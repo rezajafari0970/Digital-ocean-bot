@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "at": "2026-10-25T10:37:36.333625+00:00",
+  "at": "2026-10-25T10:50:18.903013+00:00",
   "base_commit": "d8cc7206a4cb6f3d7aee07aa82cd568e0e056e93",
   "scope": "Full contents of these files inspected this continuation; this is not complete project coverage or proof of every runtime behavior.",
   "files": [
@@ -148,6 +148,66 @@
       "path": ".github/workflows/fleet-verification.yml",
       "sha256": "4ba97b7db278fa273a1dbaf2140818f8a12b3932df28903b63aaee791ccee75c",
       "lines": 59
+    },
+    {
+      "path": "internal/network/client.go",
+      "sha256": "c7a255bfc0dfaf4cbbfb53c8711f718b5901fb7cc827ac87083dbf11b4277e37",
+      "lines": 44
+    },
+    {
+      "path": "internal/network/identity_tls_cache.go",
+      "sha256": "562ed8514a4405abe7adf94e2bc80e4b51d7f4f7bd8101a6d8551d4cdbef43cc",
+      "lines": 81
+    },
+    {
+      "path": "internal/network/identity_tls_cache_test.go",
+      "sha256": "28484d5d83443f97017f4340a70cf07469c62bbd0a24793b1e932fb7bdb03323",
+      "lines": 248
+    },
+    {
+      "path": "internal/network/client_test.go",
+      "sha256": "3f397be73fc58b24b5bbbc11364c8282b1a0ea509993e0020da5b30fab4ee81c",
+      "lines": 26
+    },
+    {
+      "path": "internal/network/provider_transport_pool.go",
+      "sha256": "df4d94e6cad495e56877c52e9d8ce3264492181563443ee89f7cc9bcf011037c",
+      "lines": 97
+    },
+    {
+      "path": "internal/network/passive_health_transport.go",
+      "sha256": "e0530602e0543411928d053f305b6babddf5fcbfd9a03ad697d1b20fe938ef92",
+      "lines": 52
+    },
+    {
+      "path": "internal/network/isolation.go",
+      "sha256": "c16a9b764694808cd1391191464f2937bbc51993cd5784f72f6e99f978cb5e92",
+      "lines": 33
+    },
+    {
+      "path": "internal/network/passive_health_transport_test.go",
+      "sha256": "a427352e02d932773f5965202ffeaf90d0755b4383ed17606652ebcf4652c747",
+      "lines": 57
+    },
+    {
+      "path": "internal/network/health_state.go",
+      "sha256": "552767b72cd0c68604c9a853e68e7f3312ce91e2b4e8664191573d09a2ff06bd",
+      "lines": 58
+    },
+    {
+      "path": "internal/network/transport_observer.go",
+      "sha256": "e8b295e61637d5b3ea3d7c5d51a6af871d7b056a25c58246157cb22d29cda27c",
+      "lines": 39
+    },
+    {
+      "path": "internal/network/health_store.go",
+      "sha256": "cfa14f3e5b97a7458bad348019196d402ed5ff43eb7b6532f18dbcefe9c5a144",
+      "lines": 29
+    },
+    {
+      "path": "internal/app/provider_network_runtime.go",
+      "sha256": "30407f41011acd5fb4440b27e92547ab244434731169c6364663bebea0054e08",
+      "lines": 168
     }
   ],
   "partial_reads": [
@@ -168,6 +228,209 @@
     },
     "installed_original_publisher": "offline; not updated"
   },
-  "reviewed_file_count": 29,
-  "reviewed_line_count": 3169
+  "reviewed_file_count": 41,
+  "reviewed_line_count": 4101,
+  "independent_verification": {
+    "source_head": "e305d6dbf2adbb6eea74cb8cefaa917dabf37b9e",
+    "source_merge": "c309a6e60fa8507405c7b384dc98d23dff2a2fc4",
+    "source_ci": 40185594319,
+    "required_regressions_passed": 192,
+    "required_skipped": 0,
+    "gate_policy_tests": 10,
+    "bootstrap_tests": 25,
+    "updater_tests": 11,
+    "api_budget_tests": 8,
+    "public_commit": "80c8515752bbd9824967e2234c0c56ec789f55e8",
+    "public_ci": 40185762641,
+    "fresh_install": "PASS",
+    "repeat_install": "PASS",
+    "promotion_ci": 40186013893,
+    "promotion": "PASS",
+    "live_secret_scans": "PASS both configurations",
+    "gitleaks": "PASS"
+  },
+  "network_review": {
+    "tls_cache": "128 route scopes, eight tickets each, absolute ten-minute expiry; owner and credential partition inspected",
+    "provider_transport": "bounded pool, route revision rotation, per-caller HTTP client wrappers",
+    "cancellation": "operational classifyProviderProxyObservation ignores generic transport/cancellation errors; unused legacy HealthReportingTransport is not the operational classifier",
+    "limits": "No live account stress or complete review of all provider implementations"
+  },
+  "live_final": {
+    "at": "2026-10-25T10:50:18.903013+00:00",
+    "instances": [
+      {
+        "instance": "default",
+        "commit": "80c8515752bbd9824967e2234c0c56ec789f55e8",
+        "manifest_match": true,
+        "ready": "ready",
+        "checks_ok": 5,
+        "services": [
+          {
+            "unit": "digital-ocean-bot-api",
+            "active": true,
+            "restarts": 0,
+            "hash_match": true
+          },
+          {
+            "unit": "digital-ocean-bot-worker",
+            "active": true,
+            "restarts": 0,
+            "hash_match": true
+          },
+          {
+            "unit": "digital-ocean-bot-worker-panels",
+            "active": true,
+            "restarts": 0,
+            "hash_match": true
+          }
+        ]
+      },
+      {
+        "instance": "production",
+        "commit": "5dc2c25678698dbbe9ac1cfee7d18701c19213e7",
+        "manifest_match": true,
+        "ready": "ready",
+        "checks_ok": 5,
+        "services": [
+          {
+            "unit": "dob-production-api",
+            "active": true,
+            "restarts": 0,
+            "hash_match": true
+          },
+          {
+            "unit": "dob-production-worker",
+            "active": true,
+            "restarts": 0,
+            "hash_match": true
+          },
+          {
+            "unit": "dob-production-worker-panels",
+            "active": true,
+            "restarts": 0,
+            "hash_match": true
+          }
+        ]
+      }
+    ],
+    "free_bytes": 4934275072
+  },
+  "default_rollout_verification": {
+    "at": "2026-10-25T10:49:02.387604+00:00",
+    "commit": "80c8515752bbd9824967e2234c0c56ec789f55e8",
+    "schema": "000195_provider_snapshot_latest",
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-25T10:49:02.536631557Z"
+    },
+    "checks": {
+      "master_key_hash": true,
+      "environment_hash": true,
+      "creation_policy": true,
+      "output_policy": true,
+      "protection_policy": true,
+      "trojan_policy": true,
+      "unified": true,
+      "profile_policy": true,
+      "selective_ads_enabled": true,
+      "cloudflare_settings": true,
+      "cloudflare_secret_hashes": true,
+      "account_settings": true,
+      "profile_ownership": true,
+      "trojan_ownership": true
+    },
+    "preservation": {
+      "profile_ownership": {
+        "common": 0,
+        "unchanged": 0,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 0,
+        "confirmed_initial_activations": 0,
+        "confirmed_preupdate_initial_activations": 0,
+        "retired_since_backup": 0,
+        "new_since_backup": 0
+      },
+      "trojan_ownership": {
+        "common": 0,
+        "unchanged": 0,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 0,
+        "confirmed_initial_activations": 0,
+        "confirmed_preupdate_initial_activations": 0,
+        "retired_since_backup": 0,
+        "new_since_backup": 0
+      }
+    },
+    "cloudflare_state": {
+      "accounts": 0,
+      "records": 0,
+      "profiles": 0
+    }
+  },
+  "build_cache_cleanup": {
+    "at": "2026-10-25T10:49:27.767760+00:00",
+    "only_reproducible_build_caches_cleaned": true,
+    "free_before": 4594343936,
+    "free_after": 4934873088
+  },
+  "production_deployment": {
+    "status": "blocked_before_deployment",
+    "running_commit": "5dc2c25678698dbbe9ac1cfee7d18701c19213e7",
+    "preserved_stage_commit": "8d838efa34acc2bd6004045ccf335cc22cb5b2ef",
+    "latest_stable_commit": "80c8515752bbd9824967e2234c0c56ec789f55e8",
+    "free_bytes_at_preflight": 4934676480,
+    "reserve_bytes_at_preflight": 6551766077,
+    "settings_changed": false,
+    "database_evidence_deleted": false
+  },
+  "openai_usage_this_continuation": {
+    "requests": 0,
+    "tokens": 0,
+    "usd": 0,
+    "blocker": "API key absent from accessible known configurations",
+    "helper_cap_usd": 2,
+    "helper_attempt_cap": 3
+  }
 }

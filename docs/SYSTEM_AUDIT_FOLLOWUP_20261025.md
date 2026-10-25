@@ -1,6 +1,6 @@
 # System audit continuation — 2026-10-25
 
-This continuation starts from source d8cc7206 and public stable 8d838efa. All six services were ready with zero automatic restarts at 10:20 UTC (13:50 Tehran). Default still runs 8d838efa; production still runs 5dc2c256.
+Starting point: source d8cc7206 and public stable 8d838efa. At 10:20 UTC (13:50 Tehran), all six services were healthy; default ran 8d838efa and production ran 5dc2c256. Final verification at 10:50 UTC (14:20 Tehran): public main/stable and default now run 80c85157; production remains healthy on 5dc2c256 because disk reserve still fails. All six executable hashes match their manifests and all ten readiness checks pass.
 
 ## Reproduced resource retention defect
 
@@ -41,11 +41,81 @@ Production's previous verified stage /opt/.dob-release.bXqgHMgu remains intact. 
 | Prior checkpoint and live identity | Reverified |
 | Production installation continuation | Blocked by disk reserve; prior services healthy |
 | Worker resource retention | Reproduced and fixed; focused tests pass |
-| Cancellation, sibling limits, admission | Relevant implementation inspected; focused behavioral tests pass; full CI pending |
-| Publication policy drift | Reproduced; single implementation and 10 local gate tests pass; full CI pending |
+| Cancellation, sibling limits, admission | Relevant implementation inspected; focused behavioral tests pass; independent full CI passed |
+| Publication policy drift | Reproduced; single implementation and 10 local gate tests pass; independent full CI passed |
 | Provider interfaces and ownership | Shared registry/resource/absence contracts inspected; individual provider implementations remain pending |
 | OpenAI review | Key still absent from known accessible configurations; 0 requests/tokens/USD this continuation |
-| Publication and deployment | Pending independent verification |
+| Publication | Source PR #5 merged; public main/stable 80c85157 verified and promoted |
+| Default deployment | Completed under 1 GiB/one-CPU bound; three hashes, five readiness and 14 preservation checks pass |
 | Broader load, restore and failure drills | Pending; no destructive live experiment |
 
 SYSTEM_AUDIT_FOLLOWUP_20261025.json lists exact inspected files and hashes. No account settings, credentials, concurrency limits, provider actions or scheduling policies were changed. The original host remains quarantined and offline. No complete-project or future zero-failure guarantee is made.
+
+## Network resource and account isolation review
+
+The identity TLS cache bounds retained route scopes to 128 and tickets per scope
+to eight, with an absolute ten-minute lifetime. The provider transport pool has
+bounded entries, exact owner/credential/route revision partitioning and separate
+HTTP-client wrappers per caller. Operational passive-health classification ignores
+generic transport and cancellation errors; only explicit proxy authentication
+failure provides negative passive evidence. The separate legacy
+HealthReportingTransport helper is used in tests, not this operational path.
+These findings are source inspection, supported by existing full-suite tests;
+no live account stress result or complete provider-driver review is claimed.
+
+The inventory now records 41 fully read files / 4,101 lines for this continuation,
+with exact hashes. It does not count searches or partial file reads as full reviews.
+
+## Independent verification and publication
+
+- Source product head: e305d6dbf2adbb6eea74cb8cefaa917dabf37b9e;
+  PR #5 merged as c309a6e60fa8507405c7b384dc98d23dff2a2fc4.
+- Source CI 40185594319: full Go tests/vet, repeated mobile browser flows,
+  all 192 required PostgreSQL/native/race tests with zero skips; 10 release-gate,
+  25 bootstrap, 11 updater and eight fake-transport API-budget tests passed.
+- Public exact candidate 80c8515752bbd9824967e2234c0c56ec789f55e8:
+  CI 40185762641 passed source checks, fresh Ubuntu install and repeated install,
+  all five readiness checks, ordinary login and identity preservation.
+- Full export manifest (1,724 files), both live-secret scans and gitleaks passed.
+- Promotion 40186013893 advanced main and stable atomically from 8d838efa to
+  80c85157 with expected-head leases. Both remote refs were independently checked.
+
+The production stage at /opt/.dob-release.bXqgHMgu is still the older 8d838efa
+candidate; preserving it does not mean the new 80c85157 release is deployed.
+The old resume helper is suitable for inspection of that older stage only; do not
+call it a latest-release upgrade. After restoring adequate disk headroom, recheck
+stable/CI identity and run the ordinary production updater under
+ops/release/run-bounded-update.sh, preserving all backup/integrity guards.
+
+## Final deployment state and next actions
+
+The default installer completed successfully in a bounded service. Revision
+80c85157, schema 000195_provider_snapshot_latest, all three running executable
+hashes, five readiness checks and 14 policy/configuration/identity comparisons
+passed. This independent instance currently has zero profile/Trojan identities;
+those comparisons are not a production-fleet migration claim. Both instances'
+six services were active with NRestarts=0 at the final snapshot. The installer
+performed its normal controlled service restart; uninterrupted availability is
+not claimed.
+
+After the build finished and no Go compiler/linker or pending deployment remained,
+only reproducible installer Go build/module caches were cleaned. Free space rose
+from 4,594,343,936 to 4,934,873,088 bytes. The subsequent production preflight still
+failed: 4,934,676,480 free versus 6,551,766,077 required. No production update,
+additional production backup attempt, unrelated application cleanup or retained
+database evidence deletion was performed in this continuation.
+
+Next, restore production disk headroom including build/backup growth; reverify
+the latest stable commit and independent CI before the bounded ordinary updater.
+Do not mistake the preserved older 8d838efa stage for the new release. Continue
+isolated restore/load/failure drills and per-provider semantic coverage; the
+whole-project audit remains incomplete. The original host and installed private
+publisher remain offline/quarantined. AWS credential acceptance, selected DNS
+quota and gateway management remain unresolved.
+
+The bounded Astra review helper retains its USD 2 / three-attempt cap. The API key
+is still unavailable in known accessible configuration, so this continuation used
+zero paid requests, zero tokens and USD 0; fake-transport tests are not API usage.
+The legacy unbounded council was not invoked. Evidence is retained under
+/root/dob-audit-followup-20261025. This checkpoint updates PROJECT_STATE.md and
+HANDOFF.md so a later continuation uses repository state rather than chat memory.
