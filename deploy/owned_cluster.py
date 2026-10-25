@@ -30,7 +30,7 @@ def ensure_cluster(state, save, *, run=subprocess.run, config_root=Path("/etc/po
         # The intent was persisted by the caller before this side effect.
         result = run(["pg_createcluster", str(version), name, "--port", str(port),
                       "--datadir", str(data), "--start-conf=auto", "--start",
-                      "-o", "listen_addresses='127.0.0.1'", "--",
+                      "-o", "listen_addresses=127.0.0.1,::1", "--",
                       "--data-checksums", "--auth-local=peer", "--auth-host=scram-sha-256"],
                      capture_output=True, text=True, timeout=120)
         if result.returncode:
@@ -43,6 +43,7 @@ def ensure_cluster(state, save, *, run=subprocess.run, config_root=Path("/etc/po
     sql = """SELECT json_build_object(
         'system_identifier',(SELECT system_identifier::text FROM pg_control_system()),
         'checksums',current_setting('data_checksums'),
+        'listen_addresses',current_setting('listen_addresses'),
         'data_directory',current_setting('data_directory'),
         'port',current_setting('port'),
         'version',(current_setting('server_version_num')::int/10000),
@@ -55,7 +56,7 @@ def ensure_cluster(state, save, *, run=subprocess.run, config_root=Path("/etc/po
     if result.returncode:
         raise RuntimeError("Dedicated cluster identity check failed")
     actual = json.loads(result.stdout)
-    if (actual.get("checksums") != "on" or actual.get("data_directory") != str(data) or
+    if (actual.get("listen_addresses") != "127.0.0.1,::1" or actual.get("checksums") != "on" or actual.get("data_directory") != str(data) or
             actual.get("port") != str(port) or actual.get("version") != version or
             not str(actual.get("system_identifier", "")).isdigit()):
         raise RuntimeError("Dedicated cluster identity or checksum mismatch")

@@ -33,6 +33,10 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    await evaluate('window.__editAlerts=[];window.alert=m=>window.__editAlerts.push(m);document.querySelector("#modalSubmit").disabled=true;document.querySelector("#modalError").textContent="previous error";window.editAccount('+JSON.stringify(provider)+')');
    assert.deepEqual(await evaluate('window.__editAlerts'),[],provider+' opens without JS errors');
    await waitFor('document.querySelector("#modal").open');
+   // Reproduce a queued close from a preceding dialog after the next one opens.
+   await evaluate('document.querySelector("#modal").dispatchEvent(new Event("close"))');
+   assert.equal(await evaluate('document.querySelector("#modalForm").classList.contains("accountForm")'),true,provider+' ignores stale close while open');
+
    assert.equal(await evaluate('document.querySelector("#modalSubmit").hidden||document.querySelector("#modalSubmit").disabled'),false,provider+' Save usable');
    assert.equal(await evaluate('document.querySelector("#modalError").textContent'),'');
    for(const name of ['size2','size3','image2','image3','proxy_id2','proxy_id3','region2','region3']){
@@ -47,6 +51,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    }
    await evaluate(provider==='aws'?'document.querySelector("#modalForm").requestSubmit()':'document.querySelector("#modalSubmit").click()');
    await waitFor('!document.querySelector("#modal").open');
+   await waitFor('!document.querySelector("#modalForm").classList.contains("accountForm")');
    await waitFor('cache.accounts!==null&&activePageView&&!activePageView.loading');
   }
   await evaluate('load("settings")');

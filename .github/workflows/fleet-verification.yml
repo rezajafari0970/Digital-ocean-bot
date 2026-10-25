@@ -51,7 +51,8 @@ jobs:
           node --check web/static/panel-settings.js
           node --check web/static/cloudflare.js
           node web/tests/config-transport.cjs
-          go test -v -count=1 -p 1 -timeout 5m -run '^(TestAccountEditBrowser|TestNewCloudProviderBrowser)$' ./internal/adminapi
+          go test -v -count=3 -p 1 -timeout 5m -run '^TestAccountEditBrowser$' ./internal/adminapi
+          go test -v -count=1 -p 1 -timeout 5m -run '^TestNewCloudProviderBrowser$' ./internal/adminapi
           DOB_TEST_AUTH_POPUP_BLOCKED=1 go test -v -count=1 -timeout 5m -run '^TestNewCloudProviderBrowser$' ./internal/adminapi
       - name: Canonical database, native transport and race gate
         run: python3 ops/release/transport-regression-gate.py "$GITHUB_WORKSPACE"

@@ -15,7 +15,7 @@ class OwnedClusterTests(unittest.TestCase):
         self.state = {"status": "pending", "cluster": {"version": 16, "name": "dob" + "a"*16, "port": 55432}}
         self.calls = []
         self.saved = []
-        self.actual = {"system_identifier": "123456789", "checksums": "on", "port": "55432",
+        self.actual = {"system_identifier": "123456789", "checksums": "on", "listen_addresses": "127.0.0.1,::1", "port": "55432",
                        "version": 16, "data_directory": str(self.data / "16" / self.state["cluster"]["name"]),
                        "foreign_databases": 0, "foreign_roles": 0}
         self.confdir = self.config / "16" / self.state["cluster"]["name"]
@@ -36,7 +36,7 @@ class OwnedClusterTests(unittest.TestCase):
         self.assertIn("--data-checksums", create)
         self.assertIn("--auth-local=peer", create)
         self.assertIn("--auth-host=scram-sha-256", create)
-        self.assertIn("listen_addresses='127.0.0.1'", create)
+        self.assertIn("listen_addresses=127.0.0.1,::1", create)
         self.assertIn("55432", self.calls[-1])
         self.assertEqual(self.saved[0]["cluster"]["system_identifier"], "123456789")
 
@@ -63,7 +63,7 @@ class OwnedClusterTests(unittest.TestCase):
 
     def test_disabled_checksums_wrong_directory_and_wrong_port_are_rejected(self):
         self.confdir.mkdir(parents=True)
-        for field, value in (("checksums", "off"), ("port", "5432"), ("data_directory", "/unowned")):
+        for field, value in (("listen_addresses", "*"), ("checksums", "off"), ("port", "5432"), ("data_directory", "/unowned")):
             original = self.actual[field]
             self.actual[field] = value
             with self.subTest(field=field), self.assertRaisesRegex(RuntimeError, "mismatch"):
