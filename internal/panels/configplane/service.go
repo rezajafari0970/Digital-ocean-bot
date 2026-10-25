@@ -291,6 +291,11 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 	if p.Spec.Port == t.PanelPort {
 		return errors.New("profile_panel_port_conflict")
 	}
+	if !recovering {
+		if e = s.checkListenerPortReservation(ctx, id, panel, p.Spec.Port); e != nil {
+			return e
+		}
+	}
 	var remote sql.NullInt64
 	var applied configdriver.Spec
 	var appliedRaw, mutationRaw []byte
@@ -481,6 +486,10 @@ func (s Service) Reconcile(ctx context.Context, id, panel string) (ret error) {
 		}
 		// Never install during observation-only recovery of an ambiguous write.
 		if !recovering {
+			// Recheck under the shared panel writer lock before any remote change.
+			if e = s.checkListenerPortReservation(ctx, id, panel, p.Spec.Port); e != nil {
+				return e
+			}
 			setStage("runtime_prepare")
 			if e = transportcore.PrepareCurrent(ctx, s.SSH, t.Target, key); e != nil {
 				return errors.New("profile_runtime_prepare_failed")

@@ -27,6 +27,7 @@ Object.assign(profileErrorLabels,{
  profile_http_host_required:'Enter the HTTP Host for this TCP header.',
  profile_tcp_header_invalid:'Choose None or HTTP for the TCP header.',
  profile_tcp_header_security_unsupported:'HTTP headers cannot be combined with Reality or Vision.',
+ profile_port_cleanup_pending:'This server is waiting for its previous configuration to be removed; other servers continue independently.',
  profile_delete_panel_unavailable:'Server unavailable; removal will retry automatically.',
  profile_delete_receipt_unconfirmed:'Removal could not be confirmed. Refresh the list before trying again.',
  profile_delete_inventory_unavailable:'Waiting for a fresh server inventory to confirm removal.',

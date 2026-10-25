@@ -100,8 +100,8 @@ func (s *Server) saveConfigProfile(w http.ResponseWriter, r *http.Request) {
 	if automaticPort {
 		portQuery := `SELECT n FROM generate_series(10000,60000) n WHERE n<>18080
   AND NOT EXISTS(SELECT 1 FROM config_driver_profiles WHERE enabled AND delete_requested_at IS NULL AND (spec->>'port')::integer=n)
-  AND NOT EXISTS(SELECT 1 FROM config_driver_listeners WHERE state<>'RETIRED' AND ((remote_id IS NOT NULL AND (applied_spec->>'port')::integer=n) OR (mutation_state IN('PREPARED','SENT') AND (mutation_spec->>'port')::integer=n)))
-  AND NOT EXISTS(SELECT 1 FROM panel_inbound_inventory WHERE present AND port=n)
+  AND NOT EXISTS(SELECT 1 FROM config_driver_listeners l JOIN config_driver_profiles owner ON owner.id=l.profile_id WHERE l.state<>'RETIRED' AND (owner.delete_requested_at IS NULL OR NOT EXISTS(SELECT 1 FROM config_control_authority WHERE unified)) AND ((l.remote_id IS NOT NULL AND (l.applied_spec->>'port')::integer=n) OR (l.mutation_state IN('PREPARED','SENT') AND (l.mutation_spec->>'port')::integer=n)))
+  AND NOT EXISTS(SELECT 1 FROM panel_inbound_inventory i WHERE i.present AND i.port=n AND NOT EXISTS(SELECT 1 FROM config_driver_listeners l JOIN config_driver_profiles owner ON owner.id=l.profile_id WHERE owner.delete_requested_at IS NOT NULL AND EXISTS(SELECT 1 FROM config_control_authority WHERE unified) AND l.state<>'RETIRED' AND l.panel_id=i.panel_id AND l.remote_id=i.remote_id AND l.managed_key=i.remark AND (l.applied_spec->>'port')::integer=i.port))
   AND NOT EXISTS(SELECT 1 FROM xui_panel_deployments WHERE port=n)
   AND NOT EXISTS(SELECT 1 FROM trojan_tcp_policy WHERE enabled AND port=n)
   AND (EXISTS(SELECT 1 FROM config_control_authority WHERE unified) OR NOT EXISTS(SELECT 1 FROM (SELECT ports FROM reality_config_profiles UNION ALL SELECT ports FROM global_config_policies WHERE policy_key='reality') p CROSS JOIN LATERAL jsonb_array_elements_text(p.ports) port WHERE port::integer=n))
@@ -168,12 +168,14 @@ func (s *Server) saveConfigProfile(w http.ResponseWriter, r *http.Request) {
 	if p.Panels == nil {
 		p.Panels = []string{}
 	}
-	// Inventory includes disabled inbounds; their sockets and ownership cannot be stolen.
+	// Desired replacements may queue while a deleted profile drains. Only exact
+	// owned inventory is deferred; unknown/disabled inbounds still block admission.
+	// Reconcile enforces each remaining reservation under that panel's writer lock.
 	var conflict bool
 	e = tx.QueryRowContext(r.Context(), `SELECT EXISTS(SELECT 1 FROM config_driver_profiles cp WHERE cp.id<>$1 AND cp.enabled AND cp.delete_requested_at IS NULL AND (cp.spec->>'port')::integer=$2 AND ($3 OR cp.fleet OR cp.panel_ids&&$4::uuid[]))
- OR EXISTS(SELECT 1 FROM config_driver_listeners l WHERE l.profile_id<>$1 AND l.state<>'RETIRED' AND ((l.remote_id IS NOT NULL AND (l.applied_spec->>'port')::integer=$2) OR (l.mutation_state IN('PREPARED','SENT') AND (l.mutation_spec->>'port')::integer=$2)) AND ($3 OR l.panel_id=ANY($4::uuid[])))
+ OR EXISTS(SELECT 1 FROM config_driver_listeners l JOIN config_driver_profiles owner ON owner.id=l.profile_id WHERE l.profile_id<>$1 AND l.state<>'RETIRED' AND (owner.delete_requested_at IS NULL OR NOT EXISTS(SELECT 1 FROM config_control_authority WHERE unified)) AND ((l.remote_id IS NOT NULL AND (l.applied_spec->>'port')::integer=$2) OR (l.mutation_state IN('PREPARED','SENT') AND (l.mutation_spec->>'port')::integer=$2)) AND ($3 OR l.panel_id=ANY($4::uuid[])))
  OR (NOT EXISTS(SELECT 1 FROM config_control_authority WHERE unified) AND EXISTS(SELECT 1 FROM (SELECT ports FROM reality_config_profiles UNION ALL SELECT ports FROM global_config_policies WHERE policy_key='reality') x CROSS JOIN LATERAL jsonb_array_elements_text(x.ports) port WHERE port::integer=$2))
- OR EXISTS(SELECT 1 FROM panel_inbound_inventory i JOIN panel_instances pi ON pi.id=i.panel_id JOIN droplets dr ON dr.id=pi.droplet_id WHERE i.present AND i.port=$2 AND dr.state IN('READY','EXPIRING') AND ($3 OR pi.id=ANY($4::uuid[])) AND NOT EXISTS(SELECT 1 FROM config_driver_listeners l WHERE l.profile_id=$1 AND l.panel_id=i.panel_id AND l.remote_id=i.remote_id AND l.managed_key=i.remark))
+ OR EXISTS(SELECT 1 FROM panel_inbound_inventory i JOIN panel_instances pi ON pi.id=i.panel_id JOIN droplets dr ON dr.id=pi.droplet_id WHERE i.present AND i.port=$2 AND dr.state IN('READY','EXPIRING') AND ($3 OR pi.id=ANY($4::uuid[])) AND NOT EXISTS(SELECT 1 FROM config_driver_listeners l JOIN config_driver_profiles owner ON owner.id=l.profile_id WHERE l.panel_id=i.panel_id AND l.remote_id=i.remote_id AND l.managed_key=i.remark AND (l.profile_id=$1 OR (owner.delete_requested_at IS NOT NULL AND EXISTS(SELECT 1 FROM config_control_authority WHERE unified) AND l.state<>'RETIRED' AND (l.applied_spec->>'port')::integer=i.port))))
  OR EXISTS(SELECT 1 FROM xui_panel_deployments x JOIN droplets dr ON dr.id=x.droplet_id WHERE x.port=$2 AND dr.state IN('READY','EXPIRING'))`, p.ID, p.Spec.Port, p.Fleet, pq.Array(p.Panels)).Scan(&conflict)
 	if e != nil {
 		writeJSON(w, 500, errorBody())
