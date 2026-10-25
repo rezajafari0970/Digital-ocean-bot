@@ -2,9 +2,9 @@
   "schema": 2,
   "status": "release_requirements_and_limits",
   "date": "2026-10-25",
-  "feature": "Fenced scheduler claims, complete database observations and truthful progress; durable SSH identity and encrypted-record containment retained",
+  "feature": "Confirmed configuration deletion priority and independent completion; TCP HTTP header profiles and precise database health",
   "publication_gates": {
-    "cloudflare_transport_fleet_no_skip": "219 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
+    "cloudflare_transport_fleet_no_skip": "220 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
     "exact_candidate_ubuntu_24_amd64_install": "required before stable promotion",
     "full_go_and_vet_unprivileged": "required before push",
     "live_secret_scan_and_gitleaks": "required before push",
@@ -18,7 +18,10 @@
     "ambiguous_compute_outcome": "Explicit ambiguous result without identity remains UNKNOWN before success-ID validation; resumption reconciles without another create",
     "deployment_ssh_durability": "Atomic encrypted private key and account/credential-bound intent before import; no replay of unknown calls; exact public-key reconciliation, crash/concurrency/credential/generation tests",
     "encrypted_record_corruption": "Invalid nonce/ciphertext/version never panics; account ownership checked; proxy/probe/residential readers honor persisted retained key version",
-    "scheduler_claims": "Unique durable claim token; stale/foreign completion rejection; partial row-read rollback; preparation, pending-capacity and completion errors fail the round; cancellation/replacement and guarded migration downgrade"
+    "scheduler_claims": "Unique durable claim token; stale/foreign completion rejection; partial row-read rollback; preparation, pending-capacity and completion errors fail the round; cancellation/replacement and guarded migration downgrade",
+    "config_deletion": "Creation consumers help deletion within the existing admission budget; due removals precede routine proofs while approaching proof deadlines remain admitted; late deletion failures cannot revive provider-confirmed tombstones",
+    "tcp_http_header": "Driver validation, profile API persistence/editing, mobile form transitions, protocol-specific URI import and seven native TCP HTTP header round trips; no Android device acceptance claim",
+    "database_health": "Precise low-space, recovery and backup reasons; malformed or contradictory health reports never show ready"
   },
   "notes": [
     "Existing single-region AWS credentials retain their original identity and region boundaries.",
@@ -33,7 +36,11 @@
     "Control recovery may run two expensive operations concurrently while weighted admission preserves provider and identity progress within the existing 24-connection pool.",
     "Under DNS quota pressure, uncovered eligible servers precede additional endpoint allocation to already covered servers. Publication still requires current ownership, routing, transport and TLS evidence.",
     "Readiness rejects disabled checksums, active recovery alarms and backup verification receipts older than 26 hours. Daily backup reuse requires the same sealed generation to be verified and less than 20 hours old; directory mtime cannot extend its lifetime.",
-    "Fresh installation uses an independently owned checksum-enabled cluster. Existing database identities remain authoritative; no automatic in-place checksum rewrite of unrelated or existing clusters."
+    "Fresh installation uses an independently owned checksum-enabled cluster. Existing database identities remain authoritative; no automatic in-place checksum rewrite of unrelated or existing clusters.",
+    "TCP HTTP headers are optional and preserve existing routing, ownership, client policy and publication checks. They are incompatible with Reality and Vision.",
+    "VMess uses its JSON/base64 URI format. Shadowsocks uses the SIP002 plugin representation interpreted by v2rayNG; generic VLESS query parameters are not a universal Shadowsocks format.",
+    "Plain TCP adds no TLS. Existing compatible-client warnings remain for VLESS and Trojan on public IPs. Loopback native tests do not certify every Android client version.",
+    "Unavailable panels and provider authorization failures retain deletion intent and retry; neither a timeout nor an invalid cloud credential proves remote absence."
   ],
   "evidence_location": "Exact-commit source and installation results are attached through GitHub Actions. Production preservation evidence is recorded separately in private operations reports."
 }
