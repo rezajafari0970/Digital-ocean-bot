@@ -714,10 +714,10 @@
     "health-final.json": "c1c7dbd9651272816bd9c89de19cd033c7c4817f0177b119725a4ef9049a168b",
     "production-rollout/verify.json": "e40c00b226058b1dce65179b8dd1fd31ae4d9d087de8192b239f4a8a340f50e8",
     "default-rollout/verify.json": "1fd4ab173d4f7d451f69cee900a9f6e4126f79e927636de34d9c042789fdd2e0",
-    "secret-production.log": "cd8b0c96a318eee848498469b0c2bbd7c88c1263ef7536ffc022f877ec465479",
-    "secret-default.log": "bed7fa1fba445454da54814b9a18cbe9b516817d1a6d08d219f43f262a29c26c",
     "gitleaks.log": "9d0a8ed37baf2abbed48dd72c7ab709ec798a8cb2ed33b562e5282bf1f815fb0",
     "runtime-archive-result.json": "6439ad708a5438d3241fa8aa8ad99051c98aab988c2edd39bccc11f5a8a3665c",
-    "bounded-launcher-test.json": "b4eeb3f484c305ff3fa2268cddf3bbd4468d42d6b3ebce9bc382773f2bce02fa"
+    "bounded-launcher-test.json": "b4eeb3f484c305ff3fa2268cddf3bbd4468d42d6b3ebce9bc382773f2bce02fa",
+    "live-comparison-production.log": "cd8b0c96a318eee848498469b0c2bbd7c88c1263ef7536ffc022f877ec465479",
+    "live-comparison-default.log": "bed7fa1fba445454da54814b9a18cbe9b516817d1a6d08d219f43f262a29c26c"
   }
 }
