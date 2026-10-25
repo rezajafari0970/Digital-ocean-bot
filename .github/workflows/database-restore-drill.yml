@@ -1,5 +1,6 @@
 name: Disposable database restore drill
 on:
+  workflow_dispatch:
   push:
     branches: ['verify/ssh-restore-drill-20261025']
 permissions:
