@@ -13,8 +13,10 @@ import uuid
 
 MODEL = "gpt-6-astra"
 # Standard text prices verified 2026-10-25, USD per token in millionths.
-# Cached input is conservatively charged as uncached; tools/fast mode are disabled.
-INPUT_MICRO = 10
+# Cover 30-minute cache writes ($12.50/M) by rounding up to $13/M.
+# Input/cache-read discounts are not used to loosen this upper bound.
+# The payload pins the 30-minute TTL; tools/fast mode are disabled.
+INPUT_MICRO = 13
 OUTPUT_MICRO = 50
 MAX_INPUT_BYTES = 64000
 MAX_OUTPUT = 16384
@@ -77,7 +79,7 @@ def review(prompt, key, path, *, send=http_send):
             raise ReviewBlocked("review_already_running")
         policy = {"model": MODEL, "budget_micro_usd": BUDGET_MICRO,
                   "max_requests": MAX_REQUESTS, "input_micro_per_token": INPUT_MICRO,
-                  "output_micro_per_token": OUTPUT_MICRO}
+                  "output_micro_per_token": OUTPUT_MICRO, "cache_ttl": "30m"}
         state = {"schema": 1, "policy": policy, "requests": []}
         if path.exists():
             try:
@@ -99,7 +101,8 @@ def review(prompt, key, path, *, send=http_send):
             raise ReviewBlocked("budget_ledger_invalid")
         payload = {"model": MODEL, "reasoning": {"effort": "max"},
                    "max_output_tokens": MAX_OUTPUT, "input": prompt,
-                   "store": False, "service_tier": "default"}
+                   "store": False, "service_tier": "default",
+                   "prompt_cache_options": {"ttl": "30m"}}
         signature = hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
         if any(row.get("status") != "completed" for row in rows):
             raise ReviewBlocked("unresolved_request_check_provider_usage_before_recovery")
