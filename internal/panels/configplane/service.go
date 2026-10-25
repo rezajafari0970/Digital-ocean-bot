@@ -106,11 +106,12 @@ func (s Service) runPrioritized(ctx context.Context, verify, deleting, recovery 
 		order = "CASE WHEN " + removing + " THEN 0 ELSE 1 END," + order
 	} else {
 		// Give a due removal the next claim on its panel. Backoff on an
-		// unavailable target must not block unrelated panels or normal proofs.
-		lane += ` AND NOT EXISTS(SELECT 1 FROM config_driver_listeners dl JOIN config_driver_profiles dp ON dp.id=dl.profile_id
+		// unavailable target must not block unrelated panels. A proof approaching
+		// its five-minute publication deadline retains admission.
+		lane += ` AND (l.verified_at<=now()-interval '4 minutes' OR NOT EXISTS(SELECT 1 FROM config_driver_listeners dl JOIN config_driver_profiles dp ON dp.id=dl.profile_id
  WHERE dl.panel_id=l.panel_id AND dl.state<>'RETIRED' AND dp.deleted_at IS NULL
  AND dl.next_attempt_at<=now() AND (dl.lease_until IS NULL OR dl.lease_until<now())
- AND (NOT dp.enabled OR dp.delete_requested_at IS NOT NULL OR NOT(dp.fleet OR dl.panel_id=ANY(dp.panel_ids))))`
+ AND (NOT dp.enabled OR dp.delete_requested_at IS NOT NULL OR NOT(dp.fleet OR dl.panel_id=ANY(dp.panel_ids)))))`
 	}
 	if recovery {
 		lane += " AND (l.error_code<>'' OR l.verified_at IS NULL OR l.state='BLOCKED')"

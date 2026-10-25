@@ -593,6 +593,11 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	if e := svc.RunVerifyOne(ctx); e != nil || len(verifiedTags) != proofsBeforeDelete {
 		t.Fatal("proof overtook pending removal", e)
 	}
+	// A long removal queue cannot expire a healthy sibling's proof.
+	sqlMust(t, db, "UPDATE config_driver_listeners SET verified_at=now()-interval '4 minutes 30 seconds',next_attempt_at=now()-interval '1 second' WHERE profile_id=$1", sibling.ID)
+	if e := svc.RunVerifyOne(ctx); e != nil || len(verifiedTags) != proofsBeforeDelete+1 || verifiedTags[len(verifiedTags)-1] != configdriver.ManagedPrefix+sibling.ID {
+		t.Fatal("removal backlog starved an approaching proof deadline", e)
+	}
 	dropAfterDelete = true
 	if e := svc.RunOne(ctx); e == nil {
 		t.Fatal("uncertain delete falsely confirmed")
@@ -676,6 +681,29 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 			batch.beforeReturn = nil
 		})
 	}
+	t.Run("late_delete_failure_cannot_revive_provider_tombstone", func(t *testing.T) {
+		sqlMust(t, db, "UPDATE droplets SET state='READY',expires_at=now()+interval '5 minutes' WHERE id=$1", droplet)
+		sqlMust(t, db, "UPDATE config_driver_profiles SET enabled=false WHERE id=$1", sibling.ID)
+		sqlMust(t, db, "UPDATE config_driver_listeners SET state='VERIFIED',stage='runtime_verified',error_code='',remote_id=$3,applied_revision=$4,mutation_state='CONFIRMED',mutation_operation='UPSERT',lease_until=NULL,claim_token=NULL WHERE profile_id=$1 AND panel_id=$2", sibling.ID, panel, siblingRemote, sibling.Revision)
+		deleting := svc
+		called := false
+		deleting.VerifyAbsent = func(context.Context, provisioning.Target, []byte, int) error {
+			called = true
+			sqlMust(t, db, "UPDATE droplets SET state='DELETED' WHERE id=$1", droplet)
+			sqlMust(t, db, "UPDATE resources SET state='deleted' WHERE account_id=(SELECT account_id FROM droplets WHERE id=$1) AND provider_resource_id=(SELECT provider_resource_id FROM droplets WHERE id=$1)", droplet)
+			if err := svc.RunDeleteOne(ctx); err != nil {
+				t.Fatal("independent provider retirement", err)
+			}
+			return errors.New("SSH lost after provider-confirmed removal")
+		}
+		if err := deleting.Reconcile(ctx, sibling.ID, panel); err == nil || !called {
+			t.Fatal("late deletion failure not exercised", err)
+		}
+		var safe bool
+		if err := db.QueryRow("SELECT state='RETIRED' AND stage='server_removed' AND error_code='' AND remote_id IS NULL AND verified_at IS NULL FROM config_driver_listeners WHERE profile_id=$1 AND panel_id=$2", sibling.ID, panel).Scan(&safe); err != nil || !safe {
+			t.Fatal("late deletion failure resurrected a confirmed tombstone", err)
+		}
+	})
 }
 
 func TestUnifiedProfileCreationIdempotency(t *testing.T) {

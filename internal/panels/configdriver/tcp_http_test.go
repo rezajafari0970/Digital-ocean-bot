@@ -22,9 +22,6 @@ func TestTCPHTTPTransportRoundTripAndValidation(t *testing.T) {
 				t.Fatal(err)
 			}
 			stream := normalized(payload["streamSettings"]).(map[string]any)
-			if err != nil {
-				t.Fatal(err)
-			}
 			settings := stream["tcpSettings"].(map[string]any)
 			header := settings["header"].(map[string]any)
 			request := header["request"].(map[string]any)

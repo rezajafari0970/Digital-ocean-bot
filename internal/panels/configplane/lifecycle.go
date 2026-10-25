@@ -109,7 +109,7 @@ func (s Service) retireListener(ctx context.Context, conn *sql.Conn, p Profile, 
 			c, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
 			defer cancel()
 			if ret.Error() == "profile_panel_busy" || errors.Is(ctx.Err(), context.Canceled) {
-				_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET next_attempt_at=now()+interval '2 seconds' WHERE profile_id=$1 AND panel_id=$2", p.ID, panel)
+				_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET next_attempt_at=now()+interval '2 seconds' WHERE profile_id=$1 AND panel_id=$2 AND state<>'RETIRED'", p.ID, panel)
 				return
 			}
 			code := "profile_delete_unverified"
@@ -121,7 +121,7 @@ func (s Service) retireListener(ctx context.Context, conn *sql.Conn, p Profile, 
 			case "profile_inventory_unavailable":
 				code = "profile_delete_inventory_unavailable"
 			}
-			_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET state='BLOCKED',stage='deleting',error_code=$3,failures=failures+1,next_attempt_at=now()+interval '30 seconds' WHERE profile_id=$1 AND panel_id=$2", p.ID, panel, code)
+			_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET state='BLOCKED',stage='deleting',error_code=$3,failures=failures+1,next_attempt_at=now()+interval '30 seconds' WHERE profile_id=$1 AND panel_id=$2 AND state<>'RETIRED'", p.ID, panel, code)
 			Event(c, s.DB, p, panel, "deleting", code)
 		}
 	}()
