@@ -14,6 +14,39 @@ Before ending a development session: update PROJECT_STATE.md and HANDOFF.md with
 
 At a new chat/session: read PROJECT_CONTEXT.md, PROJECT_STATE.md, HANDOFF.md, then verify git status/HEAD and production service state before changing code.
 
+## Immediate profile deletion — 2026-10-26T01:10:01.614981+03:30
+
+Read docs/IMMEDIATE_PROFILE_DELETE_20261026.md and its JSON acceptance receipt.
+Source 4c8a3604d44ac86d8ce536d186b1fc875a75d090 merged via PR 15 as c539db0a8e3ac82ae07dd1f3b4f23f12b3a90767.
+Canonical branch checkpoint/final-e2e-20260929; worktree
+/root/projects/dob-ssh-durability-20261025. This documentation checkpoint follows
+that merge; git HEAD identifies the checkpoint.
+
+Public main/stable and BOTH live instances run 11deda501628098630e9d728fa6876774a0ae0bf, schema 197.
+CI 40235166589 passed 232 required roots with zero skips, actual browser,
+native/race and isolated restore/interruption. Public CI 40235227957 passed
+fresh/repeated install; atomic promotion 40235777101 passed.
+Both updates exited zero, preserved all 15 policies/ownership checks, and passed
+all six running hashes and ten readiness checks. HTTPS assets/version/TLS passed.
+
+Committed Delete now removes profiles from active Configs and output immediately.
+The API returns local state=removed and independent cleanup_state. The UI applies
+only exact receipts; failed refreshes and stale reads cannot resurrect cards.
+Failed writes and revision conflicts remain visible. Existing durable cleanup,
+remote identities, evidence and port safety are retained. Old pending profiles
+are excluded without inventing remote completion or changing unrelated profiles.
+
+Three native AWS removals remain unconfirmed due to invalid credentials and
+unreachable server. Their active cards are removed; their cleanup records remain.
+Restore authorized access to finish remote removal. No new paid OpenAI request;
+unknown request accounting and usage access remain unresolved.
+
+Private backups/evidence: /root/dob-immediate-delete-20261026. A superseded
+617280570-byte routine dump was archived with both SHA256 checks and a durable
+pointer; current/incident archives retained. Original corrupted cluster/services
+remain quarantined; physical root cause and whole-project audit remain open.
+Do not repeat deployment. Next: remaining module audit and authorized remote cleanup.
+
 ## Profile deletion concurrency — 2026-10-25T20:55:40.307915+00:00
 
 Read docs/PROFILE_DELETE_CLAIMS_20261025.md and its JSON acceptance receipt first.
