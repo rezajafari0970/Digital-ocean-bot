@@ -1,0 +1,34 @@
+name: Profile claim focused regressions
+on:
+  push:
+    branches: ['fix/profile-delete-claims-20261025']
+permissions:
+  contents: read
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: fixture
+          POSTGRES_DB: bulk_test
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      BULK_TEST_DATABASE_URL: postgres://postgres:fixture@localhost:5432/bulk_test?sslmode=disable
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+      - name: Prepare disposable migration roles
+        env:
+          PGPASSWORD: fixture
+        run: psql -h localhost -U postgres -d bulk_test -v ON_ERROR_STOP=1 -c 'CREATE ROLE digitaloceanbot; CREATE ROLE digitaloceanbot_readonly;'
+      - name: Format and run actual concurrent destination claims
+        run: |
+          gofmt -w internal/panels/configplane/service.go internal/panels/configplane/claim_postgres_test.go
+          go test -race -count=3 -timeout 4m -run '^TestProfileClaimsDoNotDiscardIndependentDestinations$' ./internal/panels/configplane
