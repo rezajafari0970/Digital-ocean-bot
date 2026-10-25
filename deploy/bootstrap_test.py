@@ -86,7 +86,7 @@ class BootstrapTests(unittest.TestCase):
                 bootstrap.prepare(root, "db", "user", os.getegid())
 
 
-from backup_store_test import BackupStoreTests, IntegrityTests, RuntimeRetentionTests
+from backup_store_test import BackupStoreTests, IntegrityTests, IntegritySafetyRegressionTests, BackupFreshnessRegressionTests, RuntimeRetentionTests
 
 if __name__ == "__main__":
     unittest.main()

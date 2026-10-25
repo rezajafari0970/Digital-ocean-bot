@@ -81,7 +81,7 @@ class IntegrityTests(unittest.TestCase):
 
     def test_failed_check_never_acknowledges_corruption(self):
         stats = {"database": "test", "oid": "42", "failures": 1, "last_failure": 100, "stats_reset": 10,
-                 "fsync": "on", "full_page_writes": "on", "zero_damaged_pages": "off",
+                 "checksums": "on", "fsync": "on", "full_page_writes": "on", "zero_damaged_pages": "off",
                  "ignore_checksum_failure": "off", "synchronous_commit": "on"}
         with tempfile.TemporaryDirectory() as directory, patch.object(integrity, "STATE", Path(directory)):
             with patch.object(integrity, "query", side_effect=[json.dumps(stats), "180006"]), patch.object(Path, "is_file", return_value=True):
@@ -119,3 +119,73 @@ class RuntimeRetentionTests(unittest.TestCase):
             (paths[3] / "runtime/bin/digital-ocean-bot-api").write_bytes(b"corrupt")
             with self.assertRaises(ValueError):
                 runtime.identity(paths[3])
+
+
+class IntegritySafetyRegressionTests(unittest.TestCase):
+    def stats(self):
+        return {"database": "fixture", "oid": "42", "failures": 0, "last_failure": 0,
+                "stats_reset": 0, "checksums": "on", "fsync": "on", "full_page_writes": "on",
+                "synchronous_commit": "on", "zero_damaged_pages": "off", "ignore_checksum_failure": "off"}
+
+    def test_disabled_or_missing_checksums_never_report_healthy(self):
+        for value in ("off", None):
+            with self.subTest(checksums=value), tempfile.TemporaryDirectory() as directory:
+                stats = self.stats()
+                if value is None:
+                    del stats["checksums"]
+                else:
+                    stats["checksums"] = value
+                with patch.object(integrity, "STATE", Path(directory)), patch.object(integrity, "query", side_effect=[json.dumps(stats), "180006", json.dumps(stats)]), patch.object(Path, "is_file", return_value=True), patch.object(integrity.subprocess, "run") as run:
+                    run.return_value.returncode = 0
+                    with self.assertRaisesRegex(RuntimeError, "unsafe_database_settings"):
+                        integrity.inspect({"PGHOST": "127.0.0.1", "PGDATABASE": "fixture"}, None, True)
+                    run.assert_not_called()
+
+    def test_setting_change_during_inspection_is_rejected(self):
+        for key, value in (("checksums", "off"), ("fsync", "off"), ("full_page_writes", "off"),
+                           ("synchronous_commit", "off"), ("zero_damaged_pages", "on"),
+                           ("ignore_checksum_failure", "on")):
+            with self.subTest(setting=key), tempfile.TemporaryDirectory() as directory:
+                before = self.stats()
+                after = dict(before, **{key: value})
+                with patch.object(integrity, "STATE", Path(directory)), patch.object(integrity, "query", side_effect=[json.dumps(before), "180006", json.dumps(after)]), patch.object(Path, "is_file", return_value=True), patch.object(integrity.subprocess, "run") as run:
+                    run.return_value.returncode = 0
+                    with self.assertRaisesRegex(RuntimeError, "unsafe_database_settings"):
+                        integrity.inspect({"PGHOST": "127.0.0.1", "PGDATABASE": "fixture"}, None)
+
+    def test_healthy_checks_still_pass(self):
+        stats = self.stats()
+        with tempfile.TemporaryDirectory() as directory, patch.object(integrity, "STATE", Path(directory)), patch.object(integrity, "query", side_effect=[json.dumps(stats), "180006", json.dumps(stats)]), patch.object(Path, "is_file", return_value=True), patch.object(integrity.subprocess, "run") as run:
+            run.return_value.returncode = 0
+            self.assertEqual(integrity.inspect({"PGHOST": "127.0.0.1", "PGDATABASE": "fixture"}, None)["status"], "ok")
+
+
+class BackupFreshnessRegressionTests(unittest.TestCase):
+    def make(self, root, name):
+        pending = root / (".pending-" + name)
+        pending.mkdir()
+        (pending / "database.dump").write_bytes(b"fixture dump")
+        return backups.seal(pending, root / name)
+
+    def test_directory_mtime_cannot_refresh_old_backup(self):
+        import datetime
+        current = datetime.datetime(2026, 10, 25, 12, tzinfo=datetime.timezone.utc)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            old = self.make(root, "20261024T000000.000001Z")
+            os.utime(old, (current.timestamp(), current.timestamp()))
+            self.assertFalse(integrity.has_recent_verified_backup(root, current))
+
+    def test_only_a_fresh_verified_generation_suppresses_new_dump(self):
+        import datetime
+        current = datetime.datetime(2026, 10, 25, 12, tzinfo=datetime.timezone.utc)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            fresh = self.make(root, "20261025T100000.000001Z")
+            self.assertTrue(integrity.has_recent_verified_backup(root, current))
+            (fresh / "database.dump").write_bytes(b"damaged fixture")
+            self.assertFalse(integrity.has_recent_verified_backup(root, current))
+            future = self.make(root, "20261026T100000.000001Z")
+            self.assertFalse(integrity.has_recent_verified_backup(root, current))
+            (root / "20261025T110000.000001Z").symlink_to(future, target_is_directory=True)
+            self.assertFalse(integrity.has_recent_verified_backup(root, current))

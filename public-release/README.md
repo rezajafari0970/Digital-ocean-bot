@@ -217,3 +217,9 @@ A transient connection failure is retried by the timer without changing data.
 `pg_amcheck` detects supported structural corruption but cannot prove that storage
 will never fail. Local backups do not protect against loss of the whole host.
 Maintain a separately secured off-host backup and test restoration regularly.
+
+## Database integrity and backup freshness
+
+Database inspection requires enabled page checksums and durable write settings before and after the scan. Readiness retains explicit recovery alarms and rejects failed, undated, future-dated or stale backup verification receipts. Reusing a daily backup requires a verified sealed generation less than 20 hours old; touching a directory does not renew its age. An initial integrity-only inspection is not proof of a completed backup.
+
+These checks detect unsafe conditions. They do not automatically overwrite a live database, discard damaged pages, acknowledge corruption or promise repair of arbitrary hardware failures. Restore and failover still require verified data and ownership.

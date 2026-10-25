@@ -17,12 +17,15 @@ type integrityWatermark struct {
 }
 type integrityReport struct {
 	Backup *struct {
-		OK bool `json:"ok"`
+		OK        bool    `json:"ok"`
+		CheckedAt float64 `json:"checked_at"`
 	} `json:"backup"`
-	Version   int                `json:"version"`
-	Status    string             `json:"status"`
-	CheckedAt float64            `json:"checked_at"`
-	Watermark integrityWatermark `json:"watermark"`
+	Version          int                `json:"version"`
+	Checksums        string             `json:"checksums"`
+	RecoveryRequired bool               `json:"recovery_required"`
+	Status           string             `json:"status"`
+	CheckedAt        float64            `json:"checked_at"`
+	Watermark        integrityWatermark `json:"watermark"`
 }
 
 func validateIntegrityReport(raw []byte, current integrityWatermark, now time.Time) string {
@@ -30,15 +33,28 @@ func validateIntegrityReport(raw []byte, current integrityWatermark, now time.Ti
 	if json.Unmarshal(raw, &report) != nil || report.Version != 1 {
 		return "database_integrity_unverified"
 	}
-	if report.Status != "ok" {
+	if report.Status != "ok" || report.RecoveryRequired {
 		return "database_recovery_required"
+	}
+	if report.Checksums != "on" {
+		return "database_settings_unsafe"
 	}
 	if report.CheckedAt <= 0 || report.CheckedAt > float64(now.Add(time.Minute).Unix()) ||
 		report.CheckedAt < float64(now.Add(-8*time.Hour).Unix()) {
 		return "database_integrity_check_stale"
 	}
-	if report.Backup != nil && !report.Backup.OK {
-		return "database_backup_unavailable"
+	if report.Backup != nil {
+		if !report.Backup.OK {
+			return "database_backup_unavailable"
+		}
+		// The daily dump may be reused after verification for twenty hours.
+		// Allow one six-hour inspection interval, but never trust an undated,
+		// future-dated or indefinitely retained success receipt.
+		if report.Backup.CheckedAt <= 0 ||
+			report.Backup.CheckedAt > float64(now.Add(time.Minute).Unix()) ||
+			report.Backup.CheckedAt < float64(now.Add(-26*time.Hour).Unix()) {
+			return "database_backup_stale"
+		}
 	}
 	if report.Watermark != current {
 		return "database_recovery_required"
@@ -55,8 +71,8 @@ func (h Health) databaseIntegrity(ctx context.Context) string {
  COALESCE(checksum_failures,0),
  COALESCE(extract(epoch FROM checksum_last_failure),0)::float8,
  COALESCE(extract(epoch FROM stats_reset),0)::float8,
- current_setting('fsync')='on' AND current_setting('full_page_writes')='on'
- AND current_setting('synchronous_commit')<>'off'
+ current_setting('data_checksums')='on' AND current_setting('fsync')='on' AND current_setting('full_page_writes')='on'
+ AND current_setting('synchronous_commit') IN ('on','local','remote_write','remote_apply')
  AND current_setting('zero_damaged_pages')='off'
  AND current_setting('ignore_checksum_failure')='off'
  FROM pg_stat_database WHERE datname=current_database()`).Scan(
