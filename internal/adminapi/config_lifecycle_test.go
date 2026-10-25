@@ -574,8 +574,17 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	reuse.ID = ""
 	reuse.Revision = 0
 	reuse.Spec.Port = p.Spec.Port
-	if code, _ := profileSave(t, api, reuse, "POST"); code != 409 {
-		t.Fatal("port released before native removal")
+	code, reuse := profileSave(t, api, reuse, "POST")
+	if code != 200 {
+		t.Fatal("replacement desired profile blocked globally", code)
+	}
+	beforeReuse, _ := json.Marshal(native)
+	if err := svc.Reconcile(ctx, reuse.ID, panel); err == nil || err.Error() != "profile_port_cleanup_pending" {
+		t.Fatal("replacement must wait for this panel's old native listener", err)
+	}
+	afterReuse, _ := json.Marshal(native)
+	if !bytes.Equal(beforeReuse, afterReuse) {
+		t.Fatal("replacement changed occupied native port")
 	}
 	if e := sanaei.WithConfigLock(ctx, db, panel, func(c context.Context) error {
 		err := svc.Reconcile(c, p.ID, panel)
@@ -630,8 +639,12 @@ func TestUnifiedProfileResizeDeleteAndRecovery(t *testing.T) {
 	if !bytes.Equal(siblingBefore, siblingAfter) || len(users) != 1 || len(native) != 1 {
 		t.Fatal("deletion changed sibling or left profile users")
 	}
-	if code, _ := profileSave(t, api, reuse, "POST"); code != 200 {
-		t.Fatal("verified deleted port not reusable")
+	if err := svc.Reconcile(ctx, reuse.ID, panel); err != nil {
+		t.Fatal("replacement did not resume after confirmed cleanup", err)
+	}
+	var replacementRemote int64
+	if err := db.QueryRow("SELECT remote_id FROM config_driver_listeners WHERE profile_id=$1 AND panel_id=$2", reuse.ID, panel).Scan(&replacementRemote); err != nil || replacementRemote == 0 {
+		t.Fatal("replacement not created after port release", replacementRemote, err)
 	}
 
 	// A provider can confirm server removal while a native proof is in flight.
