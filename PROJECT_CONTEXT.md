@@ -14,6 +14,53 @@ Before ending a development session: update PROJECT_STATE.md and HANDOFF.md with
 
 At a new chat/session: read PROJECT_CONTEXT.md, PROJECT_STATE.md, HANDOFF.md, then verify git status/HEAD and production service state before changing code.
 
+## Profile port reuse after deletion — 2026-10-26T02:20:14.172246+03:30
+
+Read docs/PROFILE_PORT_REUSE_20261026.md and its JSON acceptance receipt.
+Source e2e8dc85b4f3c6be1b6a0f46f5f65059eb46354a merged via PR16 as 603afc762b12207aa751c575319dd14d31236860.
+Canonical branch checkpoint/final-e2e-20260929; worktree
+/root/projects/dob-ssh-durability-20261025. This documentation checkpoint follows
+that merge; git HEAD identifies the current checkpoint.
+
+Public main/stable and BOTH live instances run 30bff5efb645da3fbac72acfb782d144fc2b32ac, schema198.
+Source CI 40238650286 passed234 required roots/zero skips plus browser,
+native/race and isolated restore/interruption. Public CI 40238717523 passed
+fresh/repeated install; promotion 40239159812 passed exact leases.
+Both final accepted updates exited0 and preserved all15 policy/ownership checks each;
+all6 running hashes,10 readiness checks and HTTPS assets/version/TLS passed.
+Two production attempts stopped safely before publication at the unchanged
+space guard. About203 MB of reproducible caches alone was insufficient.
+Eighteen superseded runtime/source directories and three earlier archives were
+then relocated to the existing archive host with verified hashes and durable
+pointers. Current runtime/nearest rollback/staged candidate/fresh and incident
+backups stayed unchanged. Exact candidate resumed through original guards.
+Failed attempts/logs preserved in production-rollout/attempt-1 and attempt-2.
+Initial ownership verifier incorrectly required Cloudflare for a normal Reality
+activation. Native evidence proves one initial activation and five expired-server
+retirements with unchanged credential/hash fields; conditional certificate check
+corrected, all other evidence checks retained. Failure saved in verification-attempt-1;
+baseline/product code unchanged, no repeat deployment, final acceptance passed.
+
+Video01:18 showed port443 still globally reserved after Delete. Read-only live
+comparison confirmed old admission=true versus revised=false with just one
+pending panel. Migration198 releases only deleted desired fleet reservations.
+Applied/PREPARED/SENT ownership stays fenced on its own panel before credentials
+and again under the panel writer lock. Other destinations proceed independently.
+Exact pending inventory matching, active/paused owners, manual/disabled inbounds
+and legacy guards remain; rollback refuses incompatible queued replacements.
+Native tests prove no overwrite before cleanup and successful creation after it.
+Installed guard exactly matches release; live443 conflict=False.
+
+No production profile was created as a test. Existing Tcp reality8443 preserved.
+3 native AWS removals remain unconfirmed; active cards stay removed and
+cleanup ownership retained. No false physical deletion or Android acceptance.
+Private evidence/backups: /root/dob-port-reuse-20261026. Superseded617270497-byte
+routine backup archived with both hashes and durable pointer; current/incident
+archives retained. Original corrupted cluster/services remain quarantined.
+Whole-project audit/physical corruption root cause and prior API usage accounting
+remain open. No new paid OpenAI request. Do not repeat this deployment.
+Next: user retries saved form on443; authorized remote cleanup and remaining audit.
+
 ## Immediate profile deletion — 2026-10-26T01:10:01.614981+03:30
 
 Read docs/IMMEDIATE_PROFILE_DELETE_20261026.md and its JSON acceptance receipt.
