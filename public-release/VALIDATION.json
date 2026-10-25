@@ -12,7 +12,8 @@
     "account_edit_mobile": "six providers, four viewports, unchanged optional choices and cross-dialog settings submit",
     "database_backup_regressions": "25 bootstrap, owned-cluster and backup tests; real Ubuntu install/reinstall must verify checksums",
     "dispatcher_retention": "Completed account churn releases identity state; cancellation and sibling completion preserve active reservations",
-    "migration_history": "NULL/empty legacy checksums sealed; unchanged startup is idempotent; altered files rejected without replay or retained-row changes"
+    "migration_history": "NULL/empty legacy checksums sealed; unchanged startup is idempotent; altered files rejected without replay or retained-row changes",
+    "recovery_lifecycle_isolation": "20 consecutive independent-fixture passes with the existing 10-second discovery deadline; any failed repetition blocks publication"
   },
   "notes": [
     "Existing single-region AWS credentials retain their original identity and region boundaries.",

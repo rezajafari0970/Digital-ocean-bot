@@ -222,6 +222,26 @@ def main(repo):
         (work/'geosite.dat').write_bytes(geo)
         env['XRAY_LOCATION_ASSET']=str(work)
 
+        # A prior independent run hit the existing 10s discovery deadline in
+        # this isolation fixture. Exercise the unchanged deadline repeatedly;
+        # never turn a failed run into success by retrying it inside the gate.
+        repeat = subprocess.run(['go', 'test', '-json', '-race', '-count=20', '-p', '1',
+                                 '-timeout', '4m', '-run', '^TestRecoveryReaperDoesNotTouchLifecycleLane$',
+                                 './internal/worker'], cwd=repo, env=env, capture_output=True,
+                                text=True, timeout=270)
+        print(repeat.stdout, end='', flush=True)
+        if repeat.stderr:
+            print(repeat.stderr, file=sys.stderr, end='', flush=True)
+        if repeat.returncode:
+            raise RuntimeError('repeated recovery/lifecycle isolation regression failed')
+        verify_events(repeat.stdout.splitlines(), {'internal/worker': ('TestRecoveryReaperDoesNotTouchLifecycleLane',)})
+        repeat_events = [json.loads(line) for line in repeat.stdout.splitlines() if line.strip()]
+        repeat_passes = sum(x.get('Test') == 'TestRecoveryReaperDoesNotTouchLifecycleLane'
+                            and x.get('Action') == 'pass' for x in repeat_events)
+        if repeat_passes != 20:
+            raise RuntimeError('repeated recovery/lifecycle isolation evidence incomplete')
+        print(json.dumps({'recovery_lifecycle_isolation_repetitions_passed': repeat_passes}), flush=True)
+
         names = [name for group in REQUIRED.values() for name in group]
         args = ['go', 'test', '-json', '-race', '-count=1', '-p', '1', '-timeout', '5m', '-run', '^(' + '|'.join(names) + ')$'] + ['./' + p for p in REQUIRED]
         result = subprocess.run(args, cwd=repo, env=env, capture_output=True, text=True, timeout=900)
