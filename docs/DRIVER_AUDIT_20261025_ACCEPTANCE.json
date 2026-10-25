@@ -1,0 +1,421 @@
+{
+  "schema": 1,
+  "at_tehran": "2026-10-25T17:52:19.733619+03:30",
+  "whole_project_review_complete": false,
+  "source": {
+    "implementation": "640935c5704c3d195850146b139a56a4aab7f7cd",
+    "merge": "5ae2fd7cc410592f9954fe9ba3048b0c301c43ae",
+    "canonical_branch": "checkpoint/final-e2e-20260929",
+    "pr": 8,
+    "documentation_checkpoint": "the commit containing this record"
+  },
+  "coverage": {
+    "full_current_files": 88,
+    "full_current_lines": 12421,
+    "baseline_go_fully_read": 76,
+    "baseline_go_total": 1218,
+    "baseline_go_fully_read_lines": 10698,
+    "newly_inspected_files_this_continuation": 40
+  },
+  "verification": {
+    "negative_reproductions": [
+      {
+        "phase": "negative",
+        "started_at": "2026-10-25T13:44:45.379605+00:00",
+        "finished_at": "2026-10-25T13:46:11.972424+00:00",
+        "exit": 1,
+        "command": [
+          "/usr/local/lib/datacenter-bot/go1.27.1/bin/go",
+          "test",
+          "-v",
+          "-p",
+          "1",
+          "-count=1",
+          "-timeout",
+          "120s",
+          "-run",
+          "^TestCatalogPagination",
+          "./internal/providers/vultr"
+        ]
+      },
+      {
+        "phase": "negative-response",
+        "started_at": "2026-10-25T13:46:40.654499+00:00",
+        "finished_at": "2026-10-25T13:46:43.574488+00:00",
+        "exit": 1,
+        "command": [
+          "/usr/local/lib/datacenter-bot/go1.27.1/bin/go",
+          "test",
+          "-v",
+          "-p",
+          "1",
+          "-count=1",
+          "-timeout",
+          "120s",
+          "-run",
+          "^TestProviderResponse|^TestCreateResponseMissingIdentity",
+          "./internal/providers/digitalocean"
+        ]
+      },
+      {
+        "phase": "negative-executor",
+        "started_at": "2026-10-25T13:59:15.000013+00:00",
+        "finished_at": "2026-10-25T14:00:43.695652+00:00",
+        "exit": 1,
+        "command": [
+          "/usr/local/lib/datacenter-bot/go1.27.1/bin/go",
+          "test",
+          "-v",
+          "-p",
+          "1",
+          "-count=1",
+          "-timeout",
+          "120s",
+          "-run",
+          "^TestAmbiguousCreateDoesNotAdvanceCapacitySuccess$",
+          "./internal/droplets"
+        ]
+      }
+    ],
+    "focused_top_level_passed": 86,
+    "focused_database_e2e_skipped": [
+      "TestCreateResumeConcurrentPostgres",
+      "TestDeleteResumeConcurrentPostgres",
+      "TestDuePrioritizesRetiringOverOlderExpiringE2E",
+      "TestOperationDiagnosticsCapacityPostgres",
+      "TestOperationDiagnosticsAtomicPostgres",
+      "TestOperationDiagnosticsConcurrentPostgres",
+      "TestOperationDiagnosticsJournalFaultPostgres",
+      "TestOperationDiagnosticsLegacySecretPostgres",
+      "TestRetiringWithoutExpiryIsDueE2E"
+    ],
+    "focused_skips_are_not_claimed_passed": true,
+    "gate_contract_tests_passed": 10,
+    "initial_source_ci": 40199667036,
+    "initial_source_gate_count": 200,
+    "final_source_ci": 40200418124,
+    "final_source_ci_passed": true,
+    "required_tests_passed": 201,
+    "required_tests_skipped": 0,
+    "recovery_lifecycle_consecutive_passes": 20
+  },
+  "public": {
+    "main": "a59597c4f6b1f811269818e71087b3f502f260ee",
+    "stable": "a59597c4f6b1f811269818e71087b3f502f260ee",
+    "ci": 40200848276,
+    "ci_passed": true,
+    "fresh_and_repeat_install_passed": true,
+    "ordinary_login_and_identity_preservation_passed": true,
+    "promotion_ci": 40201086442,
+    "atomic_promotion_passed": true,
+    "export_files": 1729,
+    "manifest_canonical_sha256": "65b0cfa5ac595cb313aa873df13124af17a22909848d37a28a29f2edb71a0b1d",
+    "manifest_file_sha256": "55f98509b36e62cae50f3c693dcae3d1c8941225b1a40bcfef67551fa358c031"
+  },
+  "default_rollout": {
+    "update_exit": 0,
+    "duration_seconds_approx": 235,
+    "controlled_service_restart": true,
+    "memory_max_bytes": 1073741824,
+    "cpu_quota_percent": 100,
+    "verification": {
+      "at": "2026-10-25T14:18:10.492355+00:00",
+      "commit": "a59597c4f6b1f811269818e71087b3f502f260ee",
+      "schema": "000195_provider_snapshot_latest",
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-25T14:18:10.568597501Z"
+      },
+      "checks": {
+        "master_key_hash": true,
+        "environment_hash": true,
+        "creation_policy": true,
+        "output_policy": true,
+        "protection_policy": true,
+        "trojan_policy": true,
+        "unified": true,
+        "profile_policy": true,
+        "selective_ads_enabled": true,
+        "cloudflare_settings": true,
+        "cloudflare_secret_hashes": true,
+        "account_settings": true,
+        "profile_ownership": true,
+        "trojan_ownership": true
+      },
+      "preservation": {
+        "profile_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        },
+        "trojan_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        }
+      },
+      "cloudflare_state": {
+        "accounts": 0,
+        "records": 0,
+        "profiles": 0
+      }
+    },
+    "production_fleet_acceptance": false
+  },
+  "live_final": {
+    "at": "2026-10-25T14:18:13.029499+00:00",
+    "free_bytes": 4123181056,
+    "instances": {
+      "default": {
+        "commit": "a59597c4f6b1f811269818e71087b3f502f260ee",
+        "readiness": {
+          "status": "ready",
+          "checks": [
+            {
+              "name": "database",
+              "ok": true
+            },
+            {
+              "name": "worker_progress",
+              "ok": true
+            },
+            {
+              "name": "panel_worker_progress",
+              "ok": true
+            },
+            {
+              "name": "lifecycle_account_lanes",
+              "ok": true
+            },
+            {
+              "name": "client_mutation_progress",
+              "ok": true
+            }
+          ],
+          "at": "2026-10-25T14:18:13.046877292Z"
+        },
+        "services": [
+          {
+            "unit": "digital-ocean-bot-api",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          },
+          {
+            "unit": "digital-ocean-bot-worker",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          },
+          {
+            "unit": "digital-ocean-bot-worker-panels",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          }
+        ]
+      },
+      "production": {
+        "commit": "5dc2c25678698dbbe9ac1cfee7d18701c19213e7",
+        "readiness": {
+          "status": "ready",
+          "checks": [
+            {
+              "name": "database",
+              "ok": true
+            },
+            {
+              "name": "worker_progress",
+              "ok": true
+            },
+            {
+              "name": "panel_worker_progress",
+              "ok": true
+            },
+            {
+              "name": "lifecycle_account_lanes",
+              "ok": true
+            },
+            {
+              "name": "client_mutation_progress",
+              "ok": true
+            }
+          ],
+          "at": "2026-10-25T14:18:13.306487509Z"
+        },
+        "services": [
+          {
+            "unit": "dob-production-api",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          },
+          {
+            "unit": "dob-production-worker",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          },
+          {
+            "unit": "dob-production-worker-panels",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          }
+        ]
+      }
+    }
+  },
+  "original_final": {
+    "at": "2026-10-25T14:14:52.610877+00:00",
+    "units": {
+      "postgresql@18-main.service": {
+        "ActiveState": "inactive",
+        "UnitFileState": "disabled",
+        "MainPID": "0"
+      },
+      "digital-ocean-bot-api": {
+        "ActiveState": "inactive",
+        "UnitFileState": "disabled",
+        "MainPID": "0"
+      },
+      "digital-ocean-bot-worker": {
+        "ActiveState": "inactive",
+        "UnitFileState": "disabled",
+        "MainPID": "0"
+      },
+      "digital-ocean-bot-worker-panels": {
+        "ActiveState": "inactive",
+        "UnitFileState": "disabled",
+        "MainPID": "0"
+      },
+      "datacenter-publisher.timer": {
+        "ActiveState": "inactive",
+        "UnitFileState": "disabled"
+      },
+      "datacenter-publisher.service": {
+        "ActiveState": "inactive",
+        "UnitFileState": "static",
+        "MainPID": "0"
+      }
+    },
+    "api": {
+      "model": "gpt-6-astra",
+      "reasoning_effort": "max",
+      "attempts": 1,
+      "budget_usd": 2,
+      "accounted_usd_upper": 1.501011,
+      "unresolved_reserved_usd": 1.501011,
+      "actual_billed_cost_known": false
+    }
+  },
+  "production": {
+    "state": "blocked_disk_reserve",
+    "last_read_only_preflight": {
+      "candidate": "8d838efa34acc2bd6004045ccf335cc22cb5b2ef",
+      "running": "5dc2c25678698dbbe9ac1cfee7d18701c19213e7",
+      "free_bytes": 4123324416,
+      "reserve_bytes": 6687351869,
+      "space_gate_now": false,
+      "deploy_requested": false
+    },
+    "retained_preflight_candidate_is_old": true,
+    "latest_release_requires_fresh_dynamic_preflight": true,
+    "production_update_attempted_this_continuation": false
+  },
+  "cleanup": {
+    "manual": {
+      "at": "2026-10-25T14:18:12.308266+00:00",
+      "removed_only_completed_reproducible_caches": [
+        "/root/dob-driver-audit-20261025/go-cache",
+        "/root/dob-driver-audit-20261025/go-mod",
+        "/var/cache/datacenter-bot/go-build",
+        "/var/cache/datacenter-bot/go/pkg/mod"
+      ],
+      "free_before": 3637137408,
+      "free_after": 4123455488
+    },
+    "ordinary_guarded_updater_retention": {
+      "expired_verified_runtime_copies_removed": 1,
+      "expired_verified_backups_removed": 1
+    },
+    "incident_evidence_and_unrelated_application_data_untouched": true
+  },
+  "openai": {
+    "new_generation_requests_this_continuation": 0,
+    "authoritative_ledger_host": "original",
+    "ledger_schema": 2,
+    "budget_micro_usd": 2000000,
+    "attempt_cap": 3,
+    "unknown_attempts": 1,
+    "unknown_reserved_micro_usd": 1501011,
+    "actual_tokens": null,
+    "actual_billed_cost": null,
+    "last_usage_reconciliation_http_status": 403,
+    "unknown_blocks_new_paid_submissions": true
+  },
+  "next_action": "Design and verify durable deployment SSH-key/intent reservation before provider import, then scoped reconciliation and crash/concurrency regressions",
+  "remaining": [
+    "Complete remaining driver/panel/worker file inventory",
+    "SSH-key import durability at application layer",
+    "Distributed ownership fencing for multi-host active/active",
+    "Bounded production metrics/tracing",
+    "Isolated database restore and sustained fault/load drills",
+    "Original physical corruption cause",
+    "Production disk headroom and guarded latest-stable rollout",
+    "Provider usage reconciliation for the receiptless API request",
+    "Live AWS acceptance, selected DNS quota and gateway management"
+  ]
+}

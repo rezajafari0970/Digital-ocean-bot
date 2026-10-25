@@ -1,5 +1,11 @@
 # Restarted system audit — 2026-10-25
 
+Latest continuation: docs/DRIVER_AUDIT_20261025.md and its acceptance JSON.
+Cumulative inventory now records88 files /12,421 current lines and76 of1,218
+baseline Go files. The checkpoint narrative below is historical; the inventory
+JSON continues cumulatively. Current public/default release isa59597c4.
+
+
 The user requested a new review from the beginning. The immutable baseline is
 c41ee01ae47ac0c26a6db84ce951986f01a7d716. Earlier verified fixes and incident evidence
 are retained. This is an ongoing audit, not a certification of permanent or

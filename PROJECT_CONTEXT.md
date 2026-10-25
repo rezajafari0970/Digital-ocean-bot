@@ -14,19 +14,24 @@ Before ending a development session: update PROJECT_STATE.md and HANDOFF.md with
 
 At a new chat/session: read PROJECT_CONTEXT.md, PROJECT_STATE.md, HANDOFF.md, then verify git status/HEAD and production service state before changing code.
 
-## Current continuity entry — restarted audit 2026-10-25
+## Current continuity entry — driver audit continuation 2026-10-25
 
-Read the latest entries in PROJECT_STATE.md and HANDOFF.md and
-docs/SYSTEM_AUDIT_RESTART_20261025.md with its inventory/acceptance JSON before
-continuing. Current implementation bb6e4f9 is merged as a70937c8; public main/stable
-and default installation are6c92d419. Production5dc2c256 remains disk-reserve
-blocked. Original database/application/publisher quarantine remains in force.
-The audit is incomplete (42 of1,218 baseline Go files fully read in this restart).
+Read the newest PROJECT_STATE.md and HANDOFF.md entries and
+docs/DRIVER_AUDIT_20261025.md with its inventory/acceptance JSON. Implementation
+640935c5 merged as 5ae2fd7c; public main/stable and default installation run a59597c4.
+Exact source 201-test CI, independent installation and preservation checks pass.
+Production 5dc2c256 remains disk-reserve blocked; original database/application/
+publisher quarantine is unchanged. This audit is INCOMPLETE (88 files fully read,
+including 76 of 1,218 baseline Go files).
 
-The API key is available privately on the original host. Its authoritative
-schema2 ledger preserves one unknown request andUSD1.501011 reservation under
-the unchangedUSD2/three-attempt cap. New paid submissions are blocked until
-provider usage reconciliation. Never reset, duplicate or override this ledger.
-The receipt/poll helper is tested; it has not completed a real model review in this
-restart. No claims of permanent uptime, arbitrary unknown-bug auto-repair or
-complete multi-host active/active safety are supported by the current evidence.
+Next address durable deployment SSH-key/intent reservation before provider import,
+with scoped reconciliation and crash/concurrency tests. Do not confuse the new
+driver single-call validation with complete end-to-end SSH import idempotency.
+Continue per-module coverage and isolated restore/fault/load verification.
+
+The existing API key is private on the original host. Its schema 2 authoritative
+ledger preserves one unknown request andUSD 1.501011 reservation under the
+unchangedUSD 2/three-attempt cap. No new paid generation was made in this continuation.
+Provider usage must be reconciled before further paid reviews; never reset,
+duplicate or override the ledger. Permanent uptime, arbitrary unknown-bug repair,
+complete observability and multi-host active/active safety are not certified.

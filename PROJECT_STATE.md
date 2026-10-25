@@ -1,3 +1,80 @@
+## Driver audit continuation released and verified — 2026-10-25T17:52:19.733619+03:30
+
+Read docs/DRIVER_AUDIT_20261025.md and its inventory/acceptance JSON first.
+Cumulative restarted-audit coverage is 88 full files / 12,421 current lines;
+76 of 1,218 baseline Go files / 10,698 baseline lines. This continuation read 40
+additional files. The whole-project audit remains INCOMPLETE; search matches and
+partial reads do not count. Source digests were reverified before this checkpoint.
+
+Fixed native Vultr catalog cursors, endpoint isolation, missing/null inventories,
+pagination cycles/limits and cancellation. DigitalOcean required JSON is bounded
+to 8MiB and one non-null value; diagnostic reads are bounded to 32KiB. Creation
+without a positive provider identity stays ambiguous. The central executor now
+keeps an explicit no-ID ambiguous result UNKNOWN before success-ID validation,
+and resumption reconciles without a second create. No policy, credential,
+ownership setting or schema migration changed.
+
+Seven new provider regressions and the extended executor case failed before
+correction. Initial 63 provider tests passed; final focused run passed 86 tests,
+with 9 DB/E2E-only skips retained as skips. Ten gate contract tests passed.
+Exact final CI 40200418124 passed full Go/vet/browser checks,201 mandatory isolated
+PostgreSQL/native/race regressions with ZERO required skips and 20 consecutive
+recovery isolation repetitions. Earlier discovery-timeout cause remains unproven.
+
+Implementation 640935c5704c3d195850146b139a56a4aab7f7cd merged via PR #8 as
+5ae2fd7cc410592f9954fe9ba3048b0c301c43ae. Canonical branch remains
+checkpoint/final-e2e-20260929. Working directory /root/projects/dob-driver-audit-20261025,
+local branch fix/driver-audit-20261025. This documentation checkpoint is a child
+of that merge; git HEAD identifies its exact commit. Product source remains the
+tested implementation. Full export and final checkpoint files pass both live
+configuration secret comparisons and gitleaks before publication.
+
+Public main/stable and default installation now run
+a59597c4f6b1f811269818e71087b3f502f260ee. Independent public CI 40200848276 passed
+source validation, exact fresh/repeated Ubuntu24.04 amd64 installation, five
+readiness checks, ordinary login and identity preservation. Atomic promotion
+40201086442 passed and both actual refs were verified. The ordinary default
+update completed in about 235s under 1GiB/one CPU. All 14 preservation checks, three
+executing hashes and readiness pass; schema 195 unchanged. Controlled restart
+occurred. Default has no profile/Trojan identities, so this is not production
+fleet acceptance. At 17:48 Tehran both instances passed five checks and all six
+hashes, NRestarts=0. Production still runs 5dc2c25678698dbbe9ac1cfee7d18701c19213e7.
+
+Production upgrade remains DISK-RESERVE BLOCKED:4,123,324,416 bytes free against
+6,687,351,869 required in the final read-only preflight. Its retained stage
+/opt/.dob-release.bXqgHMgu is OLD 8d838efa, not current a59597c4. Do not bypass
+reserves or delete retained incident evidence. After restoring headroom for
+build/backup growth, reverify latest stable/CI, take a fresh preservation baseline,
+and use /usr/local/sbin/dob-production update through
+ops/release/run-bounded-update.sh with ordinary integrity/archive guards.
+The default updater applied existing retention to one expired verified runtime
+and one expired verified backup. Manual cleanup removed only completed Go caches;
+incident evidence and unrelated application data remain untouched.
+
+Original host is ONLINE but its PostgreSQL/API/workers and publisher remain
+inactive/quarantined (verified17:44 Tehran). Do not start them or run heavy tests
+there. Its existing private OpenAI key remains available on that host; never
+request it in chat or duplicate it. The original authoritative schema 2 ledger
+/var/lib/datacenter-bot-audit/openai/ledger.json still holds one unknown request
+andUSD 1.501011 reservation, not a known bill. Model gpt-6-astra/max,USD 2/three-attempt
+cap and the original schema 1 evidence remain intact. ZERO new generation requests
+were made in this continuation. Last usage reconciliation returnedHTTP403.
+Actual tokens/billed cost remain unknown; no retry/reset/override/new ledger.
+
+Exact next action: repair and test durable deployment SSH identity reservation.
+The application currently stores key/snapshot AFTER provider import. Reserve the
+encrypted key and an account/deployment-bound intent BEFORE external mutation,
+resume the same identity, reconcile uncertain imports with scoped ownership and
+fingerprint, and test crash/lost-response/concurrent/stale-generation cases in
+isolation. Current provider single-call behavior is not proof of end-to-end SSH
+key exactly-once handling. No live occurrence of this risk is claimed.
+
+Remaining work: pending driver/panel/worker semantic inventory, full bounded
+metrics/tracing, distributed fencing before multi-host active/active claims,
+isolated restore/fault/sustained-load drills, original physical storage cause,
+live AWS acceptance, selected DNS capacity and gateway management. Private
+evidence: /root/dob-driver-audit-20261025. Earlier entries below are historical.
+
 ## Restarted audit, verified release and default rollout — 2026-10-25T12:27:48.390083+00:00
 
 Read docs/SYSTEM_AUDIT_RESTART_20261025.md, its inventory JSON and
