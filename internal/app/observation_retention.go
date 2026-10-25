@@ -14,7 +14,7 @@ func (c Container) PruneObservations(ctx context.Context) (int64, error) {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 	var total int64
-	for _, query := range []string{
+	queries := []string{
 		`WITH doomed AS (SELECT s.id FROM panel_inventory_syncs s WHERE s.state='COMPLETED' AND s.finished_at<now()-interval '7 days'
  AND EXISTS(SELECT 1 FROM panel_inventory_syncs newer WHERE newer.panel_id=s.panel_id AND newer.state='COMPLETED' AND newer.finished_at>s.finished_at)
  ORDER BY s.finished_at LIMIT 1000 FOR UPDATE SKIP LOCKED)
@@ -24,17 +24,40 @@ func (c Container) PruneObservations(ctx context.Context) (int64, error) {
  AND EXISTS(SELECT 1 FROM provider_snapshots newer WHERE newer.account_id=s.account_id AND newer.canonical IS NOT NULL AND newer.created_at>s.created_at)
  ORDER BY s.created_at LIMIT 1000 FOR UPDATE SKIP LOCKED)
  DELETE FROM provider_snapshots s USING doomed d WHERE s.id=d.id`,
-	} {
-		res, err := c.DB.ExecContext(ctx, query)
-		if err != nil {
-			return total, err
-		}
-		n, err := res.RowsAffected()
-		if err != nil {
-			return total, err
-		}
-		total += n
 	}
+	// Keep each transaction small, but allow up to ten batches per table to
+	// catch up after downtime or bursts. The existing ten-second deadline bounds
+	// the whole round; SKIP LOCKED lets independent controllers share the work.
+	pending := make([]bool, len(queries))
+	for i := range pending {
+		pending[i] = true
+	}
+	for batch := 0; batch < 10; batch++ {
+		more := false
+		for i, query := range queries {
+			if !pending[i] {
+				continue
+			}
+			if err := ctx.Err(); err != nil {
+				return total, err
+			}
+			res, err := c.DB.ExecContext(ctx, query)
+			if err != nil {
+				return total, err
+			}
+			n, err := res.RowsAffected()
+			if err != nil {
+				return total, err
+			}
+			total += n
+			pending[i] = n == 1000
+			more = more || pending[i]
+		}
+		if !more {
+			break
+		}
+	}
+
 	return total, nil
 }
 func (c Container) RunObservationRetention(ctx context.Context) {

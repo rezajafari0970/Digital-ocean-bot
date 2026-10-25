@@ -162,6 +162,8 @@ REQUIRED['internal/secrets'] += ('TestSecretRecordCorruptionNeverPanics','TestSe
 
 REQUIRED['internal/app'] += ('TestLifecycleDeleteConfirmationInterruptedReadRollsBack', 'TestObservationRetentionCatchupAndLimits')
 
+REQUIRED['internal/adminapi'] += ('TestAdminListsRejectPartialDatabaseResults',)
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()

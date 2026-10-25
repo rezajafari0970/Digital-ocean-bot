@@ -145,13 +145,23 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 		"SELECT remote_id,public_key FROM inbound_export_metadata WHERE panel_id=$1",
 		p.ID,
 	)
+	if err != nil {
+		return nil, nil, false
+	}
 	if err == nil {
 		for rows.Next() {
 			var id int64
 			var key string
 			if rows.Scan(&id, &key) == nil {
 				keys[id] = key
+			} else {
+				rows.Close()
+				return nil, nil, false
 			}
+		}
+		if err := rows.Err(); err != nil {
+			rows.Close()
+			return nil, nil, false
 		}
 		rows.Close()
 	}

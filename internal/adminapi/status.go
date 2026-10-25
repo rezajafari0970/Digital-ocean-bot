@@ -18,9 +18,16 @@ func (s *Server) audit(w http.ResponseWriter, r *http.Request) {
 		var account, actor, action, typ, rid, result, message string
 		var at any
 		if rows.Scan(&id, &account, &actor, &action, &typ, &rid, &result, &message, &at) != nil {
-			continue
+			rows.Close()
+			writeJSON(w, http.StatusInternalServerError, errorBody())
+			return
 		}
 		out = append(out, map[string]any{"id": id, "account_id": account, "actor": actor, "action": action, "resource_type": typ, "resource_id": rid, "result": result, "message": message, "created_at": at})
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		writeJSON(w, http.StatusInternalServerError, errorBody())
+		return
 	}
 	writeJSON(w, 200, out)
 }

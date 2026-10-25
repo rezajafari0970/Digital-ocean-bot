@@ -58,7 +58,16 @@ func (m Monitor) runOnce(ctx context.Context) {
 		var x item
 		if rows.Scan(&x.p.ID, &x.p.Name, &x.p.Type, &x.p.Host, &x.p.Port, &x.user, &x.ref, &x.p.Status, &x.p.ExitIP, &x.p.FailureCount, &x.successes, &x.checked, &x.success, &x.diagnostic, &x.secretRevision) == nil {
 			list = append(list, x)
+		} else {
+			rows.Close()
+			log.Printf("proxy monitor incomplete database read")
+			return
 		}
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		log.Printf("proxy monitor incomplete database read")
+		return
 	}
 	rows.Close()
 	economy, _ := m.Economy.Enabled(ctx, "")

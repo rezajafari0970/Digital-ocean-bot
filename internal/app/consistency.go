@@ -87,7 +87,9 @@ WHERE a.id=p.account_id
 		var did, aid, pid, state, providerState, providerName string
 		var profile []byte
 		if rows.Scan(&did, &aid, &pid, &state, &profile, &providerState, &providerName) != nil {
-			continue
+			rows.Close()
+			log.Printf("consistency inventory incomplete database read")
+			return
 		}
 		meta, _ := json.Marshal(map[string]any{"droplet_id": did, "profile": json.RawMessage(profile)})
 		resourceState := "provisioning"
@@ -104,5 +106,10 @@ WHERE a.id=p.account_id
 		if err != nil {
 			log.Printf("consistency inventory %s: %v", pid, err)
 		}
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		log.Printf("consistency inventory incomplete database read")
+		return
 	}
 }

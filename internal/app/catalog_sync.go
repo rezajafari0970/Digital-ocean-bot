@@ -18,7 +18,16 @@ func (c Container) SyncCatalogs(ctx context.Context) {
 		var id string
 		if rows.Scan(&id) == nil {
 			ids = append(ids, id)
+		} else {
+			rows.Close()
+			log.Printf("catalog sync incomplete database read")
+			return
 		}
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		log.Printf("catalog sync incomplete database read")
+		return
 	}
 	rows.Close()
 	for _, id := range ids {

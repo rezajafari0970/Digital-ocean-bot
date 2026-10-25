@@ -376,6 +376,12 @@ func confirmDeletedTx(ctx context.Context, tx *sql.Tx, accountID, providerID str
 		}
 		ids = append(ids, id)
 	}
+	// UPDATE RETURNING can stop after a partial result without Close reporting
+	// the iteration error. Never commit deletion with incomplete event receipts.
+	if err = rows.Err(); err != nil {
+		rows.Close()
+		return err
+	}
 	if err = rows.Close(); err != nil {
 		return err
 	}
