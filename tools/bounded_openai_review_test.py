@@ -22,6 +22,7 @@ class BoundedReviewTests(unittest.TestCase):
         self.assertEqual(payload["reasoning"], {"effort": "max"})
         self.assertFalse(payload["store"])
         self.assertEqual(payload["service_tier"], "default")
+        self.assertEqual(payload["prompt_cache_options"], {"ttl": "30m"})
         self.assertEqual(key, "fixture-key")
         return {"id": "fixture-response", "model": module.MODEL, "status": "completed",
                 "usage": {"input_tokens": 100, "output_tokens": 200},
@@ -40,12 +41,27 @@ class BoundedReviewTests(unittest.TestCase):
 
     def test_usage_is_recorded_without_prompt_or_key(self):
         result = self.call()
-        self.assertEqual(result["estimated_cost_usd_upper"], 0.011)
+        self.assertEqual(result["estimated_cost_usd_upper"], 0.0113)
         text = self.ledger.read_text()
         self.assertNotIn("code fixture", text)
         self.assertNotIn("fixture-key", text)
         self.assertEqual(self.ledger.stat().st_mode & 0o777, 0o600)
         self.assertEqual(json.loads(text)["requests"][0]["status"], "completed")
+
+    def test_cache_write_pricing_is_covered(self):
+        def cached_write(payload, key):
+            row = json.loads(self.ledger.read_text())['requests'][0]
+            minimum = ((len(payload['input'].encode()) + 2048) * 25 + 1) // 2 + module.MAX_OUTPUT * 50
+            self.assertGreaterEqual(row['reserved_micro_usd'], minimum)
+            result = self.reply(payload, key)
+            result['usage'] = {'input_tokens': 2000, 'output_tokens': 200,
+                               'input_tokens_details': {'cache_write_tokens': 2000}}
+            return result
+        result = self.call('review cached source', send=cached_write)
+        # Published 30-minute write rate is $12.50/M, output is $50/M.
+        # Cache-write tokens replace ordinary input, rather than adding to it.
+        self.assertGreaterEqual(result['estimated_cost_usd_upper'], 0.035)
+        self.assertLessEqual(result['estimated_cost_usd_upper'], 0.036)
 
     def test_duplicate_and_request_limit_block_before_network(self):
         self.call()
