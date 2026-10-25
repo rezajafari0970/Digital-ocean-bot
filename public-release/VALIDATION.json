@@ -23,7 +23,7 @@
     "tcp_http_header": "Driver validation, profile API persistence/editing, mobile form transitions, protocol-specific URI import and seven native TCP HTTP header round trips; no Android device acceptance claim",
     "database_health": "Precise low-space, recovery and backup reasons; malformed or contradictory health reports never show ready",
     "database_read_failures": "Real PostgreSQL interrupted UPDATE RETURNING rollback and idempotent deletion; 55 API query/scan/stream/close faults reject partial results",
-    "observation_retention": "At most ten 1000-row batches per table and a shared ten-second deadline; 15000-row catch-up fixture retains latest, failure and running evidence",
+    "observation_retention": "At most ten 1000-row batches per table and a shared ten-second deadline; 15000-row catch-up fixture retains latest, failure and running evidence; completed-witness partial index must handle a fresh bulk load before statistics are refreshed",
     "runtime_identity_retention": "Failed opens retain no mutation gate; expired runtime/circuit identities are swept during acquisition; retained runtimes share live gates across replacement; cancellation and panic release idle gates"
   },
   "notes": [
@@ -43,7 +43,8 @@
     "TCP HTTP headers are optional and preserve existing routing, ownership, client policy and publication checks. They are incompatible with Reality and Vision.",
     "VMess uses its JSON/base64 URI format. Shadowsocks uses the SIP002 plugin representation interpreted by v2rayNG; generic VLESS query parameters are not a universal Shadowsocks format.",
     "Plain TCP adds no TLS. Existing compatible-client warnings remain for VLESS and Trojan on public IPs. Loopback native tests do not certify every Android client version.",
-    "Unavailable panels and provider authorization failures retain deletion intent and retry; neither a timeout nor an invalid cloud credential proves remote absence."
+    "Unavailable panels and provider authorization failures retain deletion intent and retry; neither a timeout nor an invalid cloud credential proves remote absence.",
+    "Migration 197 adds an index for completed inventory witnesses. It preserves all rows and the broader index used by other readers. The backlog regression deliberately runs before ANALYZE."
   ],
   "evidence_location": "Exact-commit source and installation results are attached through GitHub Actions. Production preservation evidence is recorded separately in private operations reports."
 }
