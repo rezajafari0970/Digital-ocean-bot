@@ -45,7 +45,12 @@ func (s *Server) cloudflareStatus(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	writeJSON(w, 200, map[string]any{"accounts": items, "transport": "ws/tls", "ip_source": "https://www.cloudflare.com/ips/", "operator_measurements_required": true})
+	rows.Close()
+	// A diagnostic failure must not hide existing records or account controls.
+	ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
+	defer cancel()
+	capacity, capacityErr := (cloudflare.Service{DB: s.DB}).Capacity(ctx)
+	writeJSON(w, 200, map[string]any{"accounts": items, "capacity": capacity, "capacity_available": capacityErr == nil, "transport": "ws/tls", "ip_source": "https://www.cloudflare.com/ips/", "operator_measurements_required": true})
 }
 func (s *Server) saveCloudflareAccount(w http.ResponseWriter, r *http.Request) {
 	var body struct {

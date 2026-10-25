@@ -4,7 +4,8 @@ async function openCloudflareSettings(){
   const data=await api('/api/v1/configs/cloudflare');
   $('#modalTitle').textContent='Cloudflare domains';$('#modalForm').classList.remove('profileForm');$('#modalError').textContent='';$('#modalSubmit').hidden=true;
   $('#modalFields').innerHTML='<p>API tokens are recommended. Allow Zone Read, DNS Edit, SSL and Certificates Edit, and Zone Settings Read for the domains you select. Zone Settings Edit is needed only for automatic Full (strict).</p><div class="cardActions"><button type="button" data-cf-new>Add Cloudflare account</button><button type="button" data-cf-status>Refresh status</button><button type="button" data-cf-ranges>Refresh official IP ranges</button></div><label>Import operator probe results<input type="file" accept="application/json,.json" data-cf-import></label>'+
-   (data.accounts.length?data.accounts.map(cloudflareAccountCard).join(''):'<p>No Cloudflare account connected yet.</p>')+
+   (data.capacity_available===false?'<p class="error">Fleet capacity could not be checked. Refresh status before planning additional servers.</p>':'')+
+   (data.accounts.length?data.accounts.map(a=>cloudflareAccountCard(a,data.capacity?.[a.id])).join(''):'<p>No Cloudflare account connected yet.</p>')+
    '<p>Official IP ranges: <a href="https://www.cloudflare.com/ips/" target="_blank" rel="noopener">cloudflare.com/ips</a>. Ranges identify Cloudflare ownership; operator speed requires measurements from that operator.</p>';
   $('#modalFields [data-cf-new]').onclick=()=>editCloudflareAccount();
   $('#modalFields [data-cf-status]').onclick=()=>openCloudflareSettings();
@@ -82,8 +83,9 @@ function bindCloudflareSchedule(f){
  return sync;
 }
 
-function cloudflareAccountCard(a){
+function cloudflareAccountCard(a,capacity){
  return '<fieldset class="cloudflareAccount"><legend>'+esc(a.name)+'</legend><p>'+esc(a.enabled?'Enabled':'Paused')+'</p><p>'+esc(a.dns_record_count??0)+' confirmed DNS records · '+esc(a.pending_record_count??0)+' pending requests · '+esc(a.probe_ready_count??0)+' probe-ready records</p>'+
+ cloudflareCapacityCard(capacity)+
  (a.error_code?'<p class="error">'+esc(configMessage(a.error_code))+'</p>':'')+
  '<p>'+esc(a.zones.filter(z=>z.enabled).map(z=>z.name).join(', ')||'No domains selected')+'</p>'+
  a.zones.filter(z=>z.enabled).map(z=>'<p>'+esc(z.name)+': '+esc(z.dns_error_code?configMessage(z.dns_error_code):z.dns_checked_at?'DNS read access verified; writes are verified during creation.':'DNS access check pending.')+'</p>'+(z.dns_quota_checked_at?'<p'+(z.dns_record_quota!=null&&z.dns_record_usage>=z.dns_record_quota?' class="error"':'')+'>DNS capacity: '+esc(z.dns_record_usage)+' / '+esc(z.dns_record_quota??'account quota')+(z.dns_record_quota!=null&&z.dns_record_usage>=z.dns_record_quota?'. Full: new records wait for capacity. Existing records and expiry cleanup continue. Select another active domain or increase the Cloudflare quota.':'')+'</p>':'')+(z.dns_quota_error_code?'<p>'+esc(configMessage(z.dns_quota_error_code))+'</p>':'')).join('')+
@@ -111,4 +113,19 @@ async function downloadCloudflareProbe(b){
   a.href=url;a.download='cloudflare-probe-'+b.dataset.cfProbe+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
  }catch(err){$('#modalError').textContent=configMessage(err.message)}
  finally{b.disabled=false}
+}
+
+// The estimate reserves replacement overlap; it is not a promise of verified
+// links or permission to consume domains outside the operator's selection.
+function cloudflareCapacityCard(c){
+ if(!c)return '';
+ const incomplete=!c.complete;
+ const summary='<p>Planned DNS capacity: '+esc(c.required_records)+' records for '+esc(c.planned_servers)+' server slots across '+esc(c.profiles)+' profiles. Each server counts once per profile. Includes replacement overlap.</p>'+
+  '<p>Current eligible servers need '+esc(c.current_required_records)+' records. Known usable capacity: '+esc(c.known_record_capacity)+'; free now: '+esc(c.available_now)+'.</p>';
+ let detail='';
+ if(incomplete)detail='<p class="error">Capacity is not fully known: '+esc(c.unknown_zones)+' domains need a fresh quota check; '+esc(c.invalid_profiles)+' profiles need a valid schedule. Refresh status before planning more servers.</p>';
+ else if(c.shortfall>0)detail='<p class="error">Capacity shortage: '+esc(c.shortfall)+' additional DNS record slots are needed for the planned servers and overlap. Select another dedicated domain, increase the provider quota, or review the rotation schedule.</p>';
+ else detail='<p>Observed capacity covers this estimate. DNS creation, TLS and connection verification still determine published links.</p>';
+ if(c.blocked_zones)detail+='<p>'+esc(c.blocked_zones)+' selected domains are excluded until access and Full (strict) are verified.</p>';
+ return '<div data-cf-capacity>'+summary+detail+'<p>This estimate includes enabled accounts’ server targets and existing servers, subtracts unrelated DNS usage, and does not change your settings.</p></div>';
 }

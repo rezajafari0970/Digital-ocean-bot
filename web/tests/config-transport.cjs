@@ -35,7 +35,7 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
  });
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port;
  const profile=fs.mkdtempSync(path.join(root,'ui-profile-')),log=fs.openSync(path.join(root,'browser.log'),'w');
- const chrome=spawn('/snap/bin/chromium',['--headless','--no-sandbox','--disable-dev-shm-usage','--disable-gpu','--remote-debugging-port=0','--remote-debugging-address=127.0.0.1','--user-data-dir='+profile,'about:blank'],{stdio:['ignore',log,log],env:{...process.env,TMPDIR:root}});
+ const chrome=spawn(process.env.DOB_TEST_CHROMIUM||'/snap/bin/chromium',['--headless','--no-sandbox','--disable-dev-shm-usage','--disable-gpu','--remote-debugging-port=0','--remote-debugging-address=127.0.0.1','--user-data-dir='+profile,'about:blank'],{stdio:['ignore',log,log],env:{...process.env,TMPDIR:root}});
  let ws;const errors=[],passed=[];
  try{
   let port;const until=Date.now()+20000;
@@ -215,6 +215,19 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
   mark('Cloudflare profile errors retain actionable messages and explain background lock contention');
   assert.match(await evaluate("cloudflareAccountCard({id:'quota-fixture',name:'Quota',enabled:true,zones:[{name:'example.com',enabled:true,dns_checked_at:new Date().toISOString(),dns_quota_checked_at:new Date().toISOString(),dns_record_usage:201,dns_record_quota:200}],records:[],record_count:0})"),/DNS capacity: 201 \/ 200/);
   mark('Cloudflare shows real provider capacity and explains that existing records and cleanup continue');
+  const forecast={profiles:1,current_servers:100,planned_servers:100,current_required_records:600,required_records:600,known_record_capacity:200,available_now:3,eligible_zones:1,unknown_zones:0,blocked_zones:0,invalid_profiles:0,complete:true,shortfall:400};
+  const forecastHTML=await evaluate('cloudflareCapacityCard('+JSON.stringify(forecast)+')');
+  assert.match(forecastHTML,/Planned DNS capacity: 600/);
+  assert.match(forecastHTML,/Capacity shortage: 400/);
+  assert.match(forecastHTML,/replacement overlap/);
+  const unknown=await evaluate('cloudflareCapacityCard('+JSON.stringify({...forecast,complete:false,unknown_zones:1,shortfall:undefined})+')');
+  assert.match(unknown,/Capacity is not fully known/);
+  assert.doesNotMatch(unknown,/Observed capacity covers|Capacity shortage/);
+  await evaluate("document.querySelector('#modalFields').innerHTML="+JSON.stringify(forecastHTML)+";document.querySelector('#modal').showModal()");
+  assert.equal(await evaluate("document.querySelector('#modal').scrollWidth<=document.querySelector('#modal').clientWidth+1"),true);
+  await evaluate("document.querySelector('#modalCancel').click()");
+  mark('Fleet DNS forecast explains overlap and shortage without claiming unknown capacity sufficient; mobile content remains scrollable');
+
   assert.deepEqual(errors,[]);
   fs.writeFileSync(path.join(root,'transport-result.json'),JSON.stringify({status:'PASS',cases:passed,page_errors:errors},null,2));console.log('UNIFIED_CONFIG_BROWSER_PASS');
  }finally{ws?.close();chrome.kill('SIGTERM');server.close();server.closeAllConnections();fs.closeSync(log)}

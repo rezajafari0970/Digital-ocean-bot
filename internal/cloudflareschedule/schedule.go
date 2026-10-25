@@ -37,7 +37,7 @@ func (s Schedule) Validate() error {
 	}
 	// Inputs are bounded above before arithmetic. Keep one spare generation
 	// for overlap while expired DNS records are being removed.
-	required := ((s.MaxLifetime+s.Interval-1)/s.Interval + 1) * s.Records
+	required := s.RequiredActive()
 	if required > MaxActiveRecords {
 		return &ValidationError{Field: "cloudflare_interval_seconds", RequiredActive: required, Detail: fmt.Sprintf("This schedule needs %d active records per server; the limit is 8. Increase the creation interval, shorten the maximum lifetime, or reduce records per interval.", required)}
 	}
@@ -48,4 +48,10 @@ func (s Schedule) Validate() error {
 		return &ValidationError{Field: "cloudflare_max_active", RequiredActive: required, Detail: "Maximum active records per server cannot exceed 8."}
 	}
 	return nil
+}
+
+// RequiredActive returns the overlap allowance for an already validated schedule.
+// Call Validate before using this value for an externally supplied schedule.
+func (s Schedule) RequiredActive() int {
+	return ((s.MaxLifetime+s.Interval-1)/s.Interval + 1) * s.Records
 }
