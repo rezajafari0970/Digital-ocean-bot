@@ -5,8 +5,8 @@
   "baseline_tracked_files": 6491,
   "baseline_go_files": 1218,
   "baseline_go_lines": 146345,
-  "baseline_go_fully_read": 76,
-  "baseline_go_fully_read_lines": 10698,
+  "baseline_go_fully_read": 105,
+  "baseline_go_fully_read_lines": 12577,
   "whole_project_review_complete": false,
   "inspected_files": [
     {
@@ -167,8 +167,8 @@
     },
     {
       "path": ".github/workflows/fleet-verification.yml",
-      "sha256": "4ba97b7db278fa273a1dbaf2140818f8a12b3932df28903b63aaee791ccee75c",
-      "lines": 59,
+      "sha256": "5ef98f26549a02b192290c86b489d011f68c088e0bc6a532fa90219a37143110",
+      "lines": 61,
       "scope": "full_file"
     },
     {
@@ -395,8 +395,8 @@
     },
     {
       "path": "internal/providers/digitalocean/discovery.go",
-      "sha256": "1b0670bc2c642d3a65220af67690219badefc5b27bd740e2e24587a021787a34",
-      "lines": 105,
+      "sha256": "3d70c0c6774de1e8ce06f1d8186a7fb100ecb2b9b50303e29e4af6883fe4f747",
+      "lines": 106,
       "scope": "full_file"
     },
     {
@@ -425,8 +425,8 @@
     },
     {
       "path": "internal/providers/vultr/ssh_read.go",
-      "sha256": "f1c041bfd13e5ed439c3af322b27a2f4cea95809b7424135e9f08a5eac43423d",
-      "lines": 47,
+      "sha256": "25a7eb47441e8db7d37b3c19d2e691429f6bf10134a86a902606d555d0812a02",
+      "lines": 36,
       "scope": "full_file"
     },
     {
@@ -473,8 +473,8 @@
     },
     {
       "path": "tools/public-release/transport-regression-gate.py",
-      "sha256": "b3adba7a5f672926631c05c1d47211c18382bbfadcf6d773401349de7ae05585",
-      "lines": 280,
+      "sha256": "90e4285fec1903c71af91ded15244de1efa62c118b9dee74c39c8254e3adcbbd",
+      "lines": 290,
       "scope": "full_file"
     },
     {
@@ -509,8 +509,8 @@
     },
     {
       "path": "internal/app/ssh_identity.go",
-      "sha256": "3f283ca935dc30a01862c3edd00310fca8303c0a6684d76c864a5ef80c96e24a",
-      "lines": 82,
+      "sha256": "48854cad01d925e4c51579ddfadcb3c5eabe1aad2f1e77e77d12e1ff43d27e70",
+      "lines": 135,
       "scope": "full_file"
     },
     {
@@ -535,6 +535,306 @@
       "path": "internal/droplets/reconcile_test.go",
       "sha256": "c6ffb8f5a5937d30be5674f8f1101121692f6020fa816af752d441d7053bcb3c",
       "lines": 39,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/app/ssh_identity_store.go",
+      "sha256": "8e57ed30df240fc090143842020cdcf561a397833266d15be3d136eed5945b6b",
+      "lines": 274,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/app/ssh_identity_postgres_test.go",
+      "sha256": "bde23c8354ef5e57d20bf1b13fec0c0486718a2fdec949754dc96fbcccec93f3",
+      "lines": 522,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/app/repository.go",
+      "sha256": "8f894655f4baebf3d8c356ec02546e687e5eaeb6bff544f5e42727f83065000f",
+      "lines": 81,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/app/network_admission.go",
+      "sha256": "1459d97564e9f595a9af8cbfbd33736c5eff191bea9abd55f5c340cf1ae3a979",
+      "lines": 54,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/app/proxy_pool.go",
+      "sha256": "33120b4071c50f361cf8984bcd861192d3d9924245ade82b2d87bc127a0103d3",
+      "lines": 57,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/app/provider_mutation_fence.go",
+      "sha256": "d081ecef88deb1003f6ab20d59a0a36f6f014d6f95478f4e7d67574fee9c9850",
+      "lines": 113,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/app/provider_observation_attempt.go",
+      "sha256": "b13d915fa8698e81067a91ad4a789d0c1ebe7e661d396b3ab94b7ac7b43ce6b6",
+      "lines": 125,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/app/provider_request_observation.go",
+      "sha256": "9b8868ee488025ef04c2580ff05d014de025ff308005a9d072f2a8d4d25bf8e0",
+      "lines": 68,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/app/provider_network_runtime.go",
+      "sha256": "30407f41011acd5fb4440b27e92547ab244434731169c6364663bebea0054e08",
+      "lines": 168,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/app/vultr_ssh_attachment_test.go",
+      "sha256": "712081298202eca0ee089cca863acb62e140ec62d9b306385e1f556b679d4731",
+      "lines": 22,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/app/network_request_guard_postgres_test.go",
+      "sha256": "c2055926c6eaa15f398649276f4b53ebccb23d621e370de6ccae340bb6a174f5",
+      "lines": 118,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/workflow/profile.go",
+      "sha256": "8b3d1fdb5faf164d4681c82fd8644f9319c44ce7d7c1d61a8479c306e7d7b000",
+      "lines": 85,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/workflow/run_lease.go",
+      "sha256": "3a2272eecddf2fc39ae4082e59af5394b80d59950de09ee1925dd6cb35e30b63",
+      "lines": 47,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/workflow/profile_store.go",
+      "sha256": "0a0294285c913347136d0567713c62843ae2e86beace2c8aa764e5ed598805ea",
+      "lines": 39,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/workflow/model.go",
+      "sha256": "8ca0ce167c1ced5227dd8de7e75986e07339b3b21130a69afa7d306b13e1f63f",
+      "lines": 48,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/digitalocean/ssh_read.go",
+      "sha256": "7f2e98c330442395e517a4ab80d75215827a32e81fbdedcdf5b0d8cbd392c767",
+      "lines": 23,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/digitalocean/ssh_durability_test.go",
+      "sha256": "76059bcd9c6b60eb086b503d4fdcf99091372285c32fdd7ebcf8d10057cc007c",
+      "lines": 24,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/vultr/mutation.go",
+      "sha256": "e3cb90ec60c3127cda7c832d332754bb79795cc9c1707e25ee48d9fcceac92e3",
+      "lines": 40,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/vultr/mutation_driver.go",
+      "sha256": "19da2bd95cdceca35551ab58bf8e1e510cd594765dfef444677891d72271bfd1",
+      "lines": 135,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/vultr/ssh_durability_test.go",
+      "sha256": "1b414bba7ea5bf9fe603ba98d584c9d9ef0997d077249a82af2e2e32b12a53ea",
+      "lines": 87,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/secrets/store.go",
+      "sha256": "62bf803afcf74ad404c54368ed963b5bdfe41da67ef7e527abd3e4dc79c24c10",
+      "lines": 110,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/secrets/postgres.go",
+      "sha256": "2941e50a9db74a0282a7f25c578ad3eebc4b2ed4c19b64ceb81df996f563f810",
+      "lines": 31,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/secrets/authorization.go",
+      "sha256": "d4a73df1f189fa5e1b269a43cb530db9ea6a6b320cbb5ce6318fddd3f6262f70",
+      "lines": 106,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/secrets/authorization_test.go",
+      "sha256": "36a270cfae173c1ff8e67671570e15387cc421c94fe98ad21658f50c6851f387",
+      "lines": 40,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/secrets/store_test.go",
+      "sha256": "7d6dc91f62510b74b42a9b80db5166f8769321e7b5f7616fb53eee3fa2ab2c9a",
+      "lines": 54,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/secrets/keyring.go",
+      "sha256": "f9c095cf5e598d1766e6de8a2e720a8f5389a8ca7ec895ceca03fd64922f0c92",
+      "lines": 57,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/secrets/key.go",
+      "sha256": "60a71ce9cd8c107ee27fe38e4de9b41e1376cb41c5b5ad2a95dd43e5a326ffaa",
+      "lines": 32,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/secrets/proxy.go",
+      "sha256": "bdd0ba04a8d3542dc765389b997d15d1a166952faf85909ed22481e2a2109a23",
+      "lines": 32,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/secrets/probe.go",
+      "sha256": "69bd06694b41fca690cf25f509632431777b591a44491d095b89824c0d2dd36e",
+      "lines": 45,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/secrets/proxy_access.go",
+      "sha256": "34d222c4b3a5499db07f7324f8eceb2498da0cb66d17690382675fb49e20f6b3",
+      "lines": 38,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/secrets/residential.go",
+      "sha256": "56e8def0411e88d5ec4d0a8db3a876abdc4457b4ad0349ed7b4af4179c29dc46",
+      "lines": 44,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/secrets/cloudflare.go",
+      "sha256": "1f0b05fb80c8ef35f587c824731491a1a1d21fd4f265077d8046c9d519d76377",
+      "lines": 39,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/secrets/ip_cleanup.go",
+      "sha256": "238516cd5ab31fb165fa25813a4e5cd2ebbbf0b896b8d3b9fe3885755db90bc7",
+      "lines": 77,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/secrets/corruption_test.go",
+      "sha256": "da295f4678fb4a88f428295945e46184718adf1131fe02c5abb1794d76e838f0",
+      "lines": 62,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/secrets/corruption_postgres_test.go",
+      "sha256": "d70c4f8a682b118615d5ca9d032e0336debc9e841e2246ce8894b43754e9ea06",
+      "lines": 125,
+      "scope": "full_file"
+    },
+    {
+      "path": "public-release/checks.yml",
+      "sha256": "463b75a5f08bf63e86cab671d77b1b8bef69f8f7dd8d84c636a9640e60b7aedf",
+      "lines": 56,
+      "scope": "full_file"
+    },
+    {
+      "path": "migrations/000005_secrets.up.sql",
+      "sha256": "8cf3d013348cfbfd9dc5c30351582db8f70b49e797c09c9b4fe95f7fa983d308",
+      "lines": 12,
+      "scope": "full_file"
+    },
+    {
+      "path": "migrations/000082_restore_secrets_owner_unique.up.sql",
+      "sha256": "20757028d23596789a7a1ebe22dd7986933a34a12ad610e71355963580fa1d3a",
+      "lines": 2,
+      "scope": "full_file"
+    },
+    {
+      "path": "migrations/000081_probe_secrets.up.sql",
+      "sha256": "e369d4d1ebf41e96037fdf1f7b307b7867a9689b6cedb5781be2c0a3aec5f915",
+      "lines": 7,
+      "scope": "full_file"
+    },
+    {
+      "path": "migrations/000013_deployments.up.sql",
+      "sha256": "bc2f04a08b51127c72c4dc3d103d0000b6fdb7287f693c4464a71b4cc1d54c9e",
+      "lines": 27,
+      "scope": "full_file"
+    },
+    {
+      "path": "migrations/000001_core.up.sql",
+      "sha256": "215b4c2d5effd18a13089be34d476fbee3c6db7b0f54132d7e2dda047a5c1bf5",
+      "lines": 40,
+      "scope": "full_file"
+    },
+    {
+      "path": "deploy/database-integrity.py",
+      "sha256": "2c977fb06ca6edacf7a884c8b9427008ae574ed4eec1bec23d20895e8d089bbf",
+      "lines": 200,
+      "scope": "full_file"
+    },
+    {
+      "path": "deploy/backup_store.py",
+      "sha256": "cfa27c35fbefc1ac3ed15f1f62169f207327e7a47eb7ec58b8a267aa41a2008b",
+      "lines": 85,
+      "scope": "full_file"
+    },
+    {
+      "path": "deploy/backup_store_test.py",
+      "sha256": "eae59106413518496026267c8ef1d58f576fd6d28e2df699fef53f2a8bed3bf4",
+      "lines": 191,
+      "scope": "full_file"
+    },
+    {
+      "path": "deploy/healthcheck.sh",
+      "sha256": "1df54686550ef7e11dbc8d4f14633dd97103737389f10c57bf68764b4523bf26",
+      "lines": 6,
+      "scope": "full_file"
+    },
+    {
+      "path": "ops/production-instance/fresh-backup.py",
+      "sha256": "c6848b003a3c1f3f55d2f84a27682468f7f171d62fe3eb3ae30c35e81f710c65",
+      "lines": 50,
+      "scope": "full_file"
+    },
+    {
+      "path": "ops/production-instance/offhost-backup.py",
+      "sha256": "2822437e285959aa0a386cacb546710d1bca773951548f565f46aefb55419bea",
+      "lines": 35,
+      "scope": "full_file"
+    },
+    {
+      "path": "ops/release/restore-fixture.go",
+      "sha256": "f77d1e8ce9484ea5ab5453c50d0b22cdf94979f07e0076476d4e4639bd296066",
+      "lines": 147,
+      "scope": "full_file"
+    },
+    {
+      "path": "ops/release/database-restore-drill.py",
+      "sha256": "e86f764b07c05737024a374b70667464c3887184799ab272c35f5c5fa2fb3a32",
+      "lines": 115,
+      "scope": "full_file"
+    },
+    {
+      "path": ".github/workflows/database-restore-drill.yml",
+      "sha256": "f7f9df041d1987a6add57c5796477efd7683e3137b6c0110278df81944d394c8",
+      "lines": 28,
       "scope": "full_file"
     }
   ],
@@ -3050,7 +3350,7 @@
       "base_blob": "0e356534e76a723bf822387a625d0d5503d46ef7",
       "base_sha256": "1459d97564e9f595a9af8cbfbd33736c5eff191bea9abd55f5c340cf1ae3a979",
       "lines": 54,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/app/network_identity.go",
@@ -3071,7 +3371,7 @@
       "base_blob": "21ef52c7fa3487c92bb66074630bf59aea3e4fe1",
       "base_sha256": "c2055926c6eaa15f398649276f4b53ebccb23d621e370de6ccae340bb6a174f5",
       "lines": 118,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/app/network_request_guard_test.go",
@@ -3190,7 +3490,7 @@
       "base_blob": "549f053b74884df5fb4b3e62df705c4b078a0b10",
       "base_sha256": "d081ecef88deb1003f6ab20d59a0a36f6f014d6f95478f4e7d67574fee9c9850",
       "lines": 113,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/app/provider_mutation_fence_test.go",
@@ -3204,7 +3504,7 @@
       "base_blob": "fe8038c77b5f5a6db8aee133ed0d16dd27a14a1a",
       "base_sha256": "30407f41011acd5fb4440b27e92547ab244434731169c6364663bebea0054e08",
       "lines": 168,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/app/provider_network_runtime_test.go",
@@ -3218,7 +3518,7 @@
       "base_blob": "24cedddef09598094cc572d205c619445ce29347",
       "base_sha256": "b13d915fa8698e81067a91ad4a789d0c1ebe7e661d396b3ab94b7ac7b43ce6b6",
       "lines": 125,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/app/provider_observation_network.go",
@@ -3267,7 +3567,7 @@
       "base_blob": "fa7fa70187c89896cea3a26349490b405bf10ece",
       "base_sha256": "9b8868ee488025ef04c2580ff05d014de025ff308005a9d072f2a8d4d25bf8e0",
       "lines": 68,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/app/provider_request_observation_test.go",
@@ -3337,7 +3637,7 @@
       "base_blob": "7c808e87ecec1e4f94dc35bf07671da1fd11f543",
       "base_sha256": "33120b4071c50f361cf8984bcd861192d3d9924245ade82b2d87bc127a0103d3",
       "lines": 57,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/app/proxy_pool_postgres_test.go",
@@ -3414,7 +3714,7 @@
       "base_blob": "78954e30c04881ae9988d1f9abf927b39ea2b1ad",
       "base_sha256": "8f894655f4baebf3d8c356ec02546e687e5eaeb6bff544f5e42727f83065000f",
       "lines": 81,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/app/route_cutover_postgres_test.go",
@@ -3561,7 +3861,7 @@
       "base_blob": "ed3026c4e945ebc8deeff06d8e59f862ab7234ad",
       "base_sha256": "712081298202eca0ee089cca863acb62e140ec62d9b306385e1f556b679d4731",
       "lines": 22,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/app/workflow.go",
@@ -7159,7 +7459,7 @@
       "base_blob": "8802d2c8ea91d49ba2550b44b457d9dba8eb5650",
       "base_sha256": "61bc149b5fc885fb3086abe9cea9622ef7fd2af23eed87749e36a30f530a2c7b",
       "lines": 19,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/providers/digitalocean/types.go",
@@ -7677,7 +7977,7 @@
       "base_blob": "b74ef09f007dccce122a6343b17146f47e315235",
       "base_sha256": "e3cb90ec60c3127cda7c832d332754bb79795cc9c1707e25ee48d9fcceac92e3",
       "lines": 40,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/providers/vultr/mutation_contract_test.go",
@@ -7691,7 +7991,7 @@
       "base_blob": "6a499ba45d998f6c3eee7c789739d6b2de892bb0",
       "base_sha256": "68b2a31e58fcaeb27891779cf42927c5d490dd0d590c4419aa6d92ff193392c9",
       "lines": 136,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/providers/vultr/mutation_driver_test.go",
@@ -8601,35 +8901,35 @@
       "base_blob": "a66ce7e5c239d57b665eb60dfbbc606b867be64a",
       "base_sha256": "b3d6633de941f0248ec262d83352efc25ccb9d436a61ea2a731de9c69b765656",
       "lines": 83,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/secrets/authorization_test.go",
       "base_blob": "3c7d0d5f89682e6d65f819bb5dcf1eb8b95a0800",
       "base_sha256": "36a270cfae173c1ff8e67671570e15387cc421c94fe98ad21658f50c6851f387",
       "lines": 40,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/secrets/cloudflare.go",
       "base_blob": "33b108524ca2a3a66bdcf1c04d83d064804e04bf",
       "base_sha256": "193be5467130fe136c0155d69f0d66c9907564dcd8e85dc002a52ddbb80a0e4f",
       "lines": 43,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/secrets/ip_cleanup.go",
       "base_blob": "4e3ecf3d0f1bb4f852732e2a64363bf5e44dfd4b",
       "base_sha256": "be3bd549b2c4849d488ce94cfe8b32c39b61b461445a00d662322d737433ef90",
       "lines": 77,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/secrets/key.go",
       "base_blob": "96e977c218731ed1a3c337c75b27919a86a6d1e2",
       "base_sha256": "60a71ce9cd8c107ee27fe38e4de9b41e1376cb41c5b5ad2a95dd43e5a326ffaa",
       "lines": 32,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/secrets/key_test.go",
@@ -8643,56 +8943,56 @@
       "base_blob": "481b142dd14f53fc38e373c1b8a3f3ec7467298e",
       "base_sha256": "f9c095cf5e598d1766e6de8a2e720a8f5389a8ca7ec895ceca03fd64922f0c92",
       "lines": 57,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/secrets/postgres.go",
       "base_blob": "4a16121f1e9184fb8ae8478437d75a45335b5578",
       "base_sha256": "2941e50a9db74a0282a7f25c578ad3eebc4b2ed4c19b64ceb81df996f563f810",
       "lines": 31,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/secrets/probe.go",
       "base_blob": "b9a57b1ee9925811e7ae916c80621d6bd8145f85",
       "base_sha256": "f8865673f92595852c81874165776d682819b52224af31126a35f9a75690b746",
       "lines": 44,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/secrets/proxy.go",
       "base_blob": "3d804fff64f7b0664fefd41e23ff8c6b50f44c96",
       "base_sha256": "bdd0ba04a8d3542dc765389b997d15d1a166952faf85909ed22481e2a2109a23",
       "lines": 32,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/secrets/proxy_access.go",
       "base_blob": "66f0ec62e7eb104b7a6c756965aa4389a5d1dd9b",
       "base_sha256": "775794f67d57ce1db12587d773bd56bc1565af184cdd1ff0a3804cb819829eb0",
       "lines": 37,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/secrets/residential.go",
       "base_blob": "10ad7ae3c417c397a2494686f80649d4836ed581",
       "base_sha256": "add6e134304a324553301942c32dc16849e299f9936ce9500f05b00bd0381fe4",
       "lines": 43,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/secrets/store.go",
       "base_blob": "84a3f8e85709abf54a8c06530a9005ac27da5d91",
       "base_sha256": "373ae7b1cb59dccbfc92226950978e49868be0f239d86ce9ca1e6a556c48d948",
       "lines": 101,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/secrets/store_test.go",
       "base_blob": "e8633e557dc3d05946e9b2a89e6025cc76a3104d",
       "base_sha256": "7d6dc91f62510b74b42a9b80db5166f8769321e7b5f7616fb53eee3fa2ab2c9a",
       "lines": 54,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/serverprotection/agent.go",
@@ -9231,7 +9531,7 @@
       "base_blob": "27a04f2d0a47adf3bdf43241348a7fe18e65276b",
       "base_sha256": "8ca0ce167c1ced5227dd8de7e75986e07339b3b21130a69afa7d306b13e1f63f",
       "lines": 48,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/workflow/postgres_e2e_test.go",
@@ -9245,14 +9545,14 @@
       "base_blob": "bf55daec8128b2720477ef285df63b5af884ac0a",
       "base_sha256": "810eefdeca5fd124d35119f6d89239b0425468589e27d57535ccc3b88143d3ec",
       "lines": 70,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/workflow/profile_store.go",
       "base_blob": "54cf91561a3a43ff827838535f75ba5331c8d52c",
       "base_sha256": "0a0294285c913347136d0567713c62843ae2e86beace2c8aa764e5ed598805ea",
       "lines": 39,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/workflow/provider_key_ref_test.go",
@@ -9273,7 +9573,7 @@
       "base_blob": "066378df45dd3ff897fcb3be780882733f8a6ff1",
       "base_sha256": "3a2272eecddf2fc39ae4082e59af5394b80d59950de09ee1925dd6cb35e30b63",
       "lines": 47,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/workflow/run_lease_test.go",
@@ -9318,7 +9618,8 @@
       "inspection": "pending"
     }
   ],
-  "last_continuation_baseline": "5703b6f59cdde435701976a07ee5d010ef523940",
-  "updated_at": "2026-10-25T17:52:19.733619+03:30",
-  "verified_implementation_commit": "640935c5704c3d195850146b139a56a4aab7f7cd"
+  "last_continuation_baseline": "3933c61256ee56cbb1a120dbef9446496faa0e3b",
+  "updated_at": "2026-10-25T18:46:39.199013+03:30",
+  "verified_implementation_commit": "4f2e595e3d7b686e2f80effa25cff3761893a270",
+  "verified_operations_commit": "5801e0d1fed3ce1158d7fd8f923ee993a3c7359b"
 }

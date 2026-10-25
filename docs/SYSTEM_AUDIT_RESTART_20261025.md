@@ -1,3 +1,5 @@
+> Newer continuation: [SSH durability, encrypted records and restore verification](SSH_IDENTITY_DURABILITY_20261025.md). This report retains its original evidence and timestamps.
+
 # Restarted system audit — 2026-10-25
 
 Latest continuation: docs/DRIVER_AUDIT_20261025.md and its acceptance JSON.

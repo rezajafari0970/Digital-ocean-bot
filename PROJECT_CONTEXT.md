@@ -14,24 +14,30 @@ Before ending a development session: update PROJECT_STATE.md and HANDOFF.md with
 
 At a new chat/session: read PROJECT_CONTEXT.md, PROJECT_STATE.md, HANDOFF.md, then verify git status/HEAD and production service state before changing code.
 
-## Current continuity entry — driver audit continuation 2026-10-25
+## Current continuity entry — SSH, secrets and restore continuation 2026-10-25
 
-Read the newest PROJECT_STATE.md and HANDOFF.md entries and
-docs/DRIVER_AUDIT_20261025.md with its inventory/acceptance JSON. Implementation
-640935c5 merged as 5ae2fd7c; public main/stable and default installation run a59597c4.
-Exact source 201-test CI, independent installation and preservation checks pass.
-Production 5dc2c256 remains disk-reserve blocked; original database/application/
-publisher quarantine is unchanged. This audit is INCOMPLETE (88 files fully read,
-including 76 of 1,218 baseline Go files).
+Read the newest PROJECT_STATE.md/HANDOFF.md and
+docs/SSH_IDENTITY_DURABILITY_20261025.md with its inventory/acceptance JSON.
+Product4f2e595e merged via PR9; restore gate5801e0d1 merged via PR10 asbe4036cf.
+Canonical branchcheckpoint/final-e2e-20260929. Public main/stable and default
+installation run329d51a8; production5dc2c256 remains disk-reserve blocked.
+Whole-project audit INCOMPLETE:138 full current files,105/1,218 baseline Go files.
 
-Next address durable deployment SSH-key/intent reservation before provider import,
-with scoped reconciliation and crash/concurrency tests. Do not confuse the new
-driver single-call validation with complete end-to-end SSH import idempotency.
-Continue per-module coverage and isolated restore/fault/load verification.
+Durable SSH reservation and scoped unknown reconciliation, malformed encrypted
+record containment and retained-key reads are tested. Combined CI passes215
+mandatory tests with zero required skips and an isolated backup/key restore,
+corrupted archive rejection and interrupted transaction rollback. This is not
+physical database repair, a production-backup restore or unconditional exactly-once
+provider execution. Unknown intents without proof remain blocked for review.
 
-The existing API key is private on the original host. Its schema 2 authoritative
-ledger preserves one unknown request andUSD 1.501011 reservation under the
-unchangedUSD 2/three-attempt cap. No new paid generation was made in this continuation.
-Provider usage must be reconciled before further paid reviews; never reset,
-duplicate or override the ledger. Permanent uptime, arbitrary unknown-bug repair,
-complete observability and multi-host active/active safety are not certified.
+Continue remaining worker/panel/provider coverage and resource/fencing/observability
+work. Production update requires sufficient disk reserve plus build/backup margin,
+fresh preservation evidence and the ordinary bounded updater. Do not bypass guards
+or deploy the old retained8d838efa stage. Original services remain quarantined;
+never run heavy tests or restart them.
+
+The existing API key is private on the original host. Its authoritative schema2
+ledger retains one unknown request andUSD1.501011 reservation underUSD2/three attempts.
+No new paid generation was sent. Reconcile provider usage before another paid
+review; never reset, duplicate or override the ledger. Permanent uptime, automatic
+repair of arbitrary unknown damage and a fully reviewed project are not certified.

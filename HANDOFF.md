@@ -1,3 +1,79 @@
+## SSH durability, secret containment and restore gate — 2026-10-25T18:46:39.199013+03:30
+
+Read docs/SSH_IDENTITY_DURABILITY_20261025.md and its coverage/acceptance JSON first.
+Whole-project audit INCOMPLETE: 138 full current files / 16,499 lines; 105 of
+1,218 baseline Go files / 12,577 baseline lines. Fifty additional full files
+were reviewed in this continuation. Hashes reverified; partial reads excluded.
+
+Durable encrypted SSH private key plus scoped intent now commits before remote
+mutation. One reserved-to-unknown claim permits at most one automatic import;
+lost responses reconcile exact name/public key without another create. Legacy
+orphans are preserved. Ambiguous inventory, credential change and missing private
+keys remain unresolved rather than authorizing replacement. AES-GCM nonce length,
+owner binding and retained-key version handling are corrected across six secret
+namespaces; corrupted data is contained, not claimed physically repaired.
+
+Product 4f2e595e3d7b686e2f80effa25cff3761893a270 merged through PR #9 as 4104b382.
+Isolated restore/interruption gate 5801e0d1fed3ce1158d7fd8f923ee993a3c7359b merged through PR #10
+as be4036cff09dca3ab0e7bffe0702fe7cdbbe17f2. Canonical checkpoint/final-e2e-20260929.
+Current worktree /root/projects/dob-ssh-durability-20261025, local branch
+fix/ssh-durability-20261025. This checkpoint is a documentation/operations child
+of that merge; git HEAD identifies the checkpoint, not a new product version.
+
+Negative SSH tests reproduced missing pre-dispatch secret and repeated imports;
+negative secret tests reproduced invalid-nonce panics and synthetic wrong owner.
+Final product CI40204392265 and combined CI40205454182 PASS: full Go/vet/browser,
+215 required PostgreSQL/native/race roots, ZERO required skips, 20 unchanged
+recovery isolation repetitions. Combined CI also passed all 195 migrations,
+sealed backup plus synthetic key restore, encrypted/unknown-intent identity,
+sequence, amcheck, truncated archive rejection, atomic failed restore and rollback
+of a terminated transaction. No live database was accessed. This does not prove
+physical repair or restore of the retained production backup. Earlier recovery
+discovery timeout cause remains unproven; failure evidence is retained.
+
+Public main/stable and default installation: 329d51a88fe75e2bd4e6680e16061e8390e517df.
+Independent public CI40204626071 passed exact fresh/repeated Ubuntu24.04 amd64
+installation, login, five readiness and identity preservation. Promotion40204888284
+passed; both refs verified. The 1,735-file export passed both live secret scans and
+gitleaks before push. Operations-only PR #10 does not alter exported product.
+
+Default update completed in215.20s under1GiB/oneCPU; all14 preservation checks,
+three hashes and five readiness checks passed at15:04:51UTC. Schema195; controlled
+restart occurred. Zero default profile/Trojan identities means no production
+fleet acceptance. Both installations at15:09:48UTC had all six hashes/services,
+NRestarts0 and5/5 readiness. Production remains5dc2c25678698dbbe9ac1cfee7d18701c19213e7.
+
+Production update is DISK-RESERVE BLOCKED: 3,956,871,168 free versus
+6,719,104,061 required at2026-10-25T15:09:48.291729+00:00;
+deficit 2,762,232,893 bytes plus build/backup margin. No production
+update attempted/pending. The 60GiB disk is fully partitioned. Keep retained
+incident archives and unrelated application data. Only completed Go caches were
+manually removed; ordinary default retention removed one expired verified runtime
+and one expired verified backup. Stored backup/integrity reports are OK, but the
+next daily dump needs5GiB free. Do not claim a scheduled backup already failed.
+
+Original host ONLINE; PG/API/workers/publisher still quarantined/inactive at
+15:07:02UTC. Do not restart or run heavy tests there. Existing API key remains
+private there. Original schema2 ledger preserves one unknown request and
+USD1.501011 reservation underUSD2/three attempts, modelgpt-6-astra/max.
+ZERO new generation calls here. Actual tokens/bill unknown; prior usageGET403
+was not retried. Reconcile usage before another paid review; no reset/duplicate/
+override or replacement ledger. No independent API review completed this turn.
+
+Next deployment step: restore disk headroom, reverify latest stable/CI, capture a
+fresh production preservation baseline, then run /usr/local/sbin/dob-production
+update through ops/release/run-bounded-update.sh with all integrity/archive guards.
+Retained stage /opt/.dob-release.bXqgHMgu is OLD8d838efa; never deploy as latest.
+Independent next source step: worker/panel/provider semantic coverage, resource
+bounds/cancellation, distributed fencing, bounded metrics/tracing and sustained
+load/fault tests. A retained live backup restore and original corruption cause
+remain open; synthetic CI restore is now complete. Live AWS acceptance, selected
+DNS capacity and gateway management remain unresolved.
+
+Private evidence /root/dob-ssh-durability-20261025. Earlier entries below are
+historical and do not override this checkpoint. Application workers continue;
+no unattended AI audit is implied after the final response.
+
 ## Driver audit continuation released and verified — 2026-10-25T17:52:19.733619+03:30
 
 Read docs/DRIVER_AUDIT_20261025.md and its inventory/acceptance JSON first.

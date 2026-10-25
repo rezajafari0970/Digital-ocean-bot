@@ -1,3 +1,5 @@
+> Newer continuation: [SSH durability, encrypted records and restore verification](SSH_IDENTITY_DURABILITY_20261025.md). This report retains its original evidence and timestamps.
+
 # Provider driver audit continuation — 2026-10-25
 
 Continues from source 5703b6f5 and the restarted audit inventory. This round fully
