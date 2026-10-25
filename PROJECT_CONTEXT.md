@@ -14,31 +14,47 @@ Before ending a development session: update PROJECT_STATE.md and HANDOFF.md with
 
 At a new chat/session: read PROJECT_CONTEXT.md, PROJECT_STATE.md, HANDOFF.md, then verify git status/HEAD and production service state before changing code.
 
-## Current continuity entry — scheduler and worker continuation 2026-10-25
+## Configuration cleanup and TCP HTTP release — 2026-10-25T17:34:22.028560+00:00
 
-Active follow-up: supplied video, slow confirmed config deletion, intermittent database attention and protocol-valid TCP HTTP-header creation. Read newest handoff; these follow-up features are not complete.
+Read docs/CONFIG_CLEANUP_HTTP_20261025.md and its acceptance JSON first.
+Product bf56dd5c311aea8393d316674fa9e5113cfcf2e6 merged via PR12 as
+9428375577cb36403a5f9da6e7d8ad39361287e8. Canonical branch
+checkpoint/final-e2e-20260929; worktree /root/projects/dob-ssh-durability-20261025.
+This documentation/operations checkpoint is a child of that merge.
 
-Read PROJECT_STATE.md, HANDOFF.md and docs/SCHEDULER_DURABILITY_20261025.md plus
-its inventory/acceptance JSON. Earlier SSH/secrets/restore evidence remains linked.
-Canonical checkpoint/final-e2e-20260929; product 721b02b2 merged through PR11 as 9d24af68.
-Public main/stable and default run dfe97084c84ad617609cafbff210b1e9fa31dc45; default schema 196.
-Production 5dc2c256 schema 195 remains disk-reserve blocked. No production update attempted.
+Public main/stable and BOTH live instances now run
+64fd97ed3d25198e7400b4f5701477e94cc92896, schema196.
+Source CI40214540128 passed 220 mandatory roots/0 skips, native/race/browser,
+20 isolation repeats and disposable restore196. Public CI40214736483 passed
+fresh/repeated install. Atomic promotion40215046466 passed and refs verified.
+Both bounded updates passed all15 preservation checks,3 binary hashes,5 readiness.
+Default has no profile identities; production baseline6,179 profiles/77 Trojan.
+See JSON for exact final times and allowed lifecycle changes.
 
-Whole-project audit INCOMPLETE: 213 full current files, 173/1,218 baseline Go files.
-Scheduler ownership, partial reads and fail-closed preparation/SQL are fixed.
-Final CI 219 required roots / 0 skips, 20 isolation repetitions and disposable restore
-through 196 migrations passed. Independent fresh/repeated install and bounded
-default update passed all 15 preservation checks. Complete reading of worker/
-scheduler/resource modules is not an error-free or sustained-load certification.
+Video reviewed: 33.44s; sampled remaining73/79/66;79->77. Current low-space
+database attention was resolved by moving7 old routine archives (5,211,867,925 bytes)
+to original host, destination+source SHA verified before unlink. Incident/current
+backups and unrelated data retained. Private receipts under
+/root/dob-config-cleanup-http-20261025; original archive receipt directory
+/root/dob-config-cleanup-archive-20261025. Never discard these as disposable.
+Final JSON records disk/ready; permanent storage growth still needs capacity.
 
-Continue remaining application/panel/provider ownership and resource/observability
-work. Production rollout requires sufficient disk reserve plus build/backup margin,
-fresh preservation evidence and ordinary bounded update. Do not deploy the old
-retained 8d838efa stage, bypass guards, delete incident archives or unrelated data.
-Original services remain quarantined; no restart/heavy tests there.
+Creation workers now assist confirmed deletions; deletion/proof priority preserves
+proof deadlines; independent tombstone completion and late-write fencing fixed.
+TCP HTTP Header supported via shared Spec/driver/API/UI/export, Host default
+play.googleapis.com, path/. Protocol-specific URI formats retained.
+No Android device acceptance or measured after-change fleet speedup claim.
 
-The existing API key stays private on the original host. Its authoritative schema 2
-ledger preserves one unknown request and USD 1.501011 reservation under USD 2/three attempts.
-Zero new paid generation. Resolve original provider usage/result before another
-paid review; never reset, duplicate or override the ledger. No unconditional
-exactly-once, arbitrary physical repair, permanent uptime or complete audit claim.
+Three pending deletes remain on one expired AWS server whose account TOKEN_INVALID
+blocks provider confirmation and whose panel is unavailable. Keep durable intent;
+no force retirement/credential guessing. Correct through Accounts UI, then observe.
+Whole-project audit remains INCOMPLETE:235 full current files/27,909 lines;
+188/1,218 baseline Go files/22,340 baseline lines. See explicit partial-read inventory.
+Next audit: application/provider ownership and resources; reproduce missing rows.Err
+check in application confirmDeletedTx. No error-free or permanent-uptime claim.
+
+Original project cluster18/main remains down; app workers/publisher quarantined.
+Do not restart/heavy-test original host. Its postgresql umbrella unit is exited.
+Original API ledger still1 unknown request,USD1.501011 reserved,USD2/3attempt cap;
+zero new paid generation. Resolve usage/result before another paid review.
+No ledger reset, duplicate unknown operation or old8d838efa stage deployment.
