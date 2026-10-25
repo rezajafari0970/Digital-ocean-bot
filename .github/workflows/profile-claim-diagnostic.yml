@@ -1,0 +1,54 @@
+name: Isolated profile claim diagnosis
+on:
+  push:
+    branches: ['diagnostics/profile-delete-20261025']
+permissions:
+  contents: read
+jobs:
+  claim:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: fixture
+          POSTGRES_DB: claim_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Reproduce claim interference on disposable synthetic rows
+        env:
+          PGPASSWORD: fixture
+          PGHOST: localhost
+          PGUSER: postgres
+          PGDATABASE: claim_test
+        run: |
+          python3 - <<'PY'
+          import subprocess, concurrent.futures, json, time
+          def sql(s):
+              p=subprocess.run(['psql','-XqAt','-v','ON_ERROR_STOP=1','-c',s],text=True,capture_output=True,timeout=10)
+              assert p.returncode==0,p.stderr
+              return p.stdout.strip()
+          sql("CREATE TABLE profiles(id int primary key, touched timestamptz); CREATE TABLE listeners(id int primary key, profile int references profiles(id), claimed bool default false); INSERT INTO profiles VALUES(1,NULL); INSERT INTO listeners SELECT n,1,false FROM generate_series(1,104)n;")
+          result={}
+          for locks in ['l,p','l']:
+              sql("UPDATE listeners SET claimed=false")
+              calls=0;claimed=0;rounds=0
+              start=time.monotonic()
+              with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+                  while claimed<104 and rounds<104:
+                      # Synthetic claim holds locks for 30ms, modeling scheduling/DB delay.
+                      # This is a contention reproduction, not a production speed benchmark.
+                      query="WITH c AS (SELECT l.id,l.profile FROM listeners l JOIN profiles p ON p.id=l.profile WHERE NOT l.claimed ORDER BY l.id FOR UPDATE OF "+locks+" SKIP LOCKED LIMIT 1), delay AS MATERIALIZED (SELECT pg_sleep(0.03) FROM c), done AS (UPDATE listeners l SET claimed=true FROM c,delay WHERE l.id=c.id RETURNING l.id,l.profile), touched AS (UPDATE profiles p SET touched=now() FROM done d WHERE p.id=d.profile RETURNING p.id) SELECT id FROM done"
+                      replies=list(pool.map(sql,[query]*8))
+                      claimed+=sum(bool(v) for v in replies);calls+=8;rounds+=1
+              result[locks]={'claimed':claimed,'empty_claims':calls-claimed,'rounds':rounds,'seconds':round(time.monotonic()-start,3)}
+          print(json.dumps(result))
+          assert result['l,p']['claimed']==result['l']['claimed']==104
+          assert result['l,p']['empty_claims']>result['l']['empty_claims'],result
+          PY
