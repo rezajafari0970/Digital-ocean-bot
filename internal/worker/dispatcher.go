@@ -48,6 +48,9 @@ func (d *Dispatcher) Submit(ctx context.Context, key, account string, fn func())
 			delete(d.active, key)
 			delete(d.started, key)
 			d.accounts[account]--
+			if d.accounts[account] == 0 {
+				delete(d.accounts, account)
+			}
 			d.mu.Unlock()
 		}()
 		fn()

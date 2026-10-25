@@ -12,6 +12,14 @@ static assets and all five readiness checks, and repeats installation to
 verify retained credentials and identity. The smoke helper refuses execution
 outside a disposable GitHub-hosted runner.
 
+The single gate implementation is tools/public-release/transport-regression-gate.py.
+The ops entry point delegates to it; the private publisher can still copy that
+self-contained file into its credential-free sandbox. Entrypoint/copy parity and
+fail-closed evidence tests are mandatory in fleet-verification. The 2026-10-25
+continuation repaired a 43-test policy drift between the former implementations;
+both paths now require the same 192 tests, pinned native assets and browser gates.
+Installed publishers must be updated before relying on this new policy.
+
 Before promotion, run transport-regression-gate.py on an independent GitHub-hosted
 runner with a disposable private-socket PostgreSQL and no production database
 variables. It requires every named test and subtest to pass without skips.

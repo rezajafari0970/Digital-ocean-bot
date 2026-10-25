@@ -45,6 +45,7 @@ jobs:
           python3 tools/bounded_openai_review_test.py
           python3 deploy/bootstrap_test.py
           python3 deploy/project_update_test.py
+          python3 tools/public-release/transport-regression-gate_test.py
           DOB_RUN_BROWSER_TEST=0 go test ./...
           go vet ./...
           node --check web/static/app.js

@@ -1,0 +1,173 @@
+{
+  "schema": 1,
+  "at": "2026-10-25T10:37:36.333625+00:00",
+  "base_commit": "d8cc7206a4cb6f3d7aee07aa82cd568e0e056e93",
+  "scope": "Full contents of these files inspected this continuation; this is not complete project coverage or proof of every runtime behavior.",
+  "files": [
+    {
+      "path": "internal/worker/dispatcher.go",
+      "sha256": "092722f7053e44c1441bf73573d8ba230e4fc6929fc617803dc19107ea1c3753",
+      "lines": 85
+    },
+    {
+      "path": "internal/worker/dispatcher_test.go",
+      "sha256": "2d989ed29e9f09647c797b2958832d15083cd0744c3dbc8ac67b81bd038ef09d",
+      "lines": 38
+    },
+    {
+      "path": "internal/worker/dispatcher_retention_test.go",
+      "sha256": "843c9887df7214c7bc966682602f9fd6c65572bd9b68117e1d53dd6221e1ecda",
+      "lines": 78
+    },
+    {
+      "path": "internal/worker/work_budget.go",
+      "sha256": "ab155b398fd28cfdbebb7c9df92dda1da0329cbc41db7217e42ffd50c0ffe792",
+      "lines": 120
+    },
+    {
+      "path": "internal/worker/work_class.go",
+      "sha256": "db12446dff636276b6171682a6be2e53027ac8bedf3427259123507307798ccf",
+      "lines": 49
+    },
+    {
+      "path": "internal/worker/weighted_budget_test.go",
+      "sha256": "99a1b03a83b3a375f044b0f160f2bd33886f05b073df07552dfcbbcf30f8c8b0",
+      "lines": 45
+    },
+    {
+      "path": "internal/worker/modules.go",
+      "sha256": "528209185ce2d7c515795eebab7bd5eb1968f60b7ffdcd6a6e8d4d0a55967002",
+      "lines": 234
+    },
+    {
+      "path": "internal/worker/role_lease.go",
+      "sha256": "86d683be23498eea5f89e8ae6b6c70c88a759c45d9984e8586d491532ca26dfd",
+      "lines": 100
+    },
+    {
+      "path": "internal/worker/process_role.go",
+      "sha256": "2c0da945e5e12e83d66867e1b84ecf39cf1def9004ea114bee203249d8433cde",
+      "lines": 55
+    },
+    {
+      "path": "internal/worker/batch.go",
+      "sha256": "e6cb81f2cb72a29deedef6f5dea74c200bbdcc5d9fd624fef9756fc31377d939",
+      "lines": 72
+    },
+    {
+      "path": "internal/worker/lifecycle.go",
+      "sha256": "e273e87de81eb7c987676c6e88fd725c22e6274d08030eb2225a216a8b1c4182",
+      "lines": 174
+    },
+    {
+      "path": "internal/worker/recovery.go",
+      "sha256": "7ac20b2bf1876543cc70cf55d1d5863f3b552718174aaa43f8ed45e8915cf205",
+      "lines": 80
+    },
+    {
+      "path": "internal/worker/recovery_checkpoint.go",
+      "sha256": "eedc775a889807cd9a466af38336e07389962301f3f16a579e5bd09c88dba120",
+      "lines": 334
+    },
+    {
+      "path": "internal/worker/worker.go",
+      "sha256": "4960d6d5855476f36df2d82ffb0d10c11f0d3219a4e42458696480168d54cd75",
+      "lines": 251
+    },
+    {
+      "path": "internal/worker/progress.go",
+      "sha256": "98ab9ab149b21781fa5bb4bf996685147aed3159922ab6f2be557fb2b2c331e8",
+      "lines": 63
+    },
+    {
+      "path": "internal/supervision/registry.go",
+      "sha256": "4426ea1eca06ca777139918c3bef50367e00bd0e4ba015ef98e76f78aa5577a4",
+      "lines": 315
+    },
+    {
+      "path": "internal/resilience/retry.go",
+      "sha256": "7c30af50b2c47ea54b59924c8d0e76c73a5060a85bb54afcb468081ce7808f0e",
+      "lines": 54
+    },
+    {
+      "path": "internal/resilience/circuit.go",
+      "sha256": "f3c221990e222b3d17a232ea18f6dbf192634a8235bee60585e096a56b2225b6",
+      "lines": 61
+    },
+    {
+      "path": "internal/resilience/policy.go",
+      "sha256": "aa8fc35c5cc86e3134201f2c9b085773f31d97004665d84ae0dc98b192118fab",
+      "lines": 44
+    },
+    {
+      "path": "internal/resources/reconcile.go",
+      "sha256": "18fb98c986082ddf08ad3c85fe33a4e9a86ed41fc04939384fdd00e940d1a1cb",
+      "lines": 40
+    },
+    {
+      "path": "internal/providers/provider.go",
+      "sha256": "7f6c840261228f6430119a875069b77c01329829a78b731a748b468d2bfcb5fc",
+      "lines": 87
+    },
+    {
+      "path": "internal/providers/registry.go",
+      "sha256": "4ab1b3039963c3a81182de32f62b6a59ae2176a61129104bf94d2695bc349412",
+      "lines": 90
+    },
+    {
+      "path": "internal/providers/account_resources.go",
+      "sha256": "2dbde42ea1404bd60b2dd9183f885842fe430de31ac3aae046bca9afa48964e5",
+      "lines": 132
+    },
+    {
+      "path": "internal/providers/absence.go",
+      "sha256": "ba2430084d0ec7a320d47928965219d6663ebedd52273873c434fe93a58d186f",
+      "lines": 49
+    },
+    {
+      "path": "internal/providers/cloudutil/common.go",
+      "sha256": "c00c1d96df3d4bb8d6ca3f6b84eb7f56496ce78d415204f582cd2df6260f9c4f",
+      "lines": 110
+    },
+    {
+      "path": "tools/public-release/transport-regression-gate.py",
+      "sha256": "05873da358604037c0ac0afd143a4b4f7a476f1bf18a7a02dd01f2f86dfe864a",
+      "lines": 254
+    },
+    {
+      "path": "tools/public-release/transport-regression-gate_test.py",
+      "sha256": "3ba2f6d69c2c459510a94e5dc6a89bc9ec601284154ce740909e68d795652b01",
+      "lines": 82
+    },
+    {
+      "path": "ops/release/transport-regression-gate.py",
+      "sha256": "d3bf2134d1d282530fed7b6da2ea4d96b8e71969e38a4384177bb947e3e16f28",
+      "lines": 14
+    },
+    {
+      "path": ".github/workflows/fleet-verification.yml",
+      "sha256": "4ba97b7db278fa273a1dbaf2140818f8a12b3932df28903b63aaee791ccee75c",
+      "lines": 59
+    }
+  ],
+  "partial_reads": [
+    "internal/worker/failures.go (through failTx)",
+    "cmd/worker/main.go (callsite search only)"
+  ],
+  "whole_project_audit_complete": false,
+  "publication_policy_drift": {
+    "before": {
+      "ops_required": 189,
+      "private_publisher_required": 146,
+      "missing_required_tests": 43
+    },
+    "after": {
+      "single_implementation": "tools/public-release/transport-regression-gate.py",
+      "required": 192,
+      "local_gate_tests": 10
+    },
+    "installed_original_publisher": "offline; not updated"
+  },
+  "reviewed_file_count": 29,
+  "reviewed_line_count": 3169
+}
