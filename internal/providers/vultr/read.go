@@ -15,61 +15,70 @@ func (c *Client) Account(ctx context.Context) (accountResponse, error) {
 	return x, err
 }
 func (c *Client) Regions(ctx context.Context) ([]region, error) {
-	path := pagePath("/regions", 500)
+	pager := newCatalogPager("/regions")
 	var out []region
-	for {
+	for pager.next != "" {
+		path, err := pager.path(ctx)
+		if err != nil {
+			return nil, err
+		}
 		var x regionsResponse
 		if err := c.do(ctx, http.MethodGet, path, nil, &x); err != nil {
 			return nil, err
 		}
-		out = append(out, x.Regions...)
-		if strings.TrimSpace(x.Meta.Links.Next) == "" {
-			return out, nil
+		if x.Regions == nil {
+			return nil, errors.New("missing regions inventory")
 		}
-		u, err := url.Parse(x.Meta.Links.Next)
+		out = append(out, x.Regions...)
+		if err := pager.advance(x.Meta.Links.Next); err != nil {
+			return nil, err
+		}
+	}
+	return out, nil
+}
+func (c *Client) Plans(ctx context.Context) ([]plan, error) {
+	pager := newCatalogPager("/plans")
+	var out []plan
+	for pager.next != "" {
+		path, err := pager.path(ctx)
 		if err != nil {
 			return nil, err
 		}
-		path = u.RequestURI()
-	}
-}
-func (c *Client) Plans(ctx context.Context) ([]plan, error) {
-	path := pagePath("/plans", 500)
-	var out []plan
-	for {
 		var x plansResponse
 		if err := c.do(ctx, http.MethodGet, path, nil, &x); err != nil {
 			return nil, err
 		}
-		out = append(out, x.Plans...)
-		if strings.TrimSpace(x.Meta.Links.Next) == "" {
-			return out, nil
+		if x.Plans == nil {
+			return nil, errors.New("missing plans inventory")
 		}
-		u, err := url.Parse(x.Meta.Links.Next)
+		out = append(out, x.Plans...)
+		if err := pager.advance(x.Meta.Links.Next); err != nil {
+			return nil, err
+		}
+	}
+	return out, nil
+}
+func (c *Client) OS(ctx context.Context) ([]osItem, error) {
+	pager := newCatalogPager("/os")
+	var out []osItem
+	for pager.next != "" {
+		path, err := pager.path(ctx)
 		if err != nil {
 			return nil, err
 		}
-		path = u.RequestURI()
-	}
-}
-func (c *Client) OS(ctx context.Context) ([]osItem, error) {
-	path := pagePath("/os", 500)
-	var out []osItem
-	for {
 		var x osResponse
 		if err := c.do(ctx, http.MethodGet, path, nil, &x); err != nil {
 			return nil, err
 		}
-		out = append(out, x.OS...)
-		if strings.TrimSpace(x.Meta.Links.Next) == "" {
-			return out, nil
+		if x.OS == nil {
+			return nil, errors.New("missing os inventory")
 		}
-		u, err := url.Parse(x.Meta.Links.Next)
-		if err != nil {
+		out = append(out, x.OS...)
+		if err := pager.advance(x.Meta.Links.Next); err != nil {
 			return nil, err
 		}
-		path = u.RequestURI()
 	}
+	return out, nil
 }
 func (c *Client) Instances(ctx context.Context) ([]instance, error) {
 	path := pagePath("/instances", 500)

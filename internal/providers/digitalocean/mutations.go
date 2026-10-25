@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -37,6 +38,9 @@ func (c *Client) CreateSSHKey(ctx context.Context, name, publicKey string) (SSHK
 		SSHKey SSHKeyCreated `json:"ssh_key"`
 	}
 	err := c.request(ctx, http.MethodPost, "/account/keys", SSHKeyCreateRequest{Name: name, PublicKey: publicKey}, &e)
+	if err == nil && e.SSHKey.ID <= 0 {
+		err = fmt.Errorf("%w: missing SSH key identity", ErrProviderRequest)
+	}
 	return e.SSHKey, err
 }
 func (c *Client) DeleteSSHKey(ctx context.Context, id int) error {
@@ -94,17 +98,12 @@ func (c *Client) request(ctx context.Context, method, path string, body any, out
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		var body struct {
-			ID      string `json:"id"`
-			Message string `json:"message"`
-		}
-		_ = json.NewDecoder(resp.Body).Decode(&body)
-		return HTTPError{Status: resp.StatusCode, RetryAfter: parseRetryAfter(resp.Header.Get("Retry-After")), Path: req.URL.String(), Code: body.ID, Message: body.Message}
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, 32<<10))
+		code, message := parseAPIError(body)
+		return HTTPError{Status: resp.StatusCode, RetryAfter: parseRetryAfter(resp.Header.Get("Retry-After")), Path: req.URL.String(), Code: code, Message: message}
 	}
-	if out != nil && resp.StatusCode != http.StatusNoContent {
-		if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
-			return fmt.Errorf("%w: decode", ErrProviderRequest)
-		}
+	if out != nil {
+		return decodeProviderResponse(resp.Body, out)
 	}
 	return nil
 }
@@ -112,6 +111,9 @@ func (c *Client) request(ctx context.Context, method, path string, body any, out
 func (c *Client) CreateDroplet(ctx context.Context, req CreateDropletRequest) (Droplet, error) {
 	var e createDropletEnvelope
 	err := c.request(ctx, http.MethodPost, "/droplets", req, &e)
+	if err == nil && e.Droplet.ID <= 0 {
+		err = fmt.Errorf("%w: missing droplet identity", ErrProviderRequest)
+	}
 	return e.Droplet, err
 }
 func (c *Client) DeleteDroplet(ctx context.Context, id int) error {

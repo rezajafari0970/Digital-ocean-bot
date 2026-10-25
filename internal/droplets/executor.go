@@ -93,13 +93,15 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 		}
 		return e.recordOperationError(ctx, reserved, stageCreate, err)
 	}
-	if result.Outcome == providers.OutcomeRejected || result.ServerID == "" {
-		reserved.State = jobs.OperationFailed
-		return e.recordOperationError(ctx, reserved, stageCreateRejected, errors.New("provider rejected create without server id"))
-	}
+	// A missing identity cannot turn an explicitly uncertain dispatch into a
+	// definitive failure. Preserve reconciliation before validating success.
 	if result.Outcome == providers.OutcomeAmbiguous {
 		reserved.State = jobs.OperationUnknown
 		return e.recordOperationError(ctx, reserved, stageCreateAmbiguous, ErrOutcomeStillUnknown)
+	}
+	if result.Outcome == providers.OutcomeRejected || result.ServerID == "" {
+		reserved.State = jobs.OperationFailed
+		return e.recordOperationError(ctx, reserved, stageCreateRejected, errors.New("provider rejected create without server id"))
 	}
 	if e.OnCreateSuccess != nil {
 		e.OnCreateSuccess(ctx, result)
