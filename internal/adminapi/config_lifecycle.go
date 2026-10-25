@@ -31,7 +31,7 @@ func (s *Server) getConfigProfiles(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	rows, e := tx.QueryContext(ctx, "SELECT id::text FROM config_driver_profiles WHERE deleted_at IS NULL ORDER BY created_at,id")
+	rows, e := tx.QueryContext(ctx, "SELECT id::text FROM config_driver_profiles WHERE deleted_at IS NULL AND delete_requested_at IS NULL ORDER BY created_at,id")
 	if e != nil {
 		writeJSON(w, 500, errorBody())
 		return
@@ -252,7 +252,11 @@ func (s *Server) deleteConfigProfile(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 409, map[string]string{"error": "profile_save_unconfirmed"})
 		return
 	}
-	writeJSON(w, 202, map[string]any{"id": p.ID, "state": "deleting"})
+	cleanupState := "pending"
+	if p.DeletedAt != nil {
+		cleanupState = "complete"
+	}
+	writeJSON(w, 202, map[string]any{"id": p.ID, "state": "removed", "cleanup_state": cleanupState})
 }
 
 // Server details use the same publication predicate as subscriptions and totals.

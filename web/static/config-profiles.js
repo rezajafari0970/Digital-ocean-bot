@@ -1,5 +1,24 @@
 // One profile lifecycle for every registered public capability.
 let configProfileCatalog=null,configProfilesRead=null,configProfilesReadSlot=null,configProfilesAbort=null,configProfilesEpoch=0;
+// A committed removal receipt wins over an older in-flight list response.
+const removedConfigProfileIDs=new Set();
+function visibleConfigProfiles(profiles){
+ return profiles.filter(x=>!x.profile.delete_requested_at&&!x.profile.deleted_at&&!removedConfigProfileIDs.has(x.profile.id));
+}
+function applyConfigRemovalReceipt(results,expectedIDs){
+ const expected=new Set(expectedIDs),seen=new Set();
+ if(!Array.isArray(results)||results.length!==expected.size)throw Error('profile_delete_receipt_unconfirmed');
+ for(const x of results){
+  if(!x||!expected.has(x.id)||seen.has(x.id)||!['removed','revision_conflict','not_found'].includes(x.state)||(x.state==='removed'&&!['pending','complete'].includes(x.cleanup_state)))throw Error('profile_delete_receipt_unconfirmed');
+  seen.add(x.id);
+ }
+ for(const x of results)if(x.state==='removed')removedConfigProfileIDs.add(x.id);
+ configProfilesAbort?.abort();++configProfilesEpoch;configProfilesRead=null;configProfilesReadSlot=null;
+ if(configProfileCatalog)configProfileCatalog.profiles=visibleConfigProfiles(configProfileCatalog.profiles);
+ document.querySelectorAll('[data-profile-id]').forEach(card=>{if(removedConfigProfileIDs.has(card.dataset.profileId))card.remove()});
+ const slot=document.querySelector('#configProfilesSlot');
+ if(slot){delete slot.dataset.snapshot;if(!slot.querySelector('[data-profile-id]'))slot.querySelector('[data-delete-all-profiles]')?.remove()}
+}
 function profileRandomHex(){return Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('')}
 function profileRequestID(){const h=profileRandomHex();return h.slice(0,8)+'-'+h.slice(8,12)+'-4'+h.slice(13,16)+'-a'+h.slice(17,20)+'-'+h.slice(20)}
 const profileStateLabels={ready:'Ready',syncing:'Applying automatically',verifying:'Checking connections',retrying:'Retrying automatically',paused:'Paused',deleting:'Deleting',waiting_for_servers:'Waiting for servers'};
@@ -9,6 +28,7 @@ Object.assign(profileErrorLabels,{
  profile_tcp_header_invalid:'Choose None or HTTP for the TCP header.',
  profile_tcp_header_security_unsupported:'HTTP headers cannot be combined with Reality or Vision.',
  profile_delete_panel_unavailable:'Server unavailable; removal will retry automatically.',
+ profile_delete_receipt_unconfirmed:'Removal could not be confirmed. Refresh the list before trying again.',
  profile_delete_inventory_unavailable:'Waiting for a fresh server inventory to confirm removal.',
  profile_delete_identity_changed:'Removal paused: the server identity differs from this profile.',
  cloudflare_dns_read_permission_denied:'Cloudflare denied DNS access. Grant Zone / DNS / Edit to this token for the selected domain, then refresh domains and access.',
@@ -51,6 +71,7 @@ async function refreshConfigProfiles(){
   try{
    const data=await viewRead('/api/v1/configs/profiles',view,controller.signal);if(!currentPageView(view)||!slot.isConnected||epoch!==configProfilesEpoch)return;
    if(!Array.isArray(data.profiles)||!Array.isArray(data.drivers)||!Array.isArray(data.servers))throw Error('Configuration status unavailable');
+   data.profiles=visibleConfigProfiles(data.profiles);
    configProfileCatalog=data;slot.querySelector('[data-profile-read-error]')?.remove();
    const retained=new Map([...slot.querySelectorAll('details[open][data-profile-servers]')].map(x=>[x.dataset.profileServers,x]));
    const open=new Set(retained.keys());
@@ -103,17 +124,17 @@ setInterval(()=>{if(current==='configs'&&!document.hidden&&!document.querySelect
 
 function deleteConfigProfileDialog(p){
  $('#modalTitle').textContent='Delete '+p.name+'?';$('#modalForm').noValidate=false;$('#modalForm').classList.remove('profileForm');
- $('#modalFields').innerHTML='<p>This removes this profile’s users and listeners from its servers and removes its links from output. Deletion continues automatically after you close this window.</p>';
+ $('#modalFields').innerHTML='<p>This immediately removes the profile from Configs and output after the request is saved. Server cleanup runs in the background, including retries when a server or account is unavailable.</p>';
  $('#modalError').textContent='';$('#modalSubmit').hidden=false;$('#modalSubmit').disabled=false;$('#modalSubmit').textContent='Delete profile';$('#modal').showModal();
- $('#modalForm').onsubmit=async e=>{e.preventDefault();$('#modalSubmit').disabled=true;setProfileBusy(p.id,true);try{await api('/api/v1/configs/profiles/'+encodeURIComponent(p.id),{method:'DELETE',body:JSON.stringify({revision:p.revision})});$('#modal').close();await refreshConfigProfilesAfterRead()}catch(err){setProfileBusy(p.id,false);$('#modalError').textContent=configMessage(err.message);$('#modalSubmit').disabled=false}};
+ $('#modalForm').onsubmit=async e=>{e.preventDefault();$('#modalSubmit').disabled=true;setProfileBusy(p.id,true);try{const result=await api('/api/v1/configs/profiles/'+encodeURIComponent(p.id),{method:'DELETE',body:JSON.stringify({revision:p.revision})});applyConfigRemovalReceipt([result],[p.id]);$('#modal').close();await refreshConfigProfilesAfterRead()}catch(err){setProfileBusy(p.id,false);$('#modalError').textContent=configMessage(err.message);$('#modalSubmit').disabled=false}};
 }
 function deleteAllConfigProfilesDialog(profiles){
  const snapshot=profiles.map(p=>({id:p.id,revision:p.revision}));
  $('#modalTitle').textContent='Delete all '+snapshot.length+' configurations?';$('#modalForm').classList.remove('profileForm');$('#modalForm').noValidate=false;
- $('#modalFields').innerHTML='<p>This removes these profiles and their clients from every assigned server. Removal runs independently on each server and continues automatically. Profiles created after this selection are excluded.</p>';
+ $('#modalFields').innerHTML='<p>This immediately removes the selected profiles from Configs and output after the request is saved. Server cleanup runs independently in the background, even when an account or server is unavailable. Profiles created after this selection are excluded.</p>';
  $('#modalError').textContent='';$('#modalSubmit').hidden=false;$('#modalSubmit').disabled=false;$('#modalSubmit').textContent='Delete all configurations';$('#modal').showModal();
  $('#modalForm').onsubmit=async e=>{e.preventDefault();$('#modalSubmit').disabled=true;
-  try{const result=await api('/api/v1/configs/profiles/delete-batch',{method:'POST',body:JSON.stringify({profiles:snapshot})});$('#modal').close();if(result.conflicts)toast(result.conflicts+' changed profiles were kept. Review them before deleting.','error');await refreshConfigProfilesAfterRead()}
+  try{const result=await api('/api/v1/configs/profiles/delete-batch',{method:'POST',body:JSON.stringify({profiles:snapshot})});applyConfigRemovalReceipt(result.results,snapshot.map(p=>p.id));$('#modal').close();if(result.conflicts)toast(result.conflicts+' changed profiles were kept. Review them before deleting.','error');await refreshConfigProfilesAfterRead()}
   catch(err){$('#modalError').textContent=configMessage(err.message);$('#modalSubmit').disabled=false}
  };
 }

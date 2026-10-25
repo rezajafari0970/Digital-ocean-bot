@@ -46,12 +46,13 @@ jobs:
           python3 deploy/bootstrap_test.py
           python3 deploy/project_update_test.py
           python3 tools/public-release/transport-regression-gate_test.py
+          node web/tests/config-transport.cjs
+          node web/tests/config-delete.cjs
           DOB_RUN_BROWSER_TEST=0 go test ./...
           go vet ./...
           node --check web/static/app.js
           node --check web/static/panel-settings.js
           node --check web/static/cloudflare.js
-          node web/tests/config-transport.cjs
           go test -v -count=3 -p 1 -timeout 5m -run '^TestAccountEditBrowser$' ./internal/adminapi
           go test -v -count=1 -p 1 -timeout 5m -run '^TestNewCloudProviderBrowser$' ./internal/adminapi
           DOB_TEST_AUTH_POPUP_BLOCKED=1 go test -v -count=1 -timeout 5m -run '^TestNewCloudProviderBrowser$' ./internal/adminapi

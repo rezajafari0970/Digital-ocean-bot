@@ -54,7 +54,7 @@ func (s *Server) deleteConfigProfiles(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	rows, e := tx.QueryContext(r.Context(), "SELECT id::text,revision,delete_requested_at FROM config_driver_profiles WHERE id=ANY($1::uuid[]) FOR UPDATE", pq.Array(ids))
+	rows, e := tx.QueryContext(r.Context(), "SELECT id::text,revision,delete_requested_at,deleted_at FROM config_driver_profiles WHERE id=ANY($1::uuid[]) FOR UPDATE", pq.Array(ids))
 	if e != nil {
 		writeJSON(w, 500, errorBody())
 		return
@@ -62,16 +62,17 @@ func (s *Server) deleteConfigProfiles(w http.ResponseWriter, r *http.Request) {
 	type current struct {
 		revision int64
 		deleting bool
+		complete bool
 	}
 	known := map[string]current{}
 	for rows.Next() {
 		var id string
 		var rev int64
-		var at sql.NullTime
-		if e = rows.Scan(&id, &rev, &at); e != nil {
+		var at, completed sql.NullTime
+		if e = rows.Scan(&id, &rev, &at, &completed); e != nil {
 			break
 		}
-		known[id] = current{rev, at.Valid}
+		known[id] = current{rev, at.Valid, completed.Valid}
 	}
 	if e == nil {
 		e = rows.Err()
@@ -86,7 +87,7 @@ func (s *Server) deleteConfigProfiles(w http.ResponseWriter, r *http.Request) {
 	conflicts := 0
 	for _, p := range body.Profiles {
 		c, ok := known[p.ID]
-		state := "deleting"
+		state := "removed"
 		if !ok {
 			state = "not_found"
 			conflicts++
@@ -98,7 +99,14 @@ func (s *Server) deleteConfigProfiles(w http.ResponseWriter, r *http.Request) {
 				changes = append(changes, p.ID)
 			}
 		}
-		results = append(results, map[string]any{"id": p.ID, "state": state})
+		result := map[string]any{"id": p.ID, "state": state}
+		if state == "removed" {
+			result["cleanup_state"] = "pending"
+			if c.complete {
+				result["cleanup_state"] = "complete"
+			}
+		}
+		results = append(results, result)
 	}
 	if len(changes) > 0 {
 		_, e = tx.ExecContext(r.Context(), `WITH changed AS (

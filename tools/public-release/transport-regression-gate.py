@@ -52,6 +52,7 @@ REQUIRED = {
         "TestCloudflareOutputRevocationAndRecordOwnership",
         "TestCloudflareOperatorMeasurementRangeFreshnessAndIdempotency",
         "TestUnifiedProfileResizeDeleteAndRecovery",
+        "TestProfileDeleteImmediatelyRemovesLocalVisibility",
         "TestUnifiedProfileCreationIdempotency",
         "TestUnifiedAuthorityRetiresLegacyWithoutBlockingCompletedPanels",
         "TestUnifiedStatusCountsActualPublishedOutput",

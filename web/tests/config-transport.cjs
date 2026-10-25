@@ -18,9 +18,9 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
    if(req.method==='GET')return json(catalog);
    let raw='';req.on('data',x=>raw+=x);req.on('end',()=>{
     const body=JSON.parse(raw),id=url.pathname.split('/')[5],current=catalog.profiles.find(x=>x.profile.id===id);
-    if(url.pathname.endsWith('/delete-batch')){deletions.push(body);const ids=new Set(body.profiles.map(x=>x.id));catalog.profiles=catalog.profiles.filter(x=>!ids.has(x.profile.id));return json({accepted:ids.size,conflicts:0},202)}
+    if(url.pathname.endsWith('/delete-batch')){deletions.push(body);const ids=new Set(body.profiles.map(x=>x.id));catalog.profiles=catalog.profiles.filter(x=>!ids.has(x.profile.id));return json({accepted:ids.size,conflicts:0,results:[...ids].map(id=>({id,state:'removed',cleanup_state:'pending'}))},202)}
     if(id&&current&&body.revision!==current.profile.revision)return json({error:'profile_revision_changed'},409);
-    if(req.method==='DELETE'){deletions.push(body);catalog.profiles=catalog.profiles.filter(x=>x!==current);return json({state:'deleting'},202)}
+    if(req.method==='DELETE'){deletions.push(body);catalog.profiles=catalog.profiles.filter(x=>x!==current);return json({id,state:'removed',cleanup_state:'pending'},202)}
     saves.push(body);const profile={...body,id:body.id||'profile-'+saves.length,revision:(body.revision||0)+1,panel_ids:body.panel_ids||[],spec:{...body.spec,port:body.spec.port||(body.spec.cloudflare_account?2083:10000+saves.length)}};
     const item={profile,state:profile.enabled?'syncing':'paused',eligible:2,verified:2,ready:0,published:0,target:2*profile.classes.reduce((n,c)=>n+(profile.class_settings?.[c]?.count??profile.clients_per_class),0),pending:2,blocked:0,deleting:0};
     catalog.profiles=[...catalog.profiles.filter(x=>x.profile.id!==profile.id),item];json({profile,state:'queued'});
