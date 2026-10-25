@@ -36,11 +36,13 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port;
  const profile=fs.mkdtempSync(path.join(root,'ui-profile-')),log=fs.openSync(path.join(root,'browser.log'),'w');
  const chrome=spawn(process.env.DOB_TEST_CHROMIUM||'/snap/bin/chromium',['--headless','--no-sandbox','--disable-dev-shm-usage','--disable-gpu','--remote-debugging-port=0','--remote-debugging-address=127.0.0.1','--user-data-dir='+profile,'about:blank'],{stdio:['ignore',log,log],env:{...process.env,TMPDIR:root}});
+ let launchError;chrome.once('error',error=>{launchError=error});
+ const launchFailure=()=>{let details='';try{details=fs.readFileSync(path.join(root,'browser.log'),'utf8').slice(-8192)}catch{}return 'Browser startup failed: '+String(launchError||chrome.exitCode||chrome.signalCode||'deadline')+'\n'+details};
  let ws;const errors=[],passed=[];
  try{
   let port;const until=Date.now()+20000;
-  while(Date.now()<until){try{port=Number(fs.readFileSync(path.join(profile,'DevToolsActivePort'),'utf8').split('\n')[0]);break}catch{}await new Promise(r=>setTimeout(r,100))}
-  if(!port)throw Error('Browser did not start');
+  while(Date.now()<until){if(launchError||chrome.exitCode!==null||chrome.signalCode!==null)throw Error(launchFailure());try{port=Number(fs.readFileSync(path.join(profile,'DevToolsActivePort'),'utf8').split('\n')[0]);break}catch{}await new Promise(r=>setTimeout(r,100))}
+  if(!port)throw Error(launchFailure());
   const version=await(await fetch('http://127.0.0.1:'+port+'/json/version')).json();ws=new WebSocket(version.webSocketDebuggerUrl);await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j});
   let seq=0;const pending=new Map();ws.onmessage=({data})=>{const m=JSON.parse(data);if(m.method==='Runtime.exceptionThrown')errors.push(m.params.exceptionDetails);if(m.id){const h=pending.get(m.id);if(h){pending.delete(m.id);m.error?h[1](Error(m.error.message)):h[0](m.result)}}};
   const send=(method,params={},sessionId)=>new Promise((resolve,reject)=>{const id=++seq;pending.set(id,[resolve,reject]);ws.send(JSON.stringify({id,method,params,sessionId}))});
