@@ -349,8 +349,6 @@
   },
   "read_files": [
     "PROJECT_CONTEXT.md",
-    "PROJECT_STATE.md",
-    "HANDOFF.md",
     "ops/release/README.md",
     "ops/release/FLEET-DNS-CAPACITY-20261025.md",
     "ops/release/run-bounded-update.sh",
@@ -380,7 +378,9 @@
   "partial_reads": [
     "tools/development-orchestrator.py",
     "ops/release/transport-regression-gate.py",
-    "tools/public-release/transport-regression-gate.py"
+    "tools/public-release/transport-regression-gate.py",
+    "PROJECT_STATE.md",
+    "HANDOFF.md"
   ],
   "entries": [
     {
@@ -11465,5 +11465,18 @@
       "lines": 101,
       "review": "pending"
     }
-  ]
+  ],
+  "coverage_clarification": "Read means scoped inspection this turn, not a guarantee that every line or behavior was reviewed. PROJECT_STATE and HANDOFF were partial reads. File hashes describe the inventory checkpoint, not the final deployed tree.",
+  "later_checkpoint": {
+    "at": "2026-10-25T05:55:15.739992+00:00",
+    "product_source": "cf7b124566df309c82c9b8a2103c848c846d9b1c",
+    "additional_non_test_modules_read": [
+      "internal/supervision",
+      "internal/resilience",
+      "internal/resources",
+      "internal/runtimecap"
+    ],
+    "account_dialog_and_css_scope": "targeted functions and selectors, not all app.js",
+    "full_semantic_audit_complete": false
+  }
 }

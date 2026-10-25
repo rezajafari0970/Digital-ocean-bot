@@ -1,0 +1,213 @@
+{
+  "schema": 1,
+  "at": "2026-10-25T05:55:15.739992+00:00",
+  "audit_status": "first_verified_checkpoint_not_complete_semantic_audit",
+  "source_product_commit": "cf7b124566df309c82c9b8a2103c848c846d9b1c",
+  "source_merge_commit": "8943b5553a44caf22d1c6f348f45b912b0a7acc7",
+  "public_main_and_stable": "8d838efa34acc2bd6004045ccf335cc22cb5b2ef",
+  "verification": {
+    "source_run": 40166274739,
+    "public_install_reinstall_run": 40166304091,
+    "atomic_promotion_run": 40166549890,
+    "required_native_postgresql_race_tests": 189,
+    "bootstrap_backup_cluster_tests": 25,
+    "updater_tests": 11,
+    "bounded_api_review_tests": 8,
+    "account_browser_repetitions": 3,
+    "secret_scans_and_gitleaks": "pass"
+  },
+  "default_instance": {
+    "at": "2026-10-25T05:55:12.170701+00:00",
+    "commit": "8d838efa34acc2bd6004045ccf335cc22cb5b2ef",
+    "schema": "000195_provider_snapshot_latest",
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-25T05:55:12.263932182Z"
+    },
+    "checks": {
+      "master_key_hash": true,
+      "environment_hash": true,
+      "creation_policy": true,
+      "output_policy": true,
+      "protection_policy": true,
+      "trojan_policy": true,
+      "unified": true,
+      "profile_policy": true,
+      "selective_ads_enabled": true,
+      "cloudflare_settings": true,
+      "cloudflare_secret_hashes": true,
+      "account_settings": true,
+      "profile_ownership": true,
+      "trojan_ownership": true
+    },
+    "preservation": {
+      "profile_ownership": {
+        "common": 0,
+        "unchanged": 0,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 0,
+        "confirmed_initial_activations": 0,
+        "confirmed_preupdate_initial_activations": 0,
+        "retired_since_backup": 0,
+        "new_since_backup": 0
+      },
+      "trojan_ownership": {
+        "common": 0,
+        "unchanged": 0,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 0,
+        "confirmed_initial_activations": 0,
+        "confirmed_preupdate_initial_activations": 0,
+        "retired_since_backup": 0,
+        "new_since_backup": 0
+      }
+    },
+    "cloudflare_state": {
+      "accounts": 0,
+      "records": 0,
+      "profiles": 0
+    }
+  },
+  "production_instance": {
+    "at": "2026-10-25T05:55:13.625392+00:00",
+    "commit": "5dc2c25678698dbbe9ac1cfee7d18701c19213e7",
+    "services": [
+      {
+        "unit": "dob-production-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "dob-production-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "dob-production-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-25T05:55:13.719207837Z"
+    },
+    "preservation_checks": {
+      "master_key_hash": true,
+      "environment_hash": true,
+      "creation_policy": true,
+      "output_policy": true,
+      "protection_policy": true,
+      "trojan_policy": true,
+      "unified": true,
+      "profile_policy": true,
+      "selective_ads_enabled": true,
+      "cloudflare_settings": true,
+      "cloudflare_secret_hashes": true,
+      "account_settings": true
+    },
+    "deployment_state": "blocked_before_service_stop_by_disk_reserve"
+  },
+  "production_stage": "/opt/.dob-release.bXqgHMgu",
+  "production_space": {
+    "free_bytes_after_completed_build_cleanup": 5965795328,
+    "required_bytes_at_observation": 6432375869,
+    "guard_not_bypassed": true
+  },
+  "api": {
+    "model_configured": "gpt-6-astra",
+    "reasoning": "max",
+    "budget_usd": 2,
+    "attempt_cap": 3,
+    "requests": 0,
+    "tokens": 0,
+    "cost_usd": 0,
+    "blocker": "key_unavailable_in_accessible_instance_configuration"
+  },
+  "coverage": {
+    "tracked_files_at_start": 6476,
+    "go_files_at_start": 1217,
+    "whole_project_semantic_review_complete": false,
+    "pending": [
+      "provider contracts and account isolation",
+      "queue fairness and cancellation",
+      "bounded load and memory soak",
+      "isolated restore and service-failure drills",
+      "original host storage diagnosis"
+    ]
+  },
+  "limits": [
+    "original host remains quarantined and offline",
+    "AWS credential acceptance and selected DNS capacity remain external constraints",
+    "gateway management adapter unavailable",
+    "no future zero-error or permanent uptime guarantee",
+    "local encrypted archive checked; fresh off-host copy not claimed"
+  ]
+}
