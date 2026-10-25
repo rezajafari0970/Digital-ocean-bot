@@ -30,11 +30,11 @@ def ensure_cluster(state, save, *, run=subprocess.run, config_root=Path("/etc/po
         # The intent was persisted by the caller before this side effect.
         result = run(["pg_createcluster", str(version), name, "--port", str(port),
                       "--datadir", str(data), "--start-conf=auto", "--start",
-                      "-o", "listen_addresses=127.0.0.1", "--",
+                      "-o", "listen_addresses='127.0.0.1'", "--",
                       "--data-checksums", "--auth-local=peer", "--auth-host=scram-sha-256"],
                      capture_output=True, text=True, timeout=120)
         if result.returncode:
-            raise RuntimeError("Dedicated cluster creation incomplete; preserve intent and inspect before retry")
+            raise RuntimeError(f"Dedicated cluster creation incomplete (exit {result.returncode}); preserve intent and inspect journalctl -u postgresql@{version}-{name} before retry")
     result = run(["pg_ctlcluster", str(version), name, "status"], capture_output=True, text=True, timeout=15)
     if result.returncode:
         result = run(["pg_ctlcluster", str(version), name, "start"], capture_output=True, text=True, timeout=60)

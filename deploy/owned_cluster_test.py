@@ -36,7 +36,7 @@ class OwnedClusterTests(unittest.TestCase):
         self.assertIn("--data-checksums", create)
         self.assertIn("--auth-local=peer", create)
         self.assertIn("--auth-host=scram-sha-256", create)
-        self.assertIn("listen_addresses=127.0.0.1", create)
+        self.assertIn("listen_addresses='127.0.0.1'", create)
         self.assertIn("55432", self.calls[-1])
         self.assertEqual(self.saved[0]["cluster"]["system_identifier"], "123456789")
 
