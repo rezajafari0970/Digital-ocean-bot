@@ -149,6 +149,8 @@ REQUIRED['internal/providers/vultr'] = ('TestCatalogPaginationUsesNativeCursors'
 REQUIRED['internal/providers/digitalocean'] = ('TestProviderResponseReadBounds', 'TestProviderResponseRequiresSingleJSONValue', 'TestCreateResponseMissingIdentityRemainsAmbiguous')
 REQUIRED['internal/droplets'] += ('TestAmbiguousCreateDoesNotAdvanceCapacitySuccess',)
 
+REQUIRED['internal/app'] += ('TestSSHIdentityPersistsBeforeDispatchPostgres', 'TestSSHIdentityUnknownNeverRedispatchesPostgres')
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()
