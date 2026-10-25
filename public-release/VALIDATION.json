@@ -2,15 +2,16 @@
   "schema": 2,
   "status": "release_requirements_and_limits",
   "date": "2026-10-25",
-  "feature": "Database safety settings, explicit recovery alarms and verified backup freshness",
+  "feature": "Bounded dispatcher account retention without releasing unfinished work",
   "publication_gates": {
-    "cloudflare_transport_fleet_no_skip": "189 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
+    "cloudflare_transport_fleet_no_skip": "192 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
     "exact_candidate_ubuntu_24_amd64_install": "required before stable promotion",
     "full_go_and_vet_unprivileged": "required before push",
     "live_secret_scan_and_gitleaks": "required before push",
     "atomic_main_and_stable": "required",
     "account_edit_mobile": "six providers, four viewports, unchanged optional choices and cross-dialog settings submit",
-    "database_backup_regressions": "25 bootstrap, owned-cluster and backup tests; real Ubuntu install/reinstall must verify checksums"
+    "database_backup_regressions": "25 bootstrap, owned-cluster and backup tests; real Ubuntu install/reinstall must verify checksums",
+    "dispatcher_retention": "Completed account churn releases identity state; cancellation and sibling completion preserve active reservations"
   },
   "notes": [
     "Existing single-region AWS credentials retain their original identity and region boundaries.",

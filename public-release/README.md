@@ -225,3 +225,7 @@ Database inspection requires enabled page checksums and durable write settings b
 These checks detect unsafe conditions. They do not automatically overwrite a live database, discard damaged pages, acknowledge corruption or promise repair of arbitrary hardware failures. Restore and failover still require verified data and ownership.
 
 Fresh installations use a dedicated loopback PostgreSQL cluster on port 55432, initialized with page checksums and a persisted cluster identity. Existing installations retain their database connection and credentials. A conflicting port or ambiguous partial cluster stops installation; unrelated clusters are not modified. Existing clusters without checksums require planned, verified maintenance before upgrading to this release.
+
+### نگهداری وضعیت حساب‌های زمان‌بند
+
+پس از پایان آخرین کار هر حساب، وضعیت موقت آن از حافظهٔ زمان‌بند حذف می‌شود. لغو درخواست به‌تنهایی سهم کار در حال اجرا را آزاد نمی‌کند؛ محدودیت هم‌زمانی حساب تا پایان واقعی کار حفظ می‌شود. این رفتار برای جلوگیری از انباشته‌شدن شناسه‌های حساب‌های پایان‌یافته آزمون می‌شود.

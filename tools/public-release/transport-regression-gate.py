@@ -120,6 +120,29 @@ REQUIRED['internal/providers/aws'] += ('TestAWSPaginationOperationContracts','Te
 
 REQUIRED['internal/provisioning'] += ('TestControllerKernelMemoryGuardLifecycle','TestControllerKernelMemoryGuardContainerBoundary')
 
+REQUIRED['internal/providers/aws'] += ('TestAWSImageMappingCatalogAndCreate', 'TestAWSEmptyCatalogIdentifiesReadStage')
+REQUIRED['internal/adminapi'] += ('TestAWSPreviewEmptyCatalogDiagnostics',)
+
+REQUIRED['internal/providers/aws'] += ('TestAWSRegionalDiscoveryPinsIndependentNetworks','TestAWSRegionalCatalogAndLaunchRouting','TestAWSRegionalInventoryNeverReturnsPartialSuccess','TestAWSRegionalCredentialsRejectScopeChanges','TestAWSRegionalCleanupRejectsUnknownJournalBeforeIO','TestAWSRegionalCleanupResumesEachOwnedNetwork','TestAWSPriceEvidenceRejectsWrongProductAndTerms','TestAWSPricingPaginationSigningAndOptionalFailure','TestAWSPlanCompatibilityAndAvailabilityZone')
+
+REQUIRED['internal/adminapi'] += ('TestCloudflareQuotaPrioritizesUncoveredServers',)
+REQUIRED['cmd/worker'] += ('TestControlBudgetReservesProviderProgress','TestIdentityReservedCapacityWithBulkAndBothProviders','TestIdentityDeadlineStartsAfterAdmission','TestIdentityRollingSlowPeerDoesNotBlockHealthyTail')
+
+REQUIRED['internal/adminapi'] += ('TestForwardedPanelPortPreservesGateway','TestPanelSettingsAtomicCredentials','TestPanelSettingsAddressAndAdminAuthorization')
+
+REQUIRED['internal/worker'] += ('TestWeightedAdmissionKeepsSmallWorkAndCleanup','TestAdmissionCancellationDoesNotAbandonOrLeakSlots')
+
+REQUIRED['internal/worker'] += ('TestRecoveryLedgerReadFaultNeverCallsBypassOrHandler', 'TestRecoveryMissingCheckpointOrFailedPruningRefusesWork', 'TestRecoveryCompletionFaultPreservesDurableFenceAndAtomicBackoff', 'TestRecoveryLiveOwnerCrashAndSessionLoss', 'TestRecoveryConcurrentWorkersDoNotOverlapLiveHandler', 'TestRecoveryAsyncPersistenceFailureInvalidatesProgressUntilReconciled', 'TestRecoveryProgressGenerationRejectsOlderSuccess', 'TestRecoveryCancellationPersistsBeforeReleasingLane', 'TestRecoveryCheckpointMigrationRefusesUnsafeDowngrade', 'TestRecoveryFailedActiveLaneCannotRestoreReadiness', 'TestLifecycleCompletionFailureSurvivesRestartAndInvalidatesProgress', 'TestRecoveryReaperDoesNotTouchLifecycleLane', 'TestDispatcherSlowAccountDoesNotBlockOthers', 'TestPollClassCannotOccupyRoutingHeadroom', 'TestAdmissionReservesNestedSQLAndSupervisionHeadroom')
+
+REQUIRED['internal/adminapi'] += ('TestDashboardSeparatesProvisioningFromUnverified',)
+
+REQUIRED['internal/panels/configplane'] += ('TestCDNClassProofsPreserveIndependentEndpointTimes','TestCDNProofFencesAndStructuralFailure')
+REQUIRED['internal/providers/aws'] += ('TestAWSBackgroundErrorRetainsSafeWireCause',)
+
+REQUIRED['internal/adminapi'] += ('TestCloudflareFleetCapacityScopeAndOverlap','TestCloudflareCapacityUnknownAndStaleNeverClaimsSufficient')
+
+REQUIRED['internal/worker'] += ('TestDispatcherForgetsCompletedAccounts', 'TestDispatcherCancellationKeepsExecutingAccountOwned', 'TestDispatcherAccountCountSurvivesSiblingCompletion')
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()
@@ -188,6 +211,16 @@ def main(repo):
             raise RuntimeError('native test core binary hash mismatch')
         native=work/'xray';native.write_bytes(binary);native.chmod(0o700)
         env['XRAY_TEST_BINARY']=str(native)
+        # Keep native routing tests independent of a controller's global assets.
+        # Pin the upstream release and GitHub-published digest; never skip the
+        # Google Ads path tests because a fresh runner lacks geosite.dat.
+        geo_url='https://github.com/v2fly/domain-list-community/releases/download/20261024005255/dlc.dat'
+        geo=urllib.request.urlopen(geo_url,timeout=45).read(10_000_001)
+        if hashlib.sha256(geo).hexdigest()!='356b6accce7b724490ddffee25e69edc9de8a1e7fe4e799871cf5c417fdf31d7':
+            raise RuntimeError('native test geosite hash mismatch')
+        (work/'geosite.dat').write_bytes(geo)
+        env['XRAY_LOCATION_ASSET']=str(work)
+
         names = [name for group in REQUIRED.values() for name in group]
         args = ['go', 'test', '-json', '-race', '-count=1', '-p', '1', '-timeout', '5m', '-run', '^(' + '|'.join(names) + ')$'] + ['./' + p for p in REQUIRED]
         result = subprocess.run(args, cwd=repo, env=env, capture_output=True, text=True, timeout=900)
@@ -198,6 +231,7 @@ def main(repo):
         if result.returncode:
             raise RuntimeError('database/race regression command failed')
         count = verify_events(result.stdout.splitlines())
+        subprocess.run(['node', 'web/tests/aws-catalog.cjs'], cwd=repo, env=env, check=True, timeout=30)
         subprocess.run(['node', 'web/tests/database-health.cjs'], cwd=repo, env=env, check=True, timeout=30)
         subprocess.run(['node', 'web/tests/account-save-receipt.cjs'], cwd=repo, env=env, check=True, timeout=30)
         subprocess.run(['node', 'web/tests/account-rule-status.cjs'], cwd=repo, env=env, check=True, timeout=30)
