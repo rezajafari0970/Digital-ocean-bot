@@ -2,6 +2,7 @@ package workflow
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
@@ -34,7 +35,21 @@ func (r *ProviderKeyRef) UnmarshalJSON(b []byte) error {
 func (r ProviderKeyRef) MarshalJSON() ([]byte, error) { return json.Marshal(string(r)) }
 func (r ProviderKeyRef) String() string               { return string(r) }
 
+// SSHKeyIntent is a durable account/credential-bound import fence. Unknown
+// imports are reconciled with the same private key and are never resubmitted.
+type SSHKeyIntent struct {
+	Version       int          `json:"version"`
+	AccountID     string       `json:"account_id"`
+	Provider      string       `json:"provider"`
+	ExternalID    string       `json:"external_id,omitempty"`
+	CredentialRef string       `json:"credential_ref"`
+	CredentialAt  sql.NullTime `json:"credential_at"`
+	State         string       `json:"state"`
+}
+
 type ProfileSnapshot struct {
+	SSHKeyIntent *SSHKeyIntent `json:"ssh_key_intent,omitempty"`
+
 	RegionalLaunches       map[string]providers.RegionalLaunch `json:"regional_launches,omitempty"`
 	UpCloudTrialCompatible bool                                `json:"upcloud_trial_compatible,omitempty"`
 	Name                   string                              `json:"name"`

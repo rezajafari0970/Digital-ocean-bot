@@ -155,6 +155,7 @@ type CreateServerResult struct {
 }
 
 type SSHKey struct {
+	PublicKey   string
 	ID          string
 	Name        string
 	Fingerprint string

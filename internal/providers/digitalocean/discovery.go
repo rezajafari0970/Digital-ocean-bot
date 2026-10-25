@@ -52,6 +52,7 @@ type Project struct {
 	Environment string
 }
 type SSHKey struct {
+	PublicKey   string `json:"public_key"`
 	ID          int
 	Name        string
 	Fingerprint string

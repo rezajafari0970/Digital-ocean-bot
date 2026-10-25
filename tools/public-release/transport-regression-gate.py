@@ -151,6 +151,12 @@ REQUIRED['internal/droplets'] += ('TestAmbiguousCreateDoesNotAdvanceCapacitySucc
 
 REQUIRED['internal/app'] += ('TestSSHIdentityPersistsBeforeDispatchPostgres', 'TestSSHIdentityUnknownNeverRedispatchesPostgres')
 
+REQUIRED['internal/app'] += ('TestSSHIdentityLostResponseReconcilesExactKeyPostgres', 'TestSSHIdentityRejectsForeignAndIncompleteEvidencePostgres', 'TestSSHIdentityConcurrentClaimAndStaleSnapshotPostgres', 'TestSSHIdentityReservationAtomicityAndCrashWindowsPostgres', 'TestSSHIdentityScopeAndLegacyRecoveryPostgres', 'TestSSHIdentityInlineAndPermissionFallbackPostgres')
+REQUIRED['internal/providers/vultr'] += ('TestSSHImportUncertainVerificationNeverDeletes', 'TestSSHInventoryCarriesExactPublicKeyAndIsolatesCursor')
+REQUIRED['internal/providers/digitalocean'] += ('TestSSHInventoryCarriesExactPublicKey',)
+
+REQUIRED['internal/app'] += ('TestSSHIdentityStaleGenerationAndSecretCollisionPostgres',)
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()
