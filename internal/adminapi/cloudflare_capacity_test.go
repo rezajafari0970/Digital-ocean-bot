@@ -60,8 +60,12 @@ func TestCloudflareFleetCapacityScopeAndOverlap(t *testing.T) {
 		t.Fatalf("target scope expanded: %+v", got)
 	}
 	// A second profile consumes its own records; a different CF account is isolated.
-	other, otherProfile, _ := cfSeed(t, db)
-	sqlMust(t, db, "UPDATE config_driver_profiles SET fleet=false WHERE id=$1", otherProfile)
+	other, _ := cloudflare.NewID()
+	otherProfile, _ := cloudflare.NewID()
+	sqlMust(t, db, "INSERT INTO cloudflare_accounts(id,name) VALUES($1,'other fixture')", other)
+	sqlMust(t, db, `INSERT INTO config_driver_profiles(id,name,spec,enabled,fleet,classes)
+ SELECT $1,'other profile',jsonb_set(jsonb_set(spec,'{cloudflare_account}',to_jsonb($2::text)),'{port}','2087'::jsonb),true,false,ARRAY['DIRECT']
+ FROM config_driver_profiles WHERE id=$3`, otherProfile, other, profile)
 	got = check()
 	all, err := svc.Capacity(context.Background())
 	if err != nil || got.RequiredRecords != 6 || all[other].RequiredRecords != 0 {
