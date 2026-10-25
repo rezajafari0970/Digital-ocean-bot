@@ -3,6 +3,8 @@ package scheduler
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/capacity"
 	"log"
 	"math/rand"
@@ -50,130 +52,169 @@ type Engine struct {
 }
 
 func (e Engine) RunDue(ctx context.Context, now time.Time) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	items, err := e.Leases.ClaimDue(ctx, now, 100, time.Minute)
 	if err != nil {
 		return err
 	}
+	var outcomes error
 	for _, x := range items {
-		// Refresh/validate sticky egress before READY is evaluated. This lets
-		// ISOLATION_WAIT accounts recover automatically on the next scheduler tick.
-		_ = e.Starter.PrepareScheduledAccount(ctx, x.AccountID)
-		var enabled bool
-		var runtimeStatus, providerState, providerError string
-		if err := e.DB.QueryRowContext(ctx, `SELECT enabled,runtime_status,provider_state,COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, x.AccountID).Scan(&enabled, &runtimeStatus, &providerState, &providerError); err != nil || !providerAllowsCreate(enabled, runtimeStatus, providerState, providerError) {
-			_ = e.Leases.Complete(ctx, x, now)
+		if err := ctx.Err(); err != nil {
+			return errors.Join(outcomes, err)
+		}
+		if err := e.Leases.Validate(ctx, x); err != nil {
+			outcomes = errors.Join(outcomes, fmt.Errorf("schedule %s ownership: %w", x.ID, err))
 			continue
 		}
-		// Scheduled automation is allowed only for a fully pinned, capable installer.
-		// Heal missing/stale installer references before evaluating the gate so a
-		// healthy account cannot starve indefinitely because of profile drift.
-		if err := e.ensureAutomationInstallerRef(ctx, x.ProfileID); err != nil {
-			log.Printf("scheduler skip account=%s reason=automation_repair_failed profile=%s err=%v", x.AccountID, x.ProfileID, err)
-			_ = e.Leases.Complete(ctx, x, now)
-			continue
+		owned, cancel := context.WithDeadline(ctx, x.LeaseUntil)
+		runErr := e.runClaim(owned, x, now)
+		if runErr == nil {
+			runErr = owned.Err()
 		}
-		if err := e.ensureAutomationDatabaseTemplate(ctx, x.ProfileID); err != nil {
-			log.Printf("scheduler skip account=%s reason=database_template_repair_failed profile=%s err=%v", x.AccountID, x.ProfileID, err)
-			_ = e.Leases.Complete(ctx, x, now)
-			continue
+		cancel()
+		// Persist the owned completion even on shutdown, but never erase a newer
+		// claim. An unavailable receipt remains leased for later reconciliation.
+		receipt, finish := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
+		completeErr := e.Leases.Complete(receipt, x, now)
+		finish()
+		if err := errors.Join(runErr, completeErr); err != nil {
+			outcomes = errors.Join(outcomes, fmt.Errorf("schedule %s: %w", x.ID, err))
 		}
-		var automationReady bool
-		_ = e.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM deployment_profiles p JOIN installers i ON i.name=p.config->'installer_ref'->>'name' AND i.version=(p.config->'installer_ref'->>'version')::int WHERE p.id=$1 AND p.enabled=true AND i.active=true AND i.manifest @> '{"capabilities":["xui_database","xui_panel"]}'::jsonb)`, x.ProfileID).Scan(&automationReady)
-		if !automationReady {
-			log.Printf("scheduler skip account=%s reason=automation_not_ready profile=%s", x.AccountID, x.ProfileID)
-			_ = e.Leases.Complete(ctx, x, now)
-			continue
-		}
-		var concurrent, desired, managed, spacingMin, spacingMax, backfillPending int
-		var nextBuild sql.NullTime
-		err := e.DB.QueryRowContext(ctx, `SELECT
-			(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.profile_id=$2 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))),
-			(SELECT desired_server_count FROM accounts WHERE id=$1),
-			(SELECT count(*) FROM droplets WHERE account_id=$1 AND state NOT IN ('DELETED')),
-			(SELECT build_spacing_minutes FROM accounts WHERE id=$1),
-			(SELECT build_spacing_max_minutes FROM accounts WHERE id=$1),
-			(SELECT count(*) FROM droplets WHERE account_id=$1 AND state='DELETED' AND backfill_required=true AND replacement_deployment_id IS NULL),
-			(SELECT next_build_at FROM accounts WHERE id=$1)`, x.AccountID, x.ProfileID).Scan(&concurrent, &desired, &managed, &spacingMin, &spacingMax, &backfillPending, &nextBuild)
-		if err != nil {
-			_ = e.Leases.Complete(ctx, x, now)
-			continue
-		}
-		cap, capErr := capacity.Read(ctx, e.DB, x.AccountID, 2*time.Minute)
-		if capErr != nil {
-			log.Printf("scheduler skip account=%s reason=capacity_read err=%v", x.AccountID, capErr)
-			_ = e.Leases.Complete(ctx, x, now)
-			continue
-		}
-		// Active deployments that already own a droplet count in managed. Only pre-create deployments are pending capacity.
-		var preCreate int
-		_ = e.DB.QueryRowContext(ctx, `SELECT count(*) FROM deployments WHERE account_id=$1 AND profile_id=$2 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND droplet_id IS NULL`, x.AccountID, x.ProfileID).Scan(&preCreate)
-		effectiveOccupancy := managed + preCreate
-		if cap.InUse > effectiveOccupancy {
-			effectiveOccupancy = cap.InUse
-		}
-		needed := desired - effectiveOccupancy
-		if needed <= 0 {
-			if backfillPending > 0 {
-				_, _ = e.DB.ExecContext(ctx, `UPDATE droplets SET backfill_required=false,updated_at=now() WHERE account_id=$1 AND state='DELETED' AND backfill_required=true AND replacement_deployment_id IS NULL`, x.AccountID)
+	}
+	return outcomes
+}
+func (e Engine) runClaim(ctx context.Context, x Schedule, now time.Time) error {
+	// Refresh/validate sticky egress before READY is evaluated. This lets
+	// ISOLATION_WAIT accounts recover automatically on the next scheduler tick.
+	if err := e.Starter.PrepareScheduledAccount(ctx, x.AccountID); err != nil {
+		return err
+	}
+	var enabled bool
+	var runtimeStatus, providerState, providerError string
+	if err := e.DB.QueryRowContext(ctx, `SELECT enabled,runtime_status,provider_state,COALESCE(provider_error_state,'') FROM accounts WHERE id=$1`, x.AccountID).Scan(&enabled, &runtimeStatus, &providerState, &providerError); err != nil {
+		return err
+	}
+	if !providerAllowsCreate(enabled, runtimeStatus, providerState, providerError) {
+		return nil
+	}
+	// Scheduled automation is allowed only for a fully pinned, capable installer.
+	// Heal missing/stale installer references before evaluating the gate so a
+	// healthy account cannot starve indefinitely because of profile drift.
+	if err := e.ensureAutomationInstallerRef(ctx, x.ProfileID); err != nil {
+		log.Printf("scheduler skip account=%s reason=automation_repair_failed profile=%s err=%v", x.AccountID, x.ProfileID, err)
+		return err
+	}
+	if err := e.ensureAutomationDatabaseTemplate(ctx, x.ProfileID); err != nil {
+		log.Printf("scheduler skip account=%s reason=database_template_repair_failed profile=%s err=%v", x.AccountID, x.ProfileID, err)
+		return err
+	}
+	var automationReady bool
+	if err := e.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM deployment_profiles p JOIN installers i ON i.name=p.config->'installer_ref'->>'name' AND i.version=(p.config->'installer_ref'->>'version')::int WHERE p.id=$1 AND p.enabled=true AND i.active=true AND i.manifest @> '{"capabilities":["xui_database","xui_panel"]}'::jsonb)`, x.ProfileID).Scan(&automationReady); err != nil {
+		return err
+	}
+	if !automationReady {
+		log.Printf("scheduler skip account=%s reason=automation_not_ready profile=%s", x.AccountID, x.ProfileID)
+		return nil
+	}
+	var concurrent, desired, managed, spacingMin, spacingMax, backfillPending int
+	var nextBuild sql.NullTime
+	err := e.DB.QueryRowContext(ctx, `SELECT
+		(SELECT count(*) FROM deployments d WHERE d.account_id=$1 AND d.profile_id=$2 AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC') AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))),
+		(SELECT desired_server_count FROM accounts WHERE id=$1),
+		(SELECT count(*) FROM droplets WHERE account_id=$1 AND state NOT IN ('DELETED')),
+		(SELECT build_spacing_minutes FROM accounts WHERE id=$1),
+		(SELECT build_spacing_max_minutes FROM accounts WHERE id=$1),
+		(SELECT count(*) FROM droplets WHERE account_id=$1 AND state='DELETED' AND backfill_required=true AND replacement_deployment_id IS NULL),
+		(SELECT next_build_at FROM accounts WHERE id=$1)`, x.AccountID, x.ProfileID).Scan(&concurrent, &desired, &managed, &spacingMin, &spacingMax, &backfillPending, &nextBuild)
+	if err != nil {
+		return err
+	}
+	cap, capErr := capacity.Read(ctx, e.DB, x.AccountID, 2*time.Minute)
+	if capErr != nil {
+		log.Printf("scheduler skip account=%s reason=capacity_read err=%v", x.AccountID, capErr)
+		return capErr
+	}
+	// Active deployments that already own a droplet count in managed. Only pre-create deployments are pending capacity.
+	var preCreate int
+	if err := e.DB.QueryRowContext(ctx, `SELECT count(*) FROM deployments WHERE account_id=$1 AND profile_id=$2 AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND droplet_id IS NULL`, x.AccountID, x.ProfileID).Scan(&preCreate); err != nil {
+		return err
+	}
+	effectiveOccupancy := managed + preCreate
+	if cap.InUse > effectiveOccupancy {
+		effectiveOccupancy = cap.InUse
+	}
+	needed := desired - effectiveOccupancy
+	if needed <= 0 {
+		if backfillPending > 0 {
+			if _, err := e.DB.ExecContext(ctx, `UPDATE droplets SET backfill_required=false,updated_at=now() WHERE account_id=$1 AND state='DELETED' AND backfill_required=true AND replacement_deployment_id IS NULL`, x.AccountID); err != nil {
+				return err
 			}
-			log.Printf("scheduler skip account=%s reason=desired_satisfied desired=%d managed=%d provider_inuse=%d effective=%d unmaterialized=%d", x.AccountID, desired, managed, cap.InUse, effectiveOccupancy, preCreate)
-			_ = e.Leases.Complete(ctx, x, now)
-			continue
 		}
-		if x.MaxConcurrent > 0 && concurrent >= x.MaxConcurrent {
-			log.Printf("scheduler skip account=%s reason=max_concurrent concurrent=%d max=%d", x.AccountID, concurrent, x.MaxConcurrent)
-			_ = e.Leases.Complete(ctx, x, now)
-			continue
+		log.Printf("scheduler skip account=%s reason=desired_satisfied desired=%d managed=%d provider_inuse=%d effective=%d unmaterialized=%d", x.AccountID, desired, managed, cap.InUse, effectiveOccupancy, preCreate)
+		return nil
+	}
+	if x.MaxConcurrent > 0 && concurrent >= x.MaxConcurrent {
+		log.Printf("scheduler skip account=%s reason=max_concurrent concurrent=%d max=%d", x.AccountID, concurrent, x.MaxConcurrent)
+		return nil
+	}
+	// Normal growth obeys Build Spacing. Lifecycle backfill consumes a durable
+	// backfill ticket and may bypass spacing so rotation never leaves an
+	// account below its Desired target for an entire normal cadence window.
+	if buildSpacingBlocked(backfillPending, nextBuild, now) {
+		log.Printf("scheduler skip account=%s reason=build_spacing next=%s", x.AccountID, nextBuild.Time.UTC().Format(time.RFC3339))
+		return nil
+	}
+	allowed := initialAllowedStarts(backfillPending, needed, concurrent, x.MaxConcurrent)
+	// Provider snapshot is the source of truth for occupied capacity. Only
+	// create operations without a provider resource consume additional slots;
+	// this avoids double-counting droplets already visible at DigitalOcean.
+	available := cap.Available()
+	if available < 1 && cap.Pending == 0 {
+		if _, err := e.DB.ExecContext(ctx, `UPDATE provider_capacity_observations p SET source='vultr_api_saturation',probe_in_flight=false,probe_after=now(),updated_at=now() WHERE p.account_id=$1 AND p.source='vultr_api_probe' AND p.probe_in_flight=true AND p.updated_at < now()-interval '2 minutes' AND NOT EXISTS (SELECT 1 FROM operations o WHERE o.account_id=p.account_id AND o.kind='CREATE_DROPLET' AND o.state IN ('running','unknown','verifying'))`, x.AccountID); err != nil {
+			return err
 		}
-		// Normal growth obeys Build Spacing. Lifecycle backfill consumes a durable
-		// backfill ticket and may bypass spacing so rotation never leaves an
-		// account below its Desired target for an entire normal cadence window.
-		if buildSpacingBlocked(backfillPending, nextBuild, now) {
-			log.Printf("scheduler skip account=%s reason=build_spacing next=%s", x.AccountID, nextBuild.Time.UTC().Format(time.RFC3339))
-			_ = e.Leases.Complete(ctx, x, now)
-			continue
+		var probeDue bool
+		if err := e.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM provider_capacity_observations pco JOIN accounts a ON a.id=pco.account_id WHERE pco.account_id=$1 AND a.provider='vultr' AND pco.probe_in_flight=false AND ((pco.source='vultr_api_saturation' AND pco.probe_after IS NOT NULL AND pco.probe_after<=now()) OR pco.source='vultr_api_probe_success'))`, x.AccountID).Scan(&probeDue); err != nil {
+			return err
 		}
-		allowed := initialAllowedStarts(backfillPending, needed, concurrent, x.MaxConcurrent)
-		// Provider snapshot is the source of truth for occupied capacity. Only
-		// create operations without a provider resource consume additional slots;
-		// this avoids double-counting droplets already visible at DigitalOcean.
-		available := cap.Available()
-		if available < 1 && cap.Pending == 0 {
-			_, _ = e.DB.ExecContext(ctx, `UPDATE provider_capacity_observations p SET source='vultr_api_saturation',probe_in_flight=false,probe_after=now(),updated_at=now() WHERE p.account_id=$1 AND p.source='vultr_api_probe' AND p.probe_in_flight=true AND p.updated_at < now()-interval '2 minutes' AND NOT EXISTS (SELECT 1 FROM operations o WHERE o.account_id=p.account_id AND o.kind='CREATE_DROPLET' AND o.state IN ('running','unknown','verifying'))`, x.AccountID)
-			var probeDue bool
-			_ = e.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM provider_capacity_observations pco JOIN accounts a ON a.id=pco.account_id WHERE pco.account_id=$1 AND a.provider='vultr' AND pco.probe_in_flight=false AND ((pco.source='vultr_api_saturation' AND pco.probe_after IS NOT NULL AND pco.probe_after<=now()) OR pco.source='vultr_api_probe_success'))`, x.AccountID).Scan(&probeDue)
-			if probeDue {
-				available = 1
-			}
+		if probeDue {
+			available = 1
 		}
-		if allowed > available {
-			allowed = available
+	}
+	if allowed > available {
+		allowed = available
+	}
+	if allowed < 1 {
+		log.Printf("scheduler skip account=%s reason=no_available_capacity known=%v limit=%d inuse=%d pending=%d", x.AccountID, cap.LimitKnown, cap.Limit, cap.InUse, cap.Pending)
+	}
+	for i := 0; i < allowed; i++ {
+		if err := e.Leases.Validate(ctx, x); err != nil {
+			return err
 		}
-		if allowed < 1 {
-			log.Printf("scheduler skip account=%s reason=no_available_capacity known=%v limit=%d inuse=%d pending=%d", x.AccountID, cap.LimitKnown, cap.Limit, cap.InUse, cap.Pending)
-		}
-		for i := 0; i < allowed; i++ {
-			consumeBackfill := backfillPending > 0
-			if err := e.Starter.StartScheduledDeployment(ctx, x.AccountID, x.ProfileID, consumeBackfill); err == nil {
-				if consumeBackfill {
-					if backfillPending > 0 {
-						backfillPending--
-					}
-				} else {
-					if spacingMax < spacingMin {
-						spacingMax = spacingMin
-					}
-					minutes := spacingMin
-					if spacingMax > spacingMin {
-						minutes += rand.Intn(spacingMax - spacingMin + 1)
-					}
-					_, _ = e.DB.ExecContext(ctx, `UPDATE accounts SET next_build_at=$2 WHERE id=$1`, x.AccountID, now.Add(time.Duration(minutes)*time.Minute))
+		consumeBackfill := backfillPending > 0
+		if err := e.Starter.StartScheduledDeployment(ctx, x.AccountID, x.ProfileID, consumeBackfill); err == nil {
+			if consumeBackfill {
+				if backfillPending > 0 {
+					backfillPending--
 				}
 			} else {
-				log.Printf("scheduler start deployment failed account=%s profile=%s backfill=%t err=%v", x.AccountID, x.ProfileID, consumeBackfill, err)
+				if spacingMax < spacingMin {
+					spacingMax = spacingMin
+				}
+				minutes := spacingMin
+				if spacingMax > spacingMin {
+					minutes += rand.Intn(spacingMax - spacingMin + 1)
+				}
+				if _, err := e.DB.ExecContext(ctx, `UPDATE accounts SET next_build_at=$2 WHERE id=$1`, x.AccountID, now.Add(time.Duration(minutes)*time.Minute)); err != nil {
+					return err
+				}
 			}
+		} else {
+			log.Printf("scheduler start deployment failed account=%s profile=%s backfill=%t err=%v", x.AccountID, x.ProfileID, consumeBackfill, err)
+			return err
 		}
-		_ = e.Leases.Complete(ctx, x, now)
 	}
 	return nil
 }

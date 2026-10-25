@@ -7,6 +7,9 @@ import (
 )
 
 type Schedule struct {
+	// Returned only by ClaimDue; terminal writes require this exact claim.
+	LeaseToken    string
+	LeaseUntil    time.Time
 	ID            string
 	AccountID     string
 	ProfileID     string

@@ -18,7 +18,7 @@ import tempfile
 from urllib.parse import urlencode
 
 REQUIRED = {
-    "internal/scheduler": ("TestSchedulerClaimCompletionOwnershipPostgres", "TestSchedulerPartialClaimReadRollsBackPostgres", "TestSchedulerReadAndCompletionFaultsFailClosedPostgres"),
+    "internal/scheduler": ("TestSchedulerClaimCompletionOwnershipPostgres", "TestSchedulerPartialClaimReadRollsBackPostgres", "TestSchedulerReadAndCompletionFaultsFailClosedPostgres", "TestSchedulerCancellationReplacementAndMigrationPostgres"),
     "internal/migrate": ("TestMigrationLegacyChecksumBackfillAndDrift",),
     "internal/observability": ("TestIntegrityReportCannotHideNewFailure", "TestIntegrityReportCannotHideRecoveryOrExpiredBackup"),
     "internal/secrets": ("TestAuthorizationSecretsOwnerBindingAndRotation",),

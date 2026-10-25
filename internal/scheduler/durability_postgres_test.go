@@ -173,11 +173,15 @@ func schedulerFaultDB(t *testing.T, dsn string, fault scheduleFaultConnector) *s
 }
 
 type schedulerStarter struct {
+	prepare    func(context.Context, string) error
 	prepareErr error
 	starts     atomic.Int32
 }
 
-func (s *schedulerStarter) PrepareScheduledAccount(context.Context, string) error {
+func (s *schedulerStarter) PrepareScheduledAccount(ctx context.Context, account string) error {
+	if s.prepare != nil {
+		return s.prepare(ctx, account)
+	}
 	return s.prepareErr
 }
 func (s *schedulerStarter) StartScheduledDeployment(context.Context, string, string, bool) error {
@@ -285,3 +289,102 @@ func TestSchedulerReadAndCompletionFaultsFailClosedPostgres(t *testing.T) {
 
 // Ensure the injected row wrapper follows the normal driver end contract.
 var _ driver.Rows = (*interruptedScheduleRows)(nil)
+
+func TestSchedulerCancellationReplacementAndMigrationPostgres(t *testing.T) {
+	t.Run("concurrent-claim", func(t *testing.T) {
+		db, _ := schedulerFixture(t)
+		store := LeaseStore{DB: db}
+		results := make(chan []Schedule, 2)
+		failures := make(chan error, 2)
+		start := make(chan struct{})
+		for range 2 {
+			go func() {
+				<-start
+				items, err := store.ClaimDue(context.Background(), time.Now().UTC(), 1, time.Minute)
+				results <- items
+				failures <- err
+			}()
+		}
+		close(start)
+		count := 0
+		for range 2 {
+			count += len(<-results)
+			if err := <-failures; err != nil {
+				t.Error(err)
+			}
+		}
+		if count != 1 {
+			t.Fatalf("concurrent owners=%d", count)
+		}
+	})
+	t.Run("foreign-profile", func(t *testing.T) {
+		db, _ := schedulerFixture(t)
+		if _, err := db.Exec("UPDATE deployment_profiles SET account_id='00000000-0000-4000-8000-000000000099'"); err != nil {
+			t.Fatal(err)
+		}
+		items, err := (LeaseStore{DB: db}).ClaimDue(context.Background(), time.Now().UTC(), 1, time.Minute)
+		if err != nil || len(items) != 0 {
+			t.Fatalf("foreign profile claimed: %d %v", len(items), err)
+		}
+	})
+	for _, mode := range []string{"cancelled", "replaced", "expired", "disabled"} {
+		t.Run(mode, func(t *testing.T) {
+			db, _ := schedulerFixture(t)
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			starter := &schedulerStarter{prepare: func(context.Context, string) error {
+				if mode == "cancelled" {
+					cancel()
+					return nil
+				}
+				query := "UPDATE schedules SET lease_token=gen_random_uuid()"
+				if mode == "expired" {
+					query = "UPDATE schedules SET lease_until=now()-interval '1 second'"
+				}
+				if mode == "disabled" {
+					query = "UPDATE schedules SET enabled=false"
+				}
+				_, err := db.Exec(query)
+				return err
+			}}
+			err := (Engine{DB: db, Leases: LeaseStore{DB: db}, Starter: starter}).RunDue(ctx, time.Now().UTC())
+			if err == nil || starter.starts.Load() != 0 {
+				t.Fatalf("invalid owner created: %v starts=%d", err, starter.starts.Load())
+			}
+			if mode == "replaced" {
+				var retained bool
+				if err = db.QueryRow("SELECT lease_token IS NOT NULL AND last_run_at IS NULL FROM schedules").Scan(&retained); err != nil || !retained {
+					t.Fatalf("new claim lost: %v %v", retained, err)
+				}
+			}
+			if mode == "cancelled" && !errors.Is(err, context.Canceled) {
+				t.Fatalf("cancellation hidden: %v", err)
+			}
+		})
+	}
+	t.Run("downgrade-guard", func(t *testing.T) {
+		db, _ := schedulerFixture(t)
+		store := LeaseStore{DB: db}
+		ctx := context.Background()
+		items, err := store.ClaimDue(ctx, time.Now().UTC(), 1, time.Minute)
+		if err != nil || len(items) != 1 {
+			t.Fatal(err)
+		}
+		raw, err := os.ReadFile(filepath.Join("..", "..", "migrations", "000196_scheduler_claim_fencing.down.sql"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err = db.Exec(string(raw)); err == nil {
+			t.Fatal("downgrade removed retained claim")
+		}
+		if err = store.Validate(ctx, items[0]); err != nil {
+			t.Fatal("failed downgrade changed live claim", err)
+		}
+		if err = store.Complete(ctx, items[0], time.Now().UTC()); err != nil {
+			t.Fatal(err)
+		}
+		if _, err = db.Exec(string(raw)); err != nil {
+			t.Fatal("settled downgrade refused", err)
+		}
+	})
+}
