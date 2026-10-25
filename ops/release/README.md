@@ -69,3 +69,7 @@ state must not be treated as current while that host is quarantined.
 See `CDN-PROOF-ISOLATION-20261025.md` for the current release, exact CI evidence, live rollout status, rejected AWS credentials and DNS capacity constraints. Do not treat older saved AWS/account observations as current.
 
 Post-release continuation: `POSTRELEASE-OBSERVATION-20261025.md` records three independently completed new builds, current health and the still-unresolved external blockers at 06:17 Tehran.
+
+Latest completed release: `FLEET-DNS-CAPACITY-20261025.md` records live release `5dc2c25678698dbbe9ac1cfee7d18701c19213e7`, 187 passing mandatory checks, capacity forecasting and the remaining AWS/DNS/gateway blockers.
+
+For future operator updates, invoke `ops/release/run-bounded-update.sh /usr/local/sbin/dob-production update` or `ops/release/run-bounded-update.sh /usr/local/bin/datacenter-bot update` from the root-owned source checkout. The launcher was verified against actual kernel cgroup limits. Direct invocation from a remote-command service does not provide a dedicated build limit. Preserve the existing baseline, exact-revision, ownership and backup checks around either command.

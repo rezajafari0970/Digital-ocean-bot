@@ -1,0 +1,723 @@
+{
+  "source": "8c0e86b53fab8e14739f3680277f4c53b66a4ad2",
+  "public_release": "5dc2c25678698dbbe9ac1cfee7d18701c19213e7",
+  "previous_release": "a5f53f7dedd2bf22a12b423d85bbff0f9f011192",
+  "validation": {
+    "source_run": 40156990345,
+    "source_job": 121060362291,
+    "required_tests": 187,
+    "required_skips": 0,
+    "public_run": 40157154710,
+    "public_install_job": 121060868513,
+    "promotion_run": 40157364436,
+    "promotion_job": 121061492930,
+    "source_browser_database_native_race": "PASS",
+    "install_and_repeat": "PASS"
+  },
+  "health": {
+    "at": "2026-10-25T03:35:51.757034+00:00",
+    "tehran": "2026-10-25T07:05:51.757300+03:30",
+    "instances": [
+      {
+        "name": "dob-production",
+        "services": [
+          {
+            "role": "api",
+            "ActiveState": "active",
+            "NRestarts": "0"
+          },
+          {
+            "role": "worker",
+            "ActiveState": "active",
+            "NRestarts": "0"
+          },
+          {
+            "role": "worker-panels",
+            "ActiveState": "active",
+            "NRestarts": "0"
+          }
+        ],
+        "version": {
+          "commit": "5dc2c25678698dbbe9ac1cfee7d18701c19213e7",
+          "build_time": "2026-10-25T03:16:25Z",
+          "go_version": "go1.27.1",
+          "modified": false
+        },
+        "readyz": {
+          "status": "ready",
+          "checks": [
+            {
+              "name": "database",
+              "ok": true
+            },
+            {
+              "name": "worker_progress",
+              "ok": true
+            },
+            {
+              "name": "panel_worker_progress",
+              "ok": true
+            },
+            {
+              "name": "lifecycle_account_lanes",
+              "ok": true
+            },
+            {
+              "name": "client_mutation_progress",
+              "ok": true
+            }
+          ],
+          "at": "2026-10-25T03:35:51.86741479Z"
+        }
+      },
+      {
+        "name": "digital-ocean-bot",
+        "services": [
+          {
+            "role": "api",
+            "ActiveState": "active",
+            "NRestarts": "0"
+          },
+          {
+            "role": "worker",
+            "ActiveState": "active",
+            "NRestarts": "0"
+          },
+          {
+            "role": "worker-panels",
+            "ActiveState": "active",
+            "NRestarts": "0"
+          }
+        ],
+        "version": {
+          "commit": "5dc2c25678698dbbe9ac1cfee7d18701c19213e7",
+          "build_time": "2026-10-25T03:31:27Z",
+          "go_version": "go1.27.1",
+          "modified": false
+        },
+        "readyz": {
+          "status": "ready",
+          "checks": [
+            {
+              "name": "database",
+              "ok": true
+            },
+            {
+              "name": "worker_progress",
+              "ok": true
+            },
+            {
+              "name": "panel_worker_progress",
+              "ok": true
+            },
+            {
+              "name": "lifecycle_account_lanes",
+              "ok": true
+            },
+            {
+              "name": "client_mutation_progress",
+              "ok": true
+            }
+          ],
+          "at": "2026-10-25T03:35:51.991728555Z"
+        }
+      }
+    ],
+    "free_bytes": 6815125504
+  },
+  "production_preservation": {
+    "at": "2026-10-25T03:31:14.053208+00:00",
+    "commit": "5dc2c25678698dbbe9ac1cfee7d18701c19213e7",
+    "schema": "000195_provider_snapshot_latest",
+    "services": [
+      {
+        "unit": "dob-production-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "dob-production-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "dob-production-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-25T03:31:14.138166544Z"
+    },
+    "checks": {
+      "master_key_hash": true,
+      "environment_hash": true,
+      "creation_policy": true,
+      "output_policy": true,
+      "protection_policy": true,
+      "trojan_policy": true,
+      "unified": true,
+      "profile_policy": true,
+      "selective_ads_enabled": true,
+      "cloudflare_settings": true,
+      "cloudflare_secret_hashes": true,
+      "account_settings": true,
+      "profile_ownership": true,
+      "trojan_ownership": true
+    },
+    "preservation": {
+      "profile_ownership": {
+        "common": 5716,
+        "unchanged": 5712,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 4,
+        "confirmed_initial_activations": 0,
+        "confirmed_preupdate_initial_activations": 0,
+        "retired_since_backup": 0,
+        "new_since_backup": 12
+      },
+      "trojan_ownership": {
+        "common": 77,
+        "unchanged": 77,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 0,
+        "confirmed_initial_activations": 0,
+        "confirmed_preupdate_initial_activations": 0,
+        "retired_since_backup": 0,
+        "new_since_backup": 0
+      }
+    },
+    "cloudflare_state": {
+      "accounts": 1,
+      "records": 23237,
+      "profiles": 1
+    }
+  },
+  "default_preservation": {
+    "at": "2026-10-25T03:35:50.490242+00:00",
+    "commit": "5dc2c25678698dbbe9ac1cfee7d18701c19213e7",
+    "schema": "000195_provider_snapshot_latest",
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "readiness": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-10-25T03:35:50.547323077Z"
+    },
+    "checks": {
+      "master_key_hash": true,
+      "environment_hash": true,
+      "creation_policy": true,
+      "output_policy": true,
+      "protection_policy": true,
+      "trojan_policy": true,
+      "unified": true,
+      "profile_policy": true,
+      "selective_ads_enabled": true,
+      "cloudflare_settings": true,
+      "cloudflare_secret_hashes": true,
+      "account_settings": true,
+      "profile_ownership": true,
+      "trojan_ownership": true
+    },
+    "preservation": {
+      "profile_ownership": {
+        "common": 0,
+        "unchanged": 0,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 0,
+        "confirmed_initial_activations": 0,
+        "confirmed_preupdate_initial_activations": 0,
+        "retired_since_backup": 0,
+        "new_since_backup": 0
+      },
+      "trojan_ownership": {
+        "common": 0,
+        "unchanged": 0,
+        "unexpected_changes": 0,
+        "confirmed_expired_retirements": 0,
+        "confirmed_initial_activations": 0,
+        "confirmed_preupdate_initial_activations": 0,
+        "retired_since_backup": 0,
+        "new_since_backup": 0
+      }
+    },
+    "cloudflare_state": {
+      "accounts": 0,
+      "records": 0,
+      "profiles": 0
+    }
+  },
+  "capacity_snapshot": {
+    "at": "2026-10-25T03:31:45.732539+00:00",
+    "profiles": [
+      {
+        "current_servers": 100,
+        "planned_servers": 113,
+        "required_per_server": 6,
+        "required_records": 678
+      }
+    ],
+    "zones": [
+      {
+        "eligible": true,
+        "quota_fresh": true,
+        "quota": 200,
+        "usage": 190,
+        "tracked": 191,
+        "confirmed_at_observation": 175,
+        "pending_since_observation": 16
+      }
+    ],
+    "required_records": 678,
+    "known_record_capacity": 185,
+    "unknown_zones": 0
+  },
+  "gateway": {
+    "gateway_assets": {
+      "app.js": {
+        "normal_tls": true,
+        "exact_artifact_match": true
+      },
+      "panel-settings.js": {
+        "normal_tls": true,
+        "exact_artifact_match": true
+      },
+      "cloudflare.js": {
+        "normal_tls": true,
+        "exact_artifact_match": true
+      }
+    },
+    "gateway_login": {
+      "status": 200,
+      "current_assets": true
+    },
+    "public_port_declaration": true,
+    "panel_settings": {
+      "listen_port": 28080,
+      "web_path": "/admin"
+    }
+  },
+  "account_output_samples": [
+    {
+      "provider": "aws",
+      "desired": 10,
+      "next_build_at": null,
+      "spacing_min": 15,
+      "spacing_max": 260,
+      "ready_unexpired": 1,
+      "expired_retained": 0,
+      "output_counts": {
+        "RESIDENTIAL": {
+          "configs": 0,
+          "protocols": {}
+        }
+      }
+    },
+    {
+      "provider": "ovh",
+      "desired": 10,
+      "next_build_at": "2026-10-25T00:17:29.476776+00:00",
+      "spacing_min": 39,
+      "spacing_max": 96,
+      "ready_unexpired": 10,
+      "expired_retained": 0,
+      "output_counts": {
+        "DIRECT": {
+          "configs": 41,
+          "protocols": {
+            "vless": 31,
+            "trojan": 10
+          }
+        },
+        "RESIDENTIAL": {
+          "configs": 41,
+          "protocols": {
+            "vless": 31,
+            "trojan": 10
+          }
+        }
+      }
+    },
+    {
+      "provider": "linode",
+      "desired": 10,
+      "next_build_at": null,
+      "spacing_min": 39,
+      "spacing_max": 83,
+      "ready_unexpired": 9,
+      "expired_retained": 1,
+      "output_counts": {
+        "RESIDENTIAL": {
+          "configs": 42,
+          "protocols": {
+            "trojan": 9,
+            "vless": 33
+          }
+        }
+      }
+    },
+    {
+      "provider": "vultr",
+      "desired": 10,
+      "next_build_at": null,
+      "spacing_min": 23,
+      "spacing_max": 42,
+      "ready_unexpired": 10,
+      "expired_retained": 0,
+      "output_counts": {}
+    },
+    {
+      "provider": "digitalocean",
+      "desired": 10,
+      "next_build_at": null,
+      "spacing_min": 130,
+      "spacing_max": 270,
+      "ready_unexpired": 10,
+      "expired_retained": 0,
+      "output_counts": {}
+    }
+  ],
+  "aws_readonly_check": {
+    "at": "2026-10-25T03:08:57.505222806Z",
+    "class": "authentication",
+    "diagnostic": {
+      "Code": "InvalidClientTokenId",
+      "Operation": "GetCallerIdentity",
+      "ResponseFormat": "sts_xml",
+      "Guidance": "Check the access key ID and matching secret key. Temporary credentials must include the matching session token.",
+      "RequiredPermission": ""
+    },
+    "http_status": 403,
+    "network_mode": "proxy_required",
+    "read_only_provider_operation": true,
+    "stage": "provider_health",
+    "success": false
+  },
+  "observed_builds": {
+    "at": "2026-10-25T03:12:04.380066+00:00",
+    "builds": [
+      {
+        "id": "5ab35308-503d-4bd7-b99e-add3f341c2c1",
+        "provider": "digitalocean",
+        "state": "PANEL_COMPLETE",
+        "current_step": "panel_complete",
+        "created_at": "2026-10-25T02:59:52.894614+00:00",
+        "updated_at": "2026-10-25T03:08:35.580757+00:00",
+        "server_state": "READY",
+        "ready_at": "2026-10-25T03:08:35.580757+00:00",
+        "provision_state": "COMPLETED",
+        "provision_step": "done",
+        "next_retry_at": null,
+        "installer_state": "INSTALL_COMPLETE",
+        "installer_updated": "2026-10-25T03:08:24.269395+00:00",
+        "events": [
+          {
+            "step": "installer-g1-sanaei-xui-v3-health-service-x-ui",
+            "substep": "verify",
+            "state": "PHASE_OK",
+            "error_code": null,
+            "error_class": null,
+            "duration_ms": 993,
+            "created_at": "2026-10-25T03:08:24.261591+00:00"
+          },
+          {
+            "step": "installer-g1-sanaei-xui-v3-sanaei-verify-v3.8.5",
+            "substep": "verify",
+            "state": "PHASE_OK",
+            "error_code": null,
+            "error_class": null,
+            "duration_ms": 969,
+            "created_at": "2026-10-25T03:08:23.193332+00:00"
+          },
+          {
+            "step": "installer-g1-sanaei-xui-v3-sanaei-install-v3.8.5",
+            "substep": "verify",
+            "state": "PHASE_OK",
+            "error_code": null,
+            "error_class": null,
+            "duration_ms": 936,
+            "created_at": "2026-10-25T03:08:22.153927+00:00"
+          },
+          {
+            "step": "installer-g1-sanaei-xui-v3-sanaei-install-v3.8.5",
+            "substep": "execute",
+            "state": "PHASE_OK",
+            "error_code": null,
+            "error_class": null,
+            "duration_ms": 103651,
+            "created_at": "2026-10-25T03:08:21.181505+00:00"
+          },
+          {
+            "step": "installer-g1-sanaei-xui-v3-sanaei-install-v3.8.5",
+            "substep": "precheck",
+            "state": "PRECHECK_MISS",
+            "error_code": null,
+            "error_class": null,
+            "duration_ms": 924,
+            "created_at": "2026-10-25T03:06:37.513689+00:00"
+          },
+          {
+            "step": "installer-g1-sanaei-xui-v3-artifact-sanaei-installer-v3.8.5",
+            "substep": "verify",
+            "state": "PHASE_OK",
+            "error_code": null,
+            "error_class": null,
+            "duration_ms": 888,
+            "created_at": "2026-10-25T03:06:36.584911+00:00"
+          }
+        ]
+      },
+      {
+        "id": "e7c17601-0a13-4fbb-9078-928800707f90",
+        "provider": "vultr",
+        "state": "PANEL_COMPLETE",
+        "current_step": "panel_complete",
+        "created_at": "2026-10-25T03:06:33.676388+00:00",
+        "updated_at": "2026-10-25T03:11:44.224765+00:00",
+        "server_state": "READY",
+        "ready_at": "2026-10-25T03:11:44.224765+00:00",
+        "provision_state": "COMPLETED",
+        "provision_step": "done",
+        "next_retry_at": null,
+        "installer_state": "INSTALL_COMPLETE",
+        "installer_updated": "2026-10-25T03:11:26.778066+00:00",
+        "events": [
+          {
+            "step": "installer-g1-sanaei-xui-v3-health-service-x-ui",
+            "substep": "verify",
+            "state": "PHASE_OK",
+            "error_code": null,
+            "error_class": null,
+            "duration_ms": 2866,
+            "created_at": "2026-10-25T03:11:26.775759+00:00"
+          },
+          {
+            "step": "installer-g1-sanaei-xui-v3-sanaei-verify-v3.8.5",
+            "substep": "verify",
+            "state": "PHASE_OK",
+            "error_code": null,
+            "error_class": null,
+            "duration_ms": 2797,
+            "created_at": "2026-10-25T03:11:23.905826+00:00"
+          },
+          {
+            "step": "installer-g1-sanaei-xui-v3-sanaei-install-v3.8.5",
+            "substep": "verify",
+            "state": "PHASE_OK",
+            "error_code": null,
+            "error_class": null,
+            "duration_ms": 2767,
+            "created_at": "2026-10-25T03:11:21.077103+00:00"
+          },
+          {
+            "step": "installer-g1-sanaei-xui-v3-sanaei-install-v3.8.5",
+            "substep": "execute",
+            "state": "PHASE_OK",
+            "error_code": null,
+            "error_class": null,
+            "duration_ms": 41627,
+            "created_at": "2026-10-25T03:11:18.302538+00:00"
+          },
+          {
+            "step": "installer-g1-sanaei-xui-v3-sanaei-install-v3.8.5",
+            "substep": "precheck",
+            "state": "PRECHECK_MISS",
+            "error_code": null,
+            "error_class": null,
+            "duration_ms": 2767,
+            "created_at": "2026-10-25T03:10:36.66901+00:00"
+          },
+          {
+            "step": "installer-g1-sanaei-xui-v3-artifact-sanaei-installer-v3.8.5",
+            "substep": "verify",
+            "state": "PHASE_OK",
+            "error_code": null,
+            "error_class": null,
+            "duration_ms": 2642,
+            "created_at": "2026-10-25T03:10:33.89864+00:00"
+          }
+        ]
+      }
+    ]
+  },
+  "disk": {
+    "initial_guard_stop": "insufficient_retention_workspace",
+    "first_reviewed_resume_stop": "insufficient_retention_workspace",
+    "successful_resume": "resume-2-result.json",
+    "runtime_archiving": {
+      "at": "2026-10-25T03:23:26.007003+00:00",
+      "runtimes": [
+        {
+          "path": "/opt/dob-production.rollback-20261024T043334",
+          "revision": "17a1ce99f3e52a9151baaa0f9228b73ec381decf"
+        },
+        {
+          "path": "/opt/dob-production.rollback-20261024T055024",
+          "revision": "27257387077ff80e2e2a4d7539bc61d3bb7a2e06"
+        },
+        {
+          "path": "/opt/dob-production.rollback-20261024T064716",
+          "revision": "272c46317edff036c32e302c8adce4f0ff3dcda7"
+        },
+        {
+          "path": "/opt/dob-production.rollback-20261024T091832",
+          "revision": "ae5f2e8886fb9dd2dcb5e161aacb44847cfe9445"
+        }
+      ],
+      "uncompressed_bytes": 244192395,
+      "archive_bytes": 99163751,
+      "archive_sha256": "f6ecce0907f40a82ee2931c1fa4d5f0d77bea987b94b54f957aa6f878f059cd0",
+      "byte_comparison": "PASS",
+      "latest_two_rollback_directories_retained": true,
+      "database_backups_removed": 0,
+      "free_bytes_after": 6420578304
+    },
+    "reproducible_cache_cleanup": {
+      "at": "2026-10-25T03:29:13.315237+00:00",
+      "paths": [
+        {
+          "path": "/root/dob-capacity-20261025T0300/export",
+          "bytes": 6422050,
+          "reproducible": "Exact committed export retained in public candidate Git trees"
+        },
+        {
+          "path": "/root/dob-capacity-20261025T0300/export-v2",
+          "bytes": 6422390,
+          "reproducible": "Exact committed export retained in public candidate Git trees"
+        }
+      ],
+      "database_backups_removed": 0,
+      "free_before": 6413193216,
+      "free_after": 6546255872,
+      "database_bytes": 1943869119,
+      "required_bytes": 6368478269
+    },
+    "final_cache_cleanup": {
+      "free_before": 6474424320,
+      "free_after": 6815129600,
+      "builds_complete": true
+    },
+    "guards_weakened": false,
+    "manual_database_backup_deletions": 0,
+    "ordinary_installer_verified_backup_retention_ran": true
+  },
+  "future_bounded_launcher": {
+    "resource_limits": "PASS",
+    "kernel_limits": {
+      "memory.max": "1073741824",
+      "memory.high": "805306368",
+      "cpu.max": "100000 100000"
+    },
+    "test": "harmless process; no live build repeated"
+  },
+  "live_build_resource_evidence": {
+    "default_build_observed_cgroup": "desktop-commander-remote.service",
+    "dedicated_cgroup_limit_observed": false,
+    "per_build_peak_memory_available": false,
+    "future_launch_requirement": "Use ops/release/run-bounded-update.sh; do not infer per-build limits from the shared service peak."
+  },
+  "remaining_blockers": [
+    "AWS InvalidClientTokenId",
+    "Insufficient selected DNS capacity",
+    "Gateway management offline; public-port editing unfinished",
+    "OpenAI API key unavailable on reachable instance configurations"
+  ],
+  "gateway_management": "offline23h at 2026-10-25 07:05 Tehran",
+  "openai_key_availability": {
+    "/etc/dob-production": {
+      "openai_env_file": false,
+      "inline_openai_api_key": false
+    },
+    "/etc/digital-ocean-bot": {
+      "openai_env_file": false,
+      "inline_openai_api_key": false
+    }
+  },
+  "openai_usage_this_continuation": {
+    "requests": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0,
+    "astra_invoked": false,
+    "chat_billing_not_exposed": true
+  },
+  "evidence_files_sha256": {
+    "isolated-gate.log": "7dadb20056fee750ac88bd91a98a0b3e62acdab32905422af02377ea56a012ce",
+    "public-install.log": "c009557555068c6bda228a4b35fd2c3c6a1236b4288134157b8426160fa6e8e6",
+    "promotion.log": "40053e5f2fc05add6a315bb0bcfa875f6e32618640576a783e5ba4a03c03d9c0",
+    "health-final.json": "c1c7dbd9651272816bd9c89de19cd033c7c4817f0177b119725a4ef9049a168b",
+    "production-rollout/verify.json": "e40c00b226058b1dce65179b8dd1fd31ae4d9d087de8192b239f4a8a340f50e8",
+    "default-rollout/verify.json": "1fd4ab173d4f7d451f69cee900a9f6e4126f79e927636de34d9c042789fdd2e0",
+    "secret-production.log": "cd8b0c96a318eee848498469b0c2bbd7c88c1263ef7536ffc022f877ec465479",
+    "secret-default.log": "bed7fa1fba445454da54814b9a18cbe9b516817d1a6d08d219f43f262a29c26c",
+    "gitleaks.log": "9d0a8ed37baf2abbed48dd72c7ab709ec798a8cb2ed33b562e5282bf1f815fb0",
+    "runtime-archive-result.json": "6439ad708a5438d3241fa8aa8ad99051c98aab988c2edd39bccc11f5a8a3665c",
+    "bounded-launcher-test.json": "b4eeb3f484c305ff3fa2268cddf3bbd4468d42d6b3ebce9bc382773f2bce02fa"
+  }
+}
