@@ -10,7 +10,7 @@ import (
 // operation ID. Callers still need separate durable resource-scoped cleanup authority.
 func (s *Store) GetIPCleanup(ctx context.Context, account, operation string) ([]byte, error) {
 	repo, ok := s.repo.(SQLRepository)
-	if !ok {
+	if !ok || repo.DB == nil {
 		return nil, errors.New("IP cleanup credential repository unavailable")
 	}
 	var id, kind string
@@ -22,12 +22,12 @@ func (s *Store) GetIPCleanup(ctx context.Context, account, operation string) ([]
 	if err != nil {
 		return nil, err
 	}
-	aead, available := s.keys[version]
+	_, available := s.keys[version]
 	if !available {
 		return nil, errors.New("IP cleanup credential key version unavailable")
 	}
 	aad := []byte(account + "\x00" + id + "\x00" + kind)
-	pt, err := aead.Open(nil, nonce, ct, aad)
+	pt, err := s.openRecord(version, nonce, ct, aad)
 	if err != nil {
 		return nil, errors.New("IP cleanup credential authentication failed")
 	}
@@ -61,11 +61,11 @@ func (s *Store) ValidateIPCleanupKeys(ctx context.Context) error {
 		if e = rows.Scan(&account, &id, &kind, &ct, &nonce, &version); e != nil {
 			return e
 		}
-		aead, ok := s.keys[version]
+		_, ok := s.keys[version]
 		if !ok {
 			return errors.New("retained IP cleanup key cannot be retired")
 		}
-		pt, e := aead.Open(nil, nonce, ct, []byte(account+"\x00"+id+"\x00"+kind))
+		pt, e := s.openRecord(version, nonce, ct, []byte(account+"\x00"+id+"\x00"+kind))
 		if e != nil {
 			return errors.New("retained IP cleanup key authentication failed")
 		}

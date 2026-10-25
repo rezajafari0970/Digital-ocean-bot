@@ -2,32 +2,31 @@ package app
 
 import (
 	"context"
-	"crypto/ed25519"
-	"crypto/rand"
-	"crypto/x509"
-	"encoding/json"
-	"encoding/pem"
+	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/workflow"
-	"golang.org/x/crypto/ssh"
 )
 
+var errDeploymentSSHIdentityUnknown = errors.New("deployment SSH key import is unresolved; owned-key reconciliation required")
+var errDeploymentSSHIdentityConflict = errors.New("deployment SSH identity scope or durable state changed")
+
 func (c Container) ensureDeploymentSSHIdentity(ctx context.Context, accountID string, d workflow.Deployment, snap *workflow.ProfileSnapshot) error {
-	if snap.SSHKeySecretRef != "" && (snap.SSHProviderKeyID != "" || snap.SSHAuthorizedKey != "") {
-		return nil
+	if c.DB == nil || c.Secrets == nil || snap == nil || accountID == "" || d.ID == "" || d.AccountID != accountID {
+		return errDeploymentSSHIdentityConflict
 	}
-	_, priv, err := ed25519.GenerateKey(rand.Reader)
+	// Caller snapshots can be stale. Never authorize an early return from them.
+	current, err := c.deploymentSSHSnapshot(ctx, accountID, d.ID)
 	if err != nil {
 		return err
 	}
-	der, err := x509.MarshalPKCS8PrivateKey(priv)
-	if err != nil {
-		return err
+	if current.SSHKeyIntent == nil && deploymentSSHReady(current) {
+		*snap = current
+		return nil // Preserve already provisioned legacy identities.
 	}
-	privatePEM := pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: der})
-	defer wipe(privatePEM)
-	pub, err := ssh.NewPublicKey(priv.Public())
+	attempt, err := c.BeginProviderAttempt(ctx, accountID, false)
 	if err != nil {
 		return err
 	}
@@ -35,48 +34,102 @@ func (c Container) ensureDeploymentSSHIdentity(ctx context.Context, accountID st
 	if err != nil {
 		return err
 	}
-	sshDriver, ok := runtime.Driver.(providers.SSHKeyDriver)
-	if !ok && !runtime.Driver.Capabilities().InlineSSHKeys {
-		return ErrProviderComputeUnsupported
+	return c.ensureDeploymentSSHIdentityWithRuntime(ctx, runtime, attempt, d, snap)
+}
+
+func (c Container) ensureDeploymentSSHIdentityWithRuntime(ctx context.Context, runtime AccountRuntime, attempt ProviderAttempt, d workflow.Deployment, snap *workflow.ProfileSnapshot) error {
+	current, publicKey, err := c.reserveDeploymentSSHIdentity(ctx, runtime, attempt, d)
+	if err != nil {
+		return err
+	}
+	*snap = current
+	if current.SSHKeyIntent.State == "ready" {
+		return nil
 	}
 	if err = runtime.CheckMutationGeneration(ctx); err != nil {
 		return err
 	}
-	authorizedKey := string(ssh.MarshalAuthorizedKey(pub))
-	var created providers.SSHKey
-	var createErr error
-	fallbackAuthorizedKey := runtime.Driver.Capabilities().InlineSSHKeys
-	if !fallbackAuthorizedKey {
-		created, createErr = sshDriver.CreateSSHKey(ctx, fmt.Sprintf("dob-%s", d.ID), authorizedKey)
-	}
-	if createErr != nil {
-		if runtime.Config.Provider == "digitalocean" && providers.IsClass(createErr, providers.ErrorPermissionDenied) {
-			fallbackAuthorizedKey = true
-		} else {
-			return createErr
-		}
-	}
-	ref := "ssh-deploy-" + d.ID
-	if err = c.Secrets.Put(ctx, accountID, ref, "ssh_private_key", privatePEM); err != nil {
-		if !fallbackAuthorizedKey && runtime.CheckMutationGeneration(ctx) == nil {
-			_ = sshDriver.DeleteSSHKey(ctx, created.ID)
+	if runtime.Driver.Capabilities().InlineSSHKeys {
+		current, err = c.finishDeploymentSSHIdentity(ctx, runtime, attempt, d, publicKey, "", true)
+		if err == nil {
+			*snap = current
 		}
 		return err
 	}
-	snap.SSHKeySecretRef = ref
-	if fallbackAuthorizedKey {
-		snap.SSHAuthorizedKey = authorizedKey
-		snap.SSHProviderKeyID = ""
-	} else {
-		snap.SSHProviderKeyID = workflow.ProviderKeyRef(created.ID)
-		snap.SSHAuthorizedKey = ""
+	driver, ok := runtime.Driver.(providers.SSHKeyDriver)
+	if !ok {
+		return ErrProviderComputeUnsupported
 	}
-	snap.SSHKeyFingerprint = ssh.FingerprintSHA256(pub)
-	snap.SSHUser = "root"
-	raw, err := json.Marshal(snap)
+	if current.SSHKeyIntent.State == "unknown" {
+		return c.reconcileDeploymentSSHIdentity(ctx, runtime, attempt, d, publicKey, snap)
+	}
+	claimed, err := c.claimDeploymentSSHImport(ctx, runtime, attempt, d)
 	if err != nil {
 		return err
 	}
-	_, err = c.DB.ExecContext(ctx, `UPDATE deployments SET lock_version=lock_version+1,profile_snapshot=$2 WHERE id=$1`, d.ID, raw)
+	if !claimed {
+		return errDeploymentSSHIdentityUnknown
+	}
+	// The durable UNKNOWN fence survives a crash or a lost database session.
+	// Only its single successful claimant may send a create. An empty subsequent
+	// inventory never proves that a previously dispatched request was rejected.
+	if err = ctx.Err(); err != nil {
+		return err
+	}
+	if err = runtime.CheckMutationGeneration(ctx); err != nil {
+		return err
+	}
+	if err = c.checkDeploymentSSHScope(ctx, runtime, attempt, d); err != nil {
+		return err
+	}
+	created, createErr := driver.CreateSSHKey(ctx, "dob-"+d.ID, publicKey)
+	fallback := runtime.Config.Provider == "digitalocean" && providers.IsClass(createErr, providers.ErrorPermissionDenied)
+	if createErr != nil && !fallback {
+		// Do not expose arbitrary provider text or classify an uncertain import as
+		// a terminal deployment failure. The next attempt performs only inventory.
+		return errDeploymentSSHIdentityUnknown
+	}
+	if !fallback && strings.TrimSpace(created.ID) == "" {
+		return errDeploymentSSHIdentityUnknown
+	}
+	current, err = c.finishDeploymentSSHIdentity(ctx, runtime, attempt, d, publicKey, created.ID, fallback)
+	if err == nil {
+		*snap = current
+	}
+	return err
+}
+
+func (c Container) reconcileDeploymentSSHIdentity(ctx context.Context, runtime AccountRuntime, attempt ProviderAttempt, d workflow.Deployment, publicKey string, snap *workflow.ProfileSnapshot) error {
+	reader, ok := runtime.Driver.(sshKeyInventory)
+	if !ok {
+		return errDeploymentSSHIdentityUnknown
+	}
+	if err := c.checkDeploymentSSHScope(ctx, runtime, attempt, d); err != nil {
+		return err
+	}
+	keys, err := reader.ListSSHKeys(ctx)
+	if err != nil {
+		return fmt.Errorf("%w: inventory unavailable", errDeploymentSSHIdentityUnknown)
+	}
+	found := ""
+	for _, key := range keys {
+		if key.Name != "dob-"+d.ID || !sameDeploymentSSHPublicKey(key.PublicKey, publicKey) {
+			continue
+		}
+		if strings.TrimSpace(key.ID) == "" || found != "" {
+			return errDeploymentSSHIdentityUnknown
+		}
+		found = key.ID
+	}
+	if found == "" {
+		return errDeploymentSSHIdentityUnknown
+	}
+	if err = runtime.CheckMutationGeneration(ctx); err != nil {
+		return err
+	}
+	current, err := c.finishDeploymentSSHIdentity(ctx, runtime, attempt, d, publicKey, found, false)
+	if err == nil {
+		*snap = current
+	}
 	return err
 }

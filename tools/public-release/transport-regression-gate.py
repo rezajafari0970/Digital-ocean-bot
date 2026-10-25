@@ -149,6 +149,16 @@ REQUIRED['internal/providers/vultr'] = ('TestCatalogPaginationUsesNativeCursors'
 REQUIRED['internal/providers/digitalocean'] = ('TestProviderResponseReadBounds', 'TestProviderResponseRequiresSingleJSONValue', 'TestCreateResponseMissingIdentityRemainsAmbiguous')
 REQUIRED['internal/droplets'] += ('TestAmbiguousCreateDoesNotAdvanceCapacitySuccess',)
 
+REQUIRED['internal/app'] += ('TestSSHIdentityPersistsBeforeDispatchPostgres', 'TestSSHIdentityUnknownNeverRedispatchesPostgres')
+
+REQUIRED['internal/app'] += ('TestSSHIdentityLostResponseReconcilesExactKeyPostgres', 'TestSSHIdentityRejectsForeignAndIncompleteEvidencePostgres', 'TestSSHIdentityConcurrentClaimAndStaleSnapshotPostgres', 'TestSSHIdentityReservationAtomicityAndCrashWindowsPostgres', 'TestSSHIdentityScopeAndLegacyRecoveryPostgres', 'TestSSHIdentityInlineAndPermissionFallbackPostgres')
+REQUIRED['internal/providers/vultr'] += ('TestSSHImportUncertainVerificationNeverDeletes', 'TestSSHInventoryCarriesExactPublicKeyAndIsolatesCursor')
+REQUIRED['internal/providers/digitalocean'] += ('TestSSHInventoryCarriesExactPublicKey',)
+
+REQUIRED['internal/app'] += ('TestSSHIdentityStaleGenerationAndSecretCollisionPostgres',)
+
+REQUIRED['internal/secrets'] += ('TestSecretRecordCorruptionNeverPanics','TestSecretSQLReadersRetainVersionAndRejectCorruption')
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()

@@ -70,6 +70,15 @@ func (s *Store) validateAuthorizationKeys(ctx context.Context) error {
 // PutInTransaction binds an account credential to the caller's atomic account
 // creation transaction. It uses the same encryption and AAD as Put.
 func (s *Store) PutInTransaction(ctx context.Context, tx *sql.Tx, accountID, id, kind string, plain []byte) error {
+	return s.putInTransaction(ctx, tx, accountID, id, kind, plain, true)
+}
+
+// CreateInTransaction never replaces an identity created by another writer.
+// Its encrypted row commits atomically with the caller's durable intent.
+func (s *Store) CreateInTransaction(ctx context.Context, tx *sql.Tx, accountID, id, kind string, plain []byte) error {
+	return s.putInTransaction(ctx, tx, accountID, id, kind, plain, false)
+}
+func (s *Store) putInTransaction(ctx context.Context, tx *sql.Tx, accountID, id, kind string, plain []byte, replace bool) error {
 	if tx == nil || accountID == "" || id == "" || kind == "" {
 		return errors.New("invalid transactional secret")
 	}
@@ -78,6 +87,20 @@ func (s *Store) PutInTransaction(ctx context.Context, tx *sql.Tx, accountID, id,
 		return e
 	}
 	ct := s.aead.Seal(nil, nonce, plain, []byte(accountID+"\x00"+id+"\x00"+kind))
-	_, e := tx.ExecContext(ctx, `INSERT INTO secrets(id,account_id,kind,ciphertext,nonce,key_version) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(owner_key,id) DO UPDATE SET kind=EXCLUDED.kind,ciphertext=EXCLUDED.ciphertext,nonce=EXCLUDED.nonce,key_version=EXCLUDED.key_version,updated_at=now()`, id, accountID, kind, ct, nonce, s.keyVersion)
-	return e
+	query := `INSERT INTO secrets(id,account_id,kind,ciphertext,nonce,key_version) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(owner_key,id) DO NOTHING`
+	if replace {
+		query = `INSERT INTO secrets(id,account_id,kind,ciphertext,nonce,key_version) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(owner_key,id) DO UPDATE SET kind=EXCLUDED.kind,ciphertext=EXCLUDED.ciphertext,nonce=EXCLUDED.nonce,key_version=EXCLUDED.key_version,updated_at=now()`
+	}
+	result, e := tx.ExecContext(ctx, query, id, accountID, kind, ct, nonce, s.keyVersion)
+	if e != nil {
+		return e
+	}
+	n, e := result.RowsAffected()
+	if e != nil {
+		return e
+	}
+	if n != 1 {
+		return errors.New("secret identity already exists")
+	}
+	return nil
 }

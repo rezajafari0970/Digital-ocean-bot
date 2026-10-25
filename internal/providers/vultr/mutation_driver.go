@@ -85,15 +85,15 @@ func (d *Driver) CreateSSHKey(ctx context.Context, name, publicKey string) (prov
 	if err != nil {
 		return providers.SSHKey{}, normalizeError("create_ssh_key", err)
 	}
+	if strings.TrimSpace(x.ID) == "" {
+		return providers.SSHKey{}, &providers.Error{Class: providers.ErrorAmbiguousOutcome, Operation: "create_ssh_key", Message: "Vultr create returned no SSH key id"}
+	}
 	for attempt := 0; attempt < 5; attempt++ {
 		seen, getErr := d.client.SSHKey(ctx, x.ID)
 		if getErr == nil && seen.ID == x.ID && samePublicKey(seen.SSHKey, publicKey) {
-			return providers.SSHKey{ID: x.ID, Name: x.Name}, nil
+			return providers.SSHKey{ID: x.ID, Name: x.Name, PublicKey: seen.SSHKey}, nil
 		}
 		if attempt == 4 {
-			if getErr != nil {
-				return providers.SSHKey{}, normalizeError("verify_ssh_key", getErr)
-			}
 			break
 		}
 		t := time.NewTimer(time.Duration(attempt+1) * 250 * time.Millisecond)
@@ -104,10 +104,9 @@ func (d *Driver) CreateSSHKey(ctx context.Context, name, publicKey string) (prov
 		case <-t.C:
 		}
 	}
-	cleanup, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	_ = d.client.DeleteSSHKey(cleanup, x.ID)
-	return providers.SSHKey{}, &providers.Error{Class: providers.ErrorUnavailable, Operation: "verify_ssh_key", Message: "Vultr SSH key missing or key material mismatched after create"}
+	// A missing or mismatched read does not prove ownership or failed creation.
+	// Preserve the resource for application-level exact-key reconciliation.
+	return providers.SSHKey{}, &providers.Error{Class: providers.ErrorAmbiguousOutcome, Operation: "verify_ssh_key", Message: "Vultr SSH key import could not be verified"}
 }
 
 func samePublicKey(a, b string) bool {
