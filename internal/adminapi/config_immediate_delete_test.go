@@ -31,7 +31,7 @@ func TestProfileDeleteImmediatelyRemovesLocalVisibility(t *testing.T) {
 	}
 	for _, p := range profiles[:2] {
 		raw, _ := json.Marshal(p.Spec)
-		sqlMust(t, db, "INSERT INTO config_driver_listeners(profile_id,panel_id,managed_key,remote_id,credential_ref,applied_spec,state,stage,error_code,mutation_state,applied_revision) VALUES($1,$2,$1::text,$3,'owned-secret',$4,'BLOCKED','deleting','profile_delete_panel_unavailable','CONFIRMED',$5)", p.ID, panel, 100+p.Spec.Port, raw, p.Revision)
+		sqlMust(t, db, "INSERT INTO config_driver_listeners(profile_id,panel_id,managed_key,remote_id,credential_ref,applied_spec,state,stage,error_code,mutation_state,applied_revision) VALUES($1::uuid,$2,($1::uuid)::text,$3,'owned-secret',$4,'BLOCKED','deleting','profile_delete_panel_unavailable','CONFIRMED',$5)", p.ID, panel, 100+p.Spec.Port, raw, p.Revision)
 	}
 	sqlMust(t, db, "UPDATE accounts SET provider_state='TOKEN_INVALID' WHERE id=$1", account)
 	visible := func() map[string]bool {
