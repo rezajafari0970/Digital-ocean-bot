@@ -88,14 +88,23 @@ func (s *Store) Get(ctx context.Context, accountID, id string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	aad := []byte(r.AccountID + "\x00" + r.ID + "\x00" + r.Kind)
-	aead, ok := s.keys[r.KeyVersion]
-	if !ok {
+	if r.AccountID != accountID || r.ID != id {
 		return nil, ErrSecretDecrypt
 	}
-	pt, err := aead.Open(nil, r.Nonce, r.Ciphertext, aad)
+	aad := []byte(accountID + "\x00" + id + "\x00" + r.Kind)
+	return s.openRecord(r.KeyVersion, r.Nonce, r.Ciphertext, aad)
+}
+
+// openRecord rejects corrupted envelopes before calling AEAD.Open, which panics
+// on an invalid nonce length. Every reader uses the record's retained key version.
+func (s *Store) openRecord(version int, nonce, ciphertext, aad []byte) ([]byte, error) {
+	key, ok := s.keys[version]
+	if !ok || len(nonce) != key.NonceSize() {
+		return nil, ErrSecretDecrypt
+	}
+	out, err := key.Open(nil, nonce, ciphertext, aad)
 	if err != nil {
 		return nil, ErrSecretDecrypt
 	}
-	return pt, nil
+	return out, nil
 }

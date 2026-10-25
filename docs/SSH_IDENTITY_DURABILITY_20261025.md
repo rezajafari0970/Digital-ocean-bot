@@ -46,16 +46,35 @@ fault/restore/load verification remain separate work.
 
 ## Verification status
 
-The mandatory gate has213 top-level tests, including9 application SSH durability
+The mandatory gate has215 top-level tests, including9 application SSH durability
 roots and3 provider roots in this change. They cover pre-dispatch durability,
 unknown-response replay, cancellation, failed final commit, reservation rollback,
 reserved/unknown crash windows, concurrent callers, stale snapshots, secret
 collisions, stale proxy generation, credential rotation, exact ownership matching,
 legacy orphan adoption, inline/fallback handling and provider inventory/verification.
-Independent CI is pending; required skips cannot be counted as passes.
+Final independent CI is pending; required skips cannot be counted as passes.
 No schema migration, credential setting or account policy is changed.
 
 Default live release remainsa59597c4; production remains5dc2c256 with a disk-reserve
 block. Both passed readiness with all six services active at14:43UTC. Original
 services remain quarantined. The prior receiptless OpenAI request remains
 unreconciled; no new generation request is submitted.
+
+## Encrypted-record corruption boundary
+
+Further inspection found that account, proxy, probe, residential, Cloudflare and
+IP cleanup readers could pass a corrupted nonce length to AES-GCM, causing a panic.
+The controlled negative run reproduced all five invalid-length cases. A synthetic
+repository returning a valid record for another owner was also accepted by the
+store; the SQL repository itself already scopes its query, so no live cross-tenant
+incident is claimed. The store now independently checks the requested owner/id.
+
+A shared decoder validates nonce length and retained key version before decryption.
+Proxy, probe and residential reads now select their stored key_version instead of
+trying only the currently active key. Wrong owner, corrupted nonce/ciphertext and
+missing key versions fail closed without returning plaintext or panicking. The
+IP cleanup retirement gate still rejects corrupted archives; no ciphertext or
+credential is fabricated, discarded or silently repaired. Two mandatory roots
+cover memory fixtures and isolated PostgreSQL readers, including retained-key
+rotation across six owner namespaces. This contains malformed encrypted records;
+it does not repair physical database corruption.

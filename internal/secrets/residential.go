@@ -27,7 +27,8 @@ func (s *Store) GetResidential(ctx context.Context, endpoint, id string) ([]byte
 	}
 	var kind, scope string
 	var ct, nonce []byte
-	err := repo.DB.QueryRowContext(ctx, `SELECT kind,aad_scope,ciphertext,nonce FROM residential_proxy_secrets WHERE residential_id=$1 AND id=$2`, endpoint, id).Scan(&kind, &scope, &ct, &nonce)
+	var version int
+	err := repo.DB.QueryRowContext(ctx, `SELECT kind,aad_scope,ciphertext,nonce,key_version FROM residential_proxy_secrets WHERE residential_id=$1 AND id=$2`, endpoint, id).Scan(&kind, &scope, &ct, &nonce, &version)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrSecretNotFound
 	}
@@ -35,7 +36,7 @@ func (s *Store) GetResidential(ctx context.Context, endpoint, id string) ([]byte
 		return nil, err
 	}
 	aad := []byte(scope + "\x00" + endpoint + "\x00" + id + "\x00" + kind)
-	pt, err := s.aead.Open(nil, nonce, ct, aad)
+	pt, err := s.openRecord(version, nonce, ct, aad)
 	if err != nil {
 		return nil, ErrSecretDecrypt
 	}

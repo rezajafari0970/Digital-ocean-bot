@@ -31,11 +31,7 @@ func (s *Store) GetCloudflare(ctx context.Context, account string) ([]byte, erro
 	if e != nil {
 		return nil, e
 	}
-	key, ok := s.keys[version]
-	if !ok {
-		return nil, ErrSecretDecrypt
-	}
-	out, e := key.Open(nil, nonce, ct, []byte("cloudflare\x00"+account))
+	out, e := s.openRecord(version, nonce, ct, []byte("cloudflare\x00"+account))
 	if e != nil {
 		return nil, ErrSecretDecrypt
 	}

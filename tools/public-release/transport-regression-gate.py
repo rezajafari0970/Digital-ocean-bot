@@ -157,6 +157,8 @@ REQUIRED['internal/providers/digitalocean'] += ('TestSSHInventoryCarriesExactPub
 
 REQUIRED['internal/app'] += ('TestSSHIdentityStaleGenerationAndSecretCollisionPostgres',)
 
+REQUIRED['internal/secrets'] += ('TestSecretRecordCorruptionNeverPanics','TestSecretSQLReadersRetainVersionAndRejectCorruption')
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()

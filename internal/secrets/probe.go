@@ -8,7 +8,7 @@ import (
 
 func (s *Store) PutProbe(ctx context.Context, probeID, id, kind string, plaintext []byte) error {
 	repo, ok := s.repo.(SQLRepository)
-	if !ok {
+	if !ok || repo.DB == nil {
 		return ErrSecretNotFound
 	}
 	nonce := make([]byte, s.aead.NonceSize())
@@ -23,12 +23,13 @@ func (s *Store) PutProbe(ctx context.Context, probeID, id, kind string, plaintex
 
 func (s *Store) GetProbe(ctx context.Context, probeID, id string) ([]byte, error) {
 	repo, ok := s.repo.(SQLRepository)
-	if !ok {
+	if !ok || repo.DB == nil {
 		return nil, ErrSecretNotFound
 	}
 	var kind string
 	var ct, nonce []byte
-	e := repo.DB.QueryRowContext(ctx, `SELECT kind,ciphertext,nonce FROM secrets WHERE probe_id=$1 AND id=$2`, probeID, id).Scan(&kind, &ct, &nonce)
+	var version int
+	e := repo.DB.QueryRowContext(ctx, `SELECT kind,ciphertext,nonce,key_version FROM secrets WHERE probe_id=$1 AND id=$2`, probeID, id).Scan(&kind, &ct, &nonce, &version)
 	if e == sql.ErrNoRows {
 		return nil, ErrSecretNotFound
 	}
@@ -36,7 +37,7 @@ func (s *Store) GetProbe(ctx context.Context, probeID, id string) ([]byte, error
 		return nil, e
 	}
 	aad := []byte("probe\x00" + probeID + "\x00" + id + "\x00" + kind)
-	pt, e := s.aead.Open(nil, nonce, ct, aad)
+	pt, e := s.openRecord(version, nonce, ct, aad)
 	if e != nil {
 		return nil, ErrSecretDecrypt
 	}
