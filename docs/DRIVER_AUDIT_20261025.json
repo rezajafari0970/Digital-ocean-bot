@@ -179,8 +179,8 @@
     },
     {
       "path": "tools/public-release/transport-regression-gate.py",
-      "sha256": "63e2d743b912a8630a6cab0967ba7c11f70bce4fa25b89280515e98750eddcea",
-      "lines": 279,
+      "sha256": "b3adba7a5f672926631c05c1d47211c18382bbfadcf6d773401349de7ae05585",
+      "lines": 280,
       "scope": "full_file"
     },
     {
@@ -212,11 +212,41 @@
       "sha256": "2e28fcf9c75baaca254718b1283cee3911374a7523aeaa81ea089c8547cf93aa",
       "lines": 139,
       "scope": "full_file"
+    },
+    {
+      "path": "internal/app/ssh_identity.go",
+      "sha256": "3f283ca935dc30a01862c3edd00310fca8303c0a6684d76c864a5ef80c96e24a",
+      "lines": 82,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/droplets/executor.go",
+      "sha256": "6a190834aed720e4b85d396bbf00d7f59e5fcc0e050be3230eee7970a2250ea8",
+      "lines": 183,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/droplets/executor_test.go",
+      "sha256": "3084eef2ee4c895f343542d308744e27467fec64b0a9d5220ef8c4f649831e99",
+      "lines": 188,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/droplets/reconcile.go",
+      "sha256": "ef438be28a2c36edaec113e45c5c2e8e3aa456e498d0f89f325f6a245ab993a9",
+      "lines": 69,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/droplets/reconcile_test.go",
+      "sha256": "c6ffb8f5a5937d30be5674f8f1101121692f6020fa816af752d441d7053bcb3c",
+      "lines": 39,
+      "scope": "full_file"
     }
   ],
-  "cumulative_files": 83,
-  "cumulative_current_lines": 11859,
-  "baseline_go_fully_read": 71,
-  "baseline_go_fully_read_lines": 10149,
+  "cumulative_files": 88,
+  "cumulative_current_lines": 12421,
+  "baseline_go_fully_read": 76,
+  "baseline_go_fully_read_lines": 10698,
   "whole_project_review_complete": false
 }

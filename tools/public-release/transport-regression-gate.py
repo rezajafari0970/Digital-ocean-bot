@@ -147,6 +147,7 @@ REQUIRED['internal/worker'] += ('TestDispatcherForgetsCompletedAccounts', 'TestD
 # Bounded provider reads must not accept incomplete inventories or create IDs.
 REQUIRED['internal/providers/vultr'] = ('TestCatalogPaginationUsesNativeCursors', 'TestCatalogPaginationRejectsInvalidInventory', 'TestCatalogPaginationStopsCyclesAndLimits', 'TestCatalogPaginationCancellation')
 REQUIRED['internal/providers/digitalocean'] = ('TestProviderResponseReadBounds', 'TestProviderResponseRequiresSingleJSONValue', 'TestCreateResponseMissingIdentityRemainsAmbiguous')
+REQUIRED['internal/droplets'] += ('TestAmbiguousCreateDoesNotAdvanceCapacitySuccess',)
 
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}

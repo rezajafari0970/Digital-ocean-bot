@@ -5,8 +5,8 @@
   "baseline_tracked_files": 6491,
   "baseline_go_files": 1218,
   "baseline_go_lines": 146345,
-  "baseline_go_fully_read": 71,
-  "baseline_go_fully_read_lines": 10149,
+  "baseline_go_fully_read": 76,
+  "baseline_go_fully_read_lines": 10698,
   "whole_project_review_complete": false,
   "inspected_files": [
     {
@@ -473,8 +473,8 @@
     },
     {
       "path": "tools/public-release/transport-regression-gate.py",
-      "sha256": "63e2d743b912a8630a6cab0967ba7c11f70bce4fa25b89280515e98750eddcea",
-      "lines": 279,
+      "sha256": "b3adba7a5f672926631c05c1d47211c18382bbfadcf6d773401349de7ae05585",
+      "lines": 280,
       "scope": "full_file"
     },
     {
@@ -505,6 +505,36 @@
       "path": "internal/providers/digitalocean/response_bounds_test.go",
       "sha256": "2e28fcf9c75baaca254718b1283cee3911374a7523aeaa81ea089c8547cf93aa",
       "lines": 139,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/app/ssh_identity.go",
+      "sha256": "3f283ca935dc30a01862c3edd00310fca8303c0a6684d76c864a5ef80c96e24a",
+      "lines": 82,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/droplets/executor.go",
+      "sha256": "6a190834aed720e4b85d396bbf00d7f59e5fcc0e050be3230eee7970a2250ea8",
+      "lines": 183,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/droplets/executor_test.go",
+      "sha256": "3084eef2ee4c895f343542d308744e27467fec64b0a9d5220ef8c4f649831e99",
+      "lines": 188,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/droplets/reconcile.go",
+      "sha256": "ef438be28a2c36edaec113e45c5c2e8e3aa456e498d0f89f325f6a245ab993a9",
+      "lines": 69,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/droplets/reconcile_test.go",
+      "sha256": "c6ffb8f5a5937d30be5674f8f1101121692f6020fa816af752d441d7053bcb3c",
+      "lines": 39,
       "scope": "full_file"
     }
   ],
@@ -3433,7 +3463,7 @@
       "base_blob": "53c62849eb40aae1031e0bd0817db0646a753325",
       "base_sha256": "3f283ca935dc30a01862c3edd00310fca8303c0a6684d76c864a5ef80c96e24a",
       "lines": 82,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/app/sticky_observer_test.go",
@@ -3762,14 +3792,14 @@
       "base_blob": "2c4b8a1ff3c7e6066fe0b622a82910e59be24a2b",
       "base_sha256": "9d28c406e1a0a72e5a42d11340ac5ac146288e873a9cf2914441000efa846a76",
       "lines": 181,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/droplets/executor_test.go",
       "base_blob": "ab338440c922ff6316279583e570d287b19e2eed",
       "base_sha256": "3c2a7b8b15c2edf527c84650ac51f819d6b6e9332dbfedefcf3390bb0e4354b5",
       "lines": 178,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/droplets/factory.go",
@@ -3839,14 +3869,14 @@
       "base_blob": "f1082339d5f2b3f903d76de8c4c3656ff59cedbb",
       "base_sha256": "ef438be28a2c36edaec113e45c5c2e8e3aa456e498d0f89f325f6a245ab993a9",
       "lines": 69,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/droplets/reconcile_test.go",
       "base_blob": "dde94cbd6826d3ddb6b73244601846bc7bbd66e0",
       "base_sha256": "c6ffb8f5a5937d30be5674f8f1101121692f6020fa816af752d441d7053bcb3c",
       "lines": 39,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/droplets/safety_characterization_test.go",

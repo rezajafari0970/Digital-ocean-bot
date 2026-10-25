@@ -81,20 +81,30 @@ func TestCreateIsIdempotent(t *testing.T) {
 }
 
 func TestAmbiguousCreateDoesNotAdvanceCapacitySuccess(t *testing.T) {
-	store := &opStore{}
-	result := providers.CreateServerResult{ServerID: "maybe-42", Outcome: providers.OutcomeAmbiguous}
-	provider := &computeStub{createResult: &result}
-	successCalled := false
-	e := Executor{
-		Operations:      store,
-		Provider:        provider,
-		Gate:            gateStub{},
-		OnCreateSuccess: func(context.Context, providers.CreateServerResult) { successCalled = true },
-	}
-	profile := Profile{Name: "p", Region: "ewr", Size: "s", Image: "ubuntu"}
-	_, err := e.Create(context.Background(), BuildCreateOperation("a", profile), profile)
-	if !errors.Is(err, ErrOutcomeStillUnknown) || successCalled || store.saved.State != jobs.OperationUnknown {
-		t.Fatalf("err=%v successCalled=%v state=%s", err, successCalled, store.saved.State)
+	for _, id := range []string{"maybe-42", ""} {
+		t.Run("provider_id="+id, func(t *testing.T) {
+			store := &opStore{}
+			result := providers.CreateServerResult{ServerID: id, Outcome: providers.OutcomeAmbiguous}
+			provider := &computeStub{createResult: &result}
+			successCalled := false
+			e := Executor{
+				Operations:      store,
+				Provider:        provider,
+				Gate:            gateStub{},
+				OnCreateSuccess: func(context.Context, providers.CreateServerResult) { successCalled = true },
+			}
+			profile := Profile{Name: "p", Region: "ewr", Size: "s", Image: "ubuntu", IdentityTag: "owned"}
+			op := BuildCreateOperation("a", profile)
+			_, err := e.Create(context.Background(), op, profile)
+			if !errors.Is(err, ErrOutcomeStillUnknown) || successCalled || store.saved.State != jobs.OperationUnknown {
+				t.Fatalf("err=%v successCalled=%v state=%s", err, successCalled, store.saved.State)
+			}
+			// An uncertain result is reconciled on resumption, not dispatched again.
+			_, _ = e.Create(context.Background(), op, profile)
+			if provider.creates != 1 || successCalled {
+				t.Fatalf("ambiguous creation replayed: calls=%d success=%v", provider.creates, successCalled)
+			}
+		})
 	}
 }
 

@@ -1,9 +1,9 @@
 # Provider driver audit continuation — 2026-10-25
 
 Continues from source5703b6f5 and the restarted audit inventory. This round fully
-read35 additional files (29 baseline Go files, four new Go files and two supporting
-scripts). Cumulative coverage is83 files / 11859 current lines;
-71 of1,218 baseline Go files / 10149 baseline lines.
+read40 additional files (34 baseline Go files, four new Go files and two supporting
+scripts). Cumulative coverage is88 files / 12421 current lines;
+76 of1,218 baseline Go files / 10698 baseline lines.
 The whole-project audit remains incomplete. Hashes and partial-read exclusions
 are recorded in the cumulative and round-specific JSON inventories.
 
@@ -47,8 +47,8 @@ and does not resubmit. Normal no-content deletion remains supported.
 | Original/recovery identity | Source5703b6f5 clean; original services quarantined; six recovery services active, both readiness endpoints pass |
 | Negative reproduction | Four Vultr and three DigitalOcean top-level regressions fail on original code; original logs retained privately |
 | Focused correction | All63 top-level tests across both provider packages pass;10 publication-gate contract tests pass |
-| Mandatory publication coverage | Seven new regression roots added;200 required tests, including existing DB/native/race contracts |
-| Independent source CI | Pending |
+| Mandatory publication coverage | Eight added/extended regression roots required;201 required tests, including existing DB/native/race contracts |
+| Independent source CI | Initial200-test candidate passed run40199667036; final201-test candidate requires a new run |
 | Independent fresh/repeat installation | Pending |
 | Stable publication and default deployment | Pending; live default still6c92d419 |
 | Production deployment | Still disk-reserve blocked on5dc2c256 |
@@ -79,3 +79,23 @@ Private reproduction evidence:
  negative-response.json and negative-response.log, focused.json and focused.log.
 The baseline failing response fixture emitted a large synthetic error line;
 that evidence is retained, and subsequent test diagnostics are bounded.
+
+
+## Central creation outcome ordering
+
+The full executor and reconciliation path was then read. An explicit ambiguous
+result with no returned error and no resource ID was checked as missing-ID failure
+before the ambiguous-outcome branch. A new subcase of the existing executor test
+reproduced state=failed. The branch order is corrected: both known-ID and no-ID
+ambiguous results stay UNKNOWN and resumption observes ownership without a second
+create. Rejected or empty accepted outcomes retain their existing validation.
+This extends the required gate to201 tests and requires a fresh exact-source CI.
+
+The deployment SSH-key path has a separate unresolved durability concern:
+it currently saves the newly generated private key/snapshot after provider
+import. An uncertain import or crash can therefore lose the matching local
+identity. No live occurrence is claimed and this release does not redesign that
+flow. Its next review must establish durable key/intent reservation before
+external import, scoped reconciliation and crash/concurrency tests. The current
+driver's single-call guarantee is not a proof of end-to-end SSH-key exactly-once
+behavior.
