@@ -85,8 +85,20 @@ class BootstrapTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 bootstrap.prepare(root, "db", "user", os.getegid())
 
+    def test_dedicated_port_preserves_identity_on_retry(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            bootstrap.prepare(root, "db", "user", os.getegid(), port=55432)
+            before = {p.name: p.read_bytes() for p in root.iterdir()}
+            self.assertIn(":55432/db?", (root / "env").read_text())
+            bootstrap.prepare(root, "db", "user", os.getegid(), port=55432)
+            self.assertEqual(before, {p.name: p.read_bytes() for p in root.iterdir()})
+            with self.assertRaises(ValueError):
+                bootstrap.prepare(root, "db", "user", os.getegid(), port=5432)
 
-from backup_store_test import BackupStoreTests, IntegrityTests, RuntimeRetentionTests
+
+from owned_cluster_test import OwnedClusterTests
+from backup_store_test import BackupStoreTests, IntegrityTests, IntegritySafetyRegressionTests, BackupFreshnessRegressionTests, RuntimeRetentionTests
 
 if __name__ == "__main__":
     unittest.main()

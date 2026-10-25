@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import datetime,json,os,pathlib,runpy,secrets,shutil,subprocess,sys,tarfile,tempfile
 from backup_store import seal,prune
+from owned_cluster import plan_cluster,ensure_cluster
 from urllib.parse import urlsplit,unquote
 ROOT=pathlib.Path(__file__).resolve().parent
 helpers=runpy.run_path(str(ROOT/'bootstrap.py'))
@@ -10,7 +11,8 @@ GID=int(subprocess.check_output(['id','-g','digitaloceanbot'],text=True))
 def atomic(path,data,mode=0o600):
  helpers['atomic_write'](path,data.encode(),mode,GID)
 def peer(sql):
- p=subprocess.run(['runuser','-u','postgres','--','psql','-XAt','-v','ON_ERROR_STOP=1'],input=sql,text=True,capture_output=True,timeout=45)
+ port=str(urlsplit(values()['DATABASE_URL']).port or 5432) if (ETC/'env').exists() else '5432'
+ p=subprocess.run(['runuser','-u','postgres','--','psql','-h','/var/run/postgresql','-p',port,'-d','postgres','-XAt','-v','ON_ERROR_STOP=1'],input=sql,text=True,capture_output=True,timeout=45)
  if p.returncode: raise RuntimeError('PostgreSQL bootstrap failed; credentials were preserved')
  return p.stdout.strip()
 def values(): return helpers['read_environment'](ETC/'env')
@@ -25,11 +27,16 @@ def prepare():
  if not STATE.exists() and not (ETC/'env').exists():
   if (ETC/'master.key').exists() or pathlib.Path('/opt/digital-ocean-bot/bin').exists():
    raise RuntimeError('Ambiguous existing installation; refusing fresh defaults')
-  collision=peer("SELECT (EXISTS(SELECT FROM pg_roles WHERE rolname='digitaloceanbot') OR EXISTS(SELECT FROM pg_database WHERE datname='digital_ocean_bot'))::int;")
-  if collision!='0': raise RuntimeError('Database or role already exists; refusing to adopt/reset it')
-  atomic(STATE,json.dumps({'status':'pending','created_at':datetime.datetime.now(datetime.timezone.utc).isoformat()})+'\n')
+  atomic(STATE,json.dumps({'status':'pending','created_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'cluster':plan_cluster()})+'\n')
   fresh=True
- helpers['prepare'](str(ETC),'digital_ocean_bot','digitaloceanbot',GID,validate_only=not fresh)
+ state=json.loads(STATE.read_text()) if STATE.exists() else {}
+ port=5432
+ if state.get('cluster'):
+  port=ensure_cluster(state,lambda value: atomic(STATE,json.dumps(value)+'\n'))
+ if (ETC/'env').exists() and state.get('cluster'):
+  u=urlsplit(values()['DATABASE_URL'])
+  if u.hostname!='127.0.0.1' or u.port!=port:raise RuntimeError('Persisted cluster endpoint mismatch')
+ helpers['prepare'](str(ETC),'digital_ocean_bot','digitaloceanbot',GID,validate_only=not fresh,port=port)
  if fresh:
   if (ETC/'bootstrap.pending').exists():
    u=urlsplit(values()['DATABASE_URL']);password=unquote(u.password)
@@ -38,7 +45,7 @@ def prepare():
    if peer("SELECT count(*) FROM pg_roles WHERE rolname='digitaloceanbot';")=='0':
     peer("CREATE ROLE digitaloceanbot LOGIN PASSWORD '"+password+"';")
    else:
-    checkenv=dict(os.environ,PGHOST='127.0.0.1',PGPORT='5432',PGDATABASE='postgres',PGUSER='digitaloceanbot',PGPASSWORD=password)
+    checkenv=dict(os.environ,PGHOST='127.0.0.1',PGPORT=str(u.port or 5432),PGDATABASE='postgres',PGUSER='digitaloceanbot',PGPASSWORD=password)
     p=subprocess.run(['psql','-XAt','-c','SELECT 1'],env=checkenv,capture_output=True,timeout=15)
     if p.returncode:raise RuntimeError('Existing role does not match persisted installation')
    if peer("SELECT count(*) FROM pg_database WHERE datname='digital_ocean_bot';")=='0':

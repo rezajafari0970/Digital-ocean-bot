@@ -10,7 +10,7 @@ import runpy
 import subprocess
 import sys
 import tempfile
-from backup_store import seal, prune, verified
+from backup_store import seal, prune, verified, STAMP
 
 ROOT = Path(__file__).resolve().parent
 STATE = Path("/var/lib/datacenter-bot-health")
@@ -64,12 +64,16 @@ def publish(data):
         if os.path.exists(name):
             os.unlink(name)
 
+def validate_settings(stats):
+    safe = {"checksums": "on", "fsync": "on", "full_page_writes": "on",
+            "zero_damaged_pages": "off", "ignore_checksum_failure": "off"}
+    if any(stats.get(k) != v for k, v in safe.items()) or stats.get("synchronous_commit") not in ("on", "local", "remote_write", "remote_apply"):
+        raise RuntimeError("unsafe_database_settings")
+
 def inspect(env, previous, acknowledge=False):
     stats = json.loads(query(env, SQL))
     required = needs_acknowledgement(previous, stats)
-    safe = {"fsync": "on", "full_page_writes": "on", "zero_damaged_pages": "off", "ignore_checksum_failure": "off"}
-    if any(stats.get(k) != v for k, v in safe.items()) or stats.get("synchronous_commit") == "off":
-        raise RuntimeError("unsafe_database_settings")
+    validate_settings(stats)
     version = int(query(env, "SHOW server_version_num")) // 10000
     binary = Path("/usr/lib/postgresql") / str(version) / "bin/pg_amcheck"
     if not binary.is_file():
@@ -89,6 +93,7 @@ def inspect(env, previous, acknowledge=False):
     if p.returncode:
         raise RuntimeError("integrity_check_failed")
     after = json.loads(query(env, SQL))
+    validate_settings(after)
     if signature(stats) != signature(after):
         raise RuntimeError("database_integrity_changed")
     if required and not acknowledge:
@@ -96,12 +101,26 @@ def inspect(env, previous, acknowledge=False):
     return {"version": 1, "status": "ok", "checked_at": now().timestamp(),
             "watermark": signature(after), "checksums": after["checksums"], "recovery_required": False}
 
+def has_recent_verified_backup(root, current):
+    # Use the sealed generation timestamp, never mutable directory metadata or
+    # the timestamp of a different (possibly damaged) generation.
+    for path in sorted(root.iterdir(), reverse=True):
+        if path.is_symlink() or not path.is_dir() or not STAMP.fullmatch(path.name):
+            continue
+        try:
+            created = datetime.datetime.strptime(path.name, "%Y%m%dT%H%M%S.%fZ").replace(tzinfo=datetime.timezone.utc)
+        except ValueError:
+            continue
+        age = (current - created).total_seconds()
+        if 0 <= age < 20 * 3600 and verified(path):
+            return True
+    return False
+
 def daily_backup(env):
     root = Path("/var/backups/datacenter-bot-daily")
     root.mkdir(mode=0o700, parents=True, exist_ok=True)
     os.chmod(root, 0o700)
-    recent = [p for p in root.iterdir() if p.is_dir() and not p.is_symlink() and (p / "backup-complete.json").is_file()]
-    if recent and verified(max(recent, key=lambda p: p.name)) and now().timestamp() - max(p.stat().st_mtime for p in recent) < 20 * 3600:
+    if has_recent_verified_backup(root, now()):
         return
     free = os.statvfs(root)
     size = int(query(env, "SELECT pg_database_size(current_database())"))

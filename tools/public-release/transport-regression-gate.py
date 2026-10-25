@@ -18,6 +18,7 @@ import tempfile
 from urllib.parse import urlencode
 
 REQUIRED = {
+    "internal/observability": ("TestIntegrityReportCannotHideNewFailure", "TestIntegrityReportCannotHideRecoveryOrExpiredBackup"),
     "internal/secrets": ("TestAuthorizationSecretsOwnerBindingAndRotation",),
     "internal/cloudflareschedule": ("TestCloudflareScheduleValidation",),
     "internal/cloudflare": ("TestCloudflareCertificateWireDatesAndPagination","TestCloudflareIncompleteCertificateListCannotProveAbsence","TestCloudflarePermissionErrorsIdentifyOperationWithoutSecrets","TestCertificateNodeOwnershipAtomicInstallAndPrivateKeyRetention","TestOriginCertificateTrustNamesExpiryAndCSRBinding","TestCloudflareDriverPaginationAuthAndRedaction","TestCloudflareAmbiguousWriteIsNotRetriedByDriver","TestCloudflareNamesLifetimeAndOwnership"),

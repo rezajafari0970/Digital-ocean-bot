@@ -28,6 +28,7 @@ def main():
  import runpy
  helpers=runpy.run_path(source+'/deploy/bootstrap.py')
  env=helpers['database_environment'](helpers['read_environment'](pathlib.Path('/etc/digital-ocean-bot/env')))
+ assert subprocess.check_output(['psql','-XAt','-c',"SHOW data_checksums"],env=env,text=True).strip()=='on','Installed cluster requires page checksums'
  port=subprocess.check_output(['psql','-XAt','-c','SELECT listen_port FROM panel_settings WHERE id=true'],env=env,text=True).strip()
  BASE='http://127.0.0.1:'+port
  status,ready=request('/readyz');assert status==200 and len(ready['checks'])==5 and all(x['ok']for x in ready['checks'])
