@@ -5,8 +5,8 @@
   "baseline_tracked_files": 6491,
   "baseline_go_files": 1218,
   "baseline_go_lines": 146345,
-  "baseline_go_fully_read": 21,
-  "baseline_go_fully_read_lines": 4002,
+  "baseline_go_fully_read": 42,
+  "baseline_go_fully_read_lines": 6727,
   "whole_project_review_complete": false,
   "inspected_files": [
     {
@@ -169,6 +169,132 @@
       "path": ".github/workflows/fleet-verification.yml",
       "sha256": "4ba97b7db278fa273a1dbaf2140818f8a12b3932df28903b63aaee791ccee75c",
       "lines": 59,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/registry.go",
+      "sha256": "4ab1b3039963c3a81182de32f62b6a59ae2176a61129104bf94d2695bc349412",
+      "lines": 90,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/absence.go",
+      "sha256": "ba2430084d0ec7a320d47928965219d6663ebedd52273873c434fe93a58d186f",
+      "lines": 49,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/provider.go",
+      "sha256": "7f6c840261228f6430119a875069b77c01329829a78b731a748b468d2bfcb5fc",
+      "lines": 87,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/account_resources.go",
+      "sha256": "2dbde42ea1404bd60b2dd9183f885842fe430de31ac3aae046bca9afa48964e5",
+      "lines": 132,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/cleanup.go",
+      "sha256": "8adfd4c151fafd8ff3d428761d6d6a2afee57c7b8ee214488cd95e4b080051de",
+      "lines": 83,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/errors.go",
+      "sha256": "8d6db57d591a1c18fe8c2924928f41ed602a694ef883638321aa00b031b5fc51",
+      "lines": 75,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/providers/onboarding.go",
+      "sha256": "9236befa1643d58dbc3133a194834c4bcc38c7e88b635d30761883cdf507f9af",
+      "lines": 63,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/observability/database_integrity.go",
+      "sha256": "c247a2a809b162524003c316f5261477bd19c9e14d6ecbefab8b3fafd3347436",
+      "lines": 102,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/observability/health.go",
+      "sha256": "bea8730d8eac087e976aba27d833072c2e2b72cfcceb35c0740929e2252754ea",
+      "lines": 185,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/observability/metrics.go",
+      "sha256": "b15d6c94bd124798e1d45a7eff9064d9055ee74e92d72966b17339751aa722cb",
+      "lines": 39,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/observability/database_integrity_test.go",
+      "sha256": "7ca4c92affc8f7abcd395c58e4ab7338ffb4d751eca6553331ff2d5aebc03fce",
+      "lines": 98,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/observability/worker_roles_test.go",
+      "sha256": "a6eb47d4532c99e6b2f54287d7f7d9ce46126e675dd5bb47899dc0f1d70891d1",
+      "lines": 109,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/work_budget_test.go",
+      "sha256": "6a62bcb8e39bae0bae0bcfe6a382bf6fab7c87eb0ec43b1c761a8475c911e108",
+      "lines": 126,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/supervision/registry_test.go",
+      "sha256": "c785d95f22a87c392997aadb5b711a6620595fb59f3655716a80f80b9dd543b3",
+      "lines": 143,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/supervision/restart_test.go",
+      "sha256": "d4b8b988105b5a828746e37e831d84645eb51ddda168dcc40a6759d7da6d6187",
+      "lines": 98,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/recovery_checkpoint.go",
+      "sha256": "eedc775a889807cd9a466af38336e07389962301f3f16a579e5bd09c88dba120",
+      "lines": 334,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/lifecycle_checkpoint_test.go",
+      "sha256": "6243fcc929799024885b0ed20935a50f842878c7fa4b5af7fb6791905a921605",
+      "lines": 104,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/recovery_checkpoint_test.go",
+      "sha256": "ca32b015f649daa6df97d76f33f3fafcb7bc544d44c544739dc93b2f9de1e699",
+      "lines": 377,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/recovery.go",
+      "sha256": "7ac20b2bf1876543cc70cf55d1d5863f3b552718174aaa43f8ed45e8915cf205",
+      "lines": 80,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/failures.go",
+      "sha256": "954f3d82bcabb0df93bb77b893b8e993bb0409483a339028cf9a1b2b1ec7a20f",
+      "lines": 254,
+      "scope": "full_file"
+    },
+    {
+      "path": "internal/worker/failures_test.go",
+      "sha256": "c4dec96a39379b533b51aa0f535d6440d790f66ff7b30269f78e66f46716f688",
+      "lines": 99,
       "scope": "full_file"
     }
   ],
@@ -4116,21 +4242,21 @@
       "base_blob": "78e75541bea9e7d0a44ab019037051267f46eff0",
       "base_sha256": "c247a2a809b162524003c316f5261477bd19c9e14d6ecbefab8b3fafd3347436",
       "lines": 102,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/observability/database_integrity_test.go",
       "base_blob": "819bb46f27ec6852b65fc377bc1c9f635f856a29",
       "base_sha256": "7ca4c92affc8f7abcd395c58e4ab7338ffb4d751eca6553331ff2d5aebc03fce",
       "lines": 98,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/observability/health.go",
       "base_blob": "cf8451c469249a88029065f34ed2598bc9a09347",
       "base_sha256": "bea8730d8eac087e976aba27d833072c2e2b72cfcceb35c0740929e2252754ea",
       "lines": 185,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/observability/health_test.go",
@@ -4144,7 +4270,7 @@
       "base_blob": "43f29b4286e645bf15c11dc9f458adda0598cf3b",
       "base_sha256": "b15d6c94bd124798e1d45a7eff9064d9055ee74e92d72966b17339751aa722cb",
       "lines": 39,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/observability/metrics_test.go",
@@ -4158,7 +4284,7 @@
       "base_blob": "117b8d448471b0a4d873b93e3fb2d59ff008095a",
       "base_sha256": "a6eb47d4532c99e6b2f54287d7f7d9ce46126e675dd5bb47899dc0f1d70891d1",
       "lines": 109,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/panels/cleanup/observe.go",
@@ -6405,7 +6531,7 @@
       "base_blob": "7ee933bb05d2a4d07acbf16ca00b7eb583506f54",
       "base_sha256": "ba2430084d0ec7a320d47928965219d6663ebedd52273873c434fe93a58d186f",
       "lines": 49,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/providers/account_health.go",
@@ -6426,7 +6552,7 @@
       "base_blob": "a83d949401c7f113c89560b47f30d01b123206ca",
       "base_sha256": "2dbde42ea1404bd60b2dd9183f885842fe430de31ac3aae046bca9afa48964e5",
       "lines": 132,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/providers/authorization.go",
@@ -6608,7 +6734,7 @@
       "base_blob": "2dff4a24fb210239bb356df429249660dddbef31",
       "base_sha256": "8adfd4c151fafd8ff3d428761d6d6a2afee57c7b8ee214488cd95e4b080051de",
       "lines": 83,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/providers/cloudutil/common.go",
@@ -6811,7 +6937,7 @@
       "base_blob": "a83f302bfe999005d014b1ef8303451f8f782334",
       "base_sha256": "8d6db57d591a1c18fe8c2924928f41ed602a694ef883638321aa00b031b5fc51",
       "lines": 75,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/providers/ip.go",
@@ -6909,7 +7035,7 @@
       "base_blob": "8ec9424329c14dbe0f90979873d419080a4162f6",
       "base_sha256": "9236befa1643d58dbc3133a194834c4bcc38c7e88b635d30761883cdf507f9af",
       "lines": 63,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/providers/onboarding_test.go",
@@ -7035,7 +7161,7 @@
       "base_blob": "aac0dfb56eb18acf17e63f72da92a0847c26ac6c",
       "base_sha256": "7f6c840261228f6430119a875069b77c01329829a78b731a748b468d2bfcb5fc",
       "lines": 87,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/providers/provider_v2_test.go",
@@ -7077,7 +7203,7 @@
       "base_blob": "a2372bfcf70d3c0a63e2a45db0252297944e5aab",
       "base_sha256": "4ab1b3039963c3a81182de32f62b6a59ae2176a61129104bf94d2695bc349412",
       "lines": 90,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/providers/trial.go",
@@ -8519,7 +8645,7 @@
       "base_blob": "8d2059edb63ac1bde593e309e4451fedc611a91a",
       "base_sha256": "c785d95f22a87c392997aadb5b711a6620595fb59f3655716a80f80b9dd543b3",
       "lines": 143,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/supervision/restart.go",
@@ -8533,7 +8659,7 @@
       "base_blob": "fefc275003200adadf9069021d248d6cb51b350b",
       "base_sha256": "d4b8b988105b5a828746e37e831d84645eb51ddda168dcc40a6759d7da6d6187",
       "lines": 98,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/testharness/concurrency_test.go",
@@ -8638,7 +8764,7 @@
       "base_blob": "fabfa16f5b9f81130f6e6da8878ac5ef9248e155",
       "base_sha256": "954f3d82bcabb0df93bb77b893b8e993bb0409483a339028cf9a1b2b1ec7a20f",
       "lines": 254,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/failures_defer_test.go",
@@ -8652,7 +8778,7 @@
       "base_blob": "5e7a8021f1fb48dc685ba4333d4cef0d306c9681",
       "base_sha256": "c4dec96a39379b533b51aa0f535d6440d790f66ff7b30269f78e66f46716f688",
       "lines": 99,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/heartbeat.go",
@@ -8673,7 +8799,7 @@
       "base_blob": "58435ae95c9862c617197b239bd97c18235979dd",
       "base_sha256": "e2fefa6d6045c689d30d37b0c76d8fedb83cb81ad3b3da5b5e9c7fb55ae4e1d7",
       "lines": 102,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/lifecycle_test.go",
@@ -8729,21 +8855,21 @@
       "base_blob": "a261dbd4be86a74556de19bb99bd9615ae48b2fb",
       "base_sha256": "7ac20b2bf1876543cc70cf55d1d5863f3b552718174aaa43f8ed45e8915cf205",
       "lines": 80,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/recovery_checkpoint.go",
       "base_blob": "bf69c733601978ad117361d58fd59ff5ddac9a96",
       "base_sha256": "eedc775a889807cd9a466af38336e07389962301f3f16a579e5bd09c88dba120",
       "lines": 334,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/recovery_checkpoint_test.go",
       "base_blob": "a1ae7a327298f3b66599f0fec180b459d2062d7c",
       "base_sha256": "ca32b015f649daa6df97d76f33f3fafcb7bc544d44c544739dc93b2f9de1e699",
       "lines": 377,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/remediation_extra_test.go",
@@ -8799,7 +8925,7 @@
       "base_blob": "74923e1528821d6b768bb0011d14c0f9b339f20c",
       "base_sha256": "6a62bcb8e39bae0bae0bcfe6a382bf6fab7c87eb0ec43b1c761a8475c911e108",
       "lines": 126,
-      "inspection": "pending"
+      "inspection": "fully_read"
     },
     {
       "path": "internal/worker/work_class.go",

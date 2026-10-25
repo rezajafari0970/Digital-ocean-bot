@@ -1,0 +1,254 @@
+{
+  "schema": 1,
+  "at": "2026-10-25T12:27:48.390083+00:00",
+  "whole_project_review_complete": false,
+  "source": {
+    "implementation_commit": "bb6e4f9fd1f0a21b58b83c2610ba6561d8012148",
+    "canonical_merge": "a70937c8ab07266d9f1dbb8843b1b9ee7cd69b4e",
+    "canonical_branch": "checkpoint/final-e2e-20260929",
+    "pr": 7,
+    "documentation_checkpoint": "the commit containing this record"
+  },
+  "coverage": {
+    "baseline_go_files": 1218,
+    "baseline_go_lines": 146345,
+    "baseline_go_fully_read": 42,
+    "baseline_go_fully_read_lines": 6727,
+    "fully_read_total_files": 48,
+    "fully_read_current_lines": 7759,
+    "search_or_partial_reads_counted_as_full": false
+  },
+  "verification": {
+    "source_ci_run": 40191489281,
+    "source_ci_passed": true,
+    "required_db_native_race_tests": 193,
+    "required_gate_skips": 0,
+    "api_fake_transport_tests": 23,
+    "gate_contract_tests": 10,
+    "consecutive_lifecycle_isolation_checks": 20,
+    "public_ci_run": 40191888240,
+    "public_ci_passed": true,
+    "fresh_and_repeat_install_passed": true,
+    "promotion_run": 40192190248,
+    "atomic_promotion_passed": true,
+    "prior_failed_ci_run": 40190644133,
+    "prior_timeout_root_cause_proven": false
+  },
+  "public_release": {
+    "main": "6c92d419fa1f48cbb06fe823fb9170b7b1351198",
+    "stable": "6c92d419fa1f48cbb06fe823fb9170b7b1351198",
+    "export_files": 1725,
+    "manifest_sha256": "c4fdbac9257760a5f234cbdaec98742bd4b1880f7e37e2fdea8fff9d4a480ba0"
+  },
+  "default_rollout": {
+    "commit": "6c92d419fa1f48cbb06fe823fb9170b7b1351198",
+    "verified_at": "2026-10-25T12:19:48.169886+00:00",
+    "update_exit": 0,
+    "services": [
+      {
+        "unit": "digital-ocean-bot-api",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      },
+      {
+        "unit": "digital-ocean-bot-worker-panels",
+        "active": true,
+        "hash_match": true,
+        "restarts": 0
+      }
+    ],
+    "readiness_checks_passed": 5,
+    "preservation_checks": {
+      "master_key_hash": true,
+      "environment_hash": true,
+      "creation_policy": true,
+      "output_policy": true,
+      "protection_policy": true,
+      "trojan_policy": true,
+      "unified": true,
+      "profile_policy": true,
+      "selective_ads_enabled": true,
+      "cloudflare_settings": true,
+      "cloudflare_secret_hashes": true,
+      "account_settings": true,
+      "profile_ownership": true,
+      "trojan_ownership": true
+    },
+    "schema": "000195_provider_snapshot_latest",
+    "profile_identities_in_preservation_cohort": 0,
+    "trojan_identities_in_preservation_cohort": 0,
+    "production_fleet_acceptance": false,
+    "controlled_service_restart": true,
+    "build_memory_max_bytes": 1073741824,
+    "build_cpu_quota_percent": 100
+  },
+  "live_final": {
+    "at": "2026-10-25T12:25:26.797015+00:00",
+    "free_bytes": 4285104128,
+    "instances": {
+      "default": {
+        "manifest_commit": "6c92d419fa1f48cbb06fe823fb9170b7b1351198",
+        "version": {
+          "commit": "6c92d419fa1f48cbb06fe823fb9170b7b1351198",
+          "build_time": "2026-10-25T12:15:40Z",
+          "go_version": "go1.27.1",
+          "modified": false
+        },
+        "readiness": {
+          "status": "ready",
+          "checks": [
+            {
+              "name": "database",
+              "ok": true
+            },
+            {
+              "name": "worker_progress",
+              "ok": true
+            },
+            {
+              "name": "panel_worker_progress",
+              "ok": true
+            },
+            {
+              "name": "lifecycle_account_lanes",
+              "ok": true
+            },
+            {
+              "name": "client_mutation_progress",
+              "ok": true
+            }
+          ],
+          "at": "2026-10-25T12:25:26.833588335Z"
+        },
+        "services": [
+          {
+            "unit": "digital-ocean-bot-api",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          },
+          {
+            "unit": "digital-ocean-bot-worker",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          },
+          {
+            "unit": "digital-ocean-bot-worker-panels",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          }
+        ]
+      },
+      "production": {
+        "manifest_commit": "5dc2c25678698dbbe9ac1cfee7d18701c19213e7",
+        "version": {
+          "commit": "5dc2c25678698dbbe9ac1cfee7d18701c19213e7",
+          "build_time": "2026-10-25T03:16:25Z",
+          "go_version": "go1.27.1",
+          "modified": false
+        },
+        "readiness": {
+          "status": "ready",
+          "checks": [
+            {
+              "name": "database",
+              "ok": true
+            },
+            {
+              "name": "worker_progress",
+              "ok": true
+            },
+            {
+              "name": "panel_worker_progress",
+              "ok": true
+            },
+            {
+              "name": "lifecycle_account_lanes",
+              "ok": true
+            },
+            {
+              "name": "client_mutation_progress",
+              "ok": true
+            }
+          ],
+          "at": "2026-10-25T12:25:26.963835715Z"
+        },
+        "services": [
+          {
+            "unit": "dob-production-api",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          },
+          {
+            "unit": "dob-production-worker",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          },
+          {
+            "unit": "dob-production-worker-panels",
+            "active": true,
+            "hash_match": true,
+            "restarts": 0
+          }
+        ]
+      }
+    }
+  },
+  "production_rollout": {
+    "state": "blocked_disk_reserve",
+    "running_commit": "5dc2c25678698dbbe9ac1cfee7d18701c19213e7",
+    "last_preflight_free_bytes": 4286414848,
+    "last_preflight_reserve_bytes": 6593004605,
+    "preflight_retained_candidate": "8d838efa34acc2bd6004045ccf335cc22cb5b2ef",
+    "retained_candidate_is_latest": false,
+    "fresh_dynamic_preflight_required": true,
+    "deploy_attempt_this_audit": false,
+    "no_retained_backup_or_incident_evidence_deleted": true
+  },
+  "original_host": {
+    "verified_at": "2026-10-25T12:19:50.382935+00:00",
+    "database_and_application_quarantined_inactive": true,
+    "publisher_timer_inactive_disabled": true,
+    "heavy_builds_or_tests_run": false
+  },
+  "openai": {
+    "model": "gpt-6-astra",
+    "reasoning_effort": "max",
+    "new_generation_requests_this_audit": 0,
+    "ledger_host": "original",
+    "ledger_schema": 2,
+    "budget_micro_usd": 2000000,
+    "attempt_cap": 3,
+    "unknown_attempts": 1,
+    "unknown_reserved_micro_usd": 1501011,
+    "actual_tokens": null,
+    "actual_billed_cost": null,
+    "usage_get_http_status": 403,
+    "usage_get_at": "2026-10-25T12:12:26.628201+00:00",
+    "unknown_blocks_new_paid_submissions": true,
+    "schema1_evidence_preserved": true,
+    "helper_sha256": "a909b3cdaf3d79eb226f09b5659c080d946cd2d861853cf838191fd9557ff2db"
+  },
+  "remaining": [
+    "semantic review of remaining files and individual provider/panel implementations",
+    "distributed fencing before multi-host active/active claims",
+    "production metrics/tracing integration",
+    "isolated restore and sustained load/fault drills",
+    "root cause of retained lifecycle discovery timeout",
+    "production disk headroom and guarded update to verified latest stable",
+    "provider usage reconciliation before another paid model review",
+    "original physical corruption cause and quarantine resolution",
+    "live AWS, selected DNS quota and gateway management acceptance"
+  ]
+}

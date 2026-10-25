@@ -8,22 +8,23 @@ zero-error operation.
 ## Coverage and acceptance stages
 
 The baseline contains 6,491 tracked files, including 1,218 Go files / 146,345 lines
-(including tests). This checkpoint fully reads 21 baseline Go files / 4,002 lines,
-plus six supporting or newly authored files: 27 files / 5,032 current lines total.
+(including tests). This checkpoint fully reads 42 baseline Go files / 6,727 lines,
+plus six supporting or newly authored files: 48 files / 7,759 current lines total.
 Search matches and partial reads do not count as full-file inspections.
 SYSTEM_AUDIT_RESTART_20261025.json records every baseline Go file, its blob/hash,
 module, line count and pending/read status, plus exact current hashes of inspected
 files. These counts describe inspected source, not successful live acceptance.
 
-| Stage | State at implementation checkpoint | Acceptance requirement |
+| Stage | State at final checkpoint | Acceptance requirement |
 | --- | --- | --- |
 | Baseline, access and runtime identity | Verified | Exact source/release identity, original quarantine, both readiness endpoints |
-| Entry points, ownership, supervision and resource admission | 21 baseline Go files read | Broader lifecycle/failure tests and bounded-load evidence still required |
-| Database migration history | Defect fixed; independent PostgreSQL regression pending | NULL/empty checksum sealed, no replay, later drift rejected, data retained |
-| API review durability and consumption | 23 fake-transport tests pass | Receipt/poll recovery, durable result, unchanged USD2/three-attempt cap |
+| Entry points, ownership, supervision and resource admission | 42 baseline Go files read | Broader lifecycle/failure tests and bounded-load evidence still required |
+| Database migration history | Fixed; both legacy cases pass independent PostgreSQL regression | NULL/empty checksum sealed, no replay, later drift rejected, data retained |
+| API review durability and consumption | 23 fake-transport tests pass; original ledger migration verified | Receipt/poll recovery, durable result, unchanged USD2/three-attempt cap |
 | Provider drivers, panel modules and user flows | Shared boundaries partly read; individual implementations pending | Per-driver ownership, unknown outcomes, quotas, cancellation and native API tests |
 | Database restore, service outage and sustained load | Broader drills pending | Isolated restore/failure evidence, measured recovery time and resource bounds |
-| Source CI, GitHub release and installation | Pending for this candidate | Exact source gate, full secret scan, independent fresh/repeat installation |
+| Source CI, GitHub release and installation | Passed; source PR7 and public6c92d419 published | Exact source gate, full secret scan, independent fresh/repeat installation |
+| Default installation rollout | Completed; exact 6c92d419 verified | Three running hashes, five readiness checks and 14 preservation checks pass |
 | Production rollout | Disk reserve blocked | Restore sufficient headroom before ordinary guarded updater |
 
 ## Migration checksum defect
@@ -120,5 +121,149 @@ Do not describe it as the latest update. No unrelated Telegram application data,
 retained database evidence or backup vault was deleted.
 
 Private evidence/workspace: /root/dob-audit-restart-20261025 and
-/root/projects/dob-audit-restart-20261025. Final CI, release/deployment results and
-the exact next action will be appended after independent verification.
+/root/projects/dob-audit-restart-20261025. Independent verification and the remaining operational blockers are recorded below.
+
+
+## Additional architecture coverage
+
+Factories and capability interfaces separate provider contracts. Bootstrap still
+registers the six factories at compile time, and Container.openDriver contains
+provider-specific setup branches. Dynamic plugin loading and complete removal
+of that core coupling have not been implemented or verified. They are separate
+refactoring work, with ownership/credential regressions required before changes.
+
+Readiness validates fresh process identity, expected role/module sets, stage
+progress and database integrity watermarks. The generic Prometheus Metrics helper
+currently has no production caller in cmd/internal; source inspection found no
+/metrics or OpenTelemetry integration there. Existing heartbeats and readiness
+must not be described as complete exported metrics/tracing coverage.
+
+## Independent CI timeout investigation
+
+Run40190534757 passed the initial implementation. The metadata-updated candidate
+in run40190644133 passed the new NULL/empty migration cases, but the pre-existing
+TestRecoveryReaperDoesNotTouchLifecycleLane hit the existing 10-second discovery
+deadline after10.61s. That failed run is retained; it is not relabeled as success.
+
+Inspection covered the discovery queries, checkpoint ownership, session release,
+failure ledger and fixture lifetimes. No definite root cause was established.
+The release gate now requires20 consecutive repetitions before its full193-test
+run. One failed repetition rejects publication; this is not a retry-until-green
+loop. The test logs elapsed discovery time and pool state on failure. Runtime
+deadlines, assertions and fixture workload are unchanged.
+
+Final source run40191489281 passed all20 repetitions and the full193-test gate,
+zero skips. The first repeated scan took3.590953602s; the other19 took about
+30–47ms, and the full-suite scan took30.392914ms. Cold-start overhead is a possible
+explanation, not a proven diagnosis or a claimed runtime fix. Preserve this
+investigation if the deadline recurs; do not just raise the timeout.
+
+## Exact source and installable release
+
+- Implementation: bb6e4f9fd1f0a21b58b83c2610ba6561d8012148;
+  PR7 merged as a70937c8ab07266d9f1dbb8843b1b9ee7cd69b4e.
+- Source CI40191489281: full Go/vet/browser checks,23 API-control tests,10 gate
+  tests,20 repeated isolation checks and193 mandatory DB/native/race tests,
+  zero skips in the required gate.
+- Public release6c92d419fa1f48cbb06fe823fb9170b7b1351198 contains1,725 files.
+  Both current live-secret comparisons and gitleaks passed the full export.
+- Public CI40191888240 passed exact source validation, fresh Ubuntu24.04 amd64
+  installation and repeated installation, all five readiness checks, ordinary
+  login and installation identity preservation.
+- Promotion40192190248 updated main and stable atomically with expected-head
+  leases. Both refs were independently verified at6c92d419.
+
+Evidence links:
+https://github.com/rezajafari0970/Digital-ocean-bot/pull/7
+https://github.com/rezajafari0970/Digital-ocean-bot/actions/runs/40191489281
+https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/40191888240
+https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/40192190248
+
+## Authoritative API ledger continuity
+
+At11:56:44UTC the exact helper was installed in
+/root/dob-api-review-receipts-20261025 on the ORIGINAL host; SHA256
+ a909b3cdaf3d79eb226f09b5659c080d946cd2d861853cf838191fd9557ff2db.
+The original ledger was explicitly migrated to schema2. Its schema1 evidence copy
+matches the old state, every original request field and USD1.501011 reservation
+are unchanged, and there is still exactly one unknown attempt. No ledger was
+created on the recovery host. The earlier synchronous helper/wrapper is historical;
+use the receipt-based helper only after provider usage reconciliation.
+
+A single read-only GET to the official organization usage endpoint at12:12:26UTC
+returnedHTTP403 using the existing key. No consumption record was obtained and
+no ledger settlement was applied. There were zero new generation requests in
+this restarted audit. Actual usage of the earlier attempt is still unknown.
+The key value was never printed or transferred. The original PG/application and
+publisher timer/services were reverified inactive; no heavy build/test ran there.
+
+At12:08:10UTC a read-only query of BOTH recovery databases found195 migrations,
+zero NULL checksums and zero empty checksums, schema000195_provider_snapshot_latest.
+The newly fixed legacy condition was not present in either running installation.
+
+## Default deployment and final live acceptance
+
+The default installation was updated from 80c85157 to 6c92d419 using the ordinary
+guarded updater through ops/release/run-bounded-update.sh. A private pre-update
+database dump and configuration baseline were retained. The build had systemd
+MemoryMax=1GiB, MemoryHigh=768MiB, CPUQuota=100%, GOMEMLIMIT=384MiB,
+GOMAXPROCS=2 and GOFLAGS=-p=1. It completed successfully in about226 seconds.
+A controlled service restart occurred; this is not a zero-downtime claim.
+
+At12:19:48UTC all three default services were active with exact executable
+hashes, NRestarts=0, all five readiness checks passing and all14 policy,
+credential/configuration and ownership preservation checks true. Schema remains
+000195_provider_snapshot_latest. The default instance has zero profile/Trojan
+identities; this result is not acceptance of the production fleet.
+
+At12:25:26UTC both recovery installations were checked again. All six running
+executable hashes matched their respective manifests, both endpoints passed all
+five readiness checks, and NRestarts remained0. Default runs6c92d419; production
+continues to run5dc2c256. The original host's PostgreSQL, application and publisher
+were separately confirmed inactive at12:19:50UTC. Its quarantine is retained.
+
+After the bounded updater had exited and no build process remained, only three
+known completed, reproducible Go caches were removed. This recovered406,007,808
+bytes. No retained backups, incident evidence or unrelated application data was
+removed. The subsequent read-only production preflight still failed the reserve:
+4,286,414,848 bytes free against6,593,004,605 required. Its retained candidate is
+the OLD8d838efa stage, not current6c92d419. The final live snapshot had
+4,285,104,128 bytes free. Disk figures are point-in-time observations; allow
+additional build/backup growth and repeat dynamic preflight before deployment.
+No production updater or new production backup was attempted in this audit.
+
+Private operational evidence is under
+/root/dob-audit-restart-20261025/default-rollout and live-final.json.
+The public acceptance JSON contains aggregate verified outcomes, not private
+configuration, database contents or credentials.
+
+## Remaining work and exact continuation
+
+1. Continue the pending inventory from provider factories into each driver's
+   ownership, retries, unknown outcomes, quotas and cancellation contracts;
+   then cover panel APIs and remaining worker/account flows. Partial reads are
+   separately recorded and must not be counted as completed files.
+2. Exercise restore, service/process failure, dependency outages, cancellation,
+   pool fairness and sustained resource growth in isolated environments. Add
+   exported metrics/traces with explicit cardinality/resource bounds. Do not
+   inject faults into either live installation or restart the original cluster.
+3. Resolve disk headroom without removing retained recovery evidence or unrelated
+   application data. Reverify latest stable and its CI, take a fresh preservation
+   baseline, and run /usr/local/sbin/dob-production update through the bounded
+   launcher with normal integrity/backup/archive guards. Do not use the old fixed
+   candidate resume helper as a latest-release updater.
+4. Obtain verifiable provider usage for the receiptless11:14:16UTC attempt before
+   another paid review. Preserve the original schema2 ledger, its schema1
+   evidence and the USD1.501011 reservation. No duplicate ledger, override,
+   automatic retry or reset is allowed. Subsequent authorized reviews must use
+   the tested background receipt/poll helper and the existing USD2/three-attempt
+   cap; fake-transport tests do not constitute a model review.
+5. Retain the failed discovery-timeout evidence and diagnose recurrence with the
+   added timings/pool state. Twenty passing repetitions do not prove its cause
+   is repaired. Original physical storage cause, live AWS acceptance, selected
+   DNS capacity and gateway management remain unresolved historical blockers.
+
+The latest PROJECT_STATE.md and HANDOFF.md entries supersede earlier entries
+about API inaccessibility, ledger schema1 and default release80c85157. Historical
+evidence remains intact. This checkpoint completes the documented fixes and
+their release/default rollout; the full project audit is still in progress.

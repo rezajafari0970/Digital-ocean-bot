@@ -1,3 +1,80 @@
+## Restarted audit, verified release and default rollout — 2026-10-25T12:27:48.390083+00:00
+
+Read docs/SYSTEM_AUDIT_RESTART_20261025.md, its inventory JSON and
+docs/SYSTEM_AUDIT_RESTART_20261025_ACCEPTANCE.json first. The new audit baseline
+is c41ee01ae47ac0c26a6db84ce951986f01a7d716: 1,218 Go files / 146,345 lines.
+42 baseline Go files / 6,727 lines plus six supporting/new files were fully read
+(48 files / 7,759 current lines, exact hashes). The whole-project audit remains
+INCOMPLETE; do not count search matches or partial reads as completed inspections.
+
+Fixed missing legacy migration checksums for both NULL and empty strings without
+replaying applied SQL; PostgreSQL regression verifies idempotence, drift rejection
+and retained data. Replaced the synchronous review helper with one background
+POST, durable response receipts and resumable GET polling. All23 fake-transport
+tests passed. Unknown submissions still block new paid requests.
+
+Implementation bb6e4f9fd1f0a21b58b83c2610ba6561d8012148 merged through PR7 as a70937c8ab07266d9f1dbb8843b1b9ee7cd69b4e.
+Canonical branch: checkpoint/final-e2e-20260929. Worktree:
+ /root/projects/dob-audit-restart-20261025, local branch fix/audit-restart-20261025.
+This documentation checkpoint is a child of that merge; use git HEAD for its
+exact commit. Source CI40191489281 passed full Go/vet/browser checks,23 API tests,
+10 gate tests,20 consecutive lifecycle isolation checks and193 mandatory
+PostgreSQL/native/race tests with zero required skips. Earlier CI40190644133
+failed an existing 10-second recovery-discovery test. Its cause remains unproven;
+diagnostic timing was added, deadlines/assertions stayed unchanged. Preserve
+the failure and diagnose recurrence, rather than simply increasing its timeout.
+
+Public main/stable are 6c92d419fa1f48cbb06fe823fb9170b7b1351198. Exact public CI40191888240
+passed source validation and independent Ubuntu24.04 fresh/repeat installation,
+readiness/login and identity preservation. Promotion40192190248 updated both
+refs atomically. Full public export and final checkpoint files must pass
+comparison with BOTH live configuration secret sets and gitleaks before push.
+
+Default installation now runs6c92d419 after the normal guarded update bounded
+to1GiB/oneCPU. Its12:19:48UTC acceptance passed three hashes, five readiness and
+all14 preservation checks; schema195 unchanged. Controlled restart occurred.
+There are zero profile/Trojan identities in default, so this does not validate
+the production fleet. At12:25:26UTC both instances passed readiness and all six
+executable hashes, NRestarts=0. Production remains 5dc2c25678698dbbe9ac1cfee7d18701c19213e7.
+
+Production deployment is still BLOCKED by disk reserve: read-only preflight
+found4,286,414,848 bytes free versus6,593,004,605 required; final live free space
+was4,285,104,128 bytes. Only completed reproducible Go caches were removed
+(~406MB); no backup, incident evidence or unrelated app data was deleted.
+The retained /opt/.dob-release.bXqgHMgu is OLD8d838efa, not current6c92d419.
+After restoring sufficient headroom for build/backup growth, reverify current
+stable and CI, take a fresh preservation baseline and use the ordinary
+/usr/local/sbin/dob-production update through ops/release/run-bounded-update.sh.
+Retain every integrity/archive guard. Do not bypass reserves or deploy the old
+fixed candidate under a latest-release label.
+
+Original Remote Desktop is ONLINE; its existing private OpenAI key remains at
+/etc/digital-ocean-bot/openai.env. No key was printed or transferred. At12:19:50UTC
+original PostgreSQL/API/workers and publisher were inactive; keep quarantine.
+Its installed publisher has not been updated/enabled. No heavy test/build ran
+on the original host.
+
+The authoritative ORIGINAL ledger /var/lib/datacenter-bot-audit/openai/ledger.json
+was migrated to schema2 at11:56:44UTC, preserving every original request field
+and an exact schema1 evidence copy. The one11:14:16UTC receiptless request remains
+unknown withUSD1.501011 reserved; actual tokens/billed cost are UNKNOWN, not zero.
+This restart sent ZERO new generation requests. One read-only organization usage
+GET returnedHTTP403 at12:12:26UTC, so no reconciliation was possible. No replacement
+ledger was created on recovery. KeepUSD2/three attempts, gpt-6-astra/max and all
+reservations; no automatic retry/reset/override. Obtain provider usage before
+another paid review, then use only the receipt-based helper. Installed helper
+SHA256 a909b3cdaf3d79eb226f09b5659c080d946cd2d861853cf838191fd9557ff2db.
+
+Exact next independent work: continue per-provider/panel and remaining worker
+semantic coverage from the inventory; run isolated restore/fault/load drills;
+review multi-host distributed fencing and implement bounded metrics/tracing.
+Provider factories are still compile-time and core setup has provider-specific
+branches; readiness is not complete metrics/tracing. Storage corruption cause,
+live AWS acceptance, selected DNS quota and gateway management remain unresolved.
+Private evidence: /root/dob-audit-restart-20261025; original API evidence:
+ /root/dob-api-review-receipts-20261025. Earlier entries below are historical and
+do not override these current release, access, ledger or blocker states.
+
 ## OpenAI access restored; uncertain request remains budget-blocked — 2026-10-25T11:24:23.461330+00:00
 
 Read docs/OPENAI_ACCESS_RESTORED_20261025.md first for current API state. Original Remote Desktop is ONLINE and its existing /etc/digital-ocean-bot/openai.env is root-owned mode0600 with a key; model metadata for gpt-6-astra returnedHTTP200. The access blocker is resolved. Key contents were never printed or transferred. Original PG/API/worker services remain inactive/quarantined; do not restart them.
