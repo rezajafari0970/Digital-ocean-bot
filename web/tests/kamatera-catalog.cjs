@@ -1,0 +1,10 @@
+'use strict';
+const assert=require('node:assert/strict');
+const {priceLabel,planLabel}=require('../static/kamatera-catalog.js');
+const plan={ID:'1A-1024-20',CPU:1,MemoryMB:1024,DiskGB:20,DetailsByRegion:{EU:{CPUType:'A'}},PricesByRegion:{EU:{Currency:'USD',Hourly:4/730,MonthlyEstimate:4,Complete:true,Scope:'kamatera-public-base-hourly-v1'}}};
+assert.match(priceLabel(plan,'EU'),/0.005479\/h.*4.00\/730h base/);
+assert.match(planLabel(plan,'EU'),/1 GB RAM.*1 vCPU A Availability.*20 GB SSD/);
+assert.equal(priceLabel(plan,'US'),'Price unavailable');
+for(const change of [{Complete:false},{Hourly:0},{Hourly:Infinity},{MonthlyEstimate:NaN},{Scope:'compute_only'},{Currency:'EUR'}])assert.equal(priceLabel({...plan,PricesByRegion:{EU:{...plan.PricesByRegion.EU,...change}}},'EU'),'Price unavailable');
+assert.match(priceLabel({...plan,DetailsByRegion:{EU:{CPUType:'T'}}},'EU'),/base \+ CPU usage/);
+console.log('PASS Kamatera exact regional base pricing and missing-price semantics');

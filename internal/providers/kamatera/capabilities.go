@@ -49,7 +49,7 @@ func (d *Driver) suggestedSizes(ctx context.Context, region string) ([]sizeData,
 		}
 		seen[cpu.ID] = true
 		for _, shape := range shapes {
-			s := sizeData{Cores: shape[0], RAM: shape[1], Disk: shape[2], CPUType: cpu.ID, Traffic: c.DefaultTraffic}
+			s := sizeData{Suggested: true, Cores: shape[0], RAM: shape[1], Disk: shape[2], CPUType: cpu.ID, Traffic: c.DefaultTraffic}
 			if s.valid() && containsDimension(cpu.Cores, s.Cores) && containsDimension(cpu.RAM, s.RAM) && containsDimension(c.Disks, s.Disk) {
 				out = append(out, s)
 			}

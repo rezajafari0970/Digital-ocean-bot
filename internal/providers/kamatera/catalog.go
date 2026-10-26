@@ -19,12 +19,13 @@ type location struct {
 	City    string `json:"subCategory"`
 }
 type sizeData struct {
-	ID      string `json:"id"`
-	RAM     int    `json:"ramMB"`
-	Disk    int    `json:"diskSizeGB"`
-	CPUType string `json:"cpuType"`
-	Cores   int    `json:"cpuCores"`
-	Traffic string `json:"monthlyTrafficPackage"`
+	Suggested bool   `json:"-"`
+	ID        string `json:"id"`
+	RAM       int    `json:"ramMB"`
+	Disk      int    `json:"diskSizeGB"`
+	CPUType   string `json:"cpuType"`
+	Cores     int    `json:"cpuCores"`
+	Traffic   string `json:"monthlyTrafficPackage"`
 }
 type imageData struct {
 	ID     string         `json:"id"`
@@ -95,12 +96,16 @@ func (d *Driver) images(ctx context.Context, region string) ([]imageData, error)
 	}
 	return xs, nil
 }
-func (d *Driver) CatalogCacheVersion() string { return "kamatera-cloudcli-capabilities-v2" }
+func (d *Driver) CatalogCacheVersion() string { return "kamatera-cloudcli-public-pricing-v3" }
 func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 	regions, e := d.locations(ctx)
 	if e != nil {
 		return providers.Catalog{}, e
 	}
+	priceCtx, cancelPrice := context.WithCancel(ctx)
+	defer cancelPrice()
+	priceResult := make(chan *publicTariff, 1)
+	go func() { p, _ := d.publicTariff(priceCtx); priceResult <- p }()
 	type bundle struct {
 		sizes  []sizeData
 		images []imageData
@@ -132,7 +137,23 @@ func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 		}(i)
 	}
 	wg.Wait()
-	out := providers.Catalog{CacheVersion: d.CatalogCacheVersion(), FetchedAt: time.Now().UTC(), Regions: []providers.Region{}, Plans: []providers.Plan{}, Images: []providers.Image{}, Pricing: &providers.CatalogPricing{Status: "unavailable", Basis: "Published API does not provide verified catalog prices", Source: "Kamatera CloudCLI", ObservedAt: time.Now().UTC()}}
+	// Pricing is advisory: failures cannot invalidate working API credentials.
+	for _, b := range bs {
+		if b.err != nil {
+			return providers.Catalog{}, b.err
+		}
+	}
+	var tariff *publicTariff
+	select {
+	case tariff = <-priceResult:
+	case <-ctx.Done():
+		return providers.Catalog{}, ctx.Err()
+	}
+	if ctx.Err() != nil {
+		return providers.Catalog{}, ctx.Err()
+	}
+	priced, total := 0, 0
+	out := providers.Catalog{CacheVersion: d.CatalogCacheVersion(), FetchedAt: time.Now().UTC(), Regions: []providers.Region{}, Plans: []providers.Plan{}, Images: []providers.Image{}, Pricing: &providers.CatalogPricing{Status: "unavailable", Basis: "Official public base price unavailable; retry catalog refresh", Source: pricingURL}}
 	plans := map[string]*providers.Plan{}
 	images := map[string]*providers.Image{}
 	for i, r := range regions {
@@ -148,13 +169,23 @@ func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 			id := s.planID()
 			p := plans[id]
 			if p == nil {
-				p = &providers.Plan{ID: id, Name: id, CPU: s.Cores, MemoryMB: s.RAM, DiskGB: s.Disk, Available: true, IDsByRegion: map[string]string{}}
+				p = &providers.Plan{ID: id, Name: id, CPU: s.Cores, MemoryMB: s.RAM, DiskGB: s.Disk, Available: true, IDsByRegion: map[string]string{}, DetailsByRegion: map[string]providers.PlanRegionDetails{}, PricesByRegion: map[string]providers.PlanPrice{}}
 				plans[id] = p
 			}
 			if p.IDsByRegion[r.ID] != "" {
 				continue
 			}
 			p.IDsByRegion[r.ID] = id
+			origin := "provider_preset"
+			if s.Suggested {
+				origin = "custom_preset"
+			}
+			p.DetailsByRegion[r.ID] = providers.PlanRegionDetails{NativeID: s.ID, CPUType: s.CPUType, CatalogOrigin: origin, BillingCycle: "hourly", CPU: s.Cores, MemoryMB: s.RAM, DiskGB: s.Disk, Supported: true, OS: "Ubuntu"}
+			total++
+			if price, ok := tariff.quote(s, r.ID, b.images); ok {
+				p.PricesByRegion[r.ID] = price
+				priced++
+			}
 			p.AvailableRegions = append(p.AvailableRegions, r.ID)
 		}
 		sort.Slice(b.images, func(i, j int) bool { return b.images[i].ID < b.images[j].ID })
@@ -171,6 +202,17 @@ func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 			}
 			if x.IDsByRegion[r.ID] == "" {
 				x.IDsByRegion[r.ID] = im.ID
+			}
+		}
+	}
+	if tariff != nil {
+		out.Pricing.ObservedAt = tariff.observed
+		out.Pricing.Currency = "USD"
+		out.Pricing.Basis = "Public powered-on base estimate; hourly billing; 730-hour equivalent, not a cap; traffic, tax, discounts and Type T CPU usage excluded"
+		if priced > 0 {
+			out.Pricing.Status = "partial"
+			if priced == total {
+				out.Pricing.Status = "available"
 			}
 		}
 	}
