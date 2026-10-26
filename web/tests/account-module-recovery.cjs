@@ -63,7 +63,7 @@ const {spawn}=require('node:child_process'),assert=require('node:assert/strict')
   await call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
   await call('Page.addScriptToEvaluateOnNewDocument',{source:'if(location.origin==='+JSON.stringify(base)+')localStorage.setItem("token","fixture")'});
   const evaluate=async expression=>{const r=await call('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw Error(r.exceptionDetails.exception?.description||r.exceptionDetails.text);return r.result.value};
-  const wait=async expression=>{for(let i=0;i<150;i++){if(await evaluate(expression))return;await new Promise(r=>setTimeout(r,50))}throw Error('Timed out: '+expression+'; '+await evaluate('document.querySelector("#modalError")?.textContent'))};
+  const wait=async (expression,limit=150)=>{for(let i=0;i<limit;i++){if(await evaluate(expression))return;await new Promise(r=>setTimeout(r,50))}throw Error('Timed out: '+expression+'; '+await evaluate('document.querySelector("#modalError")?.textContent'))};
   await call('Page.navigate',{url:base+'/admin/#accounts'});
   await wait('typeof activePageView!=="undefined"&&current==="accounts"&&!activePageView.loading');
   assert.equal(await evaluate('typeof AWSCatalog'),'undefined');
@@ -123,10 +123,34 @@ const {spawn}=require('node:child_process'),assert=require('node:assert/strict')
   await save('vultr');
   console.log('PASS delayed provider module cannot submit or overwrite a newer wizard');
 
+  // A timed-out caller must share the original still-loading script on retry.
+  await evaluate('delete window.AWSCatalog');
+  delayedModule='aws-catalog.js';await open('aws');const beforeTimeout=previews.length;
+  const beforeScripts=scriptRequests.filter(x=>x==='aws-catalog.js').length;
+  await validate();
+  await wait('document.querySelector("#modalError").textContent.includes("AWSCatalog")&&!document.querySelector("#discoverAccount").disabled',260);
+  assert(releaseModule);assert.equal(previews.length,beforeTimeout);
+  await validate();await new Promise(r=>setTimeout(r,100));
+  assert.equal(scriptRequests.filter(x=>x==='aws-catalog.js').length,beforeScripts+1,'timeout retry shares the original load');
+  releaseModule();releaseModule=null;await ready();
+  assert.equal(previews.length,beforeTimeout+1,'only the current preview can proceed');
+  assert.equal(await evaluate('document.querySelector("#modalSubmit").disabled'),true);
+  await evaluate('document.querySelector("[name=approve_managed_network]").click()');await save('aws');
+  console.log('PASS timeout/retry/late response uses one script and preserves AWS consent');
+
   await open('vultr');apiError='Provider rejected these credentials';
   await validate();await wait('document.querySelector("#modalError").textContent.includes("Provider rejected")&&!document.querySelector("#discoverAccount").disabled');
   assert.equal(await evaluate('document.querySelector("#modalSubmit").disabled&&cache.accountPreview===null'),true);
   assert.equal(await evaluate('document.querySelector("[name=token]").value'),'fixture-token');
+  await evaluate('document.querySelector("#modalCancel").click();delete window.AccountCatalog');
+  blocked.add('account-catalog.js');
+  await evaluate('document.querySelector("#primaryAction").click()');
+  await wait('document.querySelector("#toast").textContent.includes("Unable to open form")');
+  assert.equal(await evaluate('document.querySelector("#modal").open'),false);
+  assert.match(await evaluate('document.querySelector("#toast").textContent'),/AccountCatalog/);
+  blocked.delete('account-catalog.js');apiError='';
+  await open('vultr');await validate();await ready();await save('vultr');
+  console.log('PASS unavailable shared module has visible opening error and recovery');
   assert.deepEqual(errors,[],'no uncaught browser exceptions');
   console.log('PASS genuine provider rejection remains blocked; no script exception or mutation replay');
  }finally{
