@@ -355,8 +355,7 @@ def main():
             result = poll_review(os.environ.get('OPENAI_API_KEY'), attempt=args.attempt)
         else:
             result = submit_review(sys.stdin.read(MAX_INPUT_BYTES + 1), os.environ.get('OPENAI_API_KEY'),
-                                   max_output_tokens=args.max_output_tokens, label=args.label,
-                                   allow_held_unknown=args.allow_held_unknown)
+                                   max_output_tokens=args.max_output_tokens, label=args.label)
     except (ReviewBlocked, OSError) as exc:
         print(json.dumps({'blocked': str(exc) if isinstance(exc, ReviewBlocked) else 'private_io_failed'}), file=sys.stderr)
         return 78

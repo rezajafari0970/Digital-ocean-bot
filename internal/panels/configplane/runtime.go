@@ -23,7 +23,7 @@ var trafficProbeScript string
 //go:embed runtime.py
 var runtimeBody string
 
-var runtimeScript = trafficProbeScript + "\n" + runtimeBody
+var runtimeScript = trafficProbeScript + "\n" + runtimeUsersScript + "\n" + runtimeBody
 
 // The native panel can hot-add inbounds through Xray's API without changing its
 // startup file. Verify the running process, its actual socket, active users and
@@ -63,7 +63,11 @@ func (s Service) verifyRuntime(ctx context.Context, t provisioning.Target, key [
 		}
 		emails = append(emails, email)
 	}
-	wanted := map[string]any{"protocol": obj["protocol"], "port": obj["port"], "tag": obj["tag"], "emails": emails, "probes": obj["probe_outbounds"], "probe_classes": obj["probe_classes"], "core_hashes": profileCoreHashes()}
+	vlessUsers, err := expectedNativeVLESSUsers(obj)
+	if err != nil {
+		return err
+	}
+	wanted := map[string]any{"vless_users": vlessUsers, "protocol": obj["protocol"], "port": obj["port"], "tag": obj["tag"], "emails": emails, "probes": obj["probe_outbounds"], "probe_classes": obj["probe_classes"], "core_hashes": profileCoreHashes()}
 	input, err := json.Marshal(wanted)
 	if err != nil {
 		return err

@@ -23,7 +23,7 @@ func TestBatchProofRejectsMixedOrIncompleteResponses(t *testing.T) {
 func TestRuntimeBatchExecutesChecksAndIsolatesFailures(t *testing.T) {
 	script := `
 import ast,pathlib,json,hashlib,types,io
-source=pathlib.Path('runtime_batch.py').read_text();tree=ast.parse(source)
+source=pathlib.Path('runtime_users.py').read_text()+'\n'+pathlib.Path('runtime_batch.py').read_text();tree=ast.parse(source)
 ns={};exec(compile(ast.Module(body=[n for n in tree.body if isinstance(n,(ast.Import,ast.ImportFrom,ast.FunctionDef))],type_ignores=[]),'runtime_batch.py','exec'),ns)
 core='/usr/local/x-ui/bin/xray-linux-amd64'
 class P:

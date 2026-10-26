@@ -1,10 +1,10 @@
 {
   "schema": 2,
   "status": "release_requirements_and_limits",
-  "date": "2026-10-25",
-  "feature": "Durable deletion confirmation, complete database reads, bounded observation catch-up and panel runtime identity retention",
+  "date": "2026-10-26",
+  "feature": "Per-node native UDP capability, independent TCP selection and native VLESS identity/Flow proof",
   "publication_gates": {
-    "cloudflare_transport_fleet_no_skip": "230 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
+    "cloudflare_transport_fleet_no_skip": "244 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
     "exact_candidate_ubuntu_24_amd64_install": "required before stable promotion",
     "full_go_and_vet_unprivileged": "required before push",
     "live_secret_scan_and_gitleaks": "required before push",
@@ -24,7 +24,9 @@
     "database_health": "Precise low-space, recovery and backup reasons; malformed or contradictory health reports never show ready",
     "database_read_failures": "Real PostgreSQL interrupted UPDATE RETURNING rollback and idempotent deletion; 55 API query/scan/stream/close faults reject partial results",
     "observation_retention": "At most ten 1000-row batches per table and a shared ten-second deadline; 15000-row catch-up fixture retains latest, failure and running evidence; completed-witness partial index must handle a fresh bulk load before statistics are refreshed",
-    "runtime_identity_retention": "Failed opens retain no mutation gate; expired runtime/circuit identities are swept during acquisition; retained runtimes share live gates across replacement; cancellation and panic release idle gates"
+    "runtime_identity_retention": "Failed opens retain no mutation gate; expired runtime/circuit identities are swept during acquisition; retained runtimes share live gates across replacement; cancellation and panic release idle gates",
+    "protocol_capability": "Origin/credential/program-bound, expiring native DNS/QUIC evidence; replacement claims fence stale results; no protected direct fallback; TCP remains independent",
+    "native_vless_accounts": "Current native account ID and Flow must match desired clients, as well as email membership"
   },
   "notes": [
     "Existing single-region AWS credentials retain their original identity and region boundaries.",
@@ -44,7 +46,8 @@
     "VMess uses its JSON/base64 URI format. Shadowsocks uses the SIP002 plugin representation interpreted by v2rayNG; generic VLESS query parameters are not a universal Shadowsocks format.",
     "Plain TCP adds no TLS. Existing compatible-client warnings remain for VLESS and Trojan on public IPs. Loopback native tests do not certify every Android client version.",
     "Unavailable panels and provider authorization failures retain deletion intent and retry; neither a timeout nor an invalid cloud credential proves remote absence.",
-    "Migration 197 adds an index for completed inventory witnesses. It preserves all rows and the broader index used by other readers. The backlog regression deliberately runs before ANALYZE."
+    "Migration 197 adds an index for completed inventory witnesses. It preserves all rows and the broader index used by other readers. The backlog regression deliberately runs before ANALYZE.",
+    "UDP capability enforcement is staged through DOB_UDP_CAPABILITY_PANELS (panel UUIDs, all or none). Native datagram evidence does not measure client/ISP latency or HTTP/3 throughput. The default scope is disabled for canary rollout."
   ],
   "evidence_location": "Exact-commit source and installation results are attached through GitHub Actions. Production preservation evidence is recorded separately in private operations reports."
 }

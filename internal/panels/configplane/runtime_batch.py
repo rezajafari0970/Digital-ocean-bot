@@ -63,7 +63,7 @@ def run_job(want,observation=None):
   result=subprocess.run([str(core),'api','inbounduser','--server='+addr+':'+str(api[0]['port']),'-tag='+want['tag']],capture_output=True,text=True,timeout=5)
   if result.returncode:return False
   users=json.loads(result.stdout).get('users',[])
-  if sorted(u.get('email','') for u in users)!=sorted(want['emails']):return False
+  if not native_users_match(users,want):return False
   stage="traffic"
   probes=want.get('probes',[])
   classes=want.get('probe_classes',[])

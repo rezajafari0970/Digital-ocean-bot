@@ -25,7 +25,7 @@ import (
 //go:embed runtime_batch.py
 var runtimeBatchBody string
 
-var runtimeBatchScript = trafficProbeScript + "\n" + runtimeBatchBody
+var runtimeBatchScript = trafficProbeScript + "\n" + runtimeUsersScript + "\n" + runtimeBatchBody
 
 // Four bounded waves amortize native observation and SSH. Each profile and class
 // keeps its own result; the worker deadline includes both waves and public probes.
@@ -205,7 +205,11 @@ func (s Service) VerifyPanel(ctx context.Context, panel, claimedProfile string) 
 						seen[cl.Class] = true
 					}
 				}
-				input := map[string]any{"profile_id": p.ID, "port": p.Spec.Port, "tag": tag, "emails": emails, "probes": probes, "probe_classes": classes, "core_hashes": profileCoreHashes(), "current_core_hashes": transportcore.CoreHashes()}
+				vlessUsers, e := expectedNativeVLESSUsers(payload)
+				if e != nil {
+					return e
+				}
+				input := map[string]any{"vless_users": vlessUsers, "profile_id": p.ID, "port": p.Spec.Port, "tag": tag, "emails": emails, "probes": probes, "probe_classes": classes, "core_hashes": profileCoreHashes(), "current_core_hashes": transportcore.CoreHashes()}
 				jobs = append(jobs, batchJob{c, p, credentials, input, endpoint})
 				inputs = append(inputs, input)
 				_, _ = s.DB.ExecContext(ctx, "UPDATE config_driver_listeners SET stage='runtime',stage_started_at=now() WHERE profile_id=$1 AND panel_id=$2", p.ID, panel)

@@ -75,7 +75,7 @@ func managedSOCKS(donor, host, ref string, port int, c relayCredential) (rp, err
 		Tag: "residential-ads-relay-" + donor + "-" + digest[:12], Relay: &relayTransport{ref, c.Certificate},
 		TransportHash: digest}, nil
 }
-func proxyHasUDP(p rp) bool { return p.Type == "socks5" }
+func proxyHasUDP(p rp) bool { return p.Type == "socks5" && (!p.UDPRequired || p.UDPVerified) }
 func proxyOutbound(p rp) (map[string]any, error) {
 	protocol := "http"
 	if p.Type == "socks5" {
