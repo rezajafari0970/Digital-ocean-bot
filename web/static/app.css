@@ -68,3 +68,11 @@ header{gap:12px;flex-wrap:wrap}header>div{display:flex;flex-wrap:wrap;align-item
 .accountForm #modalError,.accountForm #accountPreviewStatus{font-size:.85rem;margin:8px 0 0;max-height:4.5em;overflow:auto;overflow-wrap:anywhere}
 .accountForm .actions{margin-top:12px;padding-bottom:env(safe-area-inset-bottom,0px)}
 .accountForm .actions button{min-height:44px}
+
+/* Native plan labels and scoped provider identities must fit phone dialogs. */
+.accountForm #modalFields,.accountForm #modalFields>*{min-width:0;max-width:100%}
+.accountForm label,.accountForm .discoveryOk,.accountForm .muted{overflow-wrap:anywhere}
+.accountForm input,.accountForm select,.accountForm textarea{min-width:0;max-width:100%}
+.accountForm select{text-overflow:ellipsis}
+.accountForm .checkRow{display:flex;align-items:flex-start;gap:9px}
+.accountForm .checkRow input{width:auto;flex:0 0 auto;margin:3px 0 0}

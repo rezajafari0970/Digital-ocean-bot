@@ -48,6 +48,14 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 	mux.HandleFunc("GET /api/v1/accounts", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, 200, []any{}) })
 	mux.HandleFunc("GET /api/v1/proxies", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, 200, []any{}) })
 
+	var saveCount atomic.Int32
+	var saveMode atomic.Value
+	saveMode.Store("reject")
+	mux.HandleFunc("POST /fixture/save-mode", func(w http.ResponseWriter, r *http.Request) {
+		saveMode.Store(r.URL.Query().Get("mode"))
+		w.WriteHeader(204)
+	})
+	mux.HandleFunc("GET /fixture/save-count", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, 200, saveCount.Load()) })
 	var starts atomic.Int32
 	var approved atomic.Bool
 	var emptyCatalog atomic.Bool
@@ -139,6 +147,9 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 			if project != "" {
 				discovery.Resolved["project_id"] = project
 			}
+		} else if x.Provider == "kamatera" {
+			region = "US-SC"
+			providerID = "kamatera-key:" + strings.Repeat("a", 64)
 		} else {
 			if x.Selection["region"] != "" {
 				region = x.Selection["region"]
@@ -187,6 +198,11 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 		regions := []providers.Region{{ID: region, Name: region, Available: true}}
 		plans := []providers.Plan{{ID: "test-plan", MemoryMB: 1024, CPU: 1, DiskGB: 20, Available: true}}
 		images := []providers.Image{{ID: "ubuntu-fixture", Family: "ubuntu", Version: "24.04", Available: true}}
+		if x.Provider == "kamatera" {
+			regions = append(regions, providers.Region{ID: "US-AT", Name: "Atlanta, United States", Available: true})
+			plans = []providers.Plan{{ID: "1A-1024-20", MemoryMB: 1024, CPU: 1, DiskGB: 20, Available: true}, {ID: "2B-4096-30", MemoryMB: 4096, CPU: 2, DiskGB: 30, Available: true}}
+			images = []providers.Image{{ID: "ubuntu26", Family: "ubuntu", Version: "26.04", Available: true}, {ID: "ubuntu24", Family: "ubuntu", Version: "24.04", Available: true}, {ID: "ubuntu22", Family: "ubuntu", Version: "22.04", Available: true}}
+		}
 		if x.Provider == "aws" {
 			plans[0].PricesByRegion = map[string]providers.PlanPrice{region: {Currency: "USD", Hourly: 0.0114, MonthlyEstimate: 8.322, Scope: "compute_only"}}
 			if x.Selection["region_2"] == "us-east-1" {
@@ -255,6 +271,26 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 			if x.AuthorizationID == "" || x.Token != "" || activeID.Load() != x.AuthorizationID || starts.Load() != 1 || x.ExternalID != "ovh-us:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" {
 				t.Error("OVH save lost pinned selection or secret")
 				w.WriteHeader(400)
+				return
+			}
+		} else if x.Provider == "kamatera" {
+			saveCount.Add(1)
+			mode := saveMode.Load().(string)
+			if credential["client_id"] != "fixture-client" || credential["secret"] != "fixture-secret" || x.Name == "" {
+				t.Error("Kamatera save lost required fields")
+			}
+			for _, values := range [][]string{x.Regions, x.Sizes, x.Images} {
+				seen := map[string]bool{}
+				for _, v := range values {
+					if seen[v] {
+						t.Error("duplicate preference reached save")
+					}
+					seen[v] = true
+				}
+			}
+			time.Sleep(800 * time.Millisecond)
+			if mode == "reject" {
+				writeJSON(w, 422, map[string]string{"error": "fixture_save_rejected", "detail": "The fixture rejected this account. Entries are preserved."})
 				return
 			}
 		} else {
