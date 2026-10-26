@@ -2,9 +2,9 @@
   "schema": 2,
   "status": "release_requirements_and_limits",
   "date": "2026-10-26",
-  "feature": "Six-resolver bounded parallel DNS and independently verified QUIC443 selection",
+  "feature": "Editable FinalMask profiles, exact client export and fragmentation-safe native HTTP/Trojan parsing",
   "publication_gates": {
-    "cloudflare_transport_fleet_no_skip": "250 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
+    "cloudflare_transport_fleet_no_skip": "259 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
     "exact_candidate_ubuntu_24_amd64_install": "required before stable promotion",
     "full_go_and_vet_unprivileged": "required before push",
     "live_secret_scan_and_gitleaks": "required before push",
@@ -30,7 +30,9 @@
     "managed_relay_probe": "Pinned native TLS/XUDP donor retains its category deny policy; permitted-domain QUIC proof succeeds while generic DNS/IP probing remains rejected",
     "probe_socket_reservation": "Real occupied-UDP regression; bounded TCP/UDP pair reservation retries only address collisions and closes all failed allocations",
     "dns_resilience": "Six unfiltered endpoints across three providers; pinned-core five-upstream failure injection, cache, all-failure/no-fabricated-answer; existing egress policy retained",
-    "quic_dns_separation": "Fresh origin/credential-bound QUIC may authorize only category UDP443; public, donor and loopback non-443 guards; native route proof covers UDP8443; full-tunnel UDP still requires full evidence"
+    "quic_dns_separation": "Fresh origin/credential-bound QUIC may authorize only category UDP443; public, donor and loopback non-443 guards; native route proof covers UDP8443; full-tunnel UDP still requires full evidence",
+    "finalmask_profiles": "Exact scalar/zero/two-fragment/UDP preset; saved JSON, Flow, export toggle, routes, CDN, subscription remarks and native URI round trips; mobile browser and database persistence",
+    "fragmented_native_reads": "Complete HTTP Host routing, bounded HTTP camouflage headers, fragmented Trojan authentication; deterministic split-boundary tests, race detector, repeated actual client/server round trips and prior-core client interoperability"
   },
   "notes": [
     "Existing single-region AWS credentials retain their original identity and region boundaries.",
@@ -54,7 +56,8 @@
     "UDP capability enforcement is staged through DOB_UDP_CAPABILITY_PANELS (panel UUIDs, all or none). Native datagram evidence does not measure client/ISP latency or HTTP/3 throughput. The default scope is disabled for canary rollout.",
     "Managed relays intentionally deny generic DNS/IP destinations. Their driver probes permitted-domain QUIC version negotiation only, without an HTTP request, and does not claim DNS capability. Migration 200 retains migration 199 history and binds evidence to the probe driver and donor plan.",
     "DNS resilience is opt-in via DOB_DNS_RESILIENCE_PANELS. Empty/malformed/none retains the prior plan; disable for rollback. Explicit DoH performance profiles retain their own configured two HTTPS resolver endpoints.",
-    "Per-resolver TCP timeout is 2000ms with parallel queries and positive cache. If all upstreams fail on an uncached name, the pinned core may drop the query; the client controls its final timeout. This is not a two-second end-to-end DNS guarantee."
+    "Per-resolver TCP timeout is 2000ms with parallel queries and positive cache. If all upstreams fail on an uncached name, the pinned core may drop the query; the client controls its final timeout. This is not a two-second end-to-end DNS guarantee.",
+    "Client FinalMask capability does not mass-enable fragmentation on existing profiles. Shadowsocks SIP002 export remains explicitly unsupported by the v2rayNG importer; no Android device acceptance claim."
   ],
   "evidence_location": "Exact-commit source and installation results are attached through GitHub Actions. Production preservation evidence is recorded separately in private operations reports."
 }

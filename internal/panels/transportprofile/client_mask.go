@@ -26,12 +26,14 @@ func (c Config) ClientTCPMask() (json.RawMessage, error) {
 	}
 	for _, mask := range wire.TCP {
 		for _, pair := range [][2]string{{"lengths", "length"}, {"delays", "delay"}} {
+			if _, supplied := mask.Settings[pair[1]]; supplied {
+				continue
+			}
 			var values []json.RawMessage
 			if err = json.Unmarshal(mask.Settings[pair[0]], &values); err != nil || len(values) == 0 {
 				return nil, fmt.Errorf("%w: missing fragment %s", ErrInvalid, pair[0])
 			}
-			// TCPMask's numeric decoder treats null delay as zero. Never publish that
-			// ambiguous value as a client scalar or leave it in the modern schedule.
+			// Never publish an ambiguous null scalar or schedule entry.
 			for _, value := range values {
 				if bytes.Equal(bytes.TrimSpace(value), []byte("null")) {
 					return nil, fmt.Errorf("%w: null fragment %s", ErrInvalid, pair[0])

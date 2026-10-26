@@ -81,7 +81,7 @@ func clientFromURI(t *testing.T, uri, cert string) map[string]any {
 	stream := map[string]any{}
 	settings := map[string]any{}
 	protocol := ""
-	if strings.HasPrefix(uri, "vmess://") {
+	if strings.HasPrefix(uri, "vmess://") && !strings.Contains(uri, "?") {
 		b, e := base64.StdEncoding.DecodeString(strings.TrimPrefix(uri, "vmess://"))
 		if e != nil {
 			t.Fatal(e)
@@ -113,6 +113,13 @@ func clientFromURI(t *testing.T, uri, cert string) map[string]any {
 			t.Fatal(e)
 		}
 		q := u.Query()
+		if q.Get("fm") != "" {
+			var mask map[string]any
+			if json.Unmarshal([]byte(q.Get("fm")), &mask) != nil {
+				t.Fatal("invalid fm")
+			}
+			stream["finalmask"] = mask
+		}
 		port, _ := strconv.Atoi(u.Port())
 		protocol = u.Scheme
 		stream["network"] = q.Get("type")
@@ -140,6 +147,8 @@ func clientFromURI(t *testing.T, uri, cert string) map[string]any {
 			if plugin["obfs"] == "http" {
 				stream["tcpSettings"] = uriHTTPHeader(plugin["obfs-host"], plugin["path"])
 			}
+		case "vmess":
+			settings["vnext"] = []any{map[string]any{"address": u.Hostname(), "port": port, "users": []any{map[string]any{"id": u.User.Username(), "security": "auto"}}}}
 		case "trojan":
 			settings["servers"] = []any{map[string]any{"address": u.Hostname(), "port": port, "password": u.User.Username()}}
 		case "vless":
@@ -178,6 +187,10 @@ func TestNativeConfigDriverRoundTrips(t *testing.T) {
 	if core == "" {
 		t.Skip("XRAY_TEST_BINARY required for actual native round trips")
 	}
+	clientCore := os.Getenv("XRAY_TEST_CLIENT_BINARY")
+	if clientCore == "" {
+		clientCore = core
+	}
 	origin := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { fmt.Fprint(w, "driver-roundtrip-ok") }))
 	defer origin.Close()
 	target := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { fmt.Fprint(w, "reality-target") }))
@@ -207,10 +220,16 @@ func TestNativeConfigDriverRoundTrips(t *testing.T) {
 			cases = append(cases, cap)
 		}
 	}
+	for _, cap := range append([]Capability(nil), cases...) {
+		if cap.Protocol != "shadowsocks" {
+			cap.ID += "_finalmask"
+			cases = append(cases, cap)
+		}
+	}
 	for _, cap := range cases {
 		t.Run(strings.ReplaceAll(cap.ID, "/", "_"), func(t *testing.T) {
 			spec := Spec{Protocol: cap.Protocol, Network: cap.Network, Security: cap.Security, Port: freePort(t)}
-			if strings.HasSuffix(cap.ID, "_http_header") {
+			if strings.Contains(cap.ID, "_http_header") {
 				spec.HeaderType = "http"
 				spec.Host = "play.googleapis.com"
 				spec.Path = "/fixture-http"
@@ -223,13 +242,16 @@ func TestNativeConfigDriverRoundTrips(t *testing.T) {
 			}
 			if spec.Security == "reality" {
 				spec.SNI = "example.com"
-				if spec.Network == "tcp" && cap.ID != "vless/tcp/reality_no_flow" {
+				if spec.Network == "tcp" && !strings.Contains(cap.ID, "reality_no_flow") {
 					spec.Flow = "xtls-rprx-vision"
 				}
 			}
 			creds, e := NewCredentials("roundtrip", "panel", []string{"DIRECT"}, 1)
 			if e != nil {
 				t.Fatal(e)
+			}
+			if strings.HasSuffix(cap.ID, "_finalmask") {
+				creds.Clients[0].FinalMask = `{"tcp":[{"type":"fragment","settings":{"packets":"tlshello","maxSplit":"0","length":"1-104","delay":"0"}},{"type":"fragment","settings":{"packets":"1-1","maxSplit":"11","length":"1-114","delay":"1"}}],"udp":[{"type":"header-custom","settings":{"client":[{"rand":16,"randRange":"0-255"}],"server":[{"rand":16,"randRange":"0-255"}]}}]}`
 			}
 			server, e := registry.Build(spec, "127.0.0.1", "fixture", creds)
 			if e != nil {
@@ -253,7 +275,7 @@ func TestNativeConfigDriverRoundTrips(t *testing.T) {
 			outbound := clientFromURI(t, uri, cert)
 			proxyPort := freePort(t)
 			client := map[string]any{"log": map[string]any{"loglevel": "warning"}, "inbounds": []any{map[string]any{"listen": "127.0.0.1", "port": proxyPort, "protocol": "http", "settings": map[string]any{}}}, "outbounds": []any{outbound}}
-			coreStart(t, core, client, proxyPort)
+			coreStart(t, clientCore, client, proxyPort)
 			proxyURL, _ := url.Parse(fmt.Sprintf("http://127.0.0.1:%d", proxyPort))
 			tr := &http.Transport{Proxy: http.ProxyURL(proxyURL), DisableKeepAlives: true}
 			defer tr.CloseIdleConnections()

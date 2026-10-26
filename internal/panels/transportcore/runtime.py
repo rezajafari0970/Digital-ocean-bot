@@ -75,6 +75,10 @@ def stage(asset,cache):
  if digest(temp)!=asset['sha256']:raise RuntimeError('binary_digest_mismatch')
  temp.chmod(0o700);os.replace(temp,dest);archive.unlink();return dest
 
+def validate_capabilities(caps,needs_panel):
+ required=('websocket_graceful_close','tls_certificate_snapshot','reality_fallback_bounded','reality_handshake_deadline','fragmented_http_sniffing','fragmented_http_header','fragmented_trojan_auth')
+ if caps.get('schema')!=1 or caps.get('reality_fallback_max_connections')!=512 or any(caps.get(k) is not True for k in required) or (needs_panel and caps.get('reality_finalmask_fragment') is not True):raise RuntimeError('core_capability_missing')
+
 def main(spec):
  os.umask(0o077)
  panel=pathlib.Path('/usr/local/x-ui/x-ui');machine=os.uname().machine
@@ -89,7 +93,7 @@ def main(spec):
   run([str(core),'run','-test','-config',str(candidate)],30,env);print('{"validated":true,"installed":false}');return
  if machine not in ('x86_64','aarch64','arm64') or (needs_panel and machine!='x86_64'):raise RuntimeError('unsupported_runtime_architecture')
  manifest=spec['manifest'];version=manifest['version']
- if version!='dob-fm-0.2.3':raise RuntimeError('unknown_runtime_version')
+ if version!='dob-fm-0.2.4':raise RuntimeError('unknown_runtime_version')
  core_asset=manifest['core'] if machine=='x86_64' else manifest['core_arm64']
  cache=pathlib.Path('/var/lib/dob-transport-runtime')/(version+('-fragment' if needs_panel else '-core'));cache.mkdir(parents=True,exist_ok=True,mode=0o700);cache.chmod(0o700)
  lock=open('/run/lock/dob-transport-runtime.lock','w');fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
@@ -129,7 +133,7 @@ def main(spec):
  run(['systemctl','is-active','--quiet','x-ui'],5)
  staged_core=stage(core_asset,cache);staged_panel=stage(manifest['panel'],cache) if needs_panel else panel
  caps=json.loads(run([str(staged_core),'dob-capabilities'],5))
- if caps.get('schema')!=1 or caps.get('websocket_graceful_close') is not True or caps.get('tls_certificate_snapshot') is not True or caps.get('reality_fallback_bounded') is not True or caps.get('reality_handshake_deadline') is not True or caps.get('reality_fallback_max_connections')!=512 or (needs_panel and caps.get('reality_finalmask_fragment') is not True):raise RuntimeError('core_capability_missing')
+ validate_capabilities(caps,needs_panel)
  if needs_panel and run([str(staged_panel),'-v'],5).decode().strip()!='3.8.5-dob-fm.1':raise RuntimeError('panel_capability_missing')
  run([str(staged_core),'run','-test','-config',str(candidate)],30,env)
  current=core.parent/'config.json'

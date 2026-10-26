@@ -87,7 +87,7 @@ func (r *Registry) CDNURI(s Spec, origin, address, domain, remark string, c Cred
 	if e != nil {
 		return "", e
 	}
-	if s.Protocol == "vmess" {
+	if s.Protocol == "vmess" && !strings.Contains(raw, "?") {
 		b, e := base64.StdEncoding.DecodeString(strings.TrimPrefix(raw, "vmess://"))
 		if e != nil {
 			return "", e

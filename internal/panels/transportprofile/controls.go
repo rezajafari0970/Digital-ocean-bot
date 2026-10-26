@@ -50,7 +50,7 @@ func jsonObject(raw json.RawMessage) (map[string]json.RawMessage, error) {
 }
 func integer(raw json.RawMessage, min, max int64) bool {
 	var n int64
-	return json.Unmarshal(raw, &n) == nil && n >= min && n <= max
+	return !bytes.Equal(bytes.TrimSpace(raw), []byte("null")) && json.Unmarshal(raw, &n) == nil && n >= min && n <= max
 }
 func rangeValue(raw json.RawMessage, min, max int64) bool {
 	if integer(raw, min, max) {
@@ -167,15 +167,24 @@ func (c Config) TCPMask() (json.RawMessage, error) {
 					}
 				}
 			case "maxSplit":
-				valid = rangeValue(v, 1, 64)
+				valid = rangeValue(v, 0, 64)
+			case "length":
+				valid = rangeValue(v, 1, 16384)
+			case "delay":
+				valid = rangeValue(v, 0, 1000)
 			}
 			if !valid {
 				return nil, fmt.Errorf("%w: invalid fragment setting %q", ErrInvalid, k)
 			}
 		}
-		for _, required := range []string{"packets", "lengths", "delays"} {
-			if _, ok := settings[required]; !ok {
-				return nil, fmt.Errorf("%w: missing fragment %s", ErrInvalid, required)
+		if _, ok := settings["packets"]; !ok {
+			return nil, fmt.Errorf("%w: missing fragment packets", ErrInvalid)
+		}
+		for _, pair := range [][2]string{{"length", "lengths"}, {"delay", "delays"}} {
+			if _, scalar := settings[pair[0]]; !scalar {
+				if _, schedule := settings[pair[1]]; !schedule {
+					return nil, fmt.Errorf("%w: missing fragment %s or %s", ErrInvalid, pair[0], pair[1])
+				}
 			}
 		}
 	}

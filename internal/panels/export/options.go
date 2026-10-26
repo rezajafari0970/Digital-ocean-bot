@@ -30,13 +30,16 @@ func ApplyOutputOptions(uri string, options OutputOptions) (string, error) {
 			return "", ErrInvalidVLESS
 		}
 		for k := range q {
+			if options.IndependentProfile && k == "sni" && q.Get("security") == "tls" && validVMessHost(q.Get(k)) {
+				continue
+			}
 			if options.IndependentProfile && k == "allowInsecure" {
 				if q.Get(k) != "true" && q.Get(k) != "false" {
 					return "", ErrInvalidVLESS
 				}
 				continue
 			}
-			if options.IndependentProfile && k == "finalmask" {
+			if options.IndependentProfile && (k == "fm" || k == "finalmask") {
 				var mask map[string]any
 				if len(q.Get(k)) > 32768 || json.Unmarshal([]byte(q.Get(k)), &mask) != nil || mask == nil {
 					return "", ErrInvalidVLESS
