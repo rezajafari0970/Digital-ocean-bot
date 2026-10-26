@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/lib/pq"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
+	"sync"
 	"time"
 )
 
@@ -20,9 +21,16 @@ func (c Container) ProcessAccountDeletions(ctx context.Context) error {
 	// Also bound callers outside the periodic worker. Earlier deadlines win.
 	ctx, cancel := context.WithTimeout(ctx, 45*time.Second)
 	defer cancel()
-	// One queued local purge and one provider cleanup get a chance per tick.
-	// A busy local account must not starve unrelated cloud deletion.
-	_, purgeErr := c.ProcessSavedAccountPurge(ctx)
+	// Two isolated local purges fit within the existing bulk lane's six-connection
+	// reservation (one lease and one transaction each). Keep cloud work separate.
+	var wg sync.WaitGroup
+	purgeErrors := make([]error, 2)
+	for i := range purgeErrors {
+		wg.Add(1)
+		go func(i int) { defer wg.Done(); _, purgeErrors[i] = c.ProcessSavedAccountPurge(ctx) }(i)
+	}
+	wg.Wait()
+	purgeErr := errors.Join(purgeErrors...)
 	id, release, err := c.claimAccountDeletion(ctx)
 	if err != nil || id == "" {
 		return errors.Join(purgeErr, err)

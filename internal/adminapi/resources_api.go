@@ -32,6 +32,7 @@ func (s *Server) accountResources(w http.ResponseWriter, r *http.Request) {
 			if provider == "ovh" {
 				return "OVH Public Cloud"
 			}
+			if provider == "kamatera" { return "Kamatera" }
 			if provider == "vultr" {
 				return "Vultr"
 			}
@@ -67,7 +68,7 @@ func (s *Server) accountCapacity(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	if (provider == "linode" || provider == "aws" || provider == "ovh") && !x.LimitKnown {
+	if (provider == "linode" || provider == "aws" || provider == "ovh" || provider == "kamatera") && !x.LimitKnown {
 		writeJSON(w, 200, map[string]any{"server_limit": nil, "limit_known": false, "provider_servers": x.InUse, "pending": x.Pending, "available": nil, "droplet_limit": nil, "active": x.InUse})
 		return
 	}

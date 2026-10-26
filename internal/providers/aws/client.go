@@ -14,6 +14,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/cloudutil"
@@ -40,8 +41,18 @@ func problem(class providers.ErrorClass, op, code string, status int) *providers
 }
 func signingCredentials(ctx context.Context, s providers.CredentialSource) (credential, error) {
 	var c credential
-	if cloudutil.ReadCredential(ctx, s, &c) != nil || !regionPattern.MatchString(c.Region) || c.AccessKey == "" || c.SecretKey == "" || strings.ContainsAny(c.AccessKey+c.SecretKey+c.SessionToken, "\r\n\x00") {
+	if cloudutil.ReadCredential(ctx, s, &c) != nil {
 		return c, problem(providers.ErrorAuthentication, "credential", "INVALID_CREDENTIAL_JSON", 0)
+	}
+	c.AccessKey = strings.TrimSpace(c.AccessKey)
+	c.SecretKey = strings.TrimSpace(c.SecretKey)
+	c.SessionToken = strings.TrimSpace(c.SessionToken)
+	c.Region = strings.TrimSpace(c.Region)
+	if !regionPattern.MatchString(c.Region) || c.AccessKey == "" || c.SecretKey == "" || strings.IndexFunc(c.AccessKey+c.SecretKey+c.SessionToken, func(r rune) bool { return unicode.IsSpace(r) || unicode.IsControl(r) }) >= 0 {
+		return c, problem(providers.ErrorAuthentication, "credential", "INVALID_CREDENTIAL_JSON", 0)
+	}
+	if strings.HasPrefix(c.AccessKey, "ASIA") && c.SessionToken == "" {
+		return c, problem(providers.ErrorAuthentication, "credential", "TEMPORARY_SESSION_TOKEN_REQUIRED", 0)
 	}
 	return c, nil
 }

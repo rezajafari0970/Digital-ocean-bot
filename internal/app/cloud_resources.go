@@ -25,7 +25,7 @@ func (c Container) SyncCloudResources(ctx context.Context, accountID, provider s
 }
 func syncCloudResourcesTx(ctx context.Context, tx *sql.Tx, accountID, provider string, inv providers.Inventory) error {
 	var e error
-	if provider != "aws" && provider != "ovh" {
+	if provider != "aws" && provider != "ovh" && provider != "kamatera" {
 		return fmt.Errorf("unsupported cloud registry provider")
 	}
 

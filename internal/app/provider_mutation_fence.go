@@ -6,6 +6,7 @@ import (
 	"database/sql/driver"
 	"errors"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/aws"
+"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/kamatera"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/ovh"
 	"io"
 	"net/http"
@@ -31,7 +32,7 @@ func (b *fencedResponseBody) Close() error {
 	return err
 }
 func (f providerMutationFence) RoundTrip(req *http.Request) (*http.Response, error) {
-	if req.Method == http.MethodGet || req.Method == http.MethodHead || req.Method == http.MethodOptions {
+	if kamatera.ReadOnlyRequest(req) || req.Method == http.MethodGet || req.Method == http.MethodHead || req.Method == http.MethodOptions {
 		return f.base.RoundTrip(req)
 	}
 	if f.db == nil {
@@ -89,7 +90,10 @@ func (f providerMutationFence) RoundTrip(req *http.Request) (*http.Response, err
 			return nil, errors.New("OVH deletion requires local project resource binding")
 		}
 	}
-	if req.Method != http.MethodDelete && !cleanupStop && (deleting || !enabled) {
+	if target := kamatera.TerminationTarget(req); target != "" {
+  if err = conn.QueryRowContext(req.Context(), `SELECT EXISTS(SELECT 1 FROM provider_account_resources m JOIN accounts a ON a.id=m.account_id JOIN droplets d ON d.account_id=a.id AND d.provider_resource_id=m.resource_id WHERE a.id=$1 AND a.provider='kamatera' AND m.provider='kamatera' AND a.external_id=$3 AND m.resource_id=$2 AND m.scope LIKE 'server:%' AND m.completed_at IS NULL AND d.state<>'DELETED')`, f.account,target,kamatera.CredentialScope(req.Header.Get("AuthClientId"))).Scan(&cleanupStop); err != nil || !cleanupStop { release(); return nil, errors.New("Kamatera termination requires local account and journal resource binding") }
+ }
+ if req.Method != http.MethodDelete && !cleanupStop && (deleting || !enabled) {
 		release()
 		return nil, errors.New("provider mutation blocked: account disabled or deleting")
 	}

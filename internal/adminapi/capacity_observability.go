@@ -24,7 +24,7 @@ func deriveCapacityEvidence(source string, lowerBound int, probeInFlight bool, p
 }
 
 func (s *Server) capacityEvidenceForAccount(accountID, provider string) capacityEvidence {
-	if provider == "linode" || provider == "aws" || provider == "ovh" {
+	if provider == "linode" || provider == "aws" || provider == "ovh" || provider == "kamatera" {
 		var usage int
 		var source string
 		err := s.DB.QueryRow("SELECT COALESCE((canonical->'Capacity'->>'ComputeInUse')::int,0),COALESCE(canonical->'Capacity'->>'Source','') FROM provider_snapshots WHERE account_id=$1 AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1", accountID).Scan(&usage, &source)

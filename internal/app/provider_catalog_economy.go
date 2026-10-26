@@ -127,7 +127,7 @@ func (c Container) ObserveProvider(ctx context.Context, rt AccountRuntime) (prov
 		}
 	}
 	// Preserve pre-economy behavior for controls and rollback.
-	if rt.Config.Provider == "vultr" || rt.Config.Provider == "upcloud" || rt.Config.Provider == "linode" || rt.Config.Provider == "aws" || rt.Config.Provider == "ovh" {
+	if rt.Config.Provider == "vultr" || rt.Config.Provider == "upcloud" || rt.Config.Provider == "linode" || rt.Config.Provider == "aws" || rt.Config.Provider == "ovh" || rt.Config.Provider == "kamatera" {
 		var previous providers.Observation
 		var raw []byte
 		if fast, ok := rt.Driver.(providers.FastObservationReader); ok && c.DB != nil {

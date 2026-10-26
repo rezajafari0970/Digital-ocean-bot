@@ -200,6 +200,11 @@ def verify_events(lines, required=REQUIRED):
     return len(passed)
 
 
+
+REQUIRED['internal/providers/kamatera'] = ('TestKamateraTaskIsNotServerAndLostResponseIsNeverReposted','TestKamateraCollisionAndRegionMismatchCannotAcquireOwnership','TestKamateraReadBoundaryAndCredentialScope','TestKamateraMalformedInventoryAndErrorsDoNotProveAbsence','TestKamateraCatalogPreservesRegionalImagesAndUnknownQuotaPrice')
+REQUIRED['internal/providers/aws'] += ('TestAWSIdentityPrecedesRegionalAccessAndSeparatesFailure','TestAWSSharedCredentialPasteAndTemporaryValidation')
+REQUIRED['internal/app'] += ('TestKamateraCleanupRequiresBothJournalAndLocalScope','TestAccountHistoryPruningRechecksConfirmationAndPreservesLiveState','TestAccountPurgeRetryUsesSafeCodes','TestKamateraResourceIntentSurvivesCrashAndHasUniqueBinding')
+
 def main(repo):
     if os.geteuid() == 0:
         raise RuntimeError("gate must run as the unprivileged release builder")

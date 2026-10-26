@@ -1,0 +1,11 @@
+DROP INDEX IF EXISTS purge_account_capacity_events_snapshot_id_idx;
+DROP INDEX IF EXISTS purge_bulk_user_shrink_gate_panel_id_idx;
+DROP INDEX IF EXISTS purge_bulk_client_execution_gate_panel_id_idx;
+DROP INDEX IF EXISTS purge_client_mutation_execution_gate_panel_id_idx;
+DROP INDEX IF EXISTS purge_schedules_profile_id_idx;
+DROP INDEX IF EXISTS purge_deployments_profile_id_idx;
+DROP INDEX IF EXISTS purge_cloudflare_schedules_panel_id_idx;
+DROP INDEX IF EXISTS purge_reality_transport_apply_jobs_panel_id_idx;
+DROP INDEX IF EXISTS purge_config_driver_clients_profile_id_panel_id_idx;
+DROP INDEX IF EXISTS purge_reality_transport_apply_jobs_rollback_of_idx;
+DROP INDEX IF EXISTS purge_server_readiness_issues_readiness_id_idx;

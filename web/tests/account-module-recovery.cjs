@@ -6,7 +6,7 @@ const {spawn}=require('node:child_process'),assert=require('node:assert/strict')
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'dob-account-modules-'));
  const blocked=new Set(['aws-catalog.js','ovh-catalog.js']),scriptRequests=[],previews=[],saves=[];
  let delayedModule='',releaseModule=null,apiError='';
- const providers=['digitalocean','vultr','upcloud','linode','aws','ovh'];
+ const providers=['digitalocean','vultr','upcloud','linode','kamatera','aws','ovh'];
  const server=http.createServer(async(req,res)=>{
   const u=new URL(req.url,'http://localhost');
   res.setHeader('Cache-Control','no-store');
@@ -82,14 +82,14 @@ const {spawn}=require('node:child_process'),assert=require('node:assert/strict')
    const b=saves.at(-1);assert.equal(b.provider,provider);assert.equal(b.region,'region-1');assert.equal(b.size,'plan-1');assert.equal(b.image,'ubuntu');
    assert.equal(b.token,provider==='aws'?'{"secret_access_key":"fixture-secret","managed_network":true,"region":"region-1"}':'fixture-token');
   };
-  for(const provider of providers.slice(0,4)){
+  for(const provider of providers.slice(0,5)){
    const count=scriptRequests.filter(x=>['aws-catalog.js','ovh-catalog.js'].includes(x)).length;
    await open(provider);await validate();await ready();
    assert.equal(await evaluate('document.querySelector("#modalSubmit").disabled'),false);
    await save(provider);
    assert.equal(scriptRequests.filter(x=>['aws-catalog.js','ovh-catalog.js'].includes(x)).length,count,'unrelated provider adapter is never loaded');
   }
-  console.log('PASS four providers validate/save with AWS and OVH scripts unavailable');
+  console.log('PASS five providers validate/save with AWS and OVH scripts unavailable');
 
   await open('aws');const before=previews.length;
   await validate();await wait('document.querySelector("#modalError").textContent.includes("AWSCatalog")&&!document.querySelector("#discoverAccount").disabled');

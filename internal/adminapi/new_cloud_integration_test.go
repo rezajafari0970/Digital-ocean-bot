@@ -11,7 +11,7 @@ import (
 )
 
 func TestNewCloudInventoryOwnershipAndIncompleteSnapshot(t *testing.T) {
-	for _, provider := range []string{"aws", "ovh"} {
+	for _, provider := range []string{"aws", "ovh", "kamatera"} {
 		t.Run(provider, func(t *testing.T) {
 			db := adminTestDB(t)
 			account, droplet, _ := seedPanel(t, db, "http://linode.invalid")
@@ -51,7 +51,7 @@ func TestNewCloudInventoryOwnershipAndIncompleteSnapshot(t *testing.T) {
 	}
 }
 func TestNewCloudCapacityAndDashboardCount(t *testing.T) {
-	for _, provider := range []string{"aws", "ovh"} {
+	for _, provider := range []string{"aws", "ovh", "kamatera"} {
 		t.Run(provider, func(t *testing.T) {
 			db := adminTestDB(t)
 			account := seedBuildAccount(t, db, provider)
