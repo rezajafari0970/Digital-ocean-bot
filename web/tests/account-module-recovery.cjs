@@ -32,7 +32,7 @@ const {spawn}=require('node:child_process'),assert=require('node:assert/strict')
    if(!providers.includes(body.provider)){json(400,{error:'bad provider'});return}
    if(u.pathname.endsWith('/preview')){
     previews.push(body);
-    if(apiError){json(401,{error:apiError});return}
+    if(apiError){json(401,{error:'provider_credential_invalid',detail:apiError});return}
     const d={provider:body.provider,account:{id:'fixture-'+body.provider},regions:[{ID:'region-1',Name:'Region one',Available:true}],
      plans:[{ID:'plan-1',Available:true,CPU:1,MemoryMB:1024,DiskGB:20,PriceMonthly:6}],images:[{ID:'ubuntu',Available:true,Family:'ubuntu',Version:'24.04'}],defaults:{region:'region-1'},policy:{},server_limit:10};
     if(body.provider==='aws')d.onboarding={complete:true,network_approval:true,resolved:{managed_network:true,region:'region-1'}};
