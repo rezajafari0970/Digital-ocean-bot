@@ -224,5 +224,5 @@ async function openConfigProfile(existing=null){
   };
  }catch(e){toast(configMessage(e.message),'error')}
 }
-document.getElementById('modal').addEventListener('close',()=>{document.getElementById('modalSubmit').disabled=false;document.getElementById('modalSubmit').textContent='Save'});
+document.getElementById('modal').addEventListener('close',()=>{if(document.getElementById('modal').open)return;document.getElementById('modalSubmit').disabled=false;document.getElementById('modalSubmit').textContent='Save'});
 setInterval(()=>{if(current==='configs'&&!document.hidden&&!document.querySelector('#modal')?.open)refreshConfigProfiles()},5000);

@@ -298,8 +298,10 @@ func (d *Driver) CreateServer(ctx context.Context, r providers.CreateServerReque
 	if flavor.ID == "" {
 		return invalid("FLAVOR_UNAVAILABLE")
 	}
+	// This is a native regional flavor budget, not an account-wide ceiling.
+	// The existing workflow may use only its persisted, approved fallback regions.
 	if flavor.Quota != nil && *flavor.Quota == 0 {
-		return rejected, problem(providers.ErrorCapacity, "quota", "FLAVOR_QUOTA_EXCEEDED", 0)
+		return rejected, problem(providers.ErrorRegionCapacity, "quota", "FLAVOR_QUOTA_EXCEEDED", 0)
 	}
 	ims, e := d.images(ctx, r.RegionID)
 	if e != nil {

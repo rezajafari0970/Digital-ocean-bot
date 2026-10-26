@@ -21,10 +21,23 @@ func normalizeDiagnostic(code, message string) (string, string) {
 	default:
 		code = "unknown"
 	}
+	suffix := ""
+	if base, reason, ok := strings.Cut(message, "; reason="); ok {
+		if code != "capacity" && code != "region_capacity" {
+			return code, "operation: " + code
+		}
+		switch reason {
+		case "FLAVOR_QUOTA_EXCEEDED", "REGIONAL_QUOTA_EXCEEDED", "COMPUTE_QUOTA_EXCEEDED", "REGION_CAPACITY_UNAVAILABLE":
+			message = base
+			suffix = "; reason=" + reason
+		default:
+			return code, "operation: " + code
+		}
+	}
 	for _, stage := range []string{"operation", "pre_create", "create_server", "create_rejected", "create_ambiguous", "create_egress", "delete_pre_egress", "delete_server", "delete_egress", "recovery"} {
 		prefix := stage + ": " + code
 		if message == prefix {
-			return code, message
+			return code, message + suffix
 		}
 		rest, ok := strings.CutPrefix(message, prefix+" (HTTP ")
 		if !ok || len(rest) != 4 || rest[3] != ')' {
@@ -32,7 +45,7 @@ func normalizeDiagnostic(code, message string) (string, string) {
 		}
 		status, err := strconv.Atoi(rest[:3])
 		if err == nil && status >= 100 && status <= 599 {
-			return code, message
+			return code, message + suffix
 		}
 	}
 	return code, "operation: " + code

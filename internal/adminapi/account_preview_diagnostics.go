@@ -26,6 +26,10 @@ func previewCode(s string) string {
 }
 
 func writeStagedProviderPreviewError(w http.ResponseWriter, err error, c previewDiagnosticContext) {
+	if c.Provider == "kamatera" {
+		writeKamateraPreviewError(w, err, c)
+		return
+	}
 	if c.Provider == "aws" {
 		writeAWSPreviewError(w, err, c)
 		return

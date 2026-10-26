@@ -177,7 +177,7 @@ func TestFlavorQuotaZeroRejectsBeforeMutation(t *testing.T) {
 		return response(body), nil
 	})
 	_, err := d.CreateServer(context.Background(), providers.CreateServerRequest{Identity: "fixed", RegionID: "GRA11", PlanID: flavorID, ImageID: imageID, SSHAuthorizedKeys: []string{key(t)}})
-	if !providers.IsClass(err, providers.ErrorCapacity) || posts != 0 {
+	if !providers.IsClass(err, providers.ErrorRegionCapacity) || posts != 0 {
 		t.Fatal(err, posts)
 	}
 }

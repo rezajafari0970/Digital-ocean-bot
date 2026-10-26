@@ -95,7 +95,7 @@ func (d *Driver) images(ctx context.Context, region string) ([]imageData, error)
 	}
 	return xs, nil
 }
-func (d *Driver) CatalogCacheVersion() string { return "kamatera-cloudcli-v1" }
+func (d *Driver) CatalogCacheVersion() string { return "kamatera-cloudcli-capabilities-v2" }
 func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 	regions, e := d.locations(ctx)
 	if e != nil {
@@ -124,6 +124,11 @@ func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 			if bs[i].err == nil {
 				bs[i].images, bs[i].err = d.images(ctx, regions[i].ID)
 			}
+			if bs[i].err == nil {
+				var suggested []sizeData
+				suggested, bs[i].err = d.suggestedSizes(ctx, regions[i].ID)
+				bs[i].sizes = append(bs[i].sizes, suggested...)
+			}
 		}(i)
 	}
 	wg.Wait()
@@ -137,7 +142,7 @@ func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 		}
 		out.Regions = append(out.Regions, providers.Region{ID: r.ID, Name: r.City + ", " + r.Country, CountryCode: locationCountryCode(r), Available: true})
 		for _, s := range b.sizes {
-			if !s.valid() {
+			if !s.valid() || !supportedSize(s, b.images) {
 				continue
 			}
 			id := s.planID()

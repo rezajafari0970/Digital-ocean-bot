@@ -267,6 +267,8 @@ func TestKamateraCatalogPreservesRegionalImagesAndUnknownQuotaPrice(t *testing.T
 			return reply(sizeJSON), nil
 		case r.URL.Query().Get("images") == "1":
 			return reply(imageJSON), nil
+		case r.URL.Query().Get("capabilities") == "1":
+			return reply(`{"diskSizeGB":[20],"monthlyTrafficPackage":{"t5000":"included"},"defaultMonthlyTrafficPackage":"t5000","cpuTypes":[{"id":"B","cpuCores":[1],"ramMB":[1024]}]}`), nil
 		case r.URL.Query().Get("datacenter") == "1":
 			return reply(`[{"id":"EU","name":"Germany","subCategory":"Frankfurt"}]`), nil
 		case r.URL.Path == "/service/servers":

@@ -218,7 +218,7 @@ func (d *Driver) checkQuota(ctx context.Context, region string, f flavorData) er
 				return problem(providers.ErrorUnavailable, "quota", "INVALID_QUOTA", 200)
 			}
 			if *pair.limit >= 0 && *pair.limit-*pair.used < pair.need {
-				return problem(providers.ErrorCapacity, "quota", "REGIONAL_QUOTA_EXCEEDED", 0)
+				return problem(providers.ErrorRegionCapacity, "quota", "REGIONAL_QUOTA_EXCEEDED", 0)
 			}
 		}
 		return nil

@@ -100,6 +100,18 @@ func (d *Driver) CreateServer(ctx context.Context, r providers.CreateServerReque
 			break
 		}
 	}
+	if size == nil {
+		suggested, e := d.suggestedSizes(ctx, r.RegionID)
+		if e != nil {
+			return rejected, e
+		}
+		for i := range suggested {
+			if suggested[i].planID() == r.PlanID {
+				size = &suggested[i]
+				break
+			}
+		}
+	}
 	for i := range images {
 		if images[i].ID == r.ImageID && images[i].version() != "" {
 			image = &images[i]

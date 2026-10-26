@@ -120,3 +120,10 @@ func (p *diagnosticDeleteProvider) DeleteServer(context.Context, string) error {
 	p.calls++
 	return p.failure
 }
+
+func TestOperationDiagnosticQuotaReasonIsAllowlisted(t *testing.T) {
+	_, msg := operationDiagnostic(stageCreate, &providers.Error{Class: providers.ErrorCapacity, Code: "FLAVOR_QUOTA_EXCEEDED", Message: "private-secret"})
+	if !strings.Contains(msg, "FLAVOR_QUOTA_EXCEEDED") || strings.Contains(msg, "private-secret") {
+		t.Fatal(msg)
+	}
+}
