@@ -61,11 +61,12 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   assert.equal(await evaluate('document.querySelector("[name=size2]").value'), '');
   await evaluate('document.querySelector("[name=name]").value="";document.querySelector("#modalSubmit").click()');
   assert.equal(await evaluate('fetch("/fixture/save-count").then(r=>r.json())'),0,'missing name must not dispatch');
-  await evaluate('document.querySelector("[name=name]").value="Kamatera fixture";document.querySelector("#modalSubmit").click();document.querySelector("#modalSubmit").click();document.querySelector("#modalForm").dispatchEvent(new Event("submit",{cancelable:true}))');
+  await evaluate('document.querySelector("[name=name]").value="Kamatera fixture";cache.accounts=[{id:"stale-fixture"}];document.querySelector("#modalSubmit").click();document.querySelector("#modalSubmit").click();document.querySelector("#modalForm").dispatchEvent(new Event("submit",{cancelable:true}))');
   await waitFor('document.querySelector("#modalSubmit").textContent==="Saving…"');
   assert.equal(await evaluate('document.querySelector("#modalSubmit").disabled&&document.querySelector("[name=provider]").disabled&&document.querySelector("[name=size]").disabled'),true);
   await waitFor('document.querySelector("#modalError").textContent.includes("The fixture rejected")');
   assert.equal(await evaluate('fetch("/fixture/save-count").then(r=>r.json())'),1,'one request per pending save');
+  assert.equal(await evaluate('cache.accounts===null'),true,'unconfirmed save invalidates cached account list');
   assert.equal(await evaluate('document.querySelector("#modalSubmit").textContent'),'Save');
   assert.equal(await evaluate('document.querySelector("#modalSubmit").disabled'),false);
   assert.equal(await evaluate('document.querySelector("[name=size]").value'),'2B-4096-30');
@@ -83,9 +84,10 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    await evaluate('fetch("/fixture/save-mode?mode='+mode+'",{method:"POST"})');
    await evaluate('document.querySelector("#modalSubmit").click();document.querySelector("#modalCancel").click();document.querySelector("#primaryAction").click()');
    await waitFor('document.querySelector("#modal").open&&document.querySelector("[name=provider]")?.disabled===false');
-   await evaluate('document.querySelector("[name=provider]").value="linode";document.querySelector("[name=provider]").dispatchEvent(new Event("change"));document.querySelector("[name=name]").value="New untouched draft"');
+   await evaluate('document.querySelector("[name=provider]").value="linode";document.querySelector("[name=provider]").dispatchEvent(new Event("change"));document.querySelector("[name=name]").value="New untouched draft";cache.accounts=[{id:"stale-fixture"}]');
    await new Promise(r=>setTimeout(r,1000));
    assert.equal(await evaluate('document.querySelector("#modal").open&&document.querySelector("[name=provider]").value==="linode"&&document.querySelector("[name=name]").value==="New untouched draft"&&document.querySelector("#modalError").textContent===""&&document.querySelector("#modalSubmit").disabled'),true,'late '+mode+' altered the new form');
+   assert.equal(await evaluate('cache.accounts===null'),true,'late '+mode+' invalidates accounts without touching the new form');
    await evaluate('document.querySelector("#modalCancel").click()');
   }
   await evaluate('document.querySelector("#primaryAction").click()');await waitFor('document.querySelector("#modal").open');

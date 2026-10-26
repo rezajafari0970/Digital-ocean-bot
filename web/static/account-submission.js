@@ -1,7 +1,7 @@
 /* One save per wizard, with callbacks scoped to that dialog lifetime. */
 (() => {
  'use strict';
- function mount({form,submit,status,error}){
+ function mount({form,submit,status,error,onSettled=()=>{}}){
   let disposed=false,pending=false,timer=null,restore=null;
   function unlock(){clearTimeout(timer);timer=null;if(restore){restore();restore=null}}
   return {
@@ -23,7 +23,7 @@
     catch(e){
      if(!disposed){error.textContent=e.message||'The save result could not be confirmed.';status.textContent='Save was not confirmed. Your entries are preserved. Review the error; if the connection was interrupted, check Accounts before retrying.'}
      return;
-    }finally{pending=false;if(!disposed)unlock()}
+    }finally{pending=false;if(!disposed)unlock();onSettled()}
     if(!disposed)onSaved(result);
    }
   };
