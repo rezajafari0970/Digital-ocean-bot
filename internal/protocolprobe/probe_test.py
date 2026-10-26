@@ -99,7 +99,7 @@ class Socks:
     def candidate(self, label):
         outbound = {"protocol": "socks", "settings": {"servers": [
             {"address": "127.0.0.1", "port": self.tcp.getsockname()[1]}]}}
-        return {"id": label, "digest": "a" * 64, "outbound": outbound}
+        return {"id": label, "driver": "socks5", "digest": "a" * 64, "outbound": outbound}
 
     def close(self):
         self.tcp.close()

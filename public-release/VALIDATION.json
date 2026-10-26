@@ -4,7 +4,7 @@
   "date": "2026-10-26",
   "feature": "Per-node native UDP capability, independent TCP selection and native VLESS identity/Flow proof",
   "publication_gates": {
-    "cloudflare_transport_fleet_no_skip": "244 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
+    "cloudflare_transport_fleet_no_skip": "246 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
     "exact_candidate_ubuntu_24_amd64_install": "required before stable promotion",
     "full_go_and_vet_unprivileged": "required before push",
     "live_secret_scan_and_gitleaks": "required before push",
@@ -26,7 +26,8 @@
     "observation_retention": "At most ten 1000-row batches per table and a shared ten-second deadline; 15000-row catch-up fixture retains latest, failure and running evidence; completed-witness partial index must handle a fresh bulk load before statistics are refreshed",
     "runtime_identity_retention": "Failed opens retain no mutation gate; expired runtime/circuit identities are swept during acquisition; retained runtimes share live gates across replacement; cancellation and panic release idle gates",
     "protocol_capability": "Origin/credential/program-bound, expiring native DNS/QUIC evidence; replacement claims fence stale results; no protected direct fallback; TCP remains independent",
-    "native_vless_accounts": "Current native account ID and Flow must match desired clients, as well as email membership"
+    "native_vless_accounts": "Current native account ID and Flow must match desired clients, as well as email membership",
+    "managed_relay_probe": "Pinned native TLS/XUDP donor retains its category deny policy; permitted-domain QUIC proof succeeds while generic DNS/IP probing remains rejected"
   },
   "notes": [
     "Existing single-region AWS credentials retain their original identity and region boundaries.",
@@ -47,7 +48,8 @@
     "Plain TCP adds no TLS. Existing compatible-client warnings remain for VLESS and Trojan on public IPs. Loopback native tests do not certify every Android client version.",
     "Unavailable panels and provider authorization failures retain deletion intent and retry; neither a timeout nor an invalid cloud credential proves remote absence.",
     "Migration 197 adds an index for completed inventory witnesses. It preserves all rows and the broader index used by other readers. The backlog regression deliberately runs before ANALYZE.",
-    "UDP capability enforcement is staged through DOB_UDP_CAPABILITY_PANELS (panel UUIDs, all or none). Native datagram evidence does not measure client/ISP latency or HTTP/3 throughput. The default scope is disabled for canary rollout."
+    "UDP capability enforcement is staged through DOB_UDP_CAPABILITY_PANELS (panel UUIDs, all or none). Native datagram evidence does not measure client/ISP latency or HTTP/3 throughput. The default scope is disabled for canary rollout.",
+    "Managed relays intentionally deny generic DNS/IP destinations. Their driver probes permitted-domain QUIC version negotiation only, without an HTTP request, and does not claim DNS capability. Migration 200 retains migration 199 history and binds evidence to the probe driver and donor plan."
   ],
   "evidence_location": "Exact-commit source and installation results are attached through GitHub Actions. Production preservation evidence is recorded separately in private operations reports."
 }

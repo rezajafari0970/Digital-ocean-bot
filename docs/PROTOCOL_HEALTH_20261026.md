@@ -25,9 +25,8 @@ server DNS, CPU and RAM did not show a bottleneck during those measurements.
   credentials in encrypted stdin, pinned core hashes, no production file edits.
   The same SOCKS, TLS pin and XUDP outbound settings are exercised, including
   managed relays. External SOCKS protocol labels do not prove UDP support.
-- A valid fresh DNS response and two QUIC version-negotiation replies are
-  required. Responses bind the transaction, connection IDs, target and port.
-  Only neutral fixed 1.1.1.1 endpoints are probed; no ad HTTP request is sent.
+- External SOCKS requires a valid fresh DNS response and two QUIC version-negotiation replies. Managed TLS/XUDP requires two permitted-domain QUIC replies; its intentionally denied DNS path is not tested. Responses bind the transaction, connection IDs, target and port.
+  External SOCKS uses fixed 1.1.1.1 endpoints. Managed relays use googleads.g.doubleclick.net for version negotiation only; no ad HTTP request is sent.
 - Per-panel durable evidence binds origin, deployment generation and complete
   outbound fingerprint. Program and credential changes invalidate evidence.
   Refresh interval is two minutes; routing rechecks reject evidence older
@@ -49,7 +48,7 @@ server DNS, CPU and RAM did not show a bottleneck during those measurements.
 
 DOB_UDP_CAPABILITY_PANELS accepts all, none, or validated panel UUIDs.
 Default is disabled to permit a measured canary before fleet activation.
-The schema migration is additive (199). Keep the previous executable and
+Schema migrations 199 and 200 retain prior migration history. Keep the previous executable and
 backups; do not remove existing release, ownership, disk or secret-scan gates.
 The native VLESS proof applies generally.
 
@@ -69,3 +68,9 @@ The native VLESS proof applies generally.
 Controller-to-server and phone-to-server paths are different. Client/ISP
 congestion, full HTTP/3/video behavior and residential provider capacity cannot
 be declared fixed by these server-side probes.
+
+## Pre-fleet managed-relay correction
+
+Before fleet activation, review of configureRelayInlet confirmed that generic DNS/IP probes violate the existing donor category policy. A second native-driver probe now tests permitted-domain QUIC through TLS/XUDP and retains the deny policy. A native regression exercises both the successful permitted probe and the correctly rejected generic probe against the same donor. Driver and donor-plan changes invalidate evidence.
+
+First source PR 18 and public release d43ef52 passed 244 mandatory checks, fresh/repeated installation and atomic promotion. The independent default instance was updated with all 15 preservation checks passing. UDP enforcement remained disabled, production remained on 2755f99, and fleet activation is held for verification of this correction.

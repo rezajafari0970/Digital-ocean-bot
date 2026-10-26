@@ -127,7 +127,7 @@ func TestProtocolHealthOriginExpiryAndClaimPostgres(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	good := []protocolprobe.Observation{{ID: id, Digest: candidates[0].Digest, DNS: true, QUIC: true, Code: "ok"}}
+	good := []protocolprobe.Observation{{Driver: protocolprobe.DriverSOCKS5, ID: id, Digest: candidates[0].Digest, DNS: true, QUIC: true, Code: "ok"}}
 	if e = svc.finishProtocolProbe(ctx, replacement, origin, good, true); e != nil {
 		t.Fatal(e)
 	}
