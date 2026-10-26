@@ -14,7 +14,20 @@
  }
  // Network consent belongs to the preview contract, not an AWS display module.
  const approvalRequired=d=>!!(d.onboarding?.network_approval||d.onboarding?.resolved?.managed_network);
- const api={inRegion,plans,images,regions,approvalRequired};
+ // Optional preferences are alternatives, not weights. Keep the primary choice.
+ function uniqueChoices(root,prefix,count,changed){
+  const fields=Array.from({length:count},(_,i)=>root.querySelector('[name="'+prefix+(i?i+1:'')+'"]')).filter(Boolean);
+  const seen=new Set();
+  if(changed&&changed!==fields[0]&&changed.value===fields[0]?.value)changed.value='';
+  if(fields[0]?.value)seen.add(fields[0].value);
+  if(changed?.value)seen.add(changed.value);
+  for(const field of fields){if(field===changed||field===fields[0]||!field.value)continue;if(seen.has(field.value))field.value='';else seen.add(field.value)}
+ }
+ function verifiedLabel(d){
+  const account=d.account||{},email=account.email||account.Email;
+  return email||(d.provider==='kamatera'?'Kamatera API access':account.ID||account.id||d.provider);
+ }
+ const api={inRegion,plans,images,regions,approvalRequired,uniqueChoices,verifiedLabel};
  if(typeof module==='object' && module.exports)module.exports=api;
  else window.AccountCatalog=api;
 })();
