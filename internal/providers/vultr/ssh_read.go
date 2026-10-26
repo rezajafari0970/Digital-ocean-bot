@@ -26,6 +26,9 @@ func (d *Driver) ListSSHKeys(ctx context.Context) ([]providers.SSHKey, error) {
 			return nil, errors.New("missing SSH key inventory")
 		}
 		for _, k := range *page.Keys {
+			if k.ID == "" {
+				return nil, errors.New("SSH key inventory has invalid identity")
+			}
 			out = append(out, providers.SSHKey{ID: k.ID, Name: k.Name, PublicKey: k.SSHKey})
 		}
 		if err = pager.advance(page.Meta.Links.Next); err != nil {

@@ -289,6 +289,9 @@ def main(repo):
 
 REQUIRED["internal/panels/sanaei"] += ("TestRuntimeFailedOpenReleasesIdentityState", "TestRuntimeAcquisitionSweepsExpiredIdentities", "TestRuntimeMutationIdentitySurvivesCacheReplacement", "TestRuntimeMutationCancellationAndPanicReleaseGate", "TestRuntimeMutationWaitHonorsDeadlineBeforeCallback", "TestRuntimeAcquisitionWaitHasPreMutationProvenance", "TestRuntimeFactorySQLFailuresNeverBecomePanelCircuit")
 
+REQUIRED["internal/providers/vultr"] += ("TestSSHDeletionInventoryRejectsMissingIdentity",)
+REQUIRED["internal/app"] += ("TestAccountSSHDeletionRequiresValidAbsenceEvidence", "TestDeletionRecoveryValidatesInventoryBeforeAdoption")
+
 if __name__ == '__main__':
     try:
         if len(sys.argv) != 2:
