@@ -1,106 +1,122 @@
 # Protocol health correction — 2026-10-26
 
-Status: initial fleet rollout is active on public release 13570e53092bf1ac694094ad2797606a77e66022. A live socket-allocation failure has been isolated; its correction is awaiting independent verification and a follow-up release. Final UDP coverage is not yet accepted.
+Status: the confirmed code corrections are deployed and verified on both
+instances. Proxy-path datagram variability remains unresolved. This record
+does not claim that all service slowdowns or every possible code defect is fixed.
+Last recorded live snapshot: 2026-10-26T06:10:52.238418+00:00 (UTC).
 
-## Confirmed baseline
+## Released source and exact verification
 
-The authorized test node is 79.137.10.153. Controller-side API model metadata
-confirms access to gpt-6-astra. The authoritative OpenAI ledger retains one
-unknown synchronous request without a response ID and a USD 1.501011 reservation
-under its USD 2 cap. No new generation has been submitted; model lookup was
-read-only. The budget and unknown-outcome guards remain intact.
+- PR 18 added native protocol evidence and native VLESS ID/Flow verification:
+  merge c35d3ae26da090fbf6a16c9fe355eb85dbd0dfc1; 244 mandatory regressions.
+- PR 19 corrected managed relay probing to respect its destination policy:
+  tested source 175f85e845682a8417c65caac5944bb2de56f809,
+  merge 163a202c6cbb777863c25f26e16ad6cefe162536; 246 mandatory regressions.
+- PR 20 fixed the real TCP/UDP port-reservation collision:
+  tested source b760678ad7919b1e8504174e5fdbcd41af960095,
+  merge c385e4b7d4e204818db0420aee0a75dee1a5fbf4.
+  Independent run 40273361859 passed 247 mandatory roots with zero skips,
+  including disposable PostgreSQL, pinned native transport, race checks,
+  browser checks and a real backup/restore/transaction-interruption drill.
+- Public release 7d2981ccacdd90da8306bbfcb54d1294f33afdfb passed exact-source checks and fresh/repeated
+  installation in run 40274047231, with login and identity preservation.
+  Run 40274292251 verified source/install results and promoted main/stable
+  atomically with expected-head leases.
+- Export scans compared 40,728 production secret values and 15 default-instance
+  values without logging them. Pinned/checksummed Gitleaks also found no leaks.
 
-Previous node measurements found eleven external SOCKS endpoints rejecting UDP
-and one passing datagram tests. TCP remains usable on those eleven endpoints.
-An isolated warm A/B routed residential QUIC successfully 6/20 times with the
-old UDP pool and 20/20 with the measured UDP candidate only. These are QUIC
-version-negotiation samples, not application throughput or a reliability SLA.
-Measured residential download rates and latency remain provider constraints;
-server DNS, CPU and RAM did not show a bottleneck during those measurements.
+## Implemented behavior
 
-## Changes
+The module probes native transport settings in an ephemeral loopback-only Xray
+process. Credentials travel through authenticated SSH/stdin and are not printed.
+External SOCKS requires fresh valid DNS and two QUIC version-negotiation replies.
+Managed TLS/XUDP probes two permitted-domain QUIC replies, preserves the donor
+deny policy and does not claim DNS capability. No ad HTTP requests are sent.
 
-- Native transport driver probe: one loopback-only, ephemeral Xray process,
-  credentials in encrypted stdin, pinned core hashes, no production file edits.
-  The same SOCKS, TLS pin and XUDP outbound settings are exercised, including
-  managed relays. External SOCKS protocol labels do not prove UDP support.
-- External SOCKS requires a valid fresh DNS response and two QUIC version-negotiation replies. Managed TLS/XUDP requires two permitted-domain QUIC replies; its intentionally denied DNS path is not tested. Responses bind the transaction, connection IDs, target and port.
-  External SOCKS uses fixed 1.1.1.1 endpoints. Managed relays use googleads.g.doubleclick.net for version negotiation only; no ad HTTP request is sent.
-- Per-panel durable evidence binds origin, deployment generation and complete
-  outbound fingerprint. Program and credential changes invalidate evidence.
-  Refresh interval is two minutes; routing rechecks reject evidence older
-  than ten minutes or from the future. A transport/SSH failure cannot refresh
-  old evidence or certify a negative result.
-- Four bounded workers use durable, expiring claims. Replacement owners fence
-  late completion; complete evidence and rescheduling commit atomically.
-  All configuration writes still use the existing owner and native proof path.
-- TCP candidates and their existing health selection are retained. Only
-  measured UDP candidates enter UDP balancers. An empty UDP pool denies its
-  protected traffic and cannot silently route it directly.
-- Native VLESS verification checks account ID and Flow as well as email.
-  The panel can hot-update users without rewriting its startup JSON, so that
-  file alone is not evidence of a broken live Flow or restart behavior.
-- OpenAI submit CLI no longer references an undefined argument. Tests ensure
-  the existing unresolved-cost guard remains reachable and is not bypassed.
+Evidence binds the origin, deployment generation, driver, complete outbound
+credentials/TLS/XUDP settings and probe program. Changes invalidate old evidence.
+Four workers use fenced, expiring claims, a 75-second operation budget and a
+65-second remote process-group timeout. Requested refresh is two minutes;
+observed first-to-second fleet cycles had median
+358.1 seconds under this workload.
+Evidence expires after ten minutes. A transport failure cannot renew old proof.
 
-## Rollout scope
+The established configuration owner applies changes and verifies the native
+plan. TCP selection remains independent. Protected UDP has no direct fallback:
+an empty verified pool denies it. The scope is running as all on both panel
+workers and includes newly eligible nodes.
 
-DOB_UDP_CAPABILITY_PANELS accepts all, none, or validated panel UUIDs.
-Default is disabled to permit a measured canary before fleet activation.
-Schema migrations 199 and 200 retain prior migration history. Keep the previous executable and
-backups; do not remove existing release, ownership, disk or secret-scan gates.
-The native VLESS proof applies generally.
+The socket fix reserves the same loopback port for TCP and UDP with at most 32
+attempts. Only EADDRINUSE is retried; failed/partial allocations close their
+sockets. A mandatory real-socket regression covers occupied UDP, exhaustion,
+held reservations, unrelated listener preservation and descriptor cleanup.
 
-## Recorded stages
+Native VLESS verification compares ID and Flow as well as email. Hot-updated
+users can differ from the startup JSON, so that difference alone is not proof
+of a broken live account. The OpenAI CLI argument bug is also fixed; its
+existing unknown-cost and budget guards are retained.
 
-| Stage | Status | Evidence |
+## Deployment and preservation
+
+| Stage | Result | Recorded evidence |
 |---|---|---|
-| Source baseline | Confirmed | 4f12dff237e56eea7c71110b24c5885e090a0c88, clean isolated worktree |
-| Strongest configured API model | Available; generation blocked | Read-only gpt-6-astra model lookup and unchanged authoritative ledger |
-| Native probe canary | Passed | New probe rejected P01–P11 and admitted P12; DNS + two QUIC replies; production configuration unchanged |
-| Response validation | Passed | Malformed/replayed/misdirected DNS and QUIC response checks |
-| OpenAI regression | Passed | 24 tests; CLI submission reaches existing budget guard |
-| Isolated database/native/full CI | Initial release passed; socket correction pending | PR 19: 246 required passes, zero skips; follow-up requires 247 |
-| Production canary | Passed on 13570e5 | 40/40 QUIC and 8/8 HTTPS on four native VLESS paths |
-| Fleet rollout | Active; final acceptance pending | Both instances on schema 200, scope all; 99 native nodes verified; socket collision correction pending |
+| Default final update | Passed 2026-10-26T05:31:49.807904+00:00 | 16 preservation checks; three services ready, exact artifact hashes, zero restarts |
+| Production final update | Passed 2026-10-26T05:41:10.440716+00:00 | 16 preservation checks; 6,897 existing profile-ownership records and 77 Trojan records unchanged |
+| Database | Schema 200 retained | Identity and integrity verified; sealed backup source 20261026T054019.237062Z |
+| Scope | All on both actual processes | UDP enforcement and selective policy read from running worker environments |
+| Canary 79.137.10.153 | Passed 2026-10-26T05:48:26.883784+00:00 | 40/40 QUIC VN and 8/8 neutral HTTPS requests across four actual VLESS paths; production file unchanged |
+| Native fleet | 99/99 distinct nodes passed in two cohorts | 396 native VLESS identities/Flows matched |
+| Automatic observations | Execution/coverage passed at 2026-10-26T05:59:27.497940+00:00 | 98/98 observed, zero execution errors, all routing APPLIED, 96 surviving initial nodes observed twice |
+| Latest network snapshot | Variability remains | 99/99 fresh observations; 96 nodes with a positive UDP candidate |
+| OpenAI generation | Blocked; no new paid request | Existing unknown request and conservative reservation retained |
 
-Controller-to-server and phone-to-server paths are different. Client/ISP
-congestion, full HTTP/3/video behavior and residential provider capacity cannot
-be declared fixed by these server-side probes.
+Earlier production attempts for release 13570e5 stopped twice at the free-space
+guard before replacing the runtime. Lossless, checksum-verified archival
+recovered space and the third attempt succeeded. Those failures and the initial
+negative canary observation remain recorded. The socket follow-up succeeded on
+its first deployment attempt for each instance. Reproducible build/APT caches
+were cleared after compilation to preserve space; the capacity guard was not
+weakened. Runtime/configuration/backup evidence was retained.
 
-## Pre-fleet managed-relay correction
+## Remaining network evidence
 
-Before fleet activation, review of configureRelayInlet confirmed that generic DNS/IP probes violate the existing donor category policy. A second native-driver probe now tests permitted-domain QUIC through TLS/XUDP and retains the deny policy. A native regression exercises both the successful permitted probe and the correctly rejected generic probe against the same donor. Driver and donor-plan changes invalidate evidence.
+The initial server DNS sample passed 96/96 requests (median ranges 1–11 ms,
+maximum 26 ms), with about 93.8% CPU idle. Short 4 MiB transfers measured
+119–164 Mbps direct and 3.19–7.90 Mbps through proxies, including connection
+setup; these are not maximum-capacity measurements. Eleven external SOCKS
+endpoints rejected UDP_ASSOCIATE; only P12 demonstrated UDP.
 
-First source PR 18 and public release d43ef52 passed 244 mandatory checks, fresh/repeated installation and atomic promotion. The independent default instance was updated with all 15 preservation checks passing. UDP enforcement remained disabled, production remained on 2755f99, and fleet activation is held for verification of this correction.
+Initial post-release canary QUIC passed 40/40 and HTTPS passed 8/8. Longer fleet
+observation nevertheless showed variable datagram results. At 05:59 UTC only
+52 of 98 eligible nodes had a fully positive generic UDP result; this is not
+hidden by the successful code/coverage checks.
 
+A bounded differential at 2026-10-26T06:01:08.027064+00:00 reproduced this outside the native
+probe: direct controls passed 12/12; raw SOCKS DNS passed 4/6, with two timeouts,
+while raw SOCKS QUIC passed 6/6. Two native two-second trials passed, but a
+five-second trial still timed out on DNS. This supports a proxy-path problem,
+not simply a too-short two-second deadline; the exact upstream cause is not
+established. It does not justify blindly changing DNS, MTU, BBR or all timeouts.
 
-## Live rollout checkpoint and socket collision correction
+The conservative generic UDP gate requires both DNS and QUIC, so partial
+capability is not admitted as fully verified UDP. TCP remains available through
+its existing selection. A stable additional UDP-capable path is needed for
+redundancy; none of the other eleven measured endpoints provides it. Client/ISP
+latency and full HTTP3/video behavior still require client-side evidence.
 
-PR 19 passed 246 mandatory independent regressions with zero skips. Release
-13570e53092bf1ac694094ad2797606a77e66022 passed fresh/repeated installation
-and atomic promotion. Both instances now run that release and schema 200,
-with all 15 preservation checks passing on each. Two production attempts
-stopped at the disk-space guard before runtime replacement. Lossless,
-checksum-verified archival recovered space; the third attempt succeeded.
-No disk gate, retained history or ownership check was bypassed.
+One transient probe_unavailable state was seen at 06:08 UTC and had cleared
+automatically by the 06:10 diagnostic. The port fix does not claim to eliminate
+all future SSH, process or network failures.
 
-On 79.137.10.153, two automatic positive observation cycles admitted one
-UDP candidate while retaining all twelve TCP candidates. Live acceptance
-passed 40/40 QUIC version-negotiation exchanges and 8/8 neutral HTTPS
-requests through the four actual VLESS paths. This does not measure phone
-experience, full HTTP/3, video or maximum throughput.
+## OpenAI status and traceability
 
-Fleet scope is running as all on both instances. A read-only native audit
-starting at 05:09:04 UTC passed 99/99 nodes and matched all 396 VLESS users,
-including IDs and Flow; 96 nodes had one selected UDP candidate and three
-had no verified candidate. Coverage was still incomplete, not a final pass.
+Read-only model metadata previously confirmed gpt-6-astra. The authoritative
+schema-2 ledger still contains one unknown TimeoutError request without a
+response ID and a USD 1.501011 conservative reservation under the USD 2 cap.
+Actual usage/cost remains unknown. No new generation, ledger reset, duplicated
+ledger or guard bypass was performed.
 
-Live diagnostics reproduced OSError EADDRINUSE on 96.30.195.65: a port
-reserved for TCP was already occupied by UDP. The probe now reserves a
-loopback TCP/UDP pair with at most 32 attempts, retrying only EADDRINUSE.
-Every failed attempt closes its sockets, including partial allocation
-and non-collision failures. Real occupied-UDP tests verify retry, bounded
-exhaustion, held successful reservations, unrelated listener preservation,
-and descriptor cleanup. This regression is mandatory in the release gate.
-No routing policy, timeout, TTL, worker count or core pin changes.
+Private operational records are under /root/dob-protocol-health-20261026:
+completion-evidence.json, stages-current.json, both socket rollout directories,
+socket-fleet-coverage.json, native-audit summaries, canary acceptance and the
+provider differential. Secrets are excluded from the user-facing report.
