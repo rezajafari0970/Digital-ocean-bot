@@ -82,7 +82,7 @@ REQUIRED = {
 
 REQUIRED["internal/panels/configplane"] += ("TestNativeVLESSIdentityAndFlowProof",)
 REQUIRED["internal/panels/residentialsync"] += ("TestNativeProtocolManagedRelayRespectsDestinationPolicy", "TestProtocolManagedEvidencePostgres")
-REQUIRED["internal/protocolprobe"] = ("TestProtocolEvidenceBindingAndIsolation", "TestProtocolProbeResponseValidation", "TestNativeProtocolProbeCapability")
+REQUIRED["internal/protocolprobe"] = ("TestProtocolEvidenceBindingAndIsolation", "TestProtocolProbeResponseValidation", "TestProtocolProbeSocketReservation", "TestNativeProtocolProbeCapability")
 REQUIRED["internal/panels/residentialsync"] += ("TestProtocolUDPSelectionPreservesTCPAndDeny", "TestProtocolHealthOriginExpiryAndClaimPostgres", "TestProtocolScopeAndStableEvidence")
 
 # Provider admission/cleanup contracts are mandatory alongside fleet regressions.

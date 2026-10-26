@@ -1,3 +1,4 @@
+import errno
 import importlib.util
 import json
 import os
@@ -7,6 +8,7 @@ import struct
 import sys
 import threading
 import types
+from unittest import mock
 
 spec = importlib.util.spec_from_file_location("probe", pathlib.Path(__file__).with_name("probe.py"))
 probe = importlib.util.module_from_spec(spec)
@@ -106,6 +108,106 @@ class Socks:
         self.udp.close()
 
 
+
+def socket_reservation():
+    real_socket = socket.socket
+    # A real UDP listener occupies a port which remains available to TCP.
+    with real_socket(socket.AF_INET, socket.SOCK_DGRAM) as occupied:
+        occupied.bind(("127.0.0.1", 0))
+        busy_port = occupied.getsockname()[1]
+        created = []
+
+        class CollisionSocket(real_socket):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                created.append(self)
+
+            def bind(self, address):
+                if self.type == socket.SOCK_STREAM and len(created) == 1:
+                    address = ("127.0.0.1", busy_port)
+                return super().bind(address)
+
+        with mock.patch.object(probe.socket, "socket", CollisionSocket):
+            tcp, udp = probe.reserve_loopback_pair()
+        try:
+            assert tcp.getsockname() == udp.getsockname()
+            assert tcp.getsockname()[0] == "127.0.0.1"
+            assert tcp.getsockname()[1] != busy_port
+            assert len(created) >= 4
+            assert all(s.fileno() == -1 for s in created[:-2])
+            # Both returned reservations are held, not just inspected.
+            for kind in (socket.SOCK_STREAM, socket.SOCK_DGRAM):
+                with real_socket(socket.AF_INET, kind) as other:
+                    try:
+                        other.bind(tcp.getsockname())
+                    except OSError as error:
+                        assert error.errno == errno.EADDRINUSE
+                    else:
+                        raise AssertionError("reservation not held")
+        finally:
+            tcp.close()
+            udp.close()
+
+        created.clear()
+
+        class AlwaysCollision(CollisionSocket):
+            def bind(self, address):
+                if self.type == socket.SOCK_STREAM:
+                    address = ("127.0.0.1", busy_port)
+                return super().bind(address)
+
+        with mock.patch.object(probe.socket, "socket", AlwaysCollision):
+            try:
+                probe.reserve_loopback_pair()
+            except OSError as error:
+                assert error.errno == errno.EADDRINUSE
+            else:
+                raise AssertionError("unbounded collision accepted")
+        assert len(created) == 64, len(created)
+        assert all(s.fileno() == -1 for s in created)
+        # No failed attempt closed or changed the unrelated UDP listener.
+        occupied.settimeout(1)
+        with real_socket(socket.AF_INET, socket.SOCK_DGRAM) as sender:
+            sender.sendto(b"still-bound", occupied.getsockname())
+        assert occupied.recv(32) == b"still-bound"
+
+    created.clear()
+
+    class PermissionFailure(CollisionSocket):
+        def bind(self, address):
+            if self.type == socket.SOCK_DGRAM:
+                raise PermissionError(errno.EACCES, "fixture")
+            return real_socket.bind(self, address)
+
+    with mock.patch.object(probe.socket, "socket", PermissionFailure):
+        try:
+            probe.reserve_loopback_pair()
+        except PermissionError as error:
+            assert error.errno == errno.EACCES
+        else:
+            raise AssertionError("non-collision failure swallowed")
+    assert len(created) == 2
+    assert all(s.fileno() == -1 for s in created)
+
+    created.clear()
+
+    def creation_failure(*args, **kwargs):
+        if created:
+            raise OSError(errno.EMFILE, "fixture")
+        sock = real_socket(*args, **kwargs)
+        created.append(sock)
+        return sock
+
+    with mock.patch.object(probe.socket, "socket", creation_failure):
+        try:
+            probe.reserve_loopback_pair()
+        except OSError as error:
+            assert error.errno == errno.EMFILE
+        else:
+            raise AssertionError("allocation failure swallowed")
+    assert len(created) == 1 and created[0].fileno() == -1
+
+
 def native():
     core = pathlib.Path(os.environ["XRAY_TEST_BINARY"])
     digest = probe.sha_file(core)
@@ -133,6 +235,8 @@ def native():
 
 
 validation()
+if sys.argv[1] == "socket-reservation":
+    socket_reservation()
 if sys.argv[1] == "native":
     native()
 print("protocol probe contracts passed")

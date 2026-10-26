@@ -57,3 +57,9 @@ func TestNativeProtocolProbeCapability(t *testing.T) {
 		t.Fatalf("%v %s", e, out)
 	}
 }
+
+func TestProtocolProbeSocketReservation(t *testing.T) {
+	if out, e := exec.Command("python3", "probe_test.py", "socket-reservation").CombinedOutput(); e != nil {
+		t.Fatalf("%v %s", e, out)
+	}
+}
