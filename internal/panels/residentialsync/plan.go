@@ -48,6 +48,7 @@ type routePolicy struct {
 	Proxies               []rp
 }
 type rp struct {
+	UDPRequired, UDPVerified                             bool
 	Relay                                                *relayTransport
 	TransportHash, DonorDroplet, DonorAccount, DonorPlan string
 	ID, Type, Host, User, Tag, Password                  string

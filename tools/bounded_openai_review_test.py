@@ -79,6 +79,13 @@ class BoundedReviewTests(unittest.TestCase):
             row.update(usage={"input_tokens": 100, "output_tokens": 20}, charged_micro_usd=2300)
         return {"schema": 1, "policy": module.POLICY.copy(), "requests": [row]}
 
+    def test_cli_submit_reaches_existing_budget_guard(self):
+        import io
+        with patch.object(module.sys, "argv", ["bounded-openai-review.py", "submit", "--label", "udp-review", "--max-output-tokens", "512"]), patch.object(module.sys, "stdin", io.StringIO("public review")), patch.object(module.sys, "stderr", io.StringIO()) as error, patch.object(module, "submit_review", side_effect=module.ReviewBlocked("unresolved_request_requires_usage_reconciliation")) as submit:
+            self.assertEqual(module.main(), 78)
+            self.assertEqual(submit.call_args.kwargs, {"max_output_tokens": 512, "label": "udp-review"})
+            self.assertIn("unresolved_request_requires_usage_reconciliation", error.getvalue())
+
     def test_submission_is_prefunded_private_and_result_verified(self):
         result = self.submit()
         self.assertEqual(result["status"], "settled")

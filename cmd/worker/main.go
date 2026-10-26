@@ -626,6 +626,7 @@ func buildModules(application *app.Application, role worker.Role, roleLease *wor
 		}
 	}
 
+	modules.Add(worker.RolePanels, "residential-protocol-health", (residentialsync.Service{DB: application.DB, Secrets: application.Container.Secrets, Runtimes: sanaeiRuntimes}).RunProtocolHealth)
 	modules.Add(worker.RolePanels, "trial-relay-health", (residentialsync.Service{DB: application.DB, Secrets: application.Container.Secrets, Runtimes: sanaeiRuntimes}).RunRelayHealth)
 	modules.Add(worker.RolePanels, "residential-performance", (residentialperf.Store{DB: application.DB}).Run)
 	modules.Add(worker.RoleControl, "observation-retention", application.Container.RunObservationRetention)

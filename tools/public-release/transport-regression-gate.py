@@ -80,6 +80,10 @@ REQUIRED = {
     ),
 }
 
+REQUIRED["internal/panels/configplane"] += ("TestNativeVLESSIdentityAndFlowProof",)
+REQUIRED["internal/protocolprobe"] = ("TestProtocolEvidenceBindingAndIsolation", "TestProtocolProbeResponseValidation", "TestNativeProtocolProbeCapability")
+REQUIRED["internal/panels/residentialsync"] += ("TestProtocolUDPSelectionPreservesTCPAndDeny", "TestProtocolHealthOriginExpiryAndClaimPostgres", "TestProtocolScopeAndStableEvidence")
+
 # Provider admission/cleanup contracts are mandatory alongside fleet regressions.
 REQUIRED['internal/providers/aws'] = REQUIRED.get('internal/providers/aws', ()) + ('TestAWSCreateContractAndAmbiguousOutcome', 'TestAWSInventoryFailsClosed', 'TestAWSAccountCatalogAndScope', 'TestAWSDeleteOwnershipAndFenceTarget', 'TestAWSCredentialAndErrorIsolation', 'TestAWSSigningDeterministicAndSensitiveToBody', 'TestAWSExpectedAccountScopeRejectsCredentialRebind', 'TestAWSAbsenceWithoutEvidenceIsInconclusive', 'TestAWSSignatureOfficialVectors')
 REQUIRED['internal/providers/ovh'] = REQUIRED.get('internal/providers/ovh', ()) + ('TestOVHCreateContractAndAmbiguity', 'TestOVHRegionalCatalogAndQuota', 'TestOVHInventoryAndOwnership', 'TestOVHClockSingleFlightAndCredentialValidation', 'TestOVHAmbiguousCreateFindsAllMatches', 'TestOVHRejectsNonOfficialUbuntuNames', 'TestOVHUnsupportedNetworkModeNeverCreates')

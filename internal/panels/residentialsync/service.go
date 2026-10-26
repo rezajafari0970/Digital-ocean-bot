@@ -158,6 +158,9 @@ func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, 
 		}
 		p.Proxies, err = s.relayProxies(ctx, panel, p)
 		p.Configured = max(1, len(p.Proxies))
+		if err == nil {
+			err = s.hydrateProtocolHealth(ctx, panel, &p)
+		}
 		return p, revision, err
 	}
 	rows, err := s.DB.QueryContext(ctx, `SELECT rp.proxy_id::text,rp.type,rp.host,rp.port,COALESCE(rp.username,''),rp.outbound_tag,COALESCE(rp.secret_ref,''),COALESCE(rp.status='healthy' AND rp.last_success_at>now()-interval '3 minutes',false)
@@ -217,6 +220,9 @@ func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, 
 		}
 	}
 	p.RelayInlet, err = s.loadRelayInlet(ctx, panel)
+	if err == nil {
+		err = s.hydrateProtocolHealth(ctx, panel, &p)
+	}
 	return p, revision, err
 }
 func (s Service) apply(ctx context.Context, panel string, rt *sanaei.PanelRuntime) (retErr error) {

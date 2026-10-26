@@ -81,6 +81,9 @@ func modulePolicy(name string) (supervision.Policy, bool) {
 	case "residential-performance":
 		p.Work = time.Minute
 		p.Idle = 5 * time.Second
+	case "residential-protocol-health":
+		p.Work = 90 * time.Second
+		p.Idle = 5 * time.Second
 	case "trial-relay-health":
 		p.Loop = 2 * time.Minute
 		p.Work = 10 * time.Second
