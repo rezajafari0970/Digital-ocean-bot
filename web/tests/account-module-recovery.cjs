@@ -141,6 +141,10 @@ const {spawn}=require('node:child_process'),assert=require('node:assert/strict')
   await open('vultr');apiError='Provider rejected these credentials';
   await validate();await wait('document.querySelector("#modalError").textContent.includes("Provider rejected")&&!document.querySelector("#discoverAccount").disabled');
   assert.equal(await evaluate('document.querySelector("#modalSubmit").disabled&&cache.accountPreview===null'),true);
+  // A prior native close event can arrive after this wizard has opened.
+  // Every shared-dialog listener must leave its validation and handlers intact.
+  await evaluate('document.querySelector("#modal").dispatchEvent(new Event("close"))');
+  assert.equal(await evaluate('document.querySelector("#modalSubmit").disabled&&cache.accountPreview===null'),true,'delayed close preserves failed validation');
   assert.equal(await evaluate('document.querySelector("[name=token]").value'),'fixture-token');
   await evaluate('document.querySelector("#modalCancel").click();delete window.AccountCatalog');
   blocked.add('account-catalog.js');
