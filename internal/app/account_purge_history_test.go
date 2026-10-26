@@ -53,3 +53,18 @@ func TestAccountPurgeRetryUsesSafeCodes(t *testing.T) {
 		}
 	}
 }
+
+func TestAccountPurgeConfirmationIncludesUnresolvedProviderIntents(t *testing.T) {
+	db := installerBootstrapDB(t)
+	f := newBootstrapFixture(t, db)
+	ctx := context.Background()
+	execBootstrap(t, db, "UPDATE accounts SET enabled=false,provider_state='LOCKED',deletion_requested_at=now()-interval '3 minutes',runtime_status='DELETE_PENDING' WHERE id=$1", f.d.AccountID)
+	before, e := ReadAccountPurgeConfirmation(ctx, db, f.d.AccountID)
+	if e != nil {
+		t.Fatal(e)
+	}
+	execBootstrap(t, db, "INSERT INTO provider_account_resources(account_id,provider,scope,name,last_attempt_at) VALUES($1,'kamatera','server:uncertain','fixture',now())", f.d.AccountID)
+	if e = PurgeSavedAccount(ctx, db, f.d.AccountID, "LOCKED", 1, before); !errors.Is(e, ErrAccountPurgeConflict) {
+		t.Fatal("new unresolved create erased by old confirmation", e)
+	}
+}

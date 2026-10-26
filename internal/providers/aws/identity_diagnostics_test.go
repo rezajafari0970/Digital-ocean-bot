@@ -55,3 +55,23 @@ func TestAWSSharedCredentialPasteAndTemporaryValidation(t *testing.T) {
 		}
 	}
 }
+
+func TestAWSRuntimeIdentityEvidenceDoesNotInvalidateVerifiedKeys(t *testing.T) {
+	calls := []string{}
+	c := &client{http: &http.Client{Transport: transport(func(r *http.Request) (*http.Response, error) {
+		action := query(r).Get("Action")
+		calls = append(calls, action)
+		if action == "GetCallerIdentity" {
+			return response(action, fixtureRead(action)), nil
+		}
+		return &http.Response{StatusCode: 403, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`<Response><Errors><Error><Code>AuthFailure</Code><Message>private-secret</Message></Error></Errors></Response>`))}, nil
+	})}, credentials: testCredential(fixtureCredential), region: "eu-west-1", expected: "123456789012:eu-west-1"}
+	err := c.call(context.Background(), "ec2", "DescribeInstances", nil, false, nil)
+	d := Diagnostic(err)
+	if len(calls) != 2 || calls[0] != "GetCallerIdentity" || !d.IdentityVerified || d.Operation != "DescribeInstances" || d.Code != "AuthFailure" || d.RequiredPermission != "" || providers.Class(err) != providers.ErrorPermissionDenied {
+		t.Fatal("runtime identity diagnosis", d, err, calls)
+	}
+	if strings.Contains(err.Error(), "private-secret") {
+		t.Fatal("raw response leaked")
+	}
+}

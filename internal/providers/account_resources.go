@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// AccountResources journals non-compute resources across failed builds and restarts.
+// AccountResources journals compute intents and non-compute resources across failed builds and restarts.
 // WithLock serializes each scope, while the provider's mutation fence independently
 // prevents a deleting/disabled account from issuing any new mutation.
 type AccountResource struct {
@@ -173,7 +173,7 @@ func (s *sqlResourceSession) PrepareIntent(ctx context.Context, intent string) e
 	return nil
 }
 func (s *sqlResourceSession) BeginDeletion(ctx context.Context) (bool, error) {
-	r, e := s.conn.ExecContext(ctx, `UPDATE provider_account_resources SET delete_attempted_at=now() WHERE account_id=$1 AND provider=$2 AND scope=$3 AND resource_id<>'' AND completed_at IS NULL AND delete_attempted_at IS NULL`, s.owner.AccountID, s.owner.Provider, s.record.Scope)
+	r, e := s.conn.ExecContext(ctx, `UPDATE provider_account_resources SET delete_attempted_at=now() WHERE account_id=$1 AND provider=$2 AND scope=$3 AND resource_id<>'' AND completed_at IS NULL AND (delete_attempted_at IS NULL OR delete_attempted_at<now()-interval '2 minutes')`, s.owner.AccountID, s.owner.Provider, s.record.Scope)
 	if e != nil {
 		return false, e
 	}

@@ -203,6 +203,8 @@ func (d *Driver) DeleteServer(ctx context.Context, id string) error {
 		if !ok {
 			return problem(providers.ErrorUnavailable, "delete_server", "DURABLE_INTENT_REQUIRED", 0)
 		}
+		// Retry only the same freshly observed, durably bound UUID, at most
+		// once per two minutes. Acceptance still never means absence.
 		started, e := recorder.BeginDeletion(ctx)
 		if e != nil {
 			return e

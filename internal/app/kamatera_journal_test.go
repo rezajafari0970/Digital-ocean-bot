@@ -66,6 +66,17 @@ func TestKamateraResourceIntentSurvivesCrashAndHasUniqueBinding(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
+	execBootstrap(t, db, "UPDATE provider_account_resources SET delete_attempted_at=now()-interval '3 minutes' WHERE account_id=$1", f.d.AccountID)
+	e = j.WithLock(ctx, "server:fixture", "name", func(s providers.AccountResourceSession) error {
+		ok, e := s.(providers.AsyncResourceSession).BeginDeletion(ctx)
+		if e != nil || !ok {
+			t.Fatal("bounded deletion retry stranded", ok, e)
+		}
+		return nil
+	})
+	if e != nil {
+		t.Fatal(e)
+	}
 	otherJournal := providers.SQLAccountResources{DB: db, AccountID: other.d.AccountID, Provider: "kamatera"}
 	e = otherJournal.WithLock(ctx, "server:other", "other-name", func(s providers.AccountResourceSession) error {
 		return s.Bind(ctx, "11111111-1111-4111-8111-111111111111")

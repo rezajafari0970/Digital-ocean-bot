@@ -27,6 +27,8 @@ const accountPurgeScopeSQL = `(SELECT COALESCE(jsonb_agg(scope_key ORDER BY scop
  SELECT jsonb_build_array('deployment',id::text,COALESCE(provider_id,''),state,COALESCE(profile_snapshot->>'ssh_provider_key_id','')) FROM deployments WHERE account_id=$1
  UNION ALL
  SELECT jsonb_build_array('ssh_key',provider_key_id,state) FROM account_deletion_keys WHERE account_id=$1
+ UNION ALL
+ SELECT jsonb_build_array('provider_intent',provider,scope,name,nonce::text,resource_id,last_attempt_at IS NOT NULL,completed_at IS NOT NULL) FROM provider_account_resources WHERE account_id=$1
 ) resource_scope)`
 
 func purgeScopeFingerprint(raw string) string {

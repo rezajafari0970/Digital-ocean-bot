@@ -168,7 +168,11 @@ func (c *client) call(ctx context.Context, service, action string, q url.Values,
 		return problem(providers.ErrorUnavailable, action, "INVALID_RESPONSE_BODY", resp.StatusCode)
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return classify(action, resp.StatusCode, raw)
+		failure := classify(action, resp.StatusCode, raw)
+		if service == "ec2" && c.expected != "" && Diagnostic(failure).Code == "AuthFailure" {
+			return &identityVerifiedEC2Error{cause: failure}
+		}
+		return failure
 	}
 	var root struct{ XMLName xml.Name }
 	if xml.Unmarshal(raw, &root) != nil || root.XMLName.Local != action+"Response" {

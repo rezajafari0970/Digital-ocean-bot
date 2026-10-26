@@ -48,15 +48,19 @@ type DiagnosticInfo struct {
 type identityVerifiedEC2Error struct{ cause error }
 
 func (e *identityVerifiedEC2Error) Error() string {
-	return "AWS identity verified; EC2 service access could not be validated"
+	return "AWS identity verified; EC2 service access could not be validated; code=AuthFailure"
 }
 func (e *identityVerifiedEC2Error) Unwrap() error {
 	var pe *providers.Error
 	status := 0
+	operation := "unknown"
 	if errors.As(e.cause, &pe) {
 		status = pe.StatusCode
+		if operations[pe.Operation] {
+			operation = pe.Operation
+		}
 	}
-	return &providers.Error{StatusCode: status, Class: providers.ErrorPermissionDenied, Operation: "DescribeRegions", Code: "ACCOUNT_ACCESS_REQUIRED", Message: e.Error(), Cause: e.cause}
+	return &providers.Error{StatusCode: status, Class: providers.ErrorPermissionDenied, Operation: operation, Code: "ACCOUNT_ACCESS_REQUIRED", Message: e.Error(), Cause: e.cause}
 }
 
 func Diagnostic(err error) DiagnosticInfo {

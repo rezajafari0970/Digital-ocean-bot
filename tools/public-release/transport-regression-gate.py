@@ -202,8 +202,10 @@ def verify_events(lines, required=REQUIRED):
 
 
 REQUIRED['internal/providers/kamatera'] = ('TestKamateraTaskIsNotServerAndLostResponseIsNeverReposted','TestKamateraCollisionAndRegionMismatchCannotAcquireOwnership','TestKamateraReadBoundaryAndCredentialScope','TestKamateraMalformedInventoryAndErrorsDoNotProveAbsence','TestKamateraCatalogPreservesRegionalImagesAndUnknownQuotaPrice')
-REQUIRED['internal/providers/aws'] += ('TestAWSIdentityPrecedesRegionalAccessAndSeparatesFailure','TestAWSSharedCredentialPasteAndTemporaryValidation')
-REQUIRED['internal/app'] += ('TestKamateraCleanupRequiresBothJournalAndLocalScope','TestAccountHistoryPruningRechecksConfirmationAndPreservesLiveState','TestAccountPurgeRetryUsesSafeCodes','TestKamateraResourceIntentSurvivesCrashAndHasUniqueBinding')
+REQUIRED['internal/providers/aws'] += ('TestAWSIdentityPrecedesRegionalAccessAndSeparatesFailure','TestAWSSharedCredentialPasteAndTemporaryValidation','TestAWSRuntimeIdentityEvidenceDoesNotInvalidateVerifiedKeys')
+REQUIRED['internal/app'] += ('TestKamateraCleanupRequiresBothJournalAndLocalScope','TestAccountHistoryPruningRechecksConfirmationAndPreservesLiveState','TestAccountPurgeRetryUsesSafeCodes','TestAccountPurgeConfirmationIncludesUnresolvedProviderIntents','TestKamateraResourceIntentSurvivesCrashAndHasUniqueBinding')
+
+REQUIRED['internal/adminapi'] += ('TestAccountPurgeHistoricalScale',)
 
 def main(repo):
     if os.geteuid() == 0:
@@ -236,6 +238,7 @@ def main(repo):
                 raise RuntimeError('isolated database identity check failed')
             run([pg / 'createdb', 'bulk_test_transport'], stdout=output, stderr=subprocess.STDOUT)
             run([pg / 'psql', '-X', '-v', 'ON_ERROR_STOP=1', '-c', 'CREATE ROLE digitaloceanbot; CREATE ROLE digitaloceanbot_readonly;'], stdout=output, stderr=subprocess.STDOUT)
+        env['DOB_PURGE_SCALE'] = '1'
         env['BULK_TEST_DATABASE_URL'] = 'postgresql://dob_gate@/bulk_test_transport?' + urlencode({'host': str(socket), 'port': '55435', 'sslmode': 'disable'})
         # Execute protocol/transport exports against the exact release-pinned core.
         # Neither an absent binary nor an environment-selected unverified core can skip this gate.
