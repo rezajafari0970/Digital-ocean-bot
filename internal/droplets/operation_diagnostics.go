@@ -67,6 +67,12 @@ func operationDiagnostic(stage operationStage, err error) (string, string) {
 	if errors.As(err, &pe) && pe != nil && pe.StatusCode >= 100 && pe.StatusCode <= 599 {
 		message += fmt.Sprintf(" (HTTP %d)", pe.StatusCode)
 	}
+	if pe != nil {
+		switch pe.Code {
+		case "FLAVOR_QUOTA_EXCEEDED", "REGIONAL_QUOTA_EXCEEDED", "COMPUTE_QUOTA_EXCEEDED", "REGION_CAPACITY_UNAVAILABLE":
+			message += "; reason=" + pe.Code
+		}
+	}
 	return code, message
 }
 

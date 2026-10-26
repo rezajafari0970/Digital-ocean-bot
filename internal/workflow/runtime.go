@@ -82,6 +82,12 @@ func (r RuntimeSteps) Create(ctx context.Context, d Deployment) (Deployment, err
 		regionOp := op
 		regionOp.IdempotencyKey = op.IdempotencyKey + ":region:" + region
 		result, err = r.Droplets.Create(ctx, regionOp, p)
+		// A crash may occur after recording a definitive regional rejection
+		// but before trying the next persisted region. Resume that decision;
+		// running/unknown operations and other failures never authorize fallback.
+		if err == nil && result.State == jobs.OperationFailed && result.ErrorCode == string(providers.ErrorRegionCapacity) && result.ResourceID == "" && result.AccountID == d.AccountID && result.Kind == "CREATE_DROPLET" && result.IdempotencyKey == regionOp.IdempotencyKey {
+			err = &providers.Error{Class: providers.ErrorRegionCapacity, Operation: "create_server", Message: "recorded regional rejection"}
+		}
 		if err == nil && result.ResourceID != "" {
 			r.Profile.Region = region
 			break

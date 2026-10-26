@@ -8,12 +8,14 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/cloudutil"
 	"io"
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 	"unicode"
 )
 
@@ -54,7 +56,49 @@ type client struct {
 	expected    string
 }
 
-func (c *client) do(ctx context.Context, method, path string, body, out any) error {
+func (c *client) do(ctx context.Context, method, path string, body, out any) (result error) {
+	defer func() {
+		var pe *providers.Error
+		if !errors.As(result, &pe) {
+			return
+		}
+		op := ""
+		switch {
+		case strings.Contains(path, "capabilities=1"):
+			op = "capabilities"
+		case strings.Contains(path, "sizes=1"):
+			op = "plans"
+		case strings.Contains(path, "images=1"):
+			op = "images"
+		case path == "/service/server?datacenter=1":
+			op = "regions"
+		}
+		if op != "" {
+			copy := *pe
+			copy.Operation = op
+			result = &copy
+		}
+	}()
+	err := c.doOnce(ctx, method, path, body, out)
+	if method != "GET" || ctx.Err() != nil {
+		return err
+	}
+	var pe *providers.Error
+	// Retry only transient reads once, inside the caller's original deadline.
+	// Authentication, malformed JSON and all POST operations are not replayed.
+	if !errors.As(err, &pe) || !(pe.Class == providers.ErrorTransport || pe.Code == "PROVIDER_UNAVAILABLE") {
+		return err
+	}
+	timer := time.NewTimer(200 * time.Millisecond)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-timer.C:
+	}
+	return c.doOnce(ctx, method, path, body, out)
+}
+func (c *client) doOnce(ctx context.Context, method, path string, body, out any) error {
 	cred, e := credentials(ctx, c.credentials)
 	if e != nil {
 		return e

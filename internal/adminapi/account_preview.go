@@ -109,7 +109,7 @@ func (s *Server) runAccountPreview(w http.ResponseWriter, r *http.Request) {
 	previewStage(r.Context(), "credential")
 	driver, err := s.Container.Providers.Open(r.Context(), x.Provider, request)
 	if err != nil {
-		if x.Provider == "ovh" || x.Provider == "aws" {
+		if x.Provider == "ovh" || x.Provider == "aws" || x.Provider == "kamatera" {
 			fail(err, "credential")
 			return
 		}

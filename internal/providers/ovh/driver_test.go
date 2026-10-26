@@ -122,7 +122,7 @@ func TestOVHRegionalCatalogAndQuota(t *testing.T) {
 	if e != nil || len(c.Images) != 1 || len(c.Plans) != 1 || c.Plans[0].IDsByRegion["GRA11"] != flavorID || c.Images[0].IDsByRegion["GRA11"] != imageID {
 		t.Fatal(c, e)
 	}
-	if e = d.checkQuota(context.Background(), "GRA11", flavorData{CPU: 16, RAM: 8}); !providers.IsClass(e, providers.ErrorCapacity) {
+	if e = d.checkQuota(context.Background(), "GRA11", flavorData{CPU: 16, RAM: 8}); !providers.IsClass(e, providers.ErrorRegionCapacity) {
 		t.Fatal(e)
 	}
 }
