@@ -12,7 +12,9 @@
   const ps=plans(d),ims=images(d);
   return (d.regions || []).filter(r=>r.Available && ps.some(p=>inRegion(p,r.ID)) && ims.some(im=>inRegion(im,r.ID)));
  }
- const api={inRegion,plans,images,regions};
+ // Network consent belongs to the preview contract, not an AWS display module.
+ const approvalRequired=d=>!!(d.onboarding?.network_approval||d.onboarding?.resolved?.managed_network);
+ const api={inRegion,plans,images,regions,approvalRequired};
  if(typeof module==='object' && module.exports)module.exports=api;
  else window.AccountCatalog=api;
 })();

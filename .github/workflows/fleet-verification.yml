@@ -12,6 +12,7 @@ jobs:
       GOMAXPROCS: '2'
       GOMEMLIMIT: 1536MiB
       GOTOOLCHAIN: local
+      DOB_TEST_CHROMIUM: /tmp/dob-chrome/chrome-headless-shell-linux64/chrome-headless-shell
     steps:
       - uses: actions/checkout@v4
         with:
@@ -51,6 +52,7 @@ jobs:
           DOB_RUN_BROWSER_TEST=0 go test ./...
           go vet ./...
           node --check web/static/app.js
+          node web/tests/account-module-recovery.cjs
           node --check web/static/panel-settings.js
           node --check web/static/cloudflare.js
           go test -v -count=3 -p 1 -timeout 5m -run '^TestAccountEditBrowser$' ./internal/adminapi
