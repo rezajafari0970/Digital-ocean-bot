@@ -30,6 +30,9 @@ func ApplyOutputOptions(uri string, options OutputOptions) (string, error) {
 			return "", ErrInvalidVLESS
 		}
 		for k := range q {
+			if options.IndependentProfile && k == "sni" && q.Get("security") == "tls" && validVMessHost(q.Get(k)) {
+				continue
+			}
 			if options.IndependentProfile && k == "allowInsecure" {
 				if q.Get(k) != "true" && q.Get(k) != "false" {
 					return "", ErrInvalidVLESS

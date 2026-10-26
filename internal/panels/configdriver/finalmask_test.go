@@ -80,7 +80,7 @@ func TestProfileFinalMaskExportContracts(t *testing.T) {
 					t.Fatal("not importable by v2rayNG")
 				}
 				var want, got any
-				json.Unmarshal([]byte(profileMaskExample), &want)
+				json.Unmarshal([]byte(p.FinalMask), &want)
 				json.Unmarshal([]byte(u.Query().Get("fm")), &got)
 				if !reflect.DeepEqual(want, got) {
 					t.Fatal("operator JSON changed")
@@ -107,9 +107,41 @@ func TestProfileFinalMaskExportContracts(t *testing.T) {
 			if e != nil {
 				t.Fatal(e)
 			}
-			if off.Clients[0].FinalMask != "" || off.Clients[0].ID != c.Clients[0].ID || policies["DIRECT"].FinalMask != profileMaskExample {
+			if off.Clients[0].FinalMask != "" || off.Clients[0].ID != c.Clients[0].ID || policies["DIRECT"].FinalMask != p.FinalMask {
 				t.Fatal("export toggle changed saved mask or identity")
 			}
 		})
+	}
+}
+
+func TestProfileFinalMaskCDNExport(t *testing.T) {
+	r := configdriver.Builtins()
+	c, e := configdriver.NewCredentials("profile", "panel", []string{"DIRECT"}, 1)
+	if e != nil {
+		t.Fatal(e)
+	}
+	c.Clients[0].FinalMask = profileMaskExample
+	for _, protocol := range []string{"vless", "vmess", "trojan"} {
+		s := configdriver.Spec{Protocol: protocol, Network: "ws", Security: "tls", Port: 2083, Path: "/assets", CloudflareAccount: "11111111-1111-4111-8111-111111111111", CloudflareRecords: 1, CloudflareInterval: 1800, CloudflareMinLifetime: 2700, CloudflareMaxLifetime: 3600, CloudflareMaxActive: 4}
+		for _, address := range []string{"104.16.0.1", "assets-owned.example.com"} {
+			uri, e := r.CDNURI(s, "192.0.2.1", address, "assets-owned.example.com", "Fixture", c, c.Clients[0])
+			if e != nil {
+				t.Fatal(protocol, e)
+			}
+			u, e := url.Parse(uri)
+			if e != nil {
+				t.Fatal(e)
+			}
+			if u.Hostname() != address || u.Query().Get("sni") != "assets-owned.example.com" || u.Query().Get("fm") == "" || u.Query().Get("allowInsecure") != "false" {
+				t.Fatal("CDN mapping or mask lost")
+			}
+			filtered, e := export.ApplyOutputOptions(uri, export.OutputOptions{IndependentProfile: true})
+			if e != nil || filtered != uri {
+				t.Fatal(protocol, "CDN output rejected", e)
+			}
+			if port, e := export.URIPort(uri); e != nil || port != 2083 {
+				t.Fatal(protocol, "CDN port", e)
+			}
+		}
 	}
 }

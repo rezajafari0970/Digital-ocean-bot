@@ -104,7 +104,7 @@ Allocation, attachment, rotation, release, guest-network changes and config publ
 
 ### XHTTP Reality creation defaults
 The Configs page can select TCP or XHTTP Reality stream-up for new physical listeners. XHTTP uses apart.com Host and a saved unique path of256–4096bytes. Direct and Residential clients on one physical listener share its path. Existing listeners retain their transport and credentials.
-The exact requested FinalMask preset is visible but disabled because it is incompatible with the tested core. This profile uses native dialing, disabled WebView and empty Flow. Changing the creation default does not convert active listeners.
+Independent configuration profiles support editable FinalMask JSON, including scalar length/delay, maxSplit zero, multiple TCP fragments and saved UDP header-custom settings. The export switch includes the mask in VLESS, standard-URI VMess and Trojan links using the client import field fm. TCP and REALITY profiles retain their selected Flow. Shadowsocks SIP002 links cannot import this field in v2rayNG, so their masks can be saved with export disabled. Changing a default does not convert active listeners.
 
 ### Country names in exported configurations
 
@@ -287,3 +287,9 @@ VLESS و Trojan با گزینه‌های `headerType=http`، `host` و `path` ص
 پاکسازی سوابق موفق قدیمی در هر نوبت حداکثر ده دستهٔ هزارردیفی برای هر جدول، با مهلت مشترک ده ثانیه انجام می‌شود. آخرین شاهد، سوابق شکست و عملیات جاری حفظ می‌شوند؛ افزایش ظرفیت پاکسازی جایگزین پایش فضای دیسک و نگهداری پشتیبان خارج از سرور نیست.
 
 شناسه‌های منقضی‌شدهٔ کش پنل در مسیر عادی خواندن پاک می‌شوند. قفل هر پنل فقط تا پایان عملیات فعال و منتظر نگهداری می‌شود؛ نسخه‌های قدیم و جدید نشست همچنان از یک قفل مشترک استفاده می‌کنند. حذفِ تأییدنشده در سرور غیرقابل‌دسترسی، موفق اعلام نمی‌شود و پس از بازگشت دسترسی از همان درخواست پایدار ادامه می‌یابد.
+
+## FinalMask در پروفایل‌های کانفیگ
+
+در ویرایش پروفایل، برای مسیر Direct یا Residential، JSON را در **FinalMask (client JSON)** وارد و **Include FinalMask in exported configs** را فعال کنید. دکمهٔ نمونه، زنجیرهٔ دو fragment و هدر UDP را وارد می‌کند. ذخیره، بازکردن دوباره، خروجی و لینک اشتراک همان تنظیمات را حفظ می‌کنند. خاموش‌کردن خروجی، JSON ذخیره‌شده را پاک نمی‌کند.
+
+VLESS TCP بدون TLS و VLESS REALITY هر دو پشتیبانی می‌شوند. هستهٔ مدیریت‌شده پیش از اعمال پروفایل بررسی و در صورت نیاز با نسخهٔ سازگار جایگزین می‌شود. خروجی تنها پس از تأیید اتصال و مسیر منتشر می‌شود. برنامهٔ کلاینت باید FinalMask و فیلد `fm` را پشتیبانی کند؛ وجود تنظیم UDP در JSON به معنی فعال‌شدن آن روی انتقال TCP نیست.

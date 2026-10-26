@@ -18,7 +18,7 @@ func DecodeVMess(uri string) (map[string]any, error) {
 	// older base64 VMess QR object. Normalize for publication/port validation.
 	if strings.Contains(uri, "?") {
 		u, e := url.Parse(uri)
-		if e != nil || u.User == nil || u.User.Username() == "" || net.ParseIP(u.Hostname()) == nil {
+		if e != nil || u.User == nil || u.User.Username() == "" || !validVMessHost(u.Hostname()) {
 			return nil, errors.New("invalid vmess endpoint")
 		}
 		q, e := url.ParseQuery(u.RawQuery)
@@ -45,7 +45,7 @@ func DecodeVMess(uri string) (map[string]any, error) {
 	}
 	host, _ := v["add"].(string)
 	id, _ := v["id"].(string)
-	if net.ParseIP(host) == nil || id == "" {
+	if !validVMessHost(host) || id == "" {
 		return nil, errors.New("invalid vmess endpoint")
 	}
 	return v, nil
@@ -99,4 +99,25 @@ func validAdditionalURI(uri string) bool {
 		return ok && method == "aes-128-gcm" && len(password) >= 32 && u.RawQuery == ""
 	}
 	return false
+}
+
+// VMess CDN endpoints may use a verified DNS name instead of a literal IP.
+func validVMessHost(host string) bool {
+	if net.ParseIP(host) != nil {
+		return true
+	}
+	if len(host) > 253 || !strings.Contains(host, ".") {
+		return false
+	}
+	for _, label := range strings.Split(host, ".") {
+		if len(label) == 0 || len(label) > 63 || label[0] == '-' || label[len(label)-1] == '-' {
+			return false
+		}
+		for _, c := range label {
+			if !(c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '-') {
+				return false
+			}
+		}
+	}
+	return true
 }

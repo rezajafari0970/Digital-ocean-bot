@@ -187,6 +187,10 @@ func TestNativeConfigDriverRoundTrips(t *testing.T) {
 	if core == "" {
 		t.Skip("XRAY_TEST_BINARY required for actual native round trips")
 	}
+	clientCore := os.Getenv("XRAY_TEST_CLIENT_BINARY")
+	if clientCore == "" {
+		clientCore = core
+	}
 	origin := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { fmt.Fprint(w, "driver-roundtrip-ok") }))
 	defer origin.Close()
 	target := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { fmt.Fprint(w, "reality-target") }))
@@ -271,7 +275,7 @@ func TestNativeConfigDriverRoundTrips(t *testing.T) {
 			outbound := clientFromURI(t, uri, cert)
 			proxyPort := freePort(t)
 			client := map[string]any{"log": map[string]any{"loglevel": "warning"}, "inbounds": []any{map[string]any{"listen": "127.0.0.1", "port": proxyPort, "protocol": "http", "settings": map[string]any{}}}, "outbounds": []any{outbound}}
-			coreStart(t, core, client, proxyPort)
+			coreStart(t, clientCore, client, proxyPort)
 			proxyURL, _ := url.Parse(fmt.Sprintf("http://127.0.0.1:%d", proxyPort))
 			tr := &http.Transport{Proxy: http.ProxyURL(proxyURL), DisableKeepAlives: true}
 			defer tr.CloseIdleConnections()
