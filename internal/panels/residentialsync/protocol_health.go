@@ -110,6 +110,8 @@ func (s Service) hydrateProtocolHealth(ctx context.Context, panel string, p *rou
 	}
 	for i := range p.Proxies {
 		p.Proxies[i].UDPRequired = true
+		p.Proxies[i].UDPVerified = false
+		p.Proxies[i].QUICVerified = false
 	}
 	_, origin, err := s.protocolTarget(ctx, panel)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -118,20 +120,25 @@ func (s Service) hydrateProtocolHealth(ctx context.Context, panel string, p *rou
 	if err != nil {
 		return err
 	}
-	rows, err := s.DB.QueryContext(ctx, `SELECT proxy_id,transport_hash FROM panel_protocol_health
- WHERE panel_id=$1 AND origin_hash=$2 AND code='ok' AND quic_ok
+	rows, err := s.DB.QueryContext(ctx, `SELECT proxy_id,transport_hash,code='ok' FROM panel_protocol_health
+ WHERE panel_id=$1 AND origin_hash=$2 AND quic_ok
  AND checked_at>now()-interval '10 minutes' AND checked_at<=now()`, panel, origin)
 	if err != nil {
 		return err
 	}
-	evidence := map[string]string{}
+	type proof struct {
+		digest string
+		full   bool
+	}
+	evidence := map[string]proof{}
 	for rows.Next() {
 		var id, digest string
-		if err = rows.Scan(&id, &digest); err != nil {
+		var full bool
+		if err = rows.Scan(&id, &digest, &full); err != nil {
 			rows.Close()
 			return err
 		}
-		evidence[id] = digest
+		evidence[id] = proof{digest, full}
 	}
 	err = rows.Err()
 	rows.Close()
@@ -144,7 +151,9 @@ func (s Service) hydrateProtocolHealth(ctx context.Context, panel string, p *rou
 		if e != nil {
 			return e
 		}
-		proxy.UDPVerified = proxy.Type == "socks5" && evidence[proxy.ID] == protocolprobe.Fingerprint(protocolDriver(*proxy), outbound, proxy.DonorAccount, proxy.DonorDroplet, proxy.DonorPlan)
+		proof := evidence[proxy.ID]
+		proxy.QUICVerified = proxy.Type == "socks5" && proof.digest == protocolprobe.Fingerprint(protocolDriver(*proxy), outbound, proxy.DonorAccount, proxy.DonorDroplet, proxy.DonorPlan)
+		proxy.UDPVerified = proxy.QUICVerified && proof.full
 	}
 	return nil
 }

@@ -52,7 +52,7 @@ func TestNativeHTTPProofRespectsPanelGRPCSerialContract(t *testing.T) {
 	if err = applyAndVerify(context.Background(), session, desired, desired, "", clients, tags, p); err != nil {
 		t.Fatal(err)
 	}
-	if overlap.Load() != 0 || reads.Load() != int32(len(tags)*3*11+1) || core.saves != 0 || core.restarts != 0 {
+	if overlap.Load() != 0 || reads.Load() != int32(len(tags)*3*12+1) || core.saves != 0 || core.restarts != 0 {
 		t.Fatal("native contract violated", overlap.Load(), reads.Load(), core.saves, core.restarts)
 	}
 }

@@ -116,6 +116,7 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 			}{
 				{"adservice.google.com", "", "tcp", "443", "tls", true},
 				{"adservice.google.com", "", "udp", "443", "quic", true},
+				{"adservice.google.com", "", "udp", "8443", "quic", true},
 				{"www.google.com", "", "tcp", "443", "tls", false},
 				{"cloudflare-dns.com", "", "tcp", "443", "tls", false},
 				{"", "1.1.1.1", "udp", "53", "", false},
@@ -135,7 +136,7 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 				if c.Effective == "DIRECT" || (!p.Residential && p.Direct) || (c.Effective == "" && p.Configured == 0 && !p.Harden && (p.Residential || p.Direct)) {
 					base = directTag
 				} else if !p.SniffingBlocked && (c.Effective == "RESIDENTIAL" || c.Effective == "" && p.Residential) && len(p.Proxies) > 0 {
-					if network == "tcp" || proxyHasUDP(p.Proxies[0]) {
+					if network == "tcp" || p.proxyHasRoutedUDP(p.Proxies[0]) {
 						base = p.Proxies[0].Tag
 					}
 				}
@@ -165,7 +166,9 @@ func verifyRunning(ctx context.Context, exec sanaei.SessionExecutor, desired map
 						base = blockedTag
 					case !p.StrictAllowlist && !ads:
 						base = directTag
-					case len(p.Proxies) > 0 && network == "udp" && ((!p.PoolEnabled && !proxyHasUDP(p.Proxies[0])) || (p.PoolEnabled && !poolHasUDP(p))):
+					case p.udp443Only() && network == "udp" && probe.port != "443":
+						base = blockedTag
+					case len(p.Proxies) > 0 && network == "udp" && ((!p.PoolEnabled && !p.proxyHasRoutedUDP(p.Proxies[0])) || (p.PoolEnabled && !poolHasUDP(p))):
 						base = blockedTag
 					case len(p.Proxies) > 0:
 						base = p.Proxies[0].Tag
@@ -351,7 +354,7 @@ func verifyPoolOutcomes(ctx context.Context, exec sanaei.SessionExecutor, desire
 			}
 			matches := result.Obj.OutboundTag == tagged(desired, blockedTag)
 			for _, x := range p.Proxies {
-				if network == "udp" && x.Type != "socks5" {
+				if network == "udp" && !p.proxyHasRoutedUDP(x) {
 					continue
 				}
 				matches = matches || result.Obj.OutboundTag == tagged(desired, x.Tag)

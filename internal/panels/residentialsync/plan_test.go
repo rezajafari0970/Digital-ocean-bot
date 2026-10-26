@@ -7,6 +7,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -155,7 +156,7 @@ func (f *fakeCore) Do(ctx context.Context, r sanaei.SessionRequest) (sanaei.Sess
 					continue
 				}
 			}
-			if port, ok := rule["port"].(string); ok && !strings.Contains(","+port+",", ","+v.Get("port")+",") {
+			if port, ok := rule["port"].(string); ok && !fixturePortMatches(port, v.Get("port")) {
 				continue
 			}
 			if ips, ok := rule["ip"].([]any); ok {
@@ -199,6 +200,23 @@ func (f *fakeCore) Do(ctx context.Context, r sanaei.SessionRequest) (sanaei.Sess
 				continue
 			}
 			tag, _ = rule["outboundTag"].(string)
+			if tag == "" {
+				if target, ok := rule["balancerTag"].(string); ok {
+					bs, _ := setting["routing"].(map[string]any)["balancers"].([]any)
+					for _, v := range bs {
+						b := v.(map[string]any)
+						if b["tag"] == target {
+							ss, _ := b["selector"].([]any)
+							if len(ss) > 0 {
+								tag, _ = ss[0].(string)
+							} else {
+								tag, _ = b["fallbackTag"].(string)
+							}
+							break
+						}
+					}
+				}
+			}
 			break
 		}
 		return ok(map[string]any{"matched": tag != "", "outboundTag": tag})
@@ -288,4 +306,26 @@ func TestExistingClassesSurviveDeletionAndReplacement(t *testing.T) {
 	if cs[0].Class != "DIRECT" || cs[1].Class != "RESIDENTIAL" || cs[0].Effective != "DIRECT" || cs[1].Effective != "BLOCKED" {
 		t.Fatal("absent proxy changed intent", cs)
 	}
+}
+
+func fixturePortMatches(spec, value string) bool {
+	port, e := strconv.Atoi(value)
+	if e != nil {
+		return false
+	}
+	for _, part := range strings.Split(spec, ",") {
+		if part == value {
+			return true
+		}
+		a, b, ok := strings.Cut(part, "-")
+		if !ok {
+			continue
+		}
+		low, e1 := strconv.Atoi(a)
+		high, e2 := strconv.Atoi(b)
+		if e1 == nil && e2 == nil && port >= low && port <= high {
+			return true
+		}
+	}
+	return false
 }

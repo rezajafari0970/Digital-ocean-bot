@@ -27,6 +27,7 @@ func residentialDomains() []string {
 
 type clientRoute struct{ ID, Email, Class, Effective string }
 type routePolicy struct {
+	DNSResilience         bool
 	RelayMode             bool
 	RelayInlet            *relayInlet
 	StrictAllowlist       bool
@@ -48,7 +49,7 @@ type routePolicy struct {
 	Proxies               []rp
 }
 type rp struct {
-	UDPRequired, UDPVerified                             bool
+	UDPRequired, UDPVerified, QUICVerified               bool
 	Relay                                                *relayTransport
 	TransportHash, DonorDroplet, DonorAccount, DonorPlan string
 	ID, Type, Host, User, Tag, Password                  string
@@ -333,6 +334,9 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 	if p.Harden {
 		// The bounded TCP resolver pool is direct in category-only mode.
 		next["dns"] = managedDNS()
+		if p.DNSResilience {
+			next["dns"] = resilientDNS()
+		}
 		dnsDestination := destination
 		if p.AdsOnly || !p.Residential && p.Direct {
 			dnsDestination = directTag
@@ -380,7 +384,7 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 			if p.Residential {
 				// HTTP cannot carry UDP: block only matched protected domains.
 				// Never send matched Ads UDP to the non-ad direct fallback.
-				if len(p.Proxies) > 0 && !proxyHasUDP(p.Proxies[0]) {
+				if len(p.Proxies) > 0 && !p.proxyHasRoutedUDP(p.Proxies[0]) {
 					first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-udp", "inboundTag": tags, "domain": p.residentialDomains(), "network": "udp", "outboundTag": blockedTag})
 				}
 				first = append(first, map[string]any{"type": "field", "ruleTag": "dob-route-residential-ads", "inboundTag": tags, "domain": p.residentialDomains(), "network": "tcp,udp", "outboundTag": destination})
@@ -428,6 +432,7 @@ func buildSettings(current map[string]any, clients []clientRoute, tags []string,
 	if err := residentialperf.Apply(next, p.Performance); err != nil {
 		return nil, err
 	}
+	constrainMeasuredDatagrams(next, p)
 	// Fingerprint effective routes and credentials. Direct membership is already
 	// encoded in next; residential-only turnover does not change routing.
 	// Runtime TestRoute returns this content-addressed tag only after the plan loads.

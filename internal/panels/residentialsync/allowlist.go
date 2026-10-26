@@ -69,8 +69,14 @@ func StrictAllowlistEnabled(panel string) bool {
 }
 func strictAllowlistPanel(panel string) bool { return StrictAllowlistEnabled(panel) }
 
+func policyResolverIPs(p routePolicy) []string {
+	if p.DNSResilience {
+		return resolverpolicy.Active()
+	}
+	return []string{"1.1.1.1", "8.8.8.8"}
+}
 func restrictInternalDNS(rule map[string]any, p routePolicy) {
-	rule["ip"] = resolverpolicy.Active()
+	rule["ip"] = policyResolverIPs(p)
 	rule["port"] = internalDNSPort(p)
 	rule["network"] = "tcp"
 }
@@ -132,7 +138,7 @@ func clientInfrastructureRules(tags []string, p routePolicy) []any {
 			rules = append(rules, map[string]any{"type": "field", "ruleTag": "dob-route-client-probes", "inboundTag": tags, "domain": domains, "network": "tcp", "port": "80,443", "outboundTag": directTag})
 		}
 		rules = append(rules,
-			map[string]any{"type": "field", "ruleTag": "dob-route-client-dns-allowed", "inboundTag": tags, "ip": resolverpolicy.Active(), "network": "tcp,udp", "port": "53", "outboundTag": clientDNSTag},
+			map[string]any{"type": "field", "ruleTag": "dob-route-client-dns-allowed", "inboundTag": tags, "ip": policyResolverIPs(p), "network": "tcp,udp", "port": "53", "outboundTag": clientDNSTag},
 			map[string]any{"type": "field", "ruleTag": "dob-route-client-doh", "inboundTag": tags, "domain": clientDoHDomains, "network": "tcp", "port": "443", "outboundTag": directTag})
 	}
 	rules = append(rules, map[string]any{"type": "field", "ruleTag": "dob-route-client-infrastructure-deny", "inboundTag": tags, "domain": p.infrastructureDomains(), "network": "tcp,udp", "outboundTag": blockedTag})

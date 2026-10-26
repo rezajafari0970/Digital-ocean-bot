@@ -249,7 +249,7 @@ def apply_response(path, state, row, response):
 
 
 def submit_review(prompt, key, path=LEDGER, *, max_output_tokens=MAX_OUTPUT,
-                  label='review', send=http_send):
+                  label='review', independent_review=False, send=http_send):
     if not key:
         raise ReviewBlocked('api_key_missing')
     if not prompt.strip() or len(prompt.encode()) > MAX_INPUT_BYTES:
@@ -271,8 +271,15 @@ def submit_review(prompt, key, path=LEDGER, *, max_output_tokens=MAX_OUTPUT,
             raise ReviewBlocked('duplicate_review')
         if any(x.get('label') == label for x in rows):
             raise ReviewBlocked('review_label_already_used')
-        if any(x['status'] == 'unknown' for x in rows):
+        unknown = [x for x in rows if x['status'] == 'unknown']
+        # A separately authorized NEW review is not a replay of an unknown
+        # operation. Keep every prior reservation at its full worst-case cost,
+        # require a distinct prompt/label, and still prefund within the SAME cap.
+        # Default behavior and pending-receipt protection remain unchanged.
+        if unknown and not independent_review:
             raise ReviewBlocked('unresolved_request_requires_usage_reconciliation')
+        if type(independent_review) is not bool:
+            raise ReviewBlocked('independent_review_flag_invalid')
         if len(rows) >= MAX_REQUESTS:
             raise ReviewBlocked('request_limit_reached')
         reserve = (len(prompt.encode()) + 2048) * INPUT_MICRO + max_output_tokens * OUTPUT_MICRO
@@ -282,6 +289,8 @@ def submit_review(prompt, key, path=LEDGER, *, max_output_tokens=MAX_OUTPUT,
                'label': label, 'status': 'reserved', 'payload_digest': signature, 'prompt_digest': prompt_digest,
                'max_output_tokens': max_output_tokens, 'reserved_micro_usd': reserve,
                'charged_micro_usd': reserve}
+        if independent_review and unknown:
+            row['independent_prior_unknowns'] = [x['attempt'] for x in unknown]
         rows.append(row)
         atomic_write(path, state)  # Never POST before the full worst-case cost is durable.
         try:
@@ -343,6 +352,7 @@ def main():
     parser.add_argument('--max-output-tokens', type=int, default=MAX_OUTPUT)
     parser.add_argument('--label', default='review')
     parser.add_argument('--attempt')
+    parser.add_argument('--independent-review', action='store_true', help='Explicitly requested new review; never releases or retries prior unknown reservations')
     args = parser.parse_args()
     try:
         if args.command == 'migrate':
@@ -355,7 +365,8 @@ def main():
             result = poll_review(os.environ.get('OPENAI_API_KEY'), attempt=args.attempt)
         else:
             result = submit_review(sys.stdin.read(MAX_INPUT_BYTES + 1), os.environ.get('OPENAI_API_KEY'),
-                                   max_output_tokens=args.max_output_tokens, label=args.label)
+                                   max_output_tokens=args.max_output_tokens, label=args.label,
+                                   independent_review=args.independent_review)
     except (ReviewBlocked, OSError) as exc:
         print(json.dumps({'blocked': str(exc) if isinstance(exc, ReviewBlocked) else 'private_io_failed'}), file=sys.stderr)
         return 78

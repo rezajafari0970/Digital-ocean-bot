@@ -54,7 +54,7 @@ func TestNativeProofConcurrencyRetainsCompleteMatrixAndNoMutation(t *testing.T) 
 	if err = applyAndVerify(ctx, f, desired, desired, "", clients, tags, p); err != nil {
 		t.Fatal(err)
 	}
-	expected := int32(len(tags)*3*11 + 1)
+	expected := int32(len(tags)*3*12 + 1)
 	if f.reads.Load() != expected || f.peak.Load() < 2 || f.peak.Load() > 4 || f.active.Load() != 0 || f.saves != 0 || f.restarts != 0 {
 		t.Fatal("incomplete or unbounded proof", f.reads.Load(), expected, f.peak.Load())
 	}

@@ -62,7 +62,7 @@ func TestNativeRouteBatchPreservesCompleteMatrix(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	total := len(tags) * 3 * 11
+	total := len(tags) * 3 * 12
 	for _, fault := range []string{"", "unavailable", "missing", "mismatch", "cancelled", "fallback_failed"} {
 		t.Run(fault, func(t *testing.T) {
 			f := &batchProofCore{fakeCore: &fakeCore{saved: desired, running: desired}, fault: fault}

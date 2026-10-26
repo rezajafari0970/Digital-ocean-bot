@@ -83,8 +83,45 @@ class BoundedReviewTests(unittest.TestCase):
         import io
         with patch.object(module.sys, "argv", ["bounded-openai-review.py", "submit", "--label", "udp-review", "--max-output-tokens", "512"]), patch.object(module.sys, "stdin", io.StringIO("public review")), patch.object(module.sys, "stderr", io.StringIO()) as error, patch.object(module, "submit_review", side_effect=module.ReviewBlocked("unresolved_request_requires_usage_reconciliation")) as submit:
             self.assertEqual(module.main(), 78)
-            self.assertEqual(submit.call_args.kwargs, {"max_output_tokens": 512, "label": "udp-review"})
+            self.assertEqual(submit.call_args.kwargs, {"max_output_tokens": 512, "label": "udp-review", "independent_review": False})
             self.assertIn("unresolved_request_requires_usage_reconciliation", error.getvalue())
+
+    def held_unknown(self):
+        self.save(self.legacy())
+        module.migrate_ledger(self.ledger)
+        return copy.deepcopy(self.state()["requests"][0])
+
+    def test_independent_review_preserves_unknown_and_total_cap(self):
+        old = self.held_unknown()
+        result = self.submit("new independent DNS review", independent_review=True, max_output_tokens=512)
+        state = self.state()
+        self.assertEqual(state["requests"][0], old)
+        self.assertEqual(state["requests"][1]["independent_prior_unknowns"], [old["attempt"]])
+        self.assertLessEqual(sum(x["charged_micro_usd"] for x in state["requests"]), module.BUDGET_MICRO)
+        self.assertEqual((self.posts, result["status"]), (1, "settled"))
+
+    def test_independent_review_cannot_replay_legacy_or_background_prompt(self):
+        old = self.held_unknown()
+        with self.assertRaisesRegex(module.ReviewBlocked, "duplicate"):
+            self.submit("old review", independent_review=True, max_output_tokens=512)
+        self.submit("new distinct review", independent_review=True, max_output_tokens=512)
+        with self.assertRaisesRegex(module.ReviewBlocked, "duplicate"):
+            self.submit("new distinct review", independent_review=True, max_output_tokens=256, label="changed")
+        self.assertEqual(self.state()["requests"][0], old)
+        self.assertEqual(self.posts, 1)
+
+    def test_independent_review_cannot_release_reservation_or_exceed_cap(self):
+        old = self.held_unknown()
+        with self.assertRaisesRegex(module.ReviewBlocked, "exceeds_cap"):
+            self.submit("new review", independent_review=True)
+        self.assertEqual(self.state()["requests"], [old])
+        self.assertEqual(self.posts, 0)
+
+    def test_independent_review_does_not_bypass_pending_receipt(self):
+        self.queue()
+        with self.assertRaisesRegex(module.ReviewBlocked, "already_pending"):
+            self.submit("another task", independent_review=True, max_output_tokens=512)
+        self.assertEqual(self.posts, 1)
 
     def test_submission_is_prefunded_private_and_result_verified(self):
         result = self.submit()
