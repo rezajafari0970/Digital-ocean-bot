@@ -29,7 +29,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   // Wait for the route and event handlers, not just the static HTML button.
   await waitFor('typeof activePageView!=="undefined"&&current==="accounts"&&activePageView&&!activePageView.loading&&!document.querySelector("#app").hidden&&typeof document.querySelector("#primaryAction").onclick==="function"');
 
-  for(const provider of ['aws','ovh','vultr','digitalocean','linode','upcloud']){
+  for(const provider of ['aws','ovh','vultr','digitalocean','linode','upcloud','kamatera']){
    await evaluate('window.__editAlerts=[];window.alert=m=>window.__editAlerts.push(m);document.querySelector("#modalSubmit").disabled=true;document.querySelector("#modalError").textContent="previous error";window.editAccount('+JSON.stringify(provider)+')');
    assert.deepEqual(await evaluate('window.__editAlerts'),[],provider+' opens without JS errors');
    await waitFor('document.querySelector("#modal").open');

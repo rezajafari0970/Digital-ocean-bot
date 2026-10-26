@@ -8,6 +8,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/aws"
+"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/kamatera"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/linode"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/ovh"
@@ -108,6 +109,7 @@ func bootstrap(ctx context.Context, maxOpen int) (*Application, error) {
 		db.Close()
 		return nil, err
 	}
+	if err := registry.Register(kamatera.Factory{}); err != nil { db.Close(); return nil, err }
 	container := Container{DB: db, Secrets: secretStore, Accounts: Repository{DB: db}, Providers: registry, Economy: &network.EconomyController{DB: db}, ProxyTransports: network.NewProviderTransportPool(128)}
 	return &Application{Config: cfg, DB: db, Container: container, stopTraffic: network.StartProxyTrafficRecorder(ctx, db)}, nil
 }

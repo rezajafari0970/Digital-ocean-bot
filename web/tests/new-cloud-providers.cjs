@@ -30,13 +30,19 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   await waitFor('typeof activePageView!=="undefined"&&current==="accounts"&&activePageView&&!activePageView.loading&&!document.querySelector("#app").hidden&&typeof document.querySelector("#primaryAction").onclick==="function"');
   await evaluate('document.querySelector("#primaryAction").click()');
   await waitFor('document.querySelector("#modalFields [name=provider]")!==null');
-  assert.deepEqual((await evaluate('[...document.querySelector("#modalFields [name=provider]").options].map(x=>x.value)')).sort(),['aws','digitalocean','linode','ovh','upcloud','vultr']);
+  assert.deepEqual((await evaluate('[...document.querySelector("#modalFields [name=provider]").options].map(x=>x.value)')).sort(),['aws','digitalocean','kamatera','linode','ovh','upcloud','vultr']);
 
   async function assertSaveVisible(label){
    const state=await evaluate('(()=>{const e=document.querySelector("#modalSubmit"),r=e.getBoundingClientRect(),v=window.visualViewport;return {hidden:e.hidden,width:r.width,height:r.height,top:r.top,bottom:r.bottom,right:r.right,viewportHeight:v?.height||innerHeight,viewportWidth:v?.width||innerWidth,hit:document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.id}})()');
    assert.equal(state.hidden,false,label);assert.ok(state.width>20&&state.height>=40&&state.top>=0&&state.bottom<=state.viewportHeight+1&&state.right<=state.viewportWidth+1,label+JSON.stringify(state));assert.equal(state.hit,'modalSubmit',label);
   }
   await assertSaveVisible('initial Save is visible');
+  await evaluate('document.querySelector("[name=provider]").value="kamatera";document.querySelector("[name=provider]").dispatchEvent(new Event("change"))');
+  assert.deepEqual(await evaluate('[...document.querySelectorAll("[data-provider-credential]")].map(x=>({key:x.dataset.providerCredential,type:x.type}))'),[{key:'client_id',type:'password'},{key:'secret',type:'password'}]);
+  await evaluate('(()=>{for(const [k,v] of Object.entries({client_id:"fixture-client",secret:"fixture-secret"})){const el=document.querySelector("[data-provider-credential="+k+"]");el.value=v;el.dispatchEvent(new Event("input"))}})()');
+  assert.deepEqual(JSON.parse(await evaluate('document.querySelector("[name=token]").value')),{client_id:'fixture-client',secret:'fixture-secret'});
+  assert.equal(await evaluate('document.querySelector("#modalSubmit").disabled'),true);
+
   for(const provider of ['aws','ovh']){
    await evaluate('document.querySelector("#modalFields [name=provider]").value='+JSON.stringify(provider)+';document.querySelector("#modalFields [name=provider]").dispatchEvent(new Event("change"))');
    const fields=await evaluate('[...document.querySelectorAll("[data-provider-credential]")].map(x=>({key:x.dataset.providerCredential,type:x.type}))');
@@ -58,7 +64,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
     await waitFor('document.querySelector("#modalError").textContent.includes("InvalidParameterValue")');
     assert.equal(await evaluate('document.querySelector("#discoverAccount").textContent'),'Validate credential & load provider options');
     const message=await evaluate('document.querySelector("#modalError").textContent');
-    for(const part of ['DescribeRegions','ec2:DescribeRegions','aws-browser-trace','HTTP 400'])assert.ok(message.includes(part));
+    for(const part of ['DescribeRegions','aws-browser-trace','HTTP 400'])assert.ok(message.includes(part));
     assert.equal(message.includes('private-provider-message'),false);
     assert.equal(await evaluate('cache.accountPreview===null&&!document.querySelector("#modalSubmit").hidden&&document.querySelector("#modalSubmit").disabled'),true);
     assert.equal(await evaluate('document.querySelector("[data-provider-credential=secret_access_key]").value'),'fixture-secret');

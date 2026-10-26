@@ -208,7 +208,7 @@ func (c Container) openDriver(ctx context.Context, cfg AccountConfig, client *ht
 		}
 	}
 	req := providers.OpenRequest{AccountID: cfg.ID, HTTPClient: client, Credentials: accountCredentialSource{store: c.Secrets, accountID: cfg.ID, ref: cfg.SecretRef, db: c.DB, expected: credentialIdentity}}
-	if cfg.Provider == "aws" || cfg.Provider == "ovh" {
+	if cfg.Provider == "aws" || cfg.Provider == "ovh" || cfg.Provider == "kamatera" {
 		if err := c.DB.QueryRowContext(ctx, "SELECT COALESCE(external_id,'') FROM accounts WHERE id=$1", cfg.ID).Scan(&req.ExpectedExternalID); err != nil {
 			return nil, err
 		}

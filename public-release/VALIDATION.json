@@ -2,14 +2,14 @@
   "schema": 2,
   "status": "release_requirements_and_limits",
   "date": "2026-10-26",
-  "feature": "Editable FinalMask profiles, exact client export and fragmentation-safe native HTTP/Trojan parsing",
+  "feature": "AWS identity-aware validation, resumable account history purge and Kamatera CloudCLI provider",
   "publication_gates": {
-    "cloudflare_transport_fleet_no_skip": "259 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
+    "cloudflare_transport_fleet_no_skip": "273 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
     "exact_candidate_ubuntu_24_amd64_install": "required before stable promotion",
     "full_go_and_vet_unprivileged": "required before push",
     "live_secret_scan_and_gitleaks": "required before push",
     "atomic_main_and_stable": "required",
-    "account_edit_mobile": "six providers, four viewports, unchanged optional choices and cross-dialog settings submit",
+    "account_edit_mobile": "seven providers, four viewports, unchanged optional choices and cross-dialog settings submit",
     "database_backup_regressions": "25 bootstrap, owned-cluster and backup tests; real Ubuntu install/reinstall must verify checksums",
     "dispatcher_retention": "Completed account churn releases identity state; cancellation and sibling completion preserve active reservations",
     "migration_history": "NULL/empty legacy checksums sealed; unchanged startup is idempotent; altered files rejected without replay or retained-row changes",
@@ -32,7 +32,10 @@
     "dns_resilience": "Six unfiltered endpoints across three providers; pinned-core five-upstream failure injection, cache, all-failure/no-fabricated-answer; existing egress policy retained",
     "quic_dns_separation": "Fresh origin/credential-bound QUIC may authorize only category UDP443; public, donor and loopback non-443 guards; native route proof covers UDP8443; full-tunnel UDP still requires full evidence",
     "finalmask_profiles": "Exact scalar/zero/two-fragment/UDP preset; saved JSON, Flow, export toggle, routes, CDN, subscription remarks and native URI round trips; mobile browser and database persistence",
-    "fragmented_native_reads": "Complete HTTP Host routing, bounded HTTP camouflage headers, fragmented Trojan authentication; deterministic split-boundary tests, race detector, repeated actual client/server round trips and prior-core client interoperability"
+    "fragmented_native_reads": "Complete HTTP Host routing, bounded HTTP camouflage headers, fragmented Trojan authentication; deterministic split-boundary tests, race detector, repeated actual client/server round trips and prior-core client interoperability",
+    "kamatera": "Native CloudCLI auth/catalog/request contracts; durable create/task journal, ambiguous outcome, ownership, credential scope, deletion retry and mobile registration",
+    "account_purge_scale": "970000 history rows with bounded fixture seeding; fast enqueue, resumable native worker passes and unrelated account preservation",
+    "aws_identity": "Official SigV4 vectors, STS before EC2, shared credential/token normalization and identity-aware errors in preview and background operations"
   },
   "notes": [
     "Existing single-region AWS credentials retain their original identity and region boundaries.",

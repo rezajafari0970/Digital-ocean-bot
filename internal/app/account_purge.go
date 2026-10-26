@@ -20,23 +20,39 @@ var ErrAccountPurgeConflict = errors.New("account purge preconditions changed")
 // PurgeSavedAccount is an explicit local-only action. It never claims provider
 // deletion. Ordinary Delete retains the durable provider-cleanup workflow.
 func PurgeSavedAccount(ctx context.Context, db *sql.DB, id, expectedState string, remaining int, confirmation AccountPurgeConfirmation) error {
-	if !canonicalPurgeAccountID(id) {
-		return ErrAccountPurgeConflict
-	}
-	tx, err := db.BeginTx(ctx, nil)
-	if err != nil {
+
+	tx, err := openAccountPurge(ctx, db, id, expectedState, remaining, confirmation)
+	if err != nil || tx == nil {
 		return err
 	}
 	defer tx.Rollback()
+	return commitAccountPurge(ctx, tx, id)
+}
+
+// Every chunk rechecks the exact operator confirmation under the native fences.
+func openAccountPurge(ctx context.Context, db *sql.DB, id, expectedState string, remaining int, confirmation AccountPurgeConfirmation) (*sql.Tx, error) {
+	if !canonicalPurgeAccountID(id) {
+		return nil, ErrAccountPurgeConflict
+	}
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	ok := false
+	defer func() {
+		if !ok {
+			tx.Rollback()
+		}
+	}()
 	if _, err = tx.ExecContext(ctx, "SET LOCAL lock_timeout='5s'"); err != nil {
-		return err
+		return nil, err
 	}
 	// Same fence as the worker prevents local purge racing cloud verification.
 	if _, err = tx.ExecContext(ctx, "SELECT pg_advisory_xact_lock(hashtextextended($1,713))", id); err != nil {
-		return err
+		return nil, err
 	}
 	if err = lockAccountPurge(ctx, tx, id); err != nil {
-		return err
+		return nil, err
 	}
 	var state string
 	var safe bool
@@ -48,15 +64,16 @@ func PurgeSavedAccount(ctx context.Context, db *sql.DB, id, expectedState string
  (SELECT count(*) FROM (SELECT provider_resource_id FROM droplets WHERE account_id=a.id AND state<>'DELETED' UNION SELECT provider_resource_id FROM resources WHERE account_id=a.id AND managed AND state<>'deleted') remaining),deletion_requested_at,`+accountPurgeScopeSQL+`
  FROM accounts a WHERE id=$1 FOR UPDATE`, id).Scan(&state, &safe, &live, &requested, &scope)
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil
+		return nil, nil
 	} // Lost response can safely be replayed.
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if !confirmation.matches(requested, scope) || !safe || live != remaining || state != expectedState || !localPurgeAllowed(state) {
-		return ErrAccountPurgeConflict
+		return nil, ErrAccountPurgeConflict
 	}
-	return commitAccountPurge(ctx, tx, id)
+	ok = true
+	return tx, nil
 }
 
 func localPurgeAllowed(state string) bool {
@@ -140,7 +157,12 @@ func commitAccountPurgeWithArtifacts(ctx context.Context, tx *sql.Tx, id string,
 		`DELETE FROM ip_cleanup_credentials WHERE account_id=$1`,
 		`DELETE FROM secrets WHERE account_id=$1`,
 		`DELETE FROM lifecycle_events WHERE account_id=$1`,
+		`DELETE FROM account_capacity_events WHERE account_id=$1`,
 		`DELETE FROM provider_snapshots WHERE account_id=$1`,
+		`DELETE FROM server_readiness_issues WHERE readiness_id IN(SELECT id FROM server_readiness_snapshots WHERE account_id=$1)`,
+		`DELETE FROM server_readiness_snapshots WHERE account_id=$1`,
+		`DELETE FROM panel_inventory_syncs WHERE panel_id IN(SELECT id FROM panel_instances WHERE account_id=$1)`,
+		`DELETE FROM config_driver_clients WHERE panel_id IN(SELECT id FROM panel_instances WHERE account_id=$1)`,
 		`DELETE FROM resources WHERE account_id=$1`,
 		`DELETE FROM deployments WHERE account_id=$1`,
 		`DELETE FROM droplets WHERE account_id=$1`,

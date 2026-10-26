@@ -39,7 +39,7 @@ func TestAWSDiagnosticsAllowlistBothEnvelopes(t *testing.T) {
 		}
 		e := classify("DescribeRegions", 400, []byte(raw))
 		d := Diagnostic(e)
-		if d.Code != "InvalidParameterValue" || d.Operation != "DescribeRegions" || d.RequiredPermission != "ec2:DescribeRegions" || d.ResponseFormat != outer+"_xml" {
+		if d.Code != "InvalidParameterValue" || d.Operation != "DescribeRegions" || d.RequiredPermission != "" || d.ResponseFormat != outer+"_xml" {
 			t.Fatalf("lost diagnostic: %+v", d)
 		}
 		if strings.Contains(d.Guidance, "private-secret") || strings.Contains(e.Error(), "private-secret") {

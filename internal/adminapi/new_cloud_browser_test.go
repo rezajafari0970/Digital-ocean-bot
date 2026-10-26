@@ -13,6 +13,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/aws"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/digitalocean"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/kamatera"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/linode"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/ovh"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/upcloud"
@@ -30,7 +31,7 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 		t.Skip("browser opt-in")
 	}
 	registry := providers.NewRegistry()
-	for _, f := range []providers.Factory{digitalocean.Factory{}, vultr.Factory{}, upcloud.Factory{}, linode.Factory{}, aws.Factory{}, ovh.Factory{}} {
+	for _, f := range []providers.Factory{digitalocean.Factory{}, vultr.Factory{}, upcloud.Factory{}, linode.Factory{}, aws.Factory{}, ovh.Factory{}, kamatera.Factory{}} {
 		if e := registry.Register(f); e != nil {
 			t.Fatal(e)
 		}
@@ -105,6 +106,9 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 		}
 		if x.Provider == "aws" && !awsRejected.Swap(true) {
 			transport := quotaDiagnosticTransport(func(req *http.Request) (*http.Response, error) {
+				if req.URL.Query().Get("Action") == "GetCallerIdentity" {
+					return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`<GetCallerIdentityResponse><GetCallerIdentityResult><Account>123456789012</Account><Arn>arn:aws:iam::123456789012:user/fixture</Arn><UserId>fixture</UserId></GetCallerIdentityResult></GetCallerIdentityResponse>`))}, nil
+				}
 				return &http.Response{StatusCode: 400, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`<Response><Errors><Error><Code>InvalidParameterValue</Code><Message>private-provider-message</Message></Error></Errors></Response>`)), Request: req}, nil
 			})
 			_, err := (aws.Factory{}).Discover(r.Context(), providers.OpenRequest{AccountID: "preview", Credentials: previewCredential{[]byte(x.Token)}, HTTPClient: &http.Client{Transport: transport}}, nil)

@@ -81,6 +81,7 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 		planID, imageID = selected.PlanID, selected.ImageID
 	}
 	result, err := e.Provider.CreateServer(ctx, providers.CreateServerRequest{UpCloudTrialCompatible: profile.UpCloudTrialCompatible, Name: profile.Name, RegionID: profile.Region, PlanID: planID, ImageID: imageID, SSHKeyRefs: ssh, SSHAuthorizedKeys: authorized, Tags: []string{"managed-by-digital-ocean-bot"}, Identity: profile.IdentityTag})
+ if result.OperationID != "" { reserved.ProviderActionID = result.OperationID }
 	if err != nil {
 		if e.OnCreateError != nil {
 			e.OnCreateError(ctx, err)

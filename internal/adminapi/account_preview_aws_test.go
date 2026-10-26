@@ -20,18 +20,21 @@ func TestAWSPreviewActionableDiagnosticsAndSecretBoundary(t *testing.T) {
 	for _, tc := range []struct {
 		code   string
 		status int
-	}{{"InvalidParameterValue", 422}, {"IncompleteSignature", 401}, {"UnauthorizedOperation", 403}, {"Blocked", 403}, {"OptInRequired", 403}, {"PendingVerification", 403}, {"MissingAuthenticationToken", 401}, {"AuthFailure", 401}} {
+	}{{"InvalidParameterValue", 422}, {"IncompleteSignature", 401}, {"UnauthorizedOperation", 403}, {"Blocked", 403}, {"OptInRequired", 403}, {"PendingVerification", 403}, {"MissingAuthenticationToken", 401}, {"AuthFailure", 403}} {
 		t.Run(tc.code, func(t *testing.T) {
 			calls := 0
 			h := quotaDiagnosticTransport(func(r *http.Request) (*http.Response, error) {
 				calls++
+				if r.URL.Query().Get("Action") == "GetCallerIdentity" {
+					return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`<GetCallerIdentityResponse><GetCallerIdentityResult><Account>123456789012</Account><Arn>arn:aws:iam::123456789012:user/fixture</Arn><UserId>fixture</UserId></GetCallerIdentityResult></GetCallerIdentityResponse>`))}, nil
+				}
 				if r.Method != "GET" || r.URL.Query().Get("Action") != "DescribeRegions" {
 					t.Fatal("unexpected or mutating request")
 				}
 				return &http.Response{StatusCode: 400, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`<Response><Errors><Error><Code>` + tc.code + `</Code><Message>private-secret</Message></Error></Errors></Response>`)), Request: r}, nil
 			})
 			_, err := (aws.Factory{}).Discover(context.Background(), providers.OpenRequest{AccountID: "preview", HTTPClient: &http.Client{Transport: h}, Credentials: previewCredential{[]byte(`{"access_key_id":"private-secret","secret_access_key":"private-secret"}`)}}, nil)
-			if err == nil || calls != 1 {
+			if err == nil || calls != 2 {
 				t.Fatal("failed discovery accepted or replayed")
 			}
 			var logs bytes.Buffer
@@ -41,7 +44,11 @@ func TestAWSPreviewActionableDiagnosticsAndSecretBoundary(t *testing.T) {
 			w := httptest.NewRecorder()
 			writeStagedProviderPreviewError(w, err, previewDiagnosticContext{Provider: "aws", Stage: "discovery", RequestID: "aws-trace", Started: time.Now()})
 			var body map[string]any
-			if json.Unmarshal(w.Body.Bytes(), &body) != nil || w.Code != tc.status || body["diagnostic"] != tc.code || body["operation"] != "DescribeRegions" || body["required_permission"] != "ec2:DescribeRegions" || body["response_format"] != "ec2_xml" {
+			permission := ""
+			if tc.code == "UnauthorizedOperation" {
+				permission = "ec2:DescribeRegions"
+			}
+			if json.Unmarshal(w.Body.Bytes(), &body) != nil || w.Code != tc.status || body["diagnostic"] != tc.code || body["operation"] != "DescribeRegions" || body["required_permission"] != permission || body["response_format"] != "ec2_xml" {
 				t.Fatal(w.Code, w.Body.String())
 			}
 			for _, out := range []string{logs.String(), w.Body.String()} {

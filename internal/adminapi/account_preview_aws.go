@@ -41,5 +41,5 @@ func writeAWSPreviewError(w http.ResponseWriter, err error, c previewDiagnosticC
 		detail += fmt.Sprintf("; HTTP %d", providerStatus)
 	}
 	detail += "; ref: " + id + "."
-	writeJSON(w, status, map[string]any{"error": code, "detail": detail, "request_id": id, "stage": stage, "operation": d.Operation, "provider_status": providerStatus, "diagnostic": d.Code, "response_format": d.ResponseFormat, "required_permission": d.RequiredPermission})
+	writeJSON(w, status, map[string]any{"error": code, "detail": detail, "request_id": id, "stage": stage, "operation": d.Operation, "provider_status": providerStatus, "diagnostic": d.Code, "response_format": d.ResponseFormat, "identity_verified": d.IdentityVerified, "required_permission": d.RequiredPermission})
 }

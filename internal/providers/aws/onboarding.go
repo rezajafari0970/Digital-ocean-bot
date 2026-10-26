@@ -7,7 +7,6 @@ import (
 	"net/url"
 	"sort"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
@@ -20,9 +19,6 @@ func discoverRegion(ctx context.Context, r providers.OpenRequest, selection map[
 		return providers.Discovery{}, problem(providers.ErrorAuthentication, "discovery", "INVALID_CREDENTIAL_JSON", 0)
 	}
 	cred.Networks = nil
-	if strings.HasPrefix(cred.AccessKey, "ASIA") && cred.SessionToken == "" {
-		return providers.Discovery{}, problem(providers.ErrorInvalidRequest, "discovery", "TEMPORARY_SESSION_TOKEN_REQUIRED", 0)
-	}
 	if selection["region"] != "" {
 		cred.Region = selection["region"]
 	}
@@ -30,10 +26,18 @@ func discoverRegion(ctx context.Context, r providers.OpenRequest, selection map[
 		cred.Region = "eu-west-1"
 	}
 	source := cloudutil.NewJSONCredential(cred)
-	if _, e := signingCredentials(ctx, source); e != nil {
+	normalized, e := signingCredentials(ctx, source)
+	if e != nil {
 		return providers.Discovery{}, e
 	}
+	cred = normalized
+	source = cloudutil.NewJSONCredential(cred)
 	c := &client{http: cloudutil.HTTPClient(r.HTTPClient), credentials: source, region: cred.Region}
+	// Prove the key's identity before interpreting regional EC2 access failures.
+	d := &Driver{client: c, accountID: r.AccountID}
+	if _, e := d.Account(ctx); e != nil {
+		return providers.Discovery{}, e
+	}
 	var rr struct {
 		Set *struct {
 			Items []struct {
@@ -43,6 +47,9 @@ func discoverRegion(ctx context.Context, r providers.OpenRequest, selection map[
 		} `xml:"regionInfo"`
 	}
 	if e := c.call(ctx, "ec2", "DescribeRegions", url.Values{"AllRegions": {"false"}}, false, &rr); e != nil {
+		if Diagnostic(e).Code == "AuthFailure" {
+			return providers.Discovery{}, &identityVerifiedEC2Error{cause: e}
+		}
 		return providers.Discovery{}, e
 	}
 	if rr.Set == nil {
@@ -70,10 +77,6 @@ func discoverRegion(ctx context.Context, r providers.OpenRequest, selection map[
 		return providers.Discovery{}, problem(providers.ErrorInvalidRequest, "discovery", "REGION_NOT_ENABLED", 0)
 	}
 	result := providers.Discovery{Fields: []providers.DiscoveryField{{Key: "region", Label: "Primary AWS region", Value: cred.Region, Options: opts}}, Resolved: map[string]any{"region": cred.Region}}
-	d := &Driver{client: c, accountID: r.AccountID}
-	if _, e := d.Account(ctx); e != nil {
-		return providers.Discovery{}, e
-	}
 	subnets, e := d.publicSubnets(ctx, "")
 	if e != nil {
 		return providers.Discovery{}, e

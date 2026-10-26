@@ -38,7 +38,30 @@ func wireProblem(e *providers.Error, code, format string) *providers.Error {
 	return e
 }
 
-type DiagnosticInfo struct{ Code, Operation, ResponseFormat, Guidance, RequiredPermission string }
+type DiagnosticInfo struct {
+	Code, Operation, ResponseFormat, Guidance, RequiredPermission string
+	IdentityVerified                                              bool
+}
+
+// Only STS success followed by a genuine EC2 AuthFailure constructs this error.
+// Preserve the wire cause without classifying a proven key as invalid.
+type identityVerifiedEC2Error struct{ cause error }
+
+func (e *identityVerifiedEC2Error) Error() string {
+	return "AWS identity verified; EC2 service access could not be validated; code=AuthFailure"
+}
+func (e *identityVerifiedEC2Error) Unwrap() error {
+	var pe *providers.Error
+	status := 0
+	operation := "unknown"
+	if errors.As(e.cause, &pe) {
+		status = pe.StatusCode
+		if operations[pe.Operation] {
+			operation = pe.Operation
+		}
+	}
+	return &providers.Error{StatusCode: status, Class: providers.ErrorPermissionDenied, Operation: operation, Code: "ACCOUNT_ACCESS_REQUIRED", Message: e.Error(), Cause: e.cause}
+}
 
 func Diagnostic(err error) DiagnosticInfo {
 	d := DiagnosticInfo{Code: "UNKNOWN", Operation: "unknown", ResponseFormat: "local", Guidance: "Retry validation and use this reference to inspect the failed step."}
@@ -102,6 +125,17 @@ func Diagnostic(err error) DiagnosticInfo {
 		d.Guidance = "AWS throttled this request. Retry after the existing backoff."
 	case "InvalidParameter", "InvalidParameterValue", "InvalidParameterCombination", "InvalidParameterDependency", "InvalidQueryParameter", "MalformedQueryString", "MissingAction", "MissingParameter", "UnknownParameter", "InvalidAction", "ValidationError", "UnsupportedOperation", "UnsupportedProtocol":
 		d.Guidance = "AWS rejected a parameter or operation. The operation and exact error code below identify the driver request to inspect; changing credentials is not established as the remedy."
+	}
+	// A named EC2 operation alone is not evidence of a missing IAM permission.
+	switch d.Code {
+	case "UnauthorizedOperation", "AccessDenied", "AccessDeniedException", "OperationNotPermitted":
+	default:
+		d.RequiredPermission = ""
+	}
+	var verified *identityVerifiedEC2Error
+	if errors.As(err, &verified) {
+		d.IdentityVerified = true
+		d.Guidance = "AWS STS verified this credential's identity, but EC2 could not validate service access in the selected region. Check EC2 account activation, billing/verification restrictions and regional access in AWS. This response alone does not prove an incorrect secret key."
 	}
 	return d
 }

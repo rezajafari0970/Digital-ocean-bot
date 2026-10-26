@@ -134,7 +134,7 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	if x.Token != "" && (accountProvider == "aws" || accountProvider == "ovh") {
+	if x.Token != "" && (accountProvider == "aws" || accountProvider == "ovh" || accountProvider == "kamatera") {
 		var original string
 		if err := tx.QueryRowContext(r.Context(), "SELECT COALESCE(external_id,'') FROM accounts WHERE id=$1 FOR UPDATE", id).Scan(&original); err != nil {
 			writeJSON(w, 500, errorBody())

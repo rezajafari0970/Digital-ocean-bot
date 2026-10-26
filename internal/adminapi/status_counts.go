@@ -96,6 +96,7 @@ SELECT json_build_object(
  'upcloud_accounts',(SELECT count(*) FROM live_accounts WHERE provider='upcloud'),
  'aws_accounts',(SELECT count(*) FROM live_accounts WHERE provider='aws'),
  'ovh_accounts',(SELECT count(*) FROM live_accounts WHERE provider='ovh'),
+ 'kamatera_accounts',(SELECT count(*) FROM live_accounts WHERE provider='kamatera'),
  'linode_accounts',(SELECT count(*) FROM live_accounts WHERE provider='linode'),
  'enabled_accounts',(SELECT count(*) FROM live_accounts WHERE enabled),
  'healthy_accounts',(SELECT count(*) FROM live_accounts WHERE health='healthy'),

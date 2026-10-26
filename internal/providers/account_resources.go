@@ -8,12 +8,12 @@ import (
 	"time"
 )
 
-// AccountResources journals non-compute resources across failed builds and restarts.
+// AccountResources journals compute intents and non-compute resources across failed builds and restarts.
 // WithLock serializes each scope, while the provider's mutation fence independently
 // prevents a deleting/disabled account from issuing any new mutation.
 type AccountResource struct {
-	Scope, Name, Nonce, ID string
-	Attempted, Complete    bool
+	Scope, Name, Nonce, ID, OperationID, Intent string
+	Attempted, Complete, DeleteAttempted        bool
 }
 type AccountResourceSession interface {
 	Record() AccountResource
@@ -22,6 +22,12 @@ type AccountResourceSession interface {
 	Missing(context.Context) (bool, error)
 	Finish(context.Context) error
 }
+type AsyncResourceSession interface {
+	RecordOperation(context.Context, string) error
+	PrepareIntent(context.Context, string) error
+	BeginDeletion(context.Context) (bool, error)
+}
+
 type AccountResources interface {
 	WithLock(context.Context, string, string, func(AccountResourceSession) error) error
 	List(context.Context) ([]AccountResource, error)
@@ -105,7 +111,7 @@ func (j SQLAccountResources) WithLock(ctx context.Context, scope, name string, f
 		return e
 	}
 	session := &sqlResourceSession{conn: conn, owner: j}
-	e = conn.QueryRowContext(ctx, `SELECT scope,name,nonce::text,resource_id,last_attempt_at IS NOT NULL,completed_at IS NOT NULL FROM provider_account_resources WHERE account_id=$1 AND provider=$2 AND scope=$3`, j.AccountID, j.Provider, scope).Scan(&session.record.Scope, &session.record.Name, &session.record.Nonce, &session.record.ID, &session.record.Attempted, &session.record.Complete)
+	e = conn.QueryRowContext(ctx, `SELECT scope,name,nonce::text,resource_id,operation_id,intent::text,last_attempt_at IS NOT NULL,completed_at IS NOT NULL,delete_attempted_at IS NOT NULL FROM provider_account_resources WHERE account_id=$1 AND provider=$2 AND scope=$3`, j.AccountID, j.Provider, scope).Scan(&session.record.Scope, &session.record.Name, &session.record.Nonce, &session.record.ID, &session.record.OperationID, &session.record.Intent, &session.record.Attempted, &session.record.Complete, &session.record.DeleteAttempted)
 	if e != nil {
 		return e
 	}
@@ -115,7 +121,7 @@ func (j SQLAccountResources) WithLock(ctx context.Context, scope, name string, f
 	return fn(session)
 }
 func (j SQLAccountResources) List(ctx context.Context) ([]AccountResource, error) {
-	rows, e := j.DB.QueryContext(ctx, `SELECT scope,name,nonce::text,resource_id,last_attempt_at IS NOT NULL,completed_at IS NOT NULL FROM provider_account_resources WHERE account_id=$1 AND provider=$2 AND completed_at IS NULL ORDER BY scope`, j.AccountID, j.Provider)
+	rows, e := j.DB.QueryContext(ctx, `SELECT scope,name,nonce::text,resource_id,operation_id,intent::text,last_attempt_at IS NOT NULL,completed_at IS NOT NULL,delete_attempted_at IS NOT NULL FROM provider_account_resources WHERE account_id=$1 AND provider=$2 AND completed_at IS NULL ORDER BY scope`, j.AccountID, j.Provider)
 	if e != nil {
 		return nil, e
 	}
@@ -123,10 +129,57 @@ func (j SQLAccountResources) List(ctx context.Context) ([]AccountResource, error
 	out := []AccountResource{}
 	for rows.Next() {
 		var x AccountResource
-		if e = rows.Scan(&x.Scope, &x.Name, &x.Nonce, &x.ID, &x.Attempted, &x.Complete); e != nil {
+		if e = rows.Scan(&x.Scope, &x.Name, &x.Nonce, &x.ID, &x.OperationID, &x.Intent, &x.Attempted, &x.Complete, &x.DeleteAttempted); e != nil {
 			return nil, e
 		}
 		out = append(out, x)
 	}
 	return out, rows.Err()
+}
+
+// Preserve native task identity independently of its eventual server/resource ID.
+func (s *sqlResourceSession) RecordOperation(ctx context.Context, id string) error {
+	if id == "" || len(id) > 128 {
+		return errors.New("invalid provider operation identity")
+	}
+	r, e := s.conn.ExecContext(ctx, `UPDATE provider_account_resources SET operation_id=$4 WHERE account_id=$1 AND provider=$2 AND scope=$3 AND last_attempt_at IS NOT NULL AND completed_at IS NULL AND (operation_id='' OR operation_id=$4)`, s.owner.AccountID, s.owner.Provider, s.record.Scope, id)
+	if e != nil {
+		return e
+	}
+	n, e := r.RowsAffected()
+	if e != nil {
+		return e
+	}
+	if n != 1 {
+		return errors.New("provider operation binding conflict")
+	}
+	s.record.OperationID = id
+	return nil
+}
+
+func (s *sqlResourceSession) PrepareIntent(ctx context.Context, intent string) error {
+	r, e := s.conn.ExecContext(ctx, `UPDATE provider_account_resources SET intent=$4::jsonb WHERE account_id=$1 AND provider=$2 AND scope=$3 AND completed_at IS NULL AND ((intent='{}'::jsonb AND last_attempt_at IS NULL) OR intent=$4::jsonb)`, s.owner.AccountID, s.owner.Provider, s.record.Scope, intent)
+	if e != nil {
+		return e
+	}
+	n, e := r.RowsAffected()
+	if e != nil {
+		return e
+	}
+	if n != 1 {
+		return errors.New("provider compute intent conflict")
+	}
+	s.record.Intent = intent
+	return nil
+}
+func (s *sqlResourceSession) BeginDeletion(ctx context.Context) (bool, error) {
+	r, e := s.conn.ExecContext(ctx, `UPDATE provider_account_resources SET delete_attempted_at=now() WHERE account_id=$1 AND provider=$2 AND scope=$3 AND resource_id<>'' AND completed_at IS NULL AND (delete_attempted_at IS NULL OR delete_attempted_at<now()-interval '2 minutes')`, s.owner.AccountID, s.owner.Provider, s.record.Scope)
+	if e != nil {
+		return false, e
+	}
+	n, e := r.RowsAffected()
+	if n == 1 {
+		s.record.DeleteAttempted = true
+	}
+	return n == 1, e
 }
