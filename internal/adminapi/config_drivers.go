@@ -17,7 +17,7 @@ import (
 
 func (s *Server) saveConfigProfile(w http.ResponseWriter, r *http.Request) {
 	var p configplane.Profile
-	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 32768))
+	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 262144))
 	dec.DisallowUnknownFields()
 	if dec.Decode(&p) != nil || dec.Decode(new(any)) != io.EOF || p.DeleteRequestedAt != nil || p.DeletedAt != nil {
 		writeJSON(w, 400, map[string]string{"error": "invalid_profile_request"})

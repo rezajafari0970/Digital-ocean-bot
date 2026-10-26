@@ -258,6 +258,35 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),
    for(const key of ['header_type','host','path'])assert.equal(key in saves.at(-1).spec,false);
   }
   mark('TCP HTTP headers save/edit for all four protocols; default Host, required input, incompatible transitions and plain TCP cleanup');
+
+  const maskExample={tcp:[{type:'fragment',settings:{packets:'tlshello',maxSplit:'0',length:'1-104',delay:'0'}},{type:'fragment',settings:{packets:'1-1',maxSplit:'11',length:'1-114',delay:'1'}}],udp:[{type:'header-custom',settings:{client:[{rand:16,randRange:'0-255'}],server:[{rand:16,randRange:'0-255'}]}}]};
+  for(const [protocol,security] of [['vless','none'],['vless','reality'],['vless','tls'],['vmess','none'],['vmess','tls'],['trojan','tls']]){
+   await evaluate("document.querySelector('#primaryAction').click()");await waitFor("document.querySelector('#modal').open");
+   await evaluate("change('protocol',"+JSON.stringify(protocol)+");change('security',"+JSON.stringify(security)+");f('name').value='Mask fixture';document.querySelector('[data-mask-example=direct]').click()");
+   assert.equal(await evaluate("f('direct_mask').disabled||f('direct_export_mask').disabled"),false);
+   assert.equal(await evaluate("f('direct_export_mask').checked"),true);
+   assert.deepEqual(await evaluate("JSON.parse(f('direct_mask').value)"),maskExample);
+   if(protocol==='vless'&&security==='reality')await evaluate("f('direct_flow').value='xtls-rprx-vision'");
+   await evaluate("document.querySelector('#modalSubmit').click()");await waitFor("!document.querySelector('#modal').open");
+   const saved=saves.at(-1),id=catalog.profiles.at(-1).profile.id;
+   assert.deepEqual(JSON.parse(saved.class_settings.DIRECT.final_mask),maskExample);
+   assert.equal(saved.class_settings.DIRECT.export_final_mask,true);
+   assert.equal(saved.class_settings.RESIDENTIAL.export_final_mask,false);
+   await waitFor("document.querySelector('[data-edit-profile=\""+id+"\"]')");
+   await evaluate("document.querySelector('[data-edit-profile=\""+id+"\"]').click()");await waitFor("document.querySelector('#modal').open");
+   assert.equal(await evaluate("f('direct_export_mask').checked"),true);
+   assert.deepEqual(await evaluate("JSON.parse(f('direct_mask').value)"),maskExample);
+   if(protocol==='vless'&&security==='reality')assert.equal(await evaluate("f('direct_flow').value"),'xtls-rprx-vision');
+   await evaluate("fixtureQueue.push({url:'/api/v1/configs/profiles/"+id+"',status:400,body:{error:'profile_final_mask_invalid: invalid fragment setting length'}});document.querySelector('#modalSubmit').click()");
+   await waitFor("document.querySelector('#modalError').innerText.includes('invalid fragment setting length')");
+   assert.equal(await evaluate("f('direct_export_mask').checked&&!document.querySelector('#modalSubmit').disabled"),true);
+   assert.deepEqual(await evaluate("JSON.parse(f('direct_mask').value)"),maskExample);
+   await evaluate("f('direct_export_mask').checked=false;document.querySelector('#modalSubmit').click()");await waitFor("!document.querySelector('#modal').open");
+   assert.equal(saves.at(-1).class_settings.DIRECT.export_final_mask,false);
+   assert.deepEqual(JSON.parse(saves.at(-1).class_settings.DIRECT.final_mask),maskExample);
+  }
+  mark('FinalMask example, plain TCP/Reality/TLS, save/reopen, Flow preservation, rejected-save retention and independent export toggle');
+
   for(const [reason,label] of [
    ['database_disk_space_low','database: low disk space'],
    ['database_recovery_required','database: recovery required'],

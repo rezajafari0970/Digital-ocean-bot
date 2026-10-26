@@ -18,6 +18,7 @@ import tempfile
 from urllib.parse import urlencode
 
 REQUIRED = {
+    "internal/panels/transportprofile": ("TestProfileMaskPreservesScalarChainAndUDP", "TestProfileMaskRejectsMalformedHeadersAndNulls", "TestClientMaskPreservesServerAndModernSchedules", "TestClientMaskRejectsInvalidSchedules"),
     "internal/scheduler": ("TestSchedulerClaimCompletionOwnershipPostgres", "TestSchedulerPartialClaimReadRollsBackPostgres", "TestSchedulerReadAndCompletionFaultsFailClosedPostgres", "TestSchedulerCancellationReplacementAndMigrationPostgres"),
     "internal/migrate": ("TestMigrationLegacyChecksumBackfillAndDrift",),
     "internal/observability": ("TestIntegrityReportCannotHideNewFailure", "TestIntegrityReportCannotHideRecoveryOrExpiredBackup"),
@@ -26,12 +27,13 @@ REQUIRED = {
     "internal/cloudflare": ("TestCloudflareCertificateWireDatesAndPagination","TestCloudflareIncompleteCertificateListCannotProveAbsence","TestCloudflarePermissionErrorsIdentifyOperationWithoutSecrets","TestCertificateNodeOwnershipAtomicInstallAndPrivateKeyRetention","TestOriginCertificateTrustNamesExpiryAndCSRBinding","TestCloudflareDriverPaginationAuthAndRedaction","TestCloudflareAmbiguousWriteIsNotRetriedByDriver","TestCloudflareNamesLifetimeAndOwnership"),
     "internal/worker": ("TestOwnedDeferralPreservesFailuresAndReplacementClaim",),
     "cmd/worker": ("TestProofBusyIsDeferredWithoutFailure","TestControlSchedulerIndependentFromBulk","TestIdentityProviderBulkPostgresPoolHeadroom","TestProofPoolFortyPhysicalPinsAndProgress"),
-    "internal/panels/configdriver": ("TestTCPHTTPTransportRoundTripAndValidation","TestCloudflareTransportPortsAndStrictOutput","TestCloudflareNativeOutboundSyntax","TestDriverCompositionAndOwnership","TestNativeConfigDriverRoundTrips","TestResizePreservesIndependentIdentities","TestClassPoliciesPreserveSiblingIdentityLifetimeAndRate","TestClassOutputFlowMaskAndCertificateOptions"),
+    "internal/panels/configdriver": ("TestTCPHTTPTransportRoundTripAndValidation","TestCloudflareTransportPortsAndStrictOutput","TestCloudflareNativeOutboundSyntax","TestDriverCompositionAndOwnership","TestNativeConfigDriverRoundTrips","TestResizePreservesIndependentIdentities","TestClassPoliciesPreserveSiblingIdentityLifetimeAndRate","TestClassOutputFlowMaskAndCertificateOptions","TestProfileFinalMaskExportContracts"),
     "internal/panels/configplane": ("TestProfileClaimsDoNotDiscardIndependentDestinations","TestPendingPortReservationIsPanelScoped","TestCloudflareCertificateDriverTransition","TestTrafficProofRetriesTransientFailuresWithoutWeakeningTLS","TestBatchProofRejectsMixedOrIncompleteResponses","TestRuntimeBatchExecutesChecksAndIsolatesFailures","TestProfileSNISelectionRequiresVerifiedPublicTLS"),
     "internal/provisioning": ("TestSSHInputUsesPinnedEncryptedStdin",),
     "internal/panels/sanaei": ("TestLocalRouteBatchReadOnlyAndComplete",),
     "internal/panels/residentialsync": ("TestProofRechecksDueAfterQueuedOwnership","TestGeneratedTrojanPassesStrictResidentialSniffing","TestNativeRouteBatchPreservesCompleteMatrix","TestGoogleAdsSelectiveScopeAndRollback","TestGoogleAdsSelectiveRoutingAndProxyOutage","TestInstalledCoreGoogleAdsSelectiveTrafficAndOutage"),
     "internal/adminapi": (
+        "TestConfigProfileFinalMaskPersistence",
         "TestLatestAccountSnapshotBoundsHistoryReads",
         "TestProviderAuthorizationJournalConcurrencyRestartAndOwnership",
         "TestProviderAuthorizationUnknownExpiryAndRetainedKeys",

@@ -14,6 +14,23 @@ func DecodeVMess(uri string) (map[string]any, error) {
 	if !strings.HasPrefix(uri, "vmess://") {
 		return nil, errors.New("invalid vmess")
 	}
+	// v2rayNG reads FinalMask through the standard URI query (fm), not the
+	// older base64 VMess QR object. Normalize for publication/port validation.
+	if strings.Contains(uri, "?") {
+		u, e := url.Parse(uri)
+		if e != nil || u.User == nil || u.User.Username() == "" || net.ParseIP(u.Hostname()) == nil {
+			return nil, errors.New("invalid vmess endpoint")
+		}
+		q, e := url.ParseQuery(u.RawQuery)
+		if e != nil {
+			return nil, e
+		}
+		tls := q.Get("security")
+		if tls == "none" {
+			tls = ""
+		}
+		return map[string]any{"add": u.Hostname(), "id": u.User.Username(), "port": u.Port(), "net": q.Get("type"), "tls": tls, "ps": u.Fragment}, nil
+	}
 	raw := strings.TrimPrefix(uri, "vmess://")
 	b, e := base64.StdEncoding.DecodeString(raw)
 	if e != nil {

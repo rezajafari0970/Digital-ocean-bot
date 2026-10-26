@@ -36,7 +36,7 @@ func ApplyOutputOptions(uri string, options OutputOptions) (string, error) {
 				}
 				continue
 			}
-			if options.IndependentProfile && k == "finalmask" {
+			if options.IndependentProfile && (k == "fm" || k == "finalmask") {
 				var mask map[string]any
 				if len(q.Get(k)) > 32768 || json.Unmarshal([]byte(q.Get(k)), &mask) != nil || mask == nil {
 					return "", ErrInvalidVLESS

@@ -3,6 +3,7 @@ package configdriver
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/transportprofile"
 	"time"
 )
@@ -34,12 +35,12 @@ func (p ClassSettings) Validate(s Spec) error {
 		return errors.New("profile_allow_insecure_requires_tls")
 	}
 	if p.FinalMask != "" {
-		if s.Protocol == "shadowsocks" || s.Security == "none" {
-			return errors.New("profile_final_mask_requires_tls_or_reality")
+		if s.Protocol == "shadowsocks" && p.ExportFinalMask {
+			return errors.New("profile_final_mask_share_unsupported")
 		}
 		c := transportprofile.Config{FinalMask: json.RawMessage(p.FinalMask)}
-		if _, e := c.ClientTCPMask(); e != nil {
-			return errors.New("profile_final_mask_invalid")
+		if _, e := c.ProfileMask(); e != nil {
+			return fmt.Errorf("profile_final_mask_invalid: %v", e)
 		}
 	}
 	if p.ExportFinalMask && p.FinalMask == "" {

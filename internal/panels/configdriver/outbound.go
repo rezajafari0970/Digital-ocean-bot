@@ -25,7 +25,7 @@ func (r *Registry) Outbound(s Spec, host string, c Credentials, cl Client) (map[
 		stream["realitySettings"] = map[string]any{"serverName": s.SNI, "publicKey": c.PublicKey, "shortId": c.ShortID, "fingerprint": "chrome"}
 	}
 	if cl.FinalMask != "" {
-		mask, e := (transportprofile.Config{FinalMask: json.RawMessage(cl.FinalMask)}).ClientTCPMask()
+		mask, e := (transportprofile.Config{FinalMask: json.RawMessage(cl.FinalMask)}).ProfileMask()
 		if e != nil {
 			return nil, e
 		}

@@ -83,10 +83,10 @@ func TestClassOutputFlowMaskAndCertificateOptions(t *testing.T) {
 		}
 		u, _ := url.Parse(uri)
 		if c.Class == "DIRECT" {
-			if u.Query().Get("flow") == "" || u.Query().Get("finalmask") == "" {
+			if u.Query().Get("flow") == "" || u.Query().Get("fm") == "" {
 				t.Fatal("enabled options missing")
 			}
-		} else if u.Query().Has("flow") || u.Query().Has("finalmask") {
+		} else if u.Query().Has("flow") || u.Query().Has("fm") {
 			t.Fatal("direct output options leaked")
 		}
 		if strings.Contains(u.RawQuery, "+") {

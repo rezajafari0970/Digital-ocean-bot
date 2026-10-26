@@ -10,7 +10,7 @@ import (
 // WithRemark changes only the URI fragment. It deliberately preserves every
 // byte of the connection string, including escapes, query order and duplicates.
 func WithRemark(uri, remark string) string {
-	if strings.HasPrefix(uri, "vmess://") {
+	if strings.HasPrefix(uri, "vmess://") && !strings.Contains(uri, "?") {
 		if v, e := DecodeVMess(uri); e == nil {
 			v["ps"] = remark
 			b, _ := json.Marshal(v)

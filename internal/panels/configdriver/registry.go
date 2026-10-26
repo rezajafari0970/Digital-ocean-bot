@@ -310,7 +310,7 @@ func (r *Registry) URI(s Spec, host, remark string, c Credentials, cl Client) (s
 	if !owned {
 		return "", errors.New("profile_client_not_owned")
 	}
-	if s.Protocol == "vmess" {
+	if s.Protocol == "vmess" && cl.FinalMask == "" {
 		tls := ""
 		if s.Security == "tls" {
 			tls = "tls"
@@ -328,13 +328,6 @@ func (r *Registry) URI(s Spec, host, remark string, c Credentials, cl Client) (s
 		if s.Security == "tls" && cl.PolicySet {
 			data["allowInsecure"] = strconv.FormatBool(cl.AllowInsecure)
 		}
-		if cl.FinalMask != "" {
-			mask, e := (transportprofile.Config{FinalMask: json.RawMessage(cl.FinalMask)}).ClientTCPMask()
-			if e != nil {
-				return "", e
-			}
-			data["finalmask"] = string(mask)
-		}
 		b, _ := json.Marshal(data)
 		return "vmess://" + base64.StdEncoding.EncodeToString(b), nil
 	}
@@ -351,15 +344,18 @@ func (r *Registry) URI(s Spec, host, remark string, c Credentials, cl Client) (s
 		q.Set("allowInsecure", strconv.FormatBool(cl.AllowInsecure))
 	}
 	if cl.FinalMask != "" {
-		mask, e := (transportprofile.Config{FinalMask: json.RawMessage(cl.FinalMask)}).ClientTCPMask()
+		mask, e := (transportprofile.Config{FinalMask: json.RawMessage(cl.FinalMask)}).ProfileMask()
 		if e != nil {
 			return "", e
 		}
-		q.Set("finalmask", string(mask))
+		q.Set("fm", string(mask))
 	}
 	scheme := s.Protocol
 	user := r.protocols[s.Protocol].User(s, cl)
 	if s.Protocol == "shadowsocks" {
+		if cl.FinalMask != "" {
+			return "", errors.New("profile_final_mask_share_unsupported")
+		}
 		scheme = "ss"
 		q = url.Values{}
 		if s.HeaderType == "http" {
