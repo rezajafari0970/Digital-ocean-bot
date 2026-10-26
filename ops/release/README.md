@@ -1,3 +1,5 @@
+> Latest accepted continuation: [Deletion inventory validation, dual-instance rollout and remaining cleanup](../../docs/DELETION_INVENTORY_20261026.md). Older release entries below retain their original dates.
+
 # Independent release verification
 
 The legacy controller is quarantined. On 2026-10-24 Git worktree creation
