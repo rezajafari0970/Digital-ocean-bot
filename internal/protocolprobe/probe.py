@@ -6,6 +6,7 @@ This measures datagram reachability, not HTTP/3 throughput.
 No production configuration is read or changed and no public listener opens.
 """
 import concurrent.futures
+import errno
 import hashlib
 import json
 import os
@@ -134,6 +135,26 @@ def sha_file(path):
     return digest.hexdigest()
 
 
+
+def reserve_loopback_pair():
+    """Reserve the same TCP/UDP port, retrying only address collisions."""
+    for attempt in range(32):
+        tcp = udp = None
+        try:
+            tcp = socket.socket()
+            tcp.bind(("127.0.0.1", 0))
+            udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            udp.bind(tcp.getsockname())
+            return tcp, udp
+        except BaseException as error:
+            if udp is not None:
+                udp.close()
+            if tcp is not None:
+                tcp.close()
+            if not isinstance(error, OSError) or error.errno != errno.EADDRINUSE or attempt == 31:
+                raise
+
+
 def probe(request):
     candidates = request["candidates"]
     if not isinstance(candidates, list) or not 1 <= len(candidates) <= 64:
@@ -151,12 +172,9 @@ def probe(request):
             outbound = candidate["outbound"]
             if outbound.get("protocol") != "socks" or candidate["driver"] not in ("socks5", "managed_tls_xudp"):
                 raise ValueError("driver")
-            tcp = socket.socket()
-            tcp.bind(("127.0.0.1", 0))
-            port = tcp.getsockname()[1]
-            udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            udp.bind(("127.0.0.1", port))
+            tcp, udp = reserve_loopback_pair()
             held.extend((tcp, udp))
+            port = tcp.getsockname()[1]
             ports.append(port)
             tag = "udp-proof-" + str(i)
             inbounds.append({"tag": tag, "listen": "127.0.0.1", "port": port, "protocol": "socks",

@@ -4,7 +4,7 @@
   "date": "2026-10-26",
   "feature": "Per-node native UDP capability, independent TCP selection and native VLESS identity/Flow proof",
   "publication_gates": {
-    "cloudflare_transport_fleet_no_skip": "246 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
+    "cloudflare_transport_fleet_no_skip": "247 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
     "exact_candidate_ubuntu_24_amd64_install": "required before stable promotion",
     "full_go_and_vet_unprivileged": "required before push",
     "live_secret_scan_and_gitleaks": "required before push",
@@ -27,7 +27,8 @@
     "runtime_identity_retention": "Failed opens retain no mutation gate; expired runtime/circuit identities are swept during acquisition; retained runtimes share live gates across replacement; cancellation and panic release idle gates",
     "protocol_capability": "Origin/credential/program-bound, expiring native DNS/QUIC evidence; replacement claims fence stale results; no protected direct fallback; TCP remains independent",
     "native_vless_accounts": "Current native account ID and Flow must match desired clients, as well as email membership",
-    "managed_relay_probe": "Pinned native TLS/XUDP donor retains its category deny policy; permitted-domain QUIC proof succeeds while generic DNS/IP probing remains rejected"
+    "managed_relay_probe": "Pinned native TLS/XUDP donor retains its category deny policy; permitted-domain QUIC proof succeeds while generic DNS/IP probing remains rejected",
+    "probe_socket_reservation": "Real occupied-UDP regression; bounded TCP/UDP pair reservation retries only address collisions and closes all failed allocations"
   },
   "notes": [
     "Existing single-region AWS credentials retain their original identity and region boundaries.",
