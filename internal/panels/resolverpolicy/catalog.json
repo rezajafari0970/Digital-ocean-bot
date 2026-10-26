@@ -1,11 +1,15 @@
 {
-  "observed_at": "2026-10-05T10:50:15Z",
-  "source": "Control-server IPv4 UDP/TCP queries for googleads.g.doubleclick.net; each provider answered three bounded probes. Fleet evidence recorded separately.",
+  "observed_at": "2026-10-26T07:47:54Z",
+  "source": "Owned canary: three valid TCP and three valid UDP replies per endpoint; private baseline evidence retained.",
   "active": [
     "1.1.1.1",
-    "8.8.8.8"
+    "8.8.8.8",
+    "94.140.14.140",
+    "1.0.0.1",
+    "8.8.4.4",
+    "94.140.14.141"
   ],
-  "note": "Cloudflare and Google only. Cached IPv4 built-in DNS and intercepted residential UDP/TCP client DNS use direct server egress, independent of residential upstream health. Direct identity routes are preserved.",
+  "note": "Six unfiltered endpoints, three providers. Scoped native parallel TCP DNS with 2000ms per-server deadline and cache. Existing direct/category-only and full-tunnel routing policy is preserved. Disabled scope retains the legacy two-resolver plan.",
   "resolvers": [
     {
       "address": "1.1.1.1",
@@ -18,6 +22,38 @@
     {
       "address": "8.8.8.8",
       "provider": "Google",
+      "profile": "unfiltered",
+      "family": 4,
+      "status": "answered",
+      "active": true
+    },
+    {
+      "address": "94.140.14.140",
+      "provider": "AdGuard",
+      "profile": "unfiltered",
+      "family": 4,
+      "status": "answered",
+      "active": true
+    },
+    {
+      "address": "1.0.0.1",
+      "provider": "Cloudflare",
+      "profile": "unfiltered",
+      "family": 4,
+      "status": "answered",
+      "active": true
+    },
+    {
+      "address": "8.8.4.4",
+      "provider": "Google",
+      "profile": "unfiltered",
+      "family": 4,
+      "status": "answered",
+      "active": true
+    },
+    {
+      "address": "94.140.14.141",
+      "provider": "AdGuard",
       "profile": "unfiltered",
       "family": 4,
       "status": "answered",

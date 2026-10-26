@@ -117,8 +117,8 @@ func TestNativeProtocolManagedRelayRespectsDestinationPolicy(t *testing.T) {
 	donorID := "00000000-0000-4000-8000-000000000070"
 	donorHost := "127.0.0.2"
 	donorPort := relayFreePort(t)
-	p := routePolicy{StrictAllowlist: true, Harden: true, AdsOnly: true, Residential: true, Configured: 1, StableFingerprint: true,
-		Proxies:    []rp{{ID: "leaf", Tag: "residential-ads-leaf", Type: "socks5", Host: "127.0.0.1", Port: tcp.Addr().(*net.TCPAddr).Port, UDPRequired: true, UDPVerified: true}},
+	p := routePolicy{DNSResilience: true, StrictAllowlist: true, Harden: true, AdsOnly: true, Residential: true, Configured: 1, StableFingerprint: true,
+		Proxies:    []rp{{ID: "leaf", Tag: "residential-ads-leaf", Type: "socks5", Host: "127.0.0.1", Port: tcp.Addr().(*net.TCPAddr).Port, UDPRequired: true, QUICVerified: true}},
 		RelayInlet: &relayInlet{Panel: donorID, Host: donorHost, Port: donorPort, Credential: credential, Sources: []string{"127.0.0.1/32"}}}
 	donor, e := buildSettings(map[string]any{"outbounds": []any{map[string]any{"tag": "direct", "protocol": "freedom"}}, "routing": map[string]any{"domainStrategy": "AsIs", "rules": []any{}}}, nil, nil, p)
 	if e != nil {
@@ -153,7 +153,13 @@ ns={'__name__':'probe_fixture'}
 exec(pathlib.Path('../../protocolprobe/probe.py').read_text(),ns)
 core=pathlib.Path(os.environ['XRAY_TEST_BINARY'])
 ns['pathlib']=types.SimpleNamespace(Path=lambda _:core)
-print(json.dumps(ns['probe'](json.load(sys.stdin))))
+request=json.load(sys.stdin)
+result=ns['probe'](request)
+original=ns['exchange']
+ns['exchange']=lambda local,host,port,payload,validator:original(local,host,8443 if port==443 else port,payload,validator)
+unmeasured=ns['probe'](dict(request,candidates=request['candidates'][:1]))
+assert not unmeasured['results'][0]['quic'], 'unmeasured UDP port escaped donor guard'
+print(json.dumps(result))
 `
 	ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
 	defer cancel()

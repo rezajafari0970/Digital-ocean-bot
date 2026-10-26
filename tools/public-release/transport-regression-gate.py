@@ -82,6 +82,8 @@ REQUIRED = {
 
 REQUIRED["internal/panels/configplane"] += ("TestNativeVLESSIdentityAndFlowProof",)
 REQUIRED["internal/panels/residentialsync"] += ("TestNativeProtocolManagedRelayRespectsDestinationPolicy", "TestProtocolManagedEvidencePostgres")
+REQUIRED["internal/panels/residentialsync"] += ("TestDNSResilienceScopeRollbackAndQUICPortBoundary", "TestInstalledCoreSixResolverParallelTimeoutAndCache")
+REQUIRED["internal/panels/resolverpolicy"] = ("TestActiveResolversAreUniqueVerifiedPublicIPv4AndUnfiltered",)
 REQUIRED["internal/protocolprobe"] = ("TestProtocolEvidenceBindingAndIsolation", "TestProtocolProbeResponseValidation", "TestProtocolProbeSocketReservation", "TestNativeProtocolProbeCapability")
 REQUIRED["internal/panels/residentialsync"] += ("TestProtocolUDPSelectionPreservesTCPAndDeny", "TestProtocolHealthOriginExpiryAndClaimPostgres", "TestProtocolScopeAndStableEvidence")
 

@@ -19,6 +19,12 @@ import (
 // Actual installed Xray: UDP/TCP client DNS, cached A, IPv4 policy, non-A
 // forwarding and resolver fallback all work while the residential proxy fails.
 func TestInstalledCoreManagedDNSDirectCacheAndFallback(t *testing.T) {
+	runManagedDNSFixture(t, false)
+}
+func TestInstalledCoreSixResolverParallelTimeoutAndCache(t *testing.T) {
+	runManagedDNSFixture(t, true)
+}
+func runManagedDNSFixture(t *testing.T, resilient bool) {
 	binaryPath := os.Getenv("XRAY_TEST_BINARY")
 	if binaryPath == "" {
 		t.Skip("installed Xray required")
@@ -83,12 +89,38 @@ func TestInstalledCoreManagedDNSDirectCacheAndFallback(t *testing.T) {
 			c.Close()
 		}
 	}()
-	p := routePolicy{Harden: true, AdsOnly: true, Residential: true, Configured: 1, Proxies: []rp{{Type: "socks5", Host: "127.0.0.1", Port: proxy.Addr().(*net.TCPAddr).Port, Tag: "residential-ads-failed"}}}
+	p := routePolicy{DNSResilience: resilient, Harden: true, AdsOnly: true, Residential: true, Configured: 1, Proxies: []rp{{Type: "socks5", Host: "127.0.0.1", Port: proxy.Addr().(*net.TCPAddr).Port, Tag: "residential-ads-failed"}}}
 	setting, err := buildSettings(baseSettings(), nil, []string{"dns-test-inbound"}, p)
 	if err != nil {
 		t.Fatal(err)
 	}
 	setting["dns"].(map[string]any)["servers"] = []string{"tcp://127.0.0.1:1", "tcp://" + resolver.Addr().String()}
+	if resilient {
+		servers := []any{}
+		for i := 0; i < 5; i++ {
+			dead, e := net.Listen("tcp4", "127.0.0.1:0")
+			if e != nil {
+				t.Fatal(e)
+			}
+			t.Cleanup(func() { dead.Close() })
+			go func() {
+				for {
+					c, e := dead.Accept()
+					if e != nil {
+						return
+					}
+					go func(c net.Conn) {
+						defer c.Close()
+						c.SetDeadline(time.Now().Add(3 * time.Second))
+						io.Copy(io.Discard, c)
+					}(c)
+				}
+			}()
+			servers = append(servers, map[string]any{"address": "tcp://" + dead.Addr().String(), "timeoutMs": 2000})
+		}
+		servers = append(servers, map[string]any{"address": "tcp://" + resolver.Addr().String(), "timeoutMs": 2000})
+		setting["dns"].(map[string]any)["servers"] = servers
+	}
 	for _, v := range setting["outbounds"].([]any) {
 		o := v.(map[string]any)
 		if o["protocol"] == "dns" {
@@ -191,7 +223,11 @@ func TestInstalledCoreManagedDNSDirectCacheAndFallback(t *testing.T) {
 		return response[10:n], nil
 	}
 	for _, network := range []string{"udp", "tcp"} {
+		start := time.Now()
 		a, e := query(network, "cached.example", 1)
+		if resilient && time.Since(start) > 1500*time.Millisecond {
+			t.Fatal("DNS waited for a dead resolver instead of racing", time.Since(start))
+		}
 		if e != nil || len(a) < 12 || a[3]&15 != 0 || binary.BigEndian.Uint16(a[6:8]) == 0 {
 			t.Fatalf("DNS A %s: %v %x", network, e, a)
 		}
@@ -212,6 +248,18 @@ func TestInstalledCoreManagedDNSDirectCacheAndFallback(t *testing.T) {
 	}
 	if proxyHits.Load() != 0 {
 		t.Fatal("DNS depended on residential upstream")
+	}
+	if resilient {
+		resolver.Close()
+		start := time.Now()
+		a, e := query("tcp", "all-unavailable.example", 1)
+		if e == nil && len(a) >= 12 && binary.BigEndian.Uint16(a[6:8]) > 0 {
+			t.Fatal("failed pool fabricated an answer")
+		}
+		// The pinned core drops a failed uncached query; it does not synthesize
+		// SERVFAIL. Its client-visible deadline therefore belongs to the client.
+		// Assert no fabricated answer or proxy escape, not a false 2s SLA.
+		t.Logf("all-upstreams-failed: no usable answer, caller elapsed=%s", time.Since(start))
 	}
 	if resolverHits.Load() != 3 {
 		t.Fatalf("unexpected DNS requests: %d", resolverHits.Load())

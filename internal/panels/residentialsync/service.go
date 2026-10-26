@@ -119,7 +119,7 @@ func (s Service) dueWhileOwned(ctx context.Context, panel string, serving *bool)
 }
 
 func (s Service) policy(ctx context.Context, panel string) (routePolicy, int64, error) {
-	p := (routePolicy{GoogleAdsSelective: GoogleAdsSelectiveEnabled(panel), ExpandedCategories: ExpandedCategoriesEnabled(panel), StrictAllowlist: strictAllowlistPanel(panel), LegacyClientPaths: !ClientPathsEnabled(panel), AdsOnly: adsOnlyPanel(panel), Harden: hardeningPanel(panel), PoolEnabled: poolPanel(panel), StableFingerprint: stablePlanPanel(panel)}).normalized()
+	p := (routePolicy{DNSResilience: DNSResilienceEnabled(panel), GoogleAdsSelective: GoogleAdsSelectiveEnabled(panel), ExpandedCategories: ExpandedCategoriesEnabled(panel), StrictAllowlist: strictAllowlistPanel(panel), LegacyClientPaths: !ClientPathsEnabled(panel), AdsOnly: adsOnlyPanel(panel), Harden: hardeningPanel(panel), PoolEnabled: poolPanel(panel), StableFingerprint: stablePlanPanel(panel)}).normalized()
 	var revision int64
 	var allowed bool
 	err := s.DB.QueryRowContext(ctx, `SELECT c.revision,c.enabled AND (c.fleet OR $1::uuid=ANY(c.panel_ids)),(g.generate_residential OR EXISTS(SELECT 1 FROM config_control_authority WHERE unified)),(g.generate_direct OR EXISTS(SELECT 1 FROM config_control_authority WHERE unified)),(SELECT count(*) FROM residential_proxies)

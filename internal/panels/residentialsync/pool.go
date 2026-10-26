@@ -64,7 +64,7 @@ func configurePool(next map[string]any, p routePolicy) error {
 		if err != nil {
 			return err
 		}
-		if proxyHasUDP(proxy) {
+		if p.proxyHasRoutedUDP(proxy) {
 			udp = append(udp, proxy.Tag)
 		}
 		outs = append(outs, o)
@@ -259,7 +259,7 @@ func fingerprintPool(next map[string]any, replacements map[string]string) {
 }
 func poolHasUDP(p routePolicy) bool {
 	for _, x := range p.Proxies {
-		if proxyHasUDP(x) {
+		if p.proxyHasRoutedUDP(x) {
 			return true
 		}
 	}

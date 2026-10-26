@@ -32,10 +32,10 @@ func TestActiveResolversAreUniqueVerifiedPublicIPv4AndUnfiltered(t *testing.T) {
 			enabled[r.Address] = true
 		}
 	}
-	if len(catalog.Resolvers) != 2 || len(Active()) != 2 || len(Active()) != len(enabled) {
+	if len(catalog.Resolvers) != 6 || len(Active()) != 6 || len(Active()) != len(enabled) {
 		t.Fatal("unbounded or inconsistent active pool")
 	}
-	allowed := map[string]bool{"1.1.1.1": true, "8.8.8.8": true}
+	allowed := map[string]bool{"1.1.1.1": true, "8.8.8.8": true, "94.140.14.140": true, "1.0.0.1": true, "8.8.4.4": true, "94.140.14.141": true}
 	for _, a := range Active() {
 		if !allowed[a] {
 			t.Fatal("unrequested resolver", a)

@@ -177,6 +177,22 @@ func TestProtocolHealthOriginExpiryAndClaimPostgres(t *testing.T) {
 	if e = db.QueryRow("SELECT checked_at::text FROM panel_protocol_health WHERE panel_id=$1", panel).Scan(&after); e != nil || before != after {
 		t.Fatal("unavailable probe refreshed evidence", e)
 	}
+	// A positive QUIC proof with failed DNS authorizes only the scoped 443 plan.
+	sqlMustTrial(t, db, "UPDATE panel_protocol_health SET dns_ok=false,code='datagram_unverified'")
+	partial := policy()
+	if proxyHasUDP(partial.Proxies[0]) || !partial.Proxies[0].QUICVerified {
+		t.Fatal("partial protocol evidence conflated")
+	}
+	partial.DNSResilience = true
+	partial.AdsOnly = true
+	if !partial.proxyHasRoutedUDP(partial.Proxies[0]) {
+		t.Fatal("QUIC blocked by unrelated DNS failure")
+	}
+	partial.AdsOnly = false
+	if partial.proxyHasRoutedUDP(partial.Proxies[0]) {
+		t.Fatal("partial evidence authorized unrestricted UDP")
+	}
+	sqlMustTrial(t, db, "UPDATE panel_protocol_health SET dns_ok=true,code='ok'")
 	// Partial persistence must roll back both the delete and all inserted rows.
 	sqlMustTrial(t, db, "UPDATE panel_protocol_probe_schedule SET next_probe_at=now()")
 	lease, e = svc.claimProtocolProbe(ctx)
