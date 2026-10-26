@@ -25,7 +25,7 @@
   summary.textContent='Prices for '+region+'. '+(detail?.CatalogOrigin==='provider_preset'?'Provider preset. ':detail?.CatalogOrigin==='custom_preset'?'Custom configuration verified by the provider API. ':'')+'Hourly billing; internet traffic is charged separately. '+(available?'Public powered-on base estimate for Ubuntu and one IPv4. The 730-hour figure is not a monthly cap. ':'A verified price is unavailable for this configuration. Refresh the catalog to try again. ');
   box.append(summary);
   const terms=document.createElement('p');terms.textContent='Taxes, account discounts, traffic charges and Type T CPU usage charges are excluded. Powered-off servers still incur storage and IP charges. Backups and managed service are disabled. Saved accounts can start building servers.';box.append(terms);
-  const source=document.createElement('p'),link=document.createElement('a');link.href='https://www.kamatera.com/pricing/';link.target='_blank';link.rel='noopener noreferrer';link.textContent='Official Kamatera calculator';source.append(link);
+  const source=document.createElement('p'),link=document.createElement('a');link.href='https://www.kamatera.com/pricing/';link.target='_blank';link.rel='noopener noreferrer';link.style.color='inherit';link.textContent='Official Kamatera calculator';source.append(link);
   const observed=new Date(pricing.ObservedAt||'');
   if(Number.isFinite(observed.getTime())&&observed.getUTCFullYear()>2000)source.append(' · Checked '+observed.toISOString());
   box.append(source);
