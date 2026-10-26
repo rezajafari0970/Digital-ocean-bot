@@ -12,6 +12,7 @@ jobs:
       GOMAXPROCS: '2'
       GOMEMLIMIT: 1536MiB
       GOTOOLCHAIN: local
+      DOB_TEST_CHROMIUM: /tmp/dob-chrome/chrome-headless-shell-linux64/chrome-headless-shell
     steps:
       - uses: actions/checkout@v4
         with:
