@@ -13,7 +13,7 @@ type Factory struct{}
 
 func (Factory) Name() string { return "kamatera" }
 func (Factory) Metadata() providers.Metadata {
-	return providers.Metadata{Name: "kamatera", DisplayName: "Kamatera", CredentialLabel: "Kamatera API credentials", CredentialFields: []providers.CredentialField{{Key: "client_id", Label: "API Client ID", Secret: true}, {Key: "secret", Label: "API Secret", Secret: true}}, CredentialHelp: "Create an API key in Kamatera Console. Region, predefined and capability-verified suggested plans, and supported Ubuntu images are loaded through this key's access. Validation creates no server. Billing totals and an exact account quota are not exposed by this integration; prices are shown only when verified.", Status: "ready", Defaults: cloudutil.Defaults()}
+	return providers.Metadata{Name: "kamatera", DisplayName: "Kamatera", CredentialLabel: "Kamatera API credentials", CredentialFields: []providers.CredentialField{{Key: "client_id", Label: "API Client ID", Secret: true}, {Key: "secret", Label: "API Secret", Secret: true}}, CredentialHelp: "Create an API key in Kamatera Console. Region, predefined and capability-verified suggested plans, and supported Ubuntu images are loaded through this key's access. Validation creates no server. Live public base estimates are matched to each configuration and region. Servers use hourly billing; traffic is charged separately. Billing totals, account-specific quotes and exact quota are not exposed by this integration.", Status: "ready", Defaults: cloudutil.Defaults()}
 }
 func (Factory) Open(ctx context.Context, r providers.OpenRequest) (providers.Driver, error) {
 	if r.AccountID == "" || r.HTTPClient == nil || r.Credentials == nil {

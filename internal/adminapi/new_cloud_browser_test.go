@@ -99,6 +99,8 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 		emptyCatalog.Store(r.URL.Query().Get("empty") == "1")
 		w.WriteHeader(204)
 	})
+	var kamateraOptions atomic.Value
+	mux.HandleFunc("GET /api/v1/accounts/kamatera-edit/options", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, 200, kamateraOptions.Load()) })
 	var previewMode atomic.Value
 	previewMode.Store("")
 	mux.HandleFunc("POST /fixture/preview-mode", func(w http.ResponseWriter, r *http.Request) {
@@ -198,10 +200,21 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 		regions := []providers.Region{{ID: region, Name: region, Available: true}}
 		plans := []providers.Plan{{ID: "test-plan", MemoryMB: 1024, CPU: 1, DiskGB: 20, Available: true}}
 		images := []providers.Image{{ID: "ubuntu-fixture", Family: "ubuntu", Version: "24.04", Available: true}}
+		var pricing *providers.CatalogPricing
 		if x.Provider == "kamatera" {
 			regions = append(regions, providers.Region{ID: "US-AT", Name: "Atlanta, United States", Available: true})
 			plans = []providers.Plan{{ID: "1A-1024-20", MemoryMB: 1024, CPU: 1, DiskGB: 20, Available: true}, {ID: "2B-4096-30", MemoryMB: 4096, CPU: 2, DiskGB: 30, Available: true}}
 			images = []providers.Image{{ID: "ubuntu26", Family: "ubuntu", Version: "26.04", Available: true}, {ID: "ubuntu24", Family: "ubuntu", Version: "24.04", Available: true}, {ID: "ubuntu22", Family: "ubuntu", Version: "22.04", Available: true}}
+			pricing = &providers.CatalogPricing{Status: "partial", Source: "https://www.kamatera.com/pricing/", ObservedAt: time.Date(2026, 10, 27, 0, 0, 0, 0, time.UTC)}
+			for i := range plans {
+				typ, origin := "A", "custom_preset"
+				if i == 1 {
+					typ, origin = "B", "provider_preset"
+				}
+				plans[i].DetailsByRegion = map[string]providers.PlanRegionDetails{"US-SC": {CPUType: typ, CatalogOrigin: origin, BillingCycle: "hourly"}, "US-AT": {CPUType: typ, CatalogOrigin: origin, BillingCycle: "hourly"}}
+				plans[i].PricesByRegion = map[string]providers.PlanPrice{"US-SC": {Currency: "USD", Hourly: float64([]int{4, 41}[i]) / 730, MonthlyEstimate: float64([]int{4, 41}[i]), Scope: "kamatera-public-base-hourly-v1", Complete: true}}
+			}
+
 		}
 		if x.Provider == "aws" {
 			plans[0].PricesByRegion = map[string]providers.PlanPrice{region: {Currency: "USD", Hourly: 0.0114, MonthlyEstimate: 8.322, Scope: "compute_only"}}
@@ -221,7 +234,11 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 				plans = nil
 			}
 		}
-		writeJSON(w, 200, map[string]any{"provider": x.Provider, "onboarding": discovery, "account": providers.Account{ID: providerID}, "regions": regions, "plans": plans, "images": images, "defaults": map[string]any{"region": "SBG"}, "policy": map[string]any{}})
+		if x.Provider == "kamatera" {
+			plans[1].IDsByRegion = map[string]string{"US-SC": plans[1].ID}
+			kamateraOptions.Store(map[string]any{"plans": plans, "images": images, "regions": regions, "pricing": pricing})
+		}
+		writeJSON(w, 200, map[string]any{"provider": x.Provider, "onboarding": discovery, "account": providers.Account{ID: providerID}, "regions": regions, "plans": plans, "images": images, "pricing": pricing, "defaults": map[string]any{"region": "SBG"}, "policy": map[string]any{}})
 	}
 	mux.HandleFunc("POST /api/v1/accounts/preview", func(w http.ResponseWriter, r *http.Request) {
 		mode := previewMode.Load().(string)

@@ -263,6 +263,8 @@ func TestKamateraMalformedInventoryAndErrorsDoNotProveAbsence(t *testing.T) {
 func TestKamateraCatalogPreservesRegionalImagesAndUnknownQuotaPrice(t *testing.T) {
 	d := fixtureDriver(t, func(r *http.Request) (*http.Response, error) {
 		switch {
+		case r.URL.Host == "www.kamatera.com":
+			return reply("unavailable"), nil
 		case r.URL.Query().Get("sizes") == "1":
 			return reply(sizeJSON), nil
 		case r.URL.Query().Get("images") == "1":

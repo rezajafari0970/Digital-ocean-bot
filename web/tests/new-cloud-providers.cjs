@@ -49,6 +49,14 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    await waitFor('cache.accountPreview?.provider==="kamatera"&&!document.querySelector("#modalSubmit").disabled&&!document.querySelector("#discoverAccount").disabled');
   }
   await prepareKamatera();
+  assert.match(await evaluate('document.querySelector("[name=size]").selectedOptions[0].textContent'),/Availability.*USD.*4.00\/730h base/);
+  assert.match(await evaluate('document.querySelector("[data-kamatera-pricing]").textContent'),/traffic is charged separately/);
+  assert.match(await evaluate('document.querySelector("[data-kamatera-pricing]").textContent'),/Custom configuration verified/);
+  await evaluate('document.querySelector("[name=region]").value="US-AT";document.querySelector("[name=region]").dispatchEvent(new Event("change"))');
+  assert.match(await evaluate('document.querySelector("[name=size]").selectedOptions[0].textContent'),/Price unavailable/);
+  assert.equal(await evaluate('document.querySelector("[data-kamatera-pricing]").textContent.includes("4.00/730h")'),false,'old region price leaked');
+  await evaluate('document.querySelector("[name=region]").value="US-SC";document.querySelector("[name=region]").dispatchEvent(new Event("change"))');
+
   for(const size of [{width:320,height:480},{width:390,height:420},{width:844,height:390},{width:390,height:844}]){
    await call('Emulation.setDeviceMetricsOverride',{...size,deviceScaleFactor:1,mobile:true});
    assert.equal(await evaluate('(()=>{const e=document.querySelector("#modalFields");return e.scrollWidth<=e.clientWidth+1})()'),true,'Kamatera fields must not scroll horizontally '+JSON.stringify(await evaluate('(()=>{const e=document.querySelector("#modalFields"),r=e.getBoundingClientRect();return {viewport:innerWidth,width:e.clientWidth,scroll:e.scrollWidth,children:[...e.querySelectorAll("*")].filter(x=>x.getBoundingClientRect().right>r.right+1).slice(0,10).map(x=>({tag:x.tagName,name:x.name,id:x.id,width:x.clientWidth,scroll:x.scrollWidth,text:x.textContent.slice(0,80)}))}})()')));
@@ -59,6 +67,10 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   assert.equal(await evaluate('document.querySelector("[name=size3]").value'), '');
   await evaluate('document.querySelector("[name=size2]").value="2B-4096-30";document.querySelector("[name=size2]").dispatchEvent(new Event("change"));document.querySelector("[name=size]").value="2B-4096-30";document.querySelector("[name=size]").dispatchEvent(new Event("change"))');
   assert.equal(await evaluate('document.querySelector("[name=size2]").value'), '');
+  assert.match(await evaluate('document.querySelector("[data-kamatera-pricing]").textContent'),/41.00\/730h base/);
+  assert.match(await evaluate('document.querySelector("[data-kamatera-pricing]").textContent'),/Provider preset/);
+  await evaluate('document.querySelector("[data-kamatera-pricing]").scrollIntoView({block:"start"})');
+  const kamateraPriceSnap=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(root,'kamatera-pricing-mobile.png'),Buffer.from(kamateraPriceSnap.data,'base64'));
   await evaluate('document.querySelector("[name=name]").value="";document.querySelector("#modalSubmit").click()');
   assert.equal(await evaluate('fetch("/fixture/save-count").then(r=>r.json())'),0,'missing name must not dispatch');
   await evaluate('document.querySelector("[name=name]").value="Kamatera fixture";cache.accounts=[{id:"stale-fixture"}];document.querySelector("#modalSubmit").click();document.querySelector("#modalSubmit").click();document.querySelector("#modalForm").dispatchEvent(new Event("submit",{cancelable:true}))');
@@ -90,8 +102,19 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    assert.equal(await evaluate('cache.accounts===null'),true,'late '+mode+' invalidates accounts without touching the new form');
    await evaluate('document.querySelector("#modalCancel").click()');
   }
-  await evaluate('document.querySelector("#primaryAction").click()');await waitFor('document.querySelector("#modal").open');
+  await evaluate('cache.accounts=[{id:"kamatera-edit",provider:"kamatera",name:"Edit fixture",regions:["US-SC"],size:"2B-4096-30",sizes:["2B-4096-30"],image:"ubuntu26",images:["ubuntu26"],max_concurrent:1}];editAccount("kamatera-edit")');
+  await waitFor('document.querySelector("#modalTitle").textContent==="Edit Edit fixture"&&document.querySelector("#modal").open');
+  assert.match(await evaluate('document.querySelector("[name=size]").selectedOptions[0].textContent'),/41.00\/730h base/);
+  await evaluate('document.querySelector("[name=region]").value="US-AT";document.querySelector("[name=region]").dispatchEvent(new Event("change"))');
+  assert.equal(await evaluate('document.querySelector("[name=size]").selectedOptions[0].disabled'),true,'unavailable regional plan retained visibly for correction');
+  await evaluate('document.querySelector("[name=size]").value="1A-1024-20";document.querySelector("[name=size]").dispatchEvent(new Event("change"))');
+  assert.match(await evaluate('document.querySelector("[data-kamatera-pricing]").textContent'),/Price unavailable/);
+  await evaluate('document.querySelector("[name=region]").value="US-SC";document.querySelector("[name=region]").dispatchEvent(new Event("change"))');
+  assert.match(await evaluate('document.querySelector("[data-kamatera-pricing]").textContent'),/4.00\/730h base/);
+  await assertSaveVisible('Kamatera edit regional prices');
+  await evaluate('document.querySelector("#modalCancel").click();cache.accounts=null;document.querySelector("#primaryAction").click()');await waitFor('document.querySelector("#modal").open');
   console.log('KAMATERA_MOBILE_LAYOUT_UNIQUE_CHOICES_SINGLE_SAVE_AND_STALE_RESPONSE PASS');
+  console.log('KAMATERA_EXACT_PRICING_NEW_EDIT_REGIONAL_UNKNOWN_PRICE PASS');
 
   for(const provider of ['aws','ovh']){
    await evaluate('document.querySelector("#modalFields [name=provider]").value='+JSON.stringify(provider)+';document.querySelector("#modalFields [name=provider]").dispatchEvent(new Event("change"))');

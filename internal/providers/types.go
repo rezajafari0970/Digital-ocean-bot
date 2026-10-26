@@ -54,6 +54,9 @@ type Plan struct {
 
 // PlanRegionDetails keeps full provider discovery separate from launch selection.
 type PlanRegionDetails struct {
+	CPUType        string `json:",omitempty"`
+	CatalogOrigin  string `json:",omitempty"`
+	BillingCycle   string `json:",omitempty"`
 	NativeID       string
 	OS             string
 	Type           string
