@@ -285,6 +285,7 @@ def main(repo):
             raise RuntimeError('database/race regression command failed')
         count = verify_events(result.stdout.splitlines())
         subprocess.run(['node', 'web/tests/aws-catalog.cjs'], cwd=repo, env=env, check=True, timeout=30)
+        subprocess.run(['node', 'web/tests/account-module-recovery.cjs'], cwd=repo, env=env, check=True, timeout=90)
         subprocess.run(['node', 'web/tests/database-health.cjs'], cwd=repo, env=env, check=True, timeout=30)
         subprocess.run(['node', 'web/tests/account-save-receipt.cjs'], cwd=repo, env=env, check=True, timeout=30)
         subprocess.run(['node', 'web/tests/account-rule-status.cjs'], cwd=repo, env=env, check=True, timeout=30)

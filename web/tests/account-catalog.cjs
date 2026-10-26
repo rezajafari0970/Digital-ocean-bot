@@ -24,3 +24,6 @@ assert.match(ovh.status({Quota:0}),/quota: 0/);
 assert.equal(ovh.status({Reason:'Out of stock'}),'Out of stock');
 assert.match(ovh.priceLabel({...plan,PricesByRegion:{GRA11:{Currency:'EUR',Hourly:0,MonthlyEstimate:0,Complete:true}}},'GRA11'),/^EUR 0\/h/);
 console.log('OVH regional currency, precise rates, unknown price and quota guards PASS');
+
+const shared=require('../static/account-catalog.js');
+for(const provider of ['aws','ovh','vultr','digitalocean','upcloud','linode']){assert.equal(shared.approvalRequired({provider}),false);assert.equal(shared.approvalRequired({provider,onboarding:{network_approval:true}}),true);assert.equal(shared.approvalRequired({provider,onboarding:{resolved:{managed_network:true}}}),true)}
