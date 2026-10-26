@@ -16,6 +16,7 @@ import urllib.request
 import uuid
 
 MODEL = 'gpt-6-astra'
+EFFORTS = {'low', 'medium', 'high', 'xhigh', 'max'}
 INPUT_MICRO = 13  # Ceiling for the pinned $12.50/M 30-minute cache-write rate.
 OUTPUT_MICRO = 50
 MAX_INPUT_BYTES = 64000
@@ -90,6 +91,8 @@ def validate(state, schema=2):
                 or row['reserved_micro_usd'] == 0):
             raise ReviewBlocked('budget_ledger_invalid')
         attempts.add(row['attempt'])
+        if row.get('reasoning_effort', 'max') not in EFFORTS:
+            raise ReviewBlocked('reasoning_effort_invalid')
         if row['status'] in {'reserved', 'unknown', 'pending'} and row['charged_micro_usd'] != row['reserved_micro_usd']:
             raise ReviewBlocked('unresolved_reservation_reduced')
         if schema == 2 and (row['status'] == 'pending' or 'response_id' in row) and not RESPONSE_ID.fullmatch(str(row.get('response_id', ''))):
@@ -166,7 +169,7 @@ def summary(state, row=None):
               'accounted_usd_upper': sum(x['charged_micro_usd'] for x in state['requests']) / 1e6,
               'unresolved_reserved_usd': sum(x['charged_micro_usd'] for x in state['requests'] if x['status'] != 'settled') / 1e6}
     if row is not None:
-        result.update(attempt=row['attempt'], status=row['status'], response_status=row.get('response_status'),
+        result.update(attempt=row['attempt'], reasoning_effort=row.get('reasoning_effort', 'max'), status=row['status'], response_status=row.get('response_status'),
                       receipt_saved=bool(row.get('response_id')))
         if row['status'] == 'settled':
             result.update(usage=row.get('usage'), estimated_cost_usd_upper=row['charged_micro_usd'] / 1e6)
@@ -209,8 +212,8 @@ def http_fetch(response_id, key):
     return http_request('GET', key, response_id=response_id)
 
 
-def payload_for(prompt, maximum, *, background=True):
-    payload = {'model': MODEL, 'reasoning': {'effort': 'max'}, 'max_output_tokens': maximum,
+def payload_for(prompt, maximum, *, background=True, reasoning_effort='max'):
+    payload = {'model': MODEL, 'reasoning': {'effort': reasoning_effort}, 'max_output_tokens': maximum,
                'input': prompt, 'store': background, 'service_tier': 'default',
                'prompt_cache_options': {'ttl': '30m'}}
     if background:
@@ -249,7 +252,7 @@ def apply_response(path, state, row, response):
 
 
 def submit_review(prompt, key, path=LEDGER, *, max_output_tokens=MAX_OUTPUT,
-                  label='review', independent_review=False, send=http_send):
+                  label='review', independent_review=False, reasoning_effort='max', send=http_send):
     if not key:
         raise ReviewBlocked('api_key_missing')
     if not prompt.strip() or len(prompt.encode()) > MAX_INPUT_BYTES:
@@ -258,7 +261,9 @@ def submit_review(prompt, key, path=LEDGER, *, max_output_tokens=MAX_OUTPUT,
         raise ReviewBlocked('output_limit_invalid')
     if not re.fullmatch(r'[a-z0-9][a-z0-9_-]{0,63}', label):
         raise ReviewBlocked('invalid_review_label')
-    payload = payload_for(prompt, max_output_tokens)
+    if reasoning_effort not in EFFORTS:
+        raise ReviewBlocked('reasoning_effort_invalid')
+    payload = payload_for(prompt, max_output_tokens, reasoning_effort=reasoning_effort)
     signature = digest(payload)
     legacy_signature = digest(payload_for(prompt, MAX_OUTPUT, background=False))
     prompt_digest = hashlib.sha256(prompt.encode()).hexdigest()
@@ -286,7 +291,7 @@ def submit_review(prompt, key, path=LEDGER, *, max_output_tokens=MAX_OUTPUT,
         if sum(x['charged_micro_usd'] for x in rows) + reserve > BUDGET_MICRO:
             raise ReviewBlocked('budget_reservation_exceeds_cap')
         row = {'attempt': str(uuid.uuid4()), 'at': time.time(), 'protocol': 'background-v1',
-               'label': label, 'status': 'reserved', 'payload_digest': signature, 'prompt_digest': prompt_digest,
+               'label': label, 'reasoning_effort': reasoning_effort, 'status': 'reserved', 'payload_digest': signature, 'prompt_digest': prompt_digest,
                'max_output_tokens': max_output_tokens, 'reserved_micro_usd': reserve,
                'charged_micro_usd': reserve}
         if independent_review and unknown:
@@ -352,6 +357,7 @@ def main():
     parser.add_argument('--max-output-tokens', type=int, default=MAX_OUTPUT)
     parser.add_argument('--label', default='review')
     parser.add_argument('--attempt')
+    parser.add_argument('--reasoning-effort', choices=sorted(EFFORTS), default='max')
     parser.add_argument('--independent-review', action='store_true', help='Explicitly requested new review; never releases or retries prior unknown reservations')
     args = parser.parse_args()
     try:
@@ -366,7 +372,7 @@ def main():
         else:
             result = submit_review(sys.stdin.read(MAX_INPUT_BYTES + 1), os.environ.get('OPENAI_API_KEY'),
                                    max_output_tokens=args.max_output_tokens, label=args.label,
-                                   independent_review=args.independent_review)
+                                   independent_review=args.independent_review, reasoning_effort=args.reasoning_effort)
     except (ReviewBlocked, OSError) as exc:
         print(json.dumps({'blocked': str(exc) if isinstance(exc, ReviewBlocked) else 'private_io_failed'}), file=sys.stderr)
         return 78

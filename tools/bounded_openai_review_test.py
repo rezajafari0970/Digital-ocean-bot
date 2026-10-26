@@ -83,7 +83,7 @@ class BoundedReviewTests(unittest.TestCase):
         import io
         with patch.object(module.sys, "argv", ["bounded-openai-review.py", "submit", "--label", "udp-review", "--max-output-tokens", "512"]), patch.object(module.sys, "stdin", io.StringIO("public review")), patch.object(module.sys, "stderr", io.StringIO()) as error, patch.object(module, "submit_review", side_effect=module.ReviewBlocked("unresolved_request_requires_usage_reconciliation")) as submit:
             self.assertEqual(module.main(), 78)
-            self.assertEqual(submit.call_args.kwargs, {"max_output_tokens": 512, "label": "udp-review", "independent_review": False})
+            self.assertEqual(submit.call_args.kwargs, {"max_output_tokens": 512, "label": "udp-review", "independent_review": False, "reasoning_effort": "max"})
             self.assertIn("unresolved_request_requires_usage_reconciliation", error.getvalue())
 
     def held_unknown(self):
@@ -122,6 +122,18 @@ class BoundedReviewTests(unittest.TestCase):
         with self.assertRaisesRegex(module.ReviewBlocked, "already_pending"):
             self.submit("another task", independent_review=True, max_output_tokens=512)
         self.assertEqual(self.posts, 1)
+
+    def test_focused_effort_keeps_model_and_cap(self):
+        def send(payload, key):
+            self.assertEqual(payload["model"], "gpt-6-astra")
+            self.assertEqual(payload["reasoning"], {"effort": "low"})
+            self.assertEqual(self.state()["requests"][-1]["reasoning_effort"], "low")
+            return self.response()
+        result = self.submit("focused new decision", reasoning_effort="low", max_output_tokens=1800, send=send)
+        self.assertEqual(result["reasoning_effort"], "low")
+        self.assertEqual(result["model"], "gpt-6-astra")
+        with self.assertRaisesRegex(module.ReviewBlocked, "invalid"):
+            self.submit("bad effort", reasoning_effort="none")
 
     def test_submission_is_prefunded_private_and_result_verified(self):
         result = self.submit()
