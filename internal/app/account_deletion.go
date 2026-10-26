@@ -277,6 +277,9 @@ func (c Container) cleanupDeletionKeys(ctx context.Context, id string, rt Accoun
 	if err != nil {
 		return err
 	}
+	if err = validateDeletionSSHInventory(keys); err != nil {
+		return err
+	}
 	rows, err := c.DB.QueryContext(ctx, "SELECT id::text,COALESCE(profile_snapshot->>'ssh_provider_key_id','') FROM deployments WHERE account_id=$1", id)
 	if err != nil {
 		return err
@@ -301,9 +304,6 @@ func (c Container) cleanupDeletionKeys(ctx context.Context, id string, rt Accoun
 	}
 	present := map[string]bool{}
 	for _, key := range keys {
-		if key.ID == "" {
-			return errors.New("invalid SSH inventory")
-		}
 		present[key.ID] = true
 		if owned[key.Name] && !recorded[key.ID] {
 			return errors.New("unrecorded provider SSH key requires ownership reconciliation")
@@ -348,6 +348,9 @@ func (c Container) cleanupDeletionKeys(ctx context.Context, id string, rt Accoun
 			if e != nil {
 				return fmt.Errorf("SSH delete outcome unknown: %w", e)
 			}
+			if e = validateDeletionSSHInventory(fresh); e != nil {
+				return fmt.Errorf("SSH delete outcome unknown: %w", e)
+			}
 			for _, k := range fresh {
 				if k.ID == key {
 					if deleteErr != nil {
@@ -368,6 +371,17 @@ func (c Container) cleanupDeletionKeys(ctx context.Context, id string, rt Accoun
 	}
 	if remaining {
 		return errors.New("SSH cleanup continues next chunk")
+	}
+	return nil
+}
+
+// An unreadable identity cannot prove absence of an owned key. Validate the
+// complete snapshot before writing cleanup progress, including read-after-delete.
+func validateDeletionSSHInventory(keys []providers.SSHKey) error {
+	for _, key := range keys {
+		if key.ID == "" {
+			return errors.New("invalid SSH inventory")
+		}
 	}
 	return nil
 }
@@ -404,6 +418,13 @@ func (c Container) adoptDeletedAccountServer(ctx context.Context, account, id st
 // Resolve a lost CREATE response by the same persisted deployment identity used
 // by normal recovery. Names alone never authorize a deletion.
 func (c Container) recoverDeletingInventory(ctx context.Context, account string, servers []providers.Server) error {
+	// Validate the entire snapshot before adopting even an earlier valid entry.
+	// Otherwise a malformed later item can leave a false durable delete target.
+	for _, server := range servers {
+		if server.ID == "" {
+			return errors.New("invalid provider inventory")
+		}
+	}
 	rows, err := c.DB.QueryContext(ctx, "SELECT id::text,COALESCE(provider_id,'') FROM deployments WHERE account_id=$1", account)
 	if err != nil {
 		return err
