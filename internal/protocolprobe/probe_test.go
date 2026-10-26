@@ -10,13 +10,13 @@ import (
 
 func TestProtocolEvidenceBindingAndIsolation(t *testing.T) {
 	o := map[string]any{"protocol": "socks", "settings": map[string]any{"password": "fixture-one"}}
-	original := Fingerprint(o)
+	original := Fingerprint(DriverSOCKS5, o)
 	o["settings"].(map[string]any)["password"] = "fixture-two"
-	if original == Fingerprint(o) {
+	if original == Fingerprint(DriverSOCKS5, o) {
 		t.Fatal("credential change retained evidence")
 	}
-	candidates := []Candidate{{ID: "one", Digest: original}}
-	good := Observation{ID: "one", Digest: original, DNS: true, QUIC: true, Code: "ok"}
+	candidates := []Candidate{{Driver: DriverSOCKS5, ID: "one", Digest: original}}
+	good := Observation{Driver: DriverSOCKS5, ID: "one", Digest: original, DNS: true, QUIC: true, Code: "ok"}
 	encode := func(rows []Observation) string {
 		b, _ := json.Marshal(map[string]any{"results": rows})
 		return string(b)

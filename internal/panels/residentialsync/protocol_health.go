@@ -79,6 +79,13 @@ func (s Service) protocolTarget(ctx context.Context, panel string) (provisioning
 	return target, hex.EncodeToString(digest[:]), nil
 }
 
+func protocolDriver(proxy rp) string {
+	if proxy.Relay != nil {
+		return protocolprobe.DriverManagedRelay
+	}
+	return protocolprobe.DriverSOCKS5
+}
+
 func protocolCandidates(proxies []rp) ([]protocolprobe.Candidate, error) {
 	candidates := []protocolprobe.Candidate{}
 	for _, p := range proxies {
@@ -89,7 +96,7 @@ func protocolCandidates(proxies []rp) ([]protocolprobe.Candidate, error) {
 		if err != nil {
 			return nil, err
 		}
-		candidates = append(candidates, protocolprobe.Candidate{ID: p.ID, Digest: protocolprobe.Fingerprint(outbound), Outbound: outbound})
+		candidates = append(candidates, protocolprobe.Candidate{ID: p.ID, Driver: protocolDriver(p), Digest: protocolprobe.Fingerprint(protocolDriver(p), outbound, p.DonorAccount, p.DonorDroplet, p.DonorPlan), Outbound: outbound})
 	}
 	if len(candidates) > protocolprobe.MaxCandidates {
 		return nil, errors.New("protocol probe candidate bound exceeded")
@@ -112,7 +119,7 @@ func (s Service) hydrateProtocolHealth(ctx context.Context, panel string, p *rou
 		return err
 	}
 	rows, err := s.DB.QueryContext(ctx, `SELECT proxy_id,transport_hash FROM panel_protocol_health
- WHERE panel_id=$1 AND origin_hash=$2 AND dns_ok AND quic_ok
+ WHERE panel_id=$1 AND origin_hash=$2 AND code='ok' AND quic_ok
  AND checked_at>now()-interval '10 minutes' AND checked_at<=now()`, panel, origin)
 	if err != nil {
 		return err
@@ -137,7 +144,7 @@ func (s Service) hydrateProtocolHealth(ctx context.Context, panel string, p *rou
 		if e != nil {
 			return e
 		}
-		proxy.UDPVerified = proxy.Type == "socks5" && evidence[proxy.ID] == protocolprobe.Fingerprint(outbound)
+		proxy.UDPVerified = proxy.Type == "socks5" && evidence[proxy.ID] == protocolprobe.Fingerprint(protocolDriver(*proxy), outbound, proxy.DonorAccount, proxy.DonorDroplet, proxy.DonorPlan)
 	}
 	return nil
 }
@@ -199,8 +206,8 @@ func (s Service) finishProtocolProbe(ctx context.Context, lease protocolLease, o
 			return err
 		}
 		for _, o := range observed {
-			_, err = tx.ExecContext(ctx, `INSERT INTO panel_protocol_health(panel_id,proxy_id,origin_hash,transport_hash,dns_ok,quic_ok,code,checked_at)
- VALUES($1,$2,$3,$4,$5,$6,$7,now())`, panel, o.ID, origin, o.Digest, o.DNS, o.QUIC, o.Code)
+			_, err = tx.ExecContext(ctx, `INSERT INTO panel_protocol_health(panel_id,proxy_id,origin_hash,transport_hash,dns_ok,quic_ok,code,checked_at,driver)
+ VALUES($1,$2,$3,$4,$5,$6,$7,now(),$8)`, panel, o.ID, origin, o.Digest, o.DNS, o.QUIC, o.Code, o.Driver)
 			if err != nil {
 				return err
 			}

@@ -1,7 +1,8 @@
 """Bounded, node-local native-driver UDP probes; credentials use stdin only.
 
-A reply to a fresh DNS transaction and two QUIC version-negotiation exchanges
-are required. This measures datagram reachability, not HTTP/3 throughput.
+External SOCKS requires fresh DNS and two QUIC version-negotiation exchanges.
+Managed TLS/XUDP requires two permitted-domain QUIC replies; DNS is not probed.
+This measures datagram reachability, not HTTP/3 throughput.
 No production configuration is read or changed and no public listener opens.
 """
 import concurrent.futures
@@ -66,11 +67,29 @@ def quic_valid(reply, request):
 
 
 def datagram_payload(data, destination, port):
-    if len(data) < 10 or data[:4] != b"\x00\x00\x00\x01":
+    if len(data) < 7 or data[:3] != b"\x00\x00\x00":
         return None
-    if data[4:8] != socket.inet_aton(destination) or struct.unpack("!H", data[8:10])[0] != port:
+    try:
+        packed = socket.inet_aton(destination)
+    except OSError:
+        packed = None
+    if data[3] == 1:
+        if len(data) < 10 or (packed is not None and data[4:8] != packed):
+            return None
+        offset = 8
+    elif data[3] == 3:
+        length = data[4]
+        if len(data) < 7 + length or data[5:5+length] != destination.encode("ascii"):
+            return None
+        offset = 5 + length
+    else:
         return None
-    return data[10:]
+    if struct.unpack("!H", data[offset:offset+2])[0] != port:
+        return None
+    # Domain routes may return the egress-resolved IPv4. The connected local
+    # relay socket, destination port and fresh unpredictable QUIC CIDs bind the
+    # response without imposing the controller's DNS answer on remote egress.
+    return data[offset+2:]
 
 
 def exchange(local_port, destination, port, payload, validator):
@@ -90,7 +109,14 @@ def exchange(local_port, destination, port, payload, validator):
         if relay not in ("127.0.0.1", "0.0.0.0") or not relay_port:
             return False
         udp.connect(("127.0.0.1", relay_port))
-        udp.send(b"\x00\x00\x00\x01" + socket.inet_aton(destination) + struct.pack("!H", port) + payload)
+        try:
+            address = b"\x01" + socket.inet_aton(destination)
+        except OSError:
+            name = destination.encode("ascii")
+            if not 1 <= len(name) <= 253:
+                return False
+            address = b"\x03" + bytes([len(name)]) + name
+        udp.send(b"\x00\x00\x00" + address + struct.pack("!H", port) + payload)
         end = time.monotonic() + 2
         while time.monotonic() < end:
             udp.settimeout(max(.01, end - time.monotonic()))
@@ -123,7 +149,7 @@ def probe(request):
     try:
         for i, candidate in enumerate(candidates):
             outbound = candidate["outbound"]
-            if outbound.get("protocol") != "socks":
+            if outbound.get("protocol") != "socks" or candidate["driver"] not in ("socks5", "managed_tls_xudp"):
                 raise ValueError("driver")
             tcp = socket.socket()
             tcp.bind(("127.0.0.1", 0))
@@ -161,17 +187,25 @@ def probe(request):
 
         def one(item):
             i, candidate = item
+            driver = candidate["driver"]
+            managed = driver == "managed_tls_xudp"
+            # A managed donor denies generic DNS/IP traffic by design. Probe
+            # its permitted domain through TLS/XUDP, with no HTTP/ad request.
+            destination = "googleads.g.doubleclick.net" if managed else "1.1.1.1"
+            tests = [] if managed else [(53, dns_request(), dns_valid)]
+            tests += [(443, quic_request(), quic_valid), (443, quic_request(), quic_valid)]
             checks = []
-            for dest_port, payload, validate in ((53, dns_request(), dns_valid),
-                                                  (443, quic_request(), quic_valid),
-                                                  (443, quic_request(), quic_valid)):
+            for dest_port, payload, validate in tests:
                 try:
-                    checks.append(exchange(ports[i], "1.1.1.1", dest_port, payload, validate))
+                    checks.append(exchange(ports[i], destination, dest_port, payload, validate))
                 except (OSError, ValueError):
                     checks.append(False)
-            dns, quic = checks[0], all(checks[1:])
-            return {"id": candidate["id"], "digest": candidate["digest"], "dns": dns,
-                    "quic": quic, "code": "ok" if dns and quic else "datagram_unverified"}
+            dns = False if managed else checks[0]
+            quic = all(checks if managed else checks[1:])
+            capable = quic and (managed or dns)
+            return {"id": candidate["id"], "driver": driver, "digest": candidate["digest"],
+                    "dns": dns, "quic": quic, "code": "ok" if capable else "datagram_unverified"}
+
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
             results = list(executor.map(one, enumerate(candidates)))

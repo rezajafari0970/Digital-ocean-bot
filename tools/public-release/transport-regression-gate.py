@@ -81,6 +81,7 @@ REQUIRED = {
 }
 
 REQUIRED["internal/panels/configplane"] += ("TestNativeVLESSIdentityAndFlowProof",)
+REQUIRED["internal/panels/residentialsync"] += ("TestNativeProtocolManagedRelayRespectsDestinationPolicy", "TestProtocolManagedEvidencePostgres")
 REQUIRED["internal/protocolprobe"] = ("TestProtocolEvidenceBindingAndIsolation", "TestProtocolProbeResponseValidation", "TestNativeProtocolProbeCapability")
 REQUIRED["internal/panels/residentialsync"] += ("TestProtocolUDPSelectionPreservesTCPAndDeny", "TestProtocolHealthOriginExpiryAndClaimPostgres", "TestProtocolScopeAndStableEvidence")
 
