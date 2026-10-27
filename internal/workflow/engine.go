@@ -156,6 +156,17 @@ func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
 				return d, nil
 			}
 			class := ClassifyStepError(step.name, err)
+			if err != nil && step.name == "create" {
+				if pendingStore, ok := e.Store.(pendingCreateStore); ok {
+					pending, readErr := pendingStore.PendingCreate(ctx, d.ID)
+					if readErr != nil {
+						return d, errors.Join(err, fmt.Errorf("read dispatched create: %w", readErr))
+					}
+					if pending {
+						class = ErrorPending
+					}
+				}
+			}
 			if ferr := e.finishStep(ctx, d, step.name, err, class); ferr != nil {
 				return d, errors.Join(err, fmt.Errorf("persist workflow step %s: %w", step.name, ferr))
 			}
@@ -170,7 +181,11 @@ func (e Engine) Run(ctx context.Context, req Request) (Deployment, error) {
 						return d, errors.Join(err, ferr)
 					}
 				} else {
-					if uerr := e.transition(ctx, &d, step.name, "step failed class="+string(class)); uerr != nil {
+					message := "step failed class=" + string(class)
+					if class == ErrorPending {
+						message = "waiting for native create confirmation"
+					}
+					if uerr := e.transition(ctx, &d, step.name, message); uerr != nil {
 						return d, errors.Join(err, uerr)
 					}
 				}
@@ -234,6 +249,10 @@ func terminalDeploymentState(s State) bool {
 	default:
 		return false
 	}
+}
+
+type pendingCreateStore interface {
+	PendingCreate(context.Context, string) (bool, error)
 }
 
 type completedStepStore interface {

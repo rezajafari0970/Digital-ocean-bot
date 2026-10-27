@@ -91,13 +91,13 @@ WITH provider_inventory AS (
  WHEN 'DEPLOYMENT_FAILED' THEN 'broken' WHEN 'PANEL_DEGRADED' THEN 'degraded' ELSE 'inactive' END health FROM server_evidence
 )
 SELECT json_build_object(
- 'digitalocean_accounts',(SELECT count(*) FROM live_accounts WHERE provider='digitalocean'),
- 'vultr_accounts',(SELECT count(*) FROM live_accounts WHERE provider='vultr'),
- 'upcloud_accounts',(SELECT count(*) FROM live_accounts WHERE provider='upcloud'),
- 'aws_accounts',(SELECT count(*) FROM live_accounts WHERE provider='aws'),
- 'ovh_accounts',(SELECT count(*) FROM live_accounts WHERE provider='ovh'),
- 'kamatera_accounts',(SELECT count(*) FROM live_accounts WHERE provider='kamatera'),
- 'linode_accounts',(SELECT count(*) FROM live_accounts WHERE provider='linode'),
+ 'digitalocean_accounts',(SELECT count(*) FROM live_accounts WHERE provider='digitalocean' AND deletion_requested_at IS NULL),
+ 'vultr_accounts',(SELECT count(*) FROM live_accounts WHERE provider='vultr' AND deletion_requested_at IS NULL),
+ 'upcloud_accounts',(SELECT count(*) FROM live_accounts WHERE provider='upcloud' AND deletion_requested_at IS NULL),
+ 'aws_accounts',(SELECT count(*) FROM live_accounts WHERE provider='aws' AND deletion_requested_at IS NULL),
+ 'ovh_accounts',(SELECT count(*) FROM live_accounts WHERE provider='ovh' AND deletion_requested_at IS NULL),
+ 'kamatera_accounts',(SELECT count(*) FROM live_accounts WHERE provider='kamatera' AND deletion_requested_at IS NULL),
+ 'linode_accounts',(SELECT count(*) FROM live_accounts WHERE provider='linode' AND deletion_requested_at IS NULL),
  'enabled_accounts',(SELECT count(*) FROM live_accounts WHERE enabled),
  'healthy_accounts',(SELECT count(*) FROM live_accounts WHERE health='healthy'),
  'capacity_full_accounts',(SELECT count(*) FROM live_accounts WHERE health='capacity'),

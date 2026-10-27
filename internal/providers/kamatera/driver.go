@@ -138,6 +138,12 @@ func (d *Driver) GetServer(ctx context.Context, id string) (providers.Server, er
 	}
 	xs, e := d.rawServers(ctx, map[string]string{"id": id})
 	if e != nil {
+		var pe *providers.Error
+		if errors.As(e, &pe) && pe.StatusCode == 500 && pe.Code == "PROVIDER_UNAVAILABLE" {
+			// CloudCLI can return a generic 500 after deletion. That error is
+			// never absence evidence: use two valid complete inventories instead.
+			return providers.Server{}, d.confirmInventoryAbsence(ctx, id)
+		}
 		return providers.Server{}, e
 	}
 	if len(xs) == 0 {

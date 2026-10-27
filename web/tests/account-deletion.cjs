@@ -4,7 +4,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
  if(!base?.startsWith('http://127.0.0.1:')||!token)throw Error('local ephemeral session required');
  const root=process.env.DOB_UI_ARTIFACT_DIR||os.tmpdir(),profile=fs.mkdtempSync(path.join(root,'ui-profile-'));
  const log=fs.openSync(path.join(root,'browser.log'),'w');
- const chrome=spawn('/snap/bin/chromium',['--headless','--no-sandbox','--disable-dev-shm-usage','--disable-gpu','--remote-debugging-port=0','--remote-debugging-address=127.0.0.1','--user-data-dir='+profile,'about:blank'],{stdio:['ignore',log,log],env:{...process.env,TMPDIR:root}});
+ const chrome=spawn(process.env.DOB_TEST_CHROMIUM||'/snap/bin/chromium',['--headless','--no-sandbox','--disable-dev-shm-usage','--disable-gpu','--remote-debugging-port=0','--remote-debugging-address=127.0.0.1','--user-data-dir='+profile,'about:blank'],{stdio:['ignore',log,log],env:{...process.env,TMPDIR:root}});
  let ws;try{
   const until=Date.now()+20000;let port;
   while(Date.now()<until){try{port=Number(fs.readFileSync(path.join(profile,'DevToolsActivePort'),'utf8').split('\n')[0]);break}catch{};await new Promise(r=>setTimeout(r,200))}
@@ -27,9 +27,10 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   const id=process.env.DOB_DELETE_ID,other=process.env.DOB_OTHER_ID;
   await call('Page.navigate',{url:base+'/admin/#accounts'});
   async function waitFor(expression){const end=Date.now()+15000;while(Date.now()<end){if(await evaluate(expression))return;await new Promise(r=>setTimeout(r,100))}throw Error('UI assertion timeout: '+expression+' BODY: '+await evaluate('document.body.innerText.slice(0,5000)'))}
-  await waitFor('document.querySelectorAll(".accountCard").length===2');
+  await waitFor('document.querySelectorAll(".accountCard,.accountCleanupCard").length===2');
   if(process.env.DOB_PURGE_ID){
    const purgeID=process.env.DOB_PURGE_ID;
+   await evaluate('document.querySelector("#accountCleanup").open=true');
    await evaluate('window.purgeID='+JSON.stringify(purgeID)+';window.confirm=()=>false;window.purgeButton=()=>document.querySelector(".deletionProgress [data-action=purge-account]")');
    assert.equal(await evaluate('purgeButton()?.textContent'), 'Delete from system…');
    await evaluate('purgeButton().click()');
@@ -54,7 +55,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    await call('Page.reload');
    // Account data arrives before the page finishes its other independent reads.
    // Assert the rendered state after reload, not merely the populated cache.
-   await waitFor('typeof cache!=="undefined"&&cache.accounts?.some(r=>r.deletion?.phase==="PURGE_PENDING")&&document.body.innerText.includes("Local system cleanup queued")');
+   await waitFor('typeof cache!=="undefined"&&cache.accounts?.some(r=>r.deletion?.phase==="PURGE_PENDING")&&document.querySelector("#accountCleanup")?.textContent.includes("Local system cleanup queued")');
    await evaluate('api("/__fixture/complete-purge",{method:"POST"}).then(()=>refreshAccountsInPlace({force:true}))');
    await waitFor('cache.accounts?.length===1');
    assert.equal(await evaluate('cache.accounts[0].id'),other);
@@ -65,14 +66,16 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    return;
   }
 
-  await evaluate('window.deleteID='+JSON.stringify(id)+';window.otherID='+JSON.stringify(other)+';window.confirm=()=>true;window.originalFetch=window.fetch;window.deleteCalls=0;window.dropOnce=true;window.fetch=async function(url,opt){const r=await window.originalFetch(url,opt);if(opt?.method==="DELETE"){window.deleteCalls++;if(window.dropOnce){window.dropOnce=false;throw Error("Fixture lost response after commit")}}return r}');
+  await evaluate('window.deleteID='+JSON.stringify(id)+';window.otherID='+JSON.stringify(other)+';window.confirm=()=>{throw Error("ordinary Delete must require one click")};window.originalFetch=window.fetch;window.deleteCalls=0;window.dropOnce=true;window.fetch=async function(url,opt){const r=await window.originalFetch(url,opt);if(opt?.method==="DELETE"){window.deleteCalls++;if(window.dropOnce){window.dropOnce=false;throw Error("Fixture lost response after commit")}}return r}');
   await evaluate('Promise.all([window.deleteAccount(deleteID),window.deleteAccount(deleteID)])');
   await waitFor('cache.accounts.find(r=>r.id===deleteID)?.deletion?.phase==="SETTLING"&&!accountDeletionBusy.has(deleteID)');
   assert.equal(await evaluate('window.deleteCalls'),1);
+  assert.equal(await evaluate('document.querySelectorAll(".accountCard").length'),1);
+  await evaluate('document.querySelector("#accountCleanup").open=true');
   assert.equal(await evaluate('[...document.querySelectorAll("[data-action=delete-account]")].find(b=>b.dataset.id===deleteID).disabled'),true);
   assert.ok(await evaluate('document.body.innerText.includes("Safety wait: about")'));
   assert.ok(await evaluate('document.body.innerText.includes("Next check:")'));
-  await evaluate('[...document.querySelectorAll(".accountCard")].find(b=>b.dataset.accountId===deleteID).scrollIntoView()');
+  await evaluate('document.querySelector("#accountCleanup").scrollIntoView()');
   assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'),true);
   const mobile=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(root,'account-deletion-mobile.png'),Buffer.from(mobile.data,'base64'));
   await call('Page.reload');await waitFor('typeof cache!=="undefined"&&cache.accounts?.some(r=>r.id==='+JSON.stringify(id)+'&&r.deletion?.phase==="SETTLING")');

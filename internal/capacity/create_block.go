@@ -19,10 +19,13 @@ type CreateBlock struct {
 }
 
 func CreateBlockReason(code string) string {
+	if code == "KAMATERA_ASYNC_CREATE_REVIEW" {
+		return "Kamatera creation is temporarily paused while accepted asynchronous builds are reconciled. This is a local maintenance hold, not a provider permission rejection."
+	}
 	if code == "TRIAL_FIREWALL" {
 		return "UpCloud trial firewall restriction (TRIAL_FIREWALL). The standard deployment disables a firewall locked during the trial. Use the restricted trial-compatible deployment option, or resolve the restriction with UpCloud before retrying."
 	}
-	return "UpCloud rejected server creation (" + code + "). Resolve the provider permission restriction, then enable a retry."
+	return "Server creation is blocked (" + code + "). Review the recorded restriction before enabling a retry."
 }
 func ReadCreateBlock(ctx context.Context, q Querier, accountID string) (*CreateBlock, error) {
 	var b CreateBlock

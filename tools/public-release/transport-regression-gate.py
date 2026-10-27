@@ -83,6 +83,12 @@ REQUIRED = {
     ),
 }
 
+REQUIRED['internal/workflow'] = REQUIRED.get('internal/workflow', ()) + ('TestSQLPendingCreateWaitsWithoutRetryExhaustionE2E', 'TestSQLPendingCreateEvidenceFencingE2E', 'TestWorkflowPendingCreateKeepsReservationAndEventuallyResumesE2E', 'TestWorkflowPendingEvidenceReadFailureDoesNotFinalize')
+REQUIRED['internal/droplets'] = REQUIRED.get('internal/droplets', ()) + ('TestAcceptedAsyncCreateDoesNotMarkAccountTransportError',)
+
+REQUIRED['internal/workflow'] += ('TestSQLUnchargedCreateCannotDispatchRegionalFallbackE2E', 'TestSQLPendingCreateCancellationFenceE2E', 'TestWorkflowSuccessfulCreateLostAcknowledgementE2E')
+REQUIRED['internal/droplets'] += ('TestCreateObservationCannotDispatchOrCrossOwnership',)
+
 REQUIRED["internal/panels/configplane"] += ("TestNativeVLESSIdentityAndFlowProof",)
 REQUIRED["internal/panels/residentialsync"] += ("TestNativeProtocolManagedRelayRespectsDestinationPolicy", "TestProtocolManagedEvidencePostgres")
 REQUIRED["internal/panels/residentialsync"] += ("TestDNSResilienceScopeRollbackAndQUICPortBoundary", "TestInstalledCoreSixResolverParallelTimeoutAndCache")
@@ -207,6 +213,10 @@ REQUIRED['internal/app'] += ('TestKamateraCleanupRequiresBothJournalAndLocalScop
 
 REQUIRED['internal/adminapi'] += ('TestAccountPurgeHistoricalScale',)
 
+REQUIRED['internal/providers/kamatera'] += ('TestKamateraFailedExactReadNeedsCompleteCorroboration','TestKamateraAlternateAbsencePreservesDurableFence')
+REQUIRED['internal/adminapi'] += ('TestAccountDeleteStopsPublicationBeforeCleanup','TestAccountDeletionBrowser','TestBlockedAccountPurgeBrowser')
+REQUIRED['internal/capacity'] = REQUIRED.get('internal/capacity', ()) + ('TestCreateBlockReasonSeparatesMaintenanceFromProviderDenial',)
+
 def main(repo):
     if os.geteuid() == 0:
         raise RuntimeError("gate must run as the unprivileged release builder")
@@ -239,6 +249,7 @@ def main(repo):
             run([pg / 'createdb', 'bulk_test_transport'], stdout=output, stderr=subprocess.STDOUT)
             run([pg / 'psql', '-X', '-v', 'ON_ERROR_STOP=1', '-c', 'CREATE ROLE digitaloceanbot; CREATE ROLE digitaloceanbot_readonly;'], stdout=output, stderr=subprocess.STDOUT)
         env['DOB_PURGE_SCALE'] = '1'
+        env['DOB_RUN_BROWSER_TEST'] = '1'
         env['BULK_TEST_DATABASE_URL'] = 'postgresql://dob_gate@/bulk_test_transport?' + urlencode({'host': str(socket), 'port': '55435', 'sslmode': 'disable'})
         # Execute protocol/transport exports against the exact release-pinned core.
         # Neither an absent binary nor an environment-selected unverified core can skip this gate.
