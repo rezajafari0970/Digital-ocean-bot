@@ -24,19 +24,21 @@ const (
 )
 
 type Deployment struct {
-	ID          string
-	AccountID   string
-	ProfileID   string
-	DropletID   string
-	ProviderID  string
-	Host        string
-	State       State
-	CurrentStep string
-	Attempt     int
-	LockVersion int64
-	LastError   string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	// Admission-only flag; never persisted or restored from a result snapshot.
+	CreateObservationOnly bool `json:"-"`
+	ID                    string
+	AccountID             string
+	ProfileID             string
+	DropletID             string
+	ProviderID            string
+	Host                  string
+	State                 State
+	CurrentStep           string
+	Attempt               int
+	LockVersion           int64
+	LastError             string
+	CreatedAt             time.Time
+	UpdatedAt             time.Time
 }
 type Request struct {
 	DeploymentID string

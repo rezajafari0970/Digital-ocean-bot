@@ -24,6 +24,9 @@ type Executor struct {
 }
 
 func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile) (jobs.Operation, error) {
+	if observationOnly, _ := ctx.Value(createObservationOnlyKey{}).(bool); observationOnly {
+		return e.observeCreate(ctx, op, profile)
+	}
 	if e.Gate == nil || e.Provider == nil {
 		return op, ErrMutationBlocked
 	}
@@ -81,12 +84,17 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 		planID, imageID = selected.PlanID, selected.ImageID
 	}
 	result, err := e.Provider.CreateServer(ctx, providers.CreateServerRequest{UpCloudTrialCompatible: profile.UpCloudTrialCompatible, Name: profile.Name, RegionID: profile.Region, PlanID: planID, ImageID: imageID, SSHKeyRefs: ssh, SSHAuthorizedKeys: authorized, Tags: []string{"managed-by-digital-ocean-bot"}, Identity: profile.IdentityTag})
- if result.OperationID != "" { reserved.ProviderActionID = result.OperationID }
+	if result.OperationID != "" {
+		reserved.ProviderActionID = result.OperationID
+	}
 	if err != nil {
-		if e.OnCreateError != nil {
+		class := providers.Class(err)
+		// A native asynchronous job was accepted; waiting for its server UUID
+		// is not an account transport failure. Real provider errors still publish.
+		acceptedPending := result.OperationID != "" && result.Outcome == providers.OutcomeAmbiguous && class == providers.ErrorAmbiguousOutcome
+		if e.OnCreateError != nil && !acceptedPending {
 			e.OnCreateError(ctx, err)
 		}
-		class := providers.Class(err)
 		if (result.ComputeNotDispatched && result.Outcome == providers.OutcomeRejected) || class == providers.ErrorAuthentication || class == providers.ErrorPermissionDenied || class == providers.ErrorAccountLocked || class == providers.ErrorCapacity || class == providers.ErrorRegionCapacity || class == providers.ErrorImageUnavailable || class == providers.ErrorInvalidRequest || class == providers.ErrorNotFound || errors.Is(err, ErrMutationBlocked) {
 			reserved.State = jobs.OperationFailed
 		} else {

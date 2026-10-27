@@ -67,6 +67,9 @@ func (r RuntimeSteps) Create(ctx context.Context, d Deployment) (Deployment, err
 	if r.Droplets == nil {
 		return d, ErrRuntimeConfig
 	}
+	if d.CreateObservationOnly {
+		ctx = droplets.WithCreateObservationOnly(ctx)
+	}
 	r.Profile.IdentityTag = "dob-deployment-" + d.ID
 	op := droplets.BuildCreateOperation(d.AccountID, r.Profile)
 	op.IdempotencyKey = "deploy:" + d.ID + ":create"
@@ -82,6 +85,9 @@ func (r RuntimeSteps) Create(ctx context.Context, d Deployment) (Deployment, err
 		regionOp := op
 		regionOp.IdempotencyKey = op.IdempotencyKey + ":region:" + region
 		result, err = r.Droplets.Create(ctx, regionOp, p)
+		if d.CreateObservationOnly && errors.Is(err, droplets.ErrCreateDispatchDeferred) {
+			continue
+		}
 		// A crash may occur after recording a definitive regional rejection
 		// but before trying the next persisted region. Resume that decision;
 		// running/unknown operations and other failures never authorize fallback.
@@ -98,6 +104,9 @@ func (r RuntimeSteps) Create(ctx context.Context, d Deployment) (Deployment, err
 		if !providers.IsClass(err, providers.ErrorRegionCapacity) || i == len(regions)-1 {
 			return d, err
 		}
+	}
+	if result.ResourceID == "" {
+		return d, droplets.ErrCreateDispatchDeferred
 	}
 	d.ProviderID = result.ResourceID
 	return d, nil

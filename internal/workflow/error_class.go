@@ -3,6 +3,7 @@ package workflow
 import (
 	"context"
 	"errors"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/droplets"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/secrets"
@@ -12,7 +13,9 @@ import (
 type ErrorClass string
 
 const (
-	ErrorRetryable  ErrorClass = "retryable"
+	ErrorRetryable ErrorClass = "retryable"
+	// Waiting for a dispatched create is observation, not another native attempt.
+	ErrorPending    ErrorClass = "pending"
 	ErrorPermanent  ErrorClass = "permanent"
 	ErrorCapacity   ErrorClass = "capacity"
 	ErrorAuth       ErrorClass = "auth"
@@ -24,6 +27,9 @@ const (
 func ClassifyStepError(step string, err error) ErrorClass {
 	if err == nil {
 		return ""
+	}
+	if errors.Is(err, droplets.ErrCreateDispatchDeferred) {
+		return ErrorRetryable
 	}
 	if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
 		return ErrorTimeout
@@ -64,5 +70,5 @@ func ClassifyStepError(step string, err error) ErrorClass {
 	return ErrorUnknown
 }
 func RetryableClass(c ErrorClass) bool {
-	return c == ErrorRetryable || c == ErrorTimeout || c == ErrorCapacity || c == ErrorUnknown
+	return c == ErrorPending || c == ErrorRetryable || c == ErrorTimeout || c == ErrorCapacity || c == ErrorUnknown
 }

@@ -83,6 +83,12 @@ REQUIRED = {
     ),
 }
 
+REQUIRED['internal/workflow'] = REQUIRED.get('internal/workflow', ()) + ('TestSQLPendingCreateWaitsWithoutRetryExhaustionE2E', 'TestSQLPendingCreateEvidenceFencingE2E', 'TestWorkflowPendingCreateKeepsReservationAndEventuallyResumesE2E', 'TestWorkflowPendingEvidenceReadFailureDoesNotFinalize')
+REQUIRED['internal/droplets'] = REQUIRED.get('internal/droplets', ()) + ('TestAcceptedAsyncCreateDoesNotMarkAccountTransportError',)
+
+REQUIRED['internal/workflow'] += ('TestSQLUnchargedCreateCannotDispatchRegionalFallbackE2E', 'TestSQLPendingCreateCancellationFenceE2E', 'TestWorkflowSuccessfulCreateLostAcknowledgementE2E')
+REQUIRED['internal/droplets'] += ('TestCreateObservationCannotDispatchOrCrossOwnership',)
+
 REQUIRED["internal/panels/configplane"] += ("TestNativeVLESSIdentityAndFlowProof",)
 REQUIRED["internal/panels/residentialsync"] += ("TestNativeProtocolManagedRelayRespectsDestinationPolicy", "TestProtocolManagedEvidencePostgres")
 REQUIRED["internal/panels/residentialsync"] += ("TestDNSResilienceScopeRollbackAndQUICPortBoundary", "TestInstalledCoreSixResolverParallelTimeoutAndCache")

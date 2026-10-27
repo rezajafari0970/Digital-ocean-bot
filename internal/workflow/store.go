@@ -69,7 +69,34 @@ func (s SQLStore) Get(ctx context.Context, id, accountID string) (Deployment, er
 	return d, err
 }
 
+// PendingCreate is fenced by account, deployment and the exact regional operation
+// namespace. A dispatched/uncertain create cannot be abandoned merely because its
+// provider takes longer than the workflow retry budget. A verified resource whose
+// workflow acknowledgement was lost must also be resumed without another POST.
+func (s SQLStore) PendingCreate(ctx context.Context, deploymentID string) (bool, error) {
+	var pending bool
+	err := s.DB.QueryRowContext(ctx, `SELECT EXISTS(
+ SELECT 1 FROM deployments d JOIN operations o ON o.account_id=d.account_id
+ WHERE d.id=$1 AND o.kind='CREATE_DROPLET' AND o.attempt>0
+ AND o.idempotency_key LIKE 'deploy:'||d.id::text||':create:region:%'
+ AND length(o.idempotency_key)>length('deploy:'||d.id::text||':create:region:')
+ AND (o.state IN ('running','verifying','unknown')
+      OR (o.state='succeeded' AND COALESCE(o.resource_id,'')<>'')))`, deploymentID).Scan(&pending)
+	return pending, err
+}
+
 func (s SQLStore) BeginStep(ctx context.Context, deploymentID, step string, maxAttempts int) (int, error) {
+	pending := false
+	if step == "create" {
+		var err error
+		pending, err = s.PendingCreate(ctx, deploymentID)
+		if err != nil {
+			return 0, err
+		}
+	}
+	return s.beginStep(ctx, deploymentID, step, maxAttempts, pending)
+}
+func (s SQLStore) beginStep(ctx context.Context, deploymentID, step string, maxAttempts int, pending bool) (int, error) {
 	var attempts int
 	var class sql.NullString
 	var next sql.NullTime
@@ -78,18 +105,18 @@ func (s SQLStore) BeginStep(ctx context.Context, deploymentID, step string, maxA
 		return 0, err
 	}
 	if err == nil {
-		if class.Valid && !RetryableClass(ErrorClass(class.String)) {
+		if !pending && class.Valid && !RetryableClass(ErrorClass(class.String)) {
 			return attempts, ErrStepTerminal
 		}
 		if next.Valid && time.Now().Before(next.Time) {
 			return attempts, ErrStepRetryDeferred
 		}
-		if maxAttempts > 0 && attempts >= maxAttempts {
+		if !pending && maxAttempts > 0 && attempts >= maxAttempts {
 			return attempts, ErrStepRetryLimit
 		}
 	}
 	var n int
-	err = s.DB.QueryRowContext(ctx, `INSERT INTO deployment_step_attempts(deployment_id,step,generation,attempts,last_started_at,last_error,last_error_class,next_retry_at) SELECT $1,$2,CASE WHEN $2 IN ('database','panel') THEN postinstall_generation ELSE 0 END,1,now(),NULL,NULL,NULL FROM deployments WHERE id=$1 ON CONFLICT(deployment_id,step,generation) DO UPDATE SET attempts=deployment_step_attempts.attempts+1,last_started_at=now(),last_error=NULL,last_error_class=NULL,next_retry_at=NULL,result_snapshot=NULL RETURNING attempts`, deploymentID, step).Scan(&n)
+	err = s.DB.QueryRowContext(ctx, `INSERT INTO deployment_step_attempts(deployment_id,step,generation,attempts,last_started_at,last_error,last_error_class,next_retry_at) SELECT $1,$2,CASE WHEN $2 IN ('database','panel') THEN postinstall_generation ELSE 0 END,1,now(),NULL,NULL,NULL FROM deployments WHERE id=$1 ON CONFLICT(deployment_id,step,generation) DO UPDATE SET attempts=deployment_step_attempts.attempts+CASE WHEN $3 THEN 0 ELSE 1 END,last_started_at=now(),last_error=NULL,last_error_class=NULL,next_retry_at=NULL,result_snapshot=NULL RETURNING attempts`, deploymentID, step, pending).Scan(&n)
 	return n, err
 }
 func (s SQLStore) FinishStep(ctx context.Context, deploymentID, step string, stepErr error, class ErrorClass) error {
@@ -101,7 +128,9 @@ func (s SQLStore) finishStep(ctx context.Context, deploymentID, step string, ste
 		msg = stepErr.Error()
 	}
 	var next any
-	if stepErr != nil && RetryableClass(class) {
+	if stepErr != nil && class == ErrorPending {
+		next = time.Now().Add(30 * time.Second)
+	} else if stepErr != nil && RetryableClass(class) {
 		var attempts int
 		if err := s.DB.QueryRowContext(ctx, `SELECT a.attempts FROM deployment_step_attempts a JOIN deployments d ON d.id=a.deployment_id WHERE a.deployment_id=$1 AND a.step=$2 AND a.generation=CASE WHEN $2 IN ('database','panel') THEN d.postinstall_generation ELSE 0 END`, deploymentID, step).Scan(&attempts); err != nil {
 			return err
@@ -222,7 +251,14 @@ func (s SQLStore) AdmitStep(ctx context.Context, d *Deployment, step string, max
 	defer tx.Rollback()
 	store := SQLStore{DB: tx}
 	pending := *d
-	if _, err = store.BeginStep(ctx, d.ID, step, maxAttempts); err != nil {
+	pending.CreateObservationOnly = false
+	if step == "create" {
+		pending.CreateObservationOnly, err = store.PendingCreate(ctx, d.ID)
+		if err != nil {
+			return err
+		}
+	}
+	if _, err = store.beginStep(ctx, d.ID, step, maxAttempts, pending.CreateObservationOnly); err != nil {
 		return err
 	}
 	if err = store.Update(ctx, &pending); err != nil {
