@@ -117,6 +117,17 @@ func (d *Driver) normalize(x serverData) providers.Server {
 func (d *Driver) rawServers(ctx context.Context, selector map[string]string) ([]serverData, error) {
 	var xs []serverData
 	if e := d.client.do(ctx, "POST", "/service/server/info", selector, &xs); e != nil {
+		var pe *providers.Error
+		if len(selector) == 1 && selector["name"] == ".*" && errors.As(e, &pe) && pe.Code == "EMPTY_WILDCARD_SELECTION" {
+			basic, verifyErr := d.basicServers(ctx)
+			if verifyErr != nil {
+				return nil, verifyErr
+			}
+			if len(basic) == 0 {
+				return []serverData{}, nil
+			}
+			return nil, problem(providers.ErrorUnavailable, "inventory", "INVENTORY_DISAGREEMENT", 200)
+		}
 		return nil, e
 	}
 	return xs, validateServers(xs)

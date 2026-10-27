@@ -48,7 +48,7 @@ type publicTariff struct {
 }
 
 func (d *Driver) publicTariff(ctx context.Context) (*publicTariff, error) {
-	budget := 5 * time.Second
+	budget := 12 * time.Second
 	if deadline, ok := ctx.Deadline(); ok && time.Until(deadline)-2*time.Second < budget {
 		budget = time.Until(deadline) - 2*time.Second
 	}
@@ -56,6 +56,24 @@ func (d *Driver) publicTariff(ctx context.Context) (*publicTariff, error) {
 		return nil, errors.New("no pricing time budget")
 	}
 	ctx, cancel := context.WithTimeout(ctx, budget)
+	defer cancel()
+	for attempt := 0; ; attempt++ {
+		p, retry, err := d.publicTariffAttempt(ctx)
+		if err == nil || !retry || attempt == 1 || ctx.Err() != nil {
+			return p, err
+		}
+		timer := time.NewTimer(200 * time.Millisecond)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return nil, errors.New("public pricing unavailable")
+		case <-timer.C:
+		}
+	}
+}
+
+func (d *Driver) publicTariffAttempt(parent context.Context) (*publicTariff, bool, error) {
+	ctx, cancel := context.WithTimeout(parent, 5*time.Second)
 	defer cancel()
 	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, pricingURL, nil)
 	req.Header.Set("Accept", "text/html")
@@ -66,21 +84,25 @@ func (d *Driver) publicTariff(ctx context.Context) (*publicTariff, error) {
 	client.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, errors.New("public pricing unavailable")
+		return nil, true, errors.New("public pricing unavailable")
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("public pricing unavailable")
+		return nil, resp.StatusCode >= 500 && resp.StatusCode <= 599, errors.New("public pricing unavailable")
 	}
+
 	raw, err := io.ReadAll(io.LimitReader(resp.Body, maxPricingBytes+1))
-	if err != nil || len(raw) > maxPricingBytes {
-		return nil, errors.New("invalid public pricing")
+	if err != nil {
+		return nil, true, errors.New("invalid public pricing")
+	}
+	if len(raw) > maxPricingBytes {
+		return nil, false, errors.New("invalid public pricing")
 	}
 	p, err := parsePublicTariff(raw)
 	if err == nil {
 		p.observed = time.Now().UTC()
 	}
-	return p, err
+	return p, false, err
 }
 
 // Parse the JSON data block only; never execute provider JavaScript. A missing

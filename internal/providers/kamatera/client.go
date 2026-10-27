@@ -31,7 +31,23 @@ type credential struct {
 
 func credentials(ctx context.Context, s providers.CredentialSource) (credential, error) {
 	var c credential
-	if s == nil || cloudutil.ReadCredential(ctx, s, &c) != nil {
+	if err := ctx.Err(); err != nil {
+		return c, err
+	}
+	if s == nil {
+		return c, problem(providers.ErrorAuthentication, "credential", "INVALID_CREDENTIAL", 0)
+	}
+	if err := cloudutil.ReadCredential(ctx, s, &c); err != nil {
+		// A canceled database/secret read does not reject the API credential.
+		if ctx.Err() != nil {
+			return c, ctx.Err()
+		}
+		if errors.Is(err, context.DeadlineExceeded) {
+			return c, context.DeadlineExceeded
+		}
+		if errors.Is(err, context.Canceled) {
+			return c, context.Canceled
+		}
 		return c, problem(providers.ErrorAuthentication, "credential", "INVALID_CREDENTIAL", 0)
 	}
 	c.ClientID = strings.TrimSpace(c.ClientID)
@@ -131,6 +147,19 @@ func (c *client) doOnce(ctx context.Context, method, path string, body, out any)
 		return problem(providers.ErrorUnavailable, "response", "INVALID_RESPONSE", resp.StatusCode)
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		// The deployed CloudCLI returns this exact 500 for an empty wildcard
+		// read, despite allowNoServers in its public schema. This is only a
+		// selection hint: rawServers must corroborate it with the basic list.
+		if resp.StatusCode == http.StatusInternalServerError && method == http.MethodPost && path == "/service/server/info" {
+			selector, ok := body.(map[string]string)
+			var response map[string]json.RawMessage
+			var message string
+			if ok && len(selector) == 1 && selector["name"] == ".*" &&
+				json.Unmarshal(raw, &response) == nil && len(response) == 1 &&
+				json.Unmarshal(response["message"], &message) == nil && message == "No servers found (name='.*')" {
+				return problem(providers.ErrorUnavailable, "inventory", "EMPTY_WILDCARD_SELECTION", resp.StatusCode)
+			}
+		}
 		class, code := providers.ErrorUnknown, "REQUEST_FAILED"
 		switch resp.StatusCode {
 		case 401:

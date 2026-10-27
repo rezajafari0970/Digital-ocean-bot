@@ -134,9 +134,16 @@ func TestKamateraTaskIsNotServerAndLostResponseIsNeverReposted(t *testing.T) {
 					return reply(sizeJSON), nil
 				case r.URL.Query().Get("images") == "1":
 					return reply(imageJSON), nil
-				case r.URL.Path == "/service/server/info":
+				case r.URL.Path == "/service/servers":
 					if !visible {
 						return reply("[]"), nil
+					}
+					return reply(`[{"id":"` + serverID + `","name":"` + d.intentName(identity) + `","datacenter":"EU","power":"on"}]`), nil
+				case r.URL.Path == "/service/server/info":
+					if !visible {
+						x := reply(emptyWildcardResponse)
+						x.StatusCode = 500
+						return x, nil
 					}
 					return reply(`[{"id":"` + serverID + `","name":"` + d.intentName(identity) + `","datacenter":"EU","power":"on","networks":[{"network":"wan","ips":["1.1.1.1"]}]}]`), nil
 				case r.URL.Path == "/service/server" && r.Method == "POST":

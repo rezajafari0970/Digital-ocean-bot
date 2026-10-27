@@ -96,7 +96,7 @@ func (d *Driver) images(ctx context.Context, region string) ([]imageData, error)
 	}
 	return xs, nil
 }
-func (d *Driver) CatalogCacheVersion() string { return "kamatera-cloudcli-public-pricing-v3" }
+func (d *Driver) CatalogCacheVersion() string { return "kamatera-cloudcli-public-pricing-v4" }
 func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 	regions, e := d.locations(ctx)
 	if e != nil {
