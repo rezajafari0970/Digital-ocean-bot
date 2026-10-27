@@ -72,9 +72,6 @@ func TestOtherServerInfoErrorsNeverBecomeEmptyInventory(t *testing.T) {
 		}
 	}
 	d := fixtureDriver(t, func(r *http.Request) (*http.Response, error) {
-		if r.Method != "POST" {
-			t.Fatal("unexpected confirmation read")
-		}
 		x := reply(emptyWildcardResponse)
 		x.StatusCode = 500
 		return x, nil

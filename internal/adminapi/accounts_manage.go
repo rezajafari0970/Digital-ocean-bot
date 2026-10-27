@@ -322,7 +322,7 @@ func (s *Server) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	writeJSON(w, http.StatusAccepted, map[string]any{"state": "DELETE_PENDING", "remaining_resources": live, "deletion": s.accountDeletionProgress(r.Context(), id), "detail": "Deletion requested. Managed provider resources must be verified absent before saved account data is purged."})
+	writeJSON(w, http.StatusAccepted, map[string]any{"state": "DELETE_PENDING", "remaining_resources": live, "removed_from_active": true, "cleanup_pending": true, "detail": "Removed from active accounts. Managed cloud resources and saved data are being cleaned up in the background."})
 }
 
 func (s *Server) accountDeletionProgress(ctx context.Context, id string) any {

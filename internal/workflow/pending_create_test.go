@@ -15,7 +15,7 @@ import (
 
 func pendingFixture(t *testing.T) (*sql.DB, Deployment) {
 	t.Helper()
-	db := e2eDB(t)
+	db := pendingTestDB(t)
 	var d Deployment
 	if err := db.QueryRow(`INSERT INTO accounts(id,provider,name,secret_ref) VALUES(gen_random_uuid(),'kamatera','async-wait-test','fixture') RETURNING id::text`).Scan(&d.AccountID); err != nil {
 		t.Fatal(err)

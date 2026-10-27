@@ -49,7 +49,7 @@ func (s *Server) createAccountOutputShare(w http.ResponseWriter, r *http.Request
 	}
 	var created string
 	err := s.DB.QueryRowContext(r.Context(), `INSERT INTO account_output_share_tokens(token,account_id,route_class)
- SELECT $1,id,$3 FROM accounts WHERE id=$2 AND deleted_at IS NULL RETURNING token`, token, id, body.RouteClass).Scan(&created)
+ SELECT $1,id,$3 FROM accounts WHERE id=$2 AND deleted_at IS NULL AND deletion_requested_at IS NULL RETURNING token`, token, id, body.RouteClass).Scan(&created)
 	if errors.Is(err, sql.ErrNoRows) {
 		http.NotFound(w, r)
 		return
@@ -72,7 +72,7 @@ func (s *Server) sharedAccountOutput(w http.ResponseWriter, r *http.Request) {
 	var class string
 	err := s.DB.QueryRowContext(r.Context(), `SELECT t.account_id::text,t.route_class
  FROM account_output_share_tokens t JOIN accounts a ON a.id=t.account_id
- WHERE t.token=$1 AND t.revoked_at IS NULL AND a.deleted_at IS NULL`, scope.Token).Scan(&scope.AccountID, &class)
+ WHERE t.token=$1 AND t.revoked_at IS NULL AND a.deleted_at IS NULL AND a.deletion_requested_at IS NULL`, scope.Token).Scan(&scope.AccountID, &class)
 	if errors.Is(err, sql.ErrNoRows) {
 		http.NotFound(w, r)
 		return
