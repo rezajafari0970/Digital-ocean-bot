@@ -178,6 +178,9 @@ func (c *client) doOnce(ctx context.Context, method, path string, body, out any)
 		// A generic 404 or malformed body is never proof that a server disappeared.
 		return problem(class, "request", code, resp.StatusCode)
 	}
+	if method == http.MethodGet && path == "/service/servers" && resp.StatusCode != http.StatusOK {
+		return problem(providers.ErrorUnavailable, "inventory", "INVALID_INVENTORY_STATUS", resp.StatusCode)
+	}
 	if out != nil && (bytes.Equal(bytes.TrimSpace(raw), []byte("null")) || json.Unmarshal(raw, out) != nil) {
 		return problem(providers.ErrorUnavailable, "response", "INVALID_RESPONSE", resp.StatusCode)
 	}

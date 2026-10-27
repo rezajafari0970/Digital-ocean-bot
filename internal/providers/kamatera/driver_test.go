@@ -119,86 +119,95 @@ func (s *memorySession) BeginDeletion(context.Context) (bool, error) {
 }
 
 func TestKamateraTaskIsNotServerAndLostResponseIsNeverReposted(t *testing.T) {
-	for _, lost := range []bool{false, true} {
-		t.Run(map[bool]string{false: "accepted-task", true: "lost-response"}[lost], func(t *testing.T) {
-			j := &memoryJournal{}
-			creates, deletes := 0, 0
-			visible := false
-			var d *Driver
-			d = fixtureDriver(t, func(r *http.Request) (*http.Response, error) {
-				if r.Header.Get("AuthClientId") != "fixture-client" || r.Header.Get("AuthSecret") != "fixture-secret" {
-					t.Fatal("native authentication missing")
+	for _, empty500 := range []bool{false, true} {
+		suffix := ""
+		if empty500 {
+			suffix = "/empty-500"
+		}
+		for _, lost := range []bool{false, true} {
+			t.Run(map[bool]string{false: "accepted-task", true: "lost-response"}[lost]+suffix, func(t *testing.T) {
+				j := &memoryJournal{}
+				creates, deletes := 0, 0
+				visible := false
+				var d *Driver
+				d = fixtureDriver(t, func(r *http.Request) (*http.Response, error) {
+					if r.Header.Get("AuthClientId") != "fixture-client" || r.Header.Get("AuthSecret") != "fixture-secret" {
+						t.Fatal("native authentication missing")
+					}
+					switch {
+					case r.URL.Query().Get("sizes") == "1":
+						return reply(sizeJSON), nil
+					case r.URL.Query().Get("images") == "1":
+						return reply(imageJSON), nil
+					case r.URL.Path == "/service/servers":
+						if !visible {
+							return reply("[]"), nil
+						}
+						return reply(`[{"id":"` + serverID + `","name":"` + d.intentName(identity) + `","datacenter":"EU","power":"on"}]`), nil
+					case r.URL.Path == "/service/server/info":
+						if !visible {
+							if !empty500 {
+								return reply("[]"), nil
+							}
+							x := reply(emptyWildcardResponse)
+							x.StatusCode = 500
+							return x, nil
+						}
+						return reply(`[{"id":"` + serverID + `","name":"` + d.intentName(identity) + `","datacenter":"EU","power":"on","networks":[{"network":"wan","ips":["1.1.1.1"]}]}]`), nil
+					case r.URL.Path == "/service/server" && r.Method == "POST":
+						creates++
+						if !j.record.Attempted || j.record.Intent == "" {
+							t.Fatal("dispatch before durable intent")
+						}
+						var b map[string]any
+						json.NewDecoder(r.Body).Decode(&b)
+						if b["password"] != "" || b["ssh-key"] == "" || b["quantity"] != float64(1) {
+							t.Fatal("invalid native create payload")
+						}
+						if lost {
+							return nil, errors.New("lost response")
+						}
+						return reply("[12345]"), nil
+					case r.URL.Path == "/service/server/terminate":
+						deletes++
+						return reply("[12346]"), nil
+					}
+					t.Fatal("unexpected request", r.Method, r.URL.Path)
+					return nil, nil
+				}, j)
+				req := providers.CreateServerRequest{Identity: identity, RegionID: "EU", PlanID: "1B-1024-20", ImageID: "EU:ubuntu-24.04-64bit", SSHAuthorizedKeys: []string{fixtureKey(t)}}
+				result, e := d.CreateServer(context.Background(), req)
+				if e == nil || result.ServerID != "" || result.Outcome != providers.OutcomeAmbiguous {
+					t.Fatal("task mistaken for VM", result, e)
 				}
-				switch {
-				case r.URL.Query().Get("sizes") == "1":
-					return reply(sizeJSON), nil
-				case r.URL.Query().Get("images") == "1":
-					return reply(imageJSON), nil
-				case r.URL.Path == "/service/servers":
-					if !visible {
-						return reply("[]"), nil
-					}
-					return reply(`[{"id":"` + serverID + `","name":"` + d.intentName(identity) + `","datacenter":"EU","power":"on"}]`), nil
-				case r.URL.Path == "/service/server/info":
-					if !visible {
-						x := reply(emptyWildcardResponse)
-						x.StatusCode = 500
-						return x, nil
-					}
-					return reply(`[{"id":"` + serverID + `","name":"` + d.intentName(identity) + `","datacenter":"EU","power":"on","networks":[{"network":"wan","ips":["1.1.1.1"]}]}]`), nil
-				case r.URL.Path == "/service/server" && r.Method == "POST":
-					creates++
-					if !j.record.Attempted || j.record.Intent == "" {
-						t.Fatal("dispatch before durable intent")
-					}
-					var b map[string]any
-					json.NewDecoder(r.Body).Decode(&b)
-					if b["password"] != "" || b["ssh-key"] == "" || b["quantity"] != float64(1) {
-						t.Fatal("invalid native create payload")
-					}
-					if lost {
-						return nil, errors.New("lost response")
-					}
-					return reply("[12345]"), nil
-				case r.URL.Path == "/service/server/terminate":
-					deletes++
-					return reply("[12346]"), nil
+				if !lost && (result.OperationID != "12345" || j.record.OperationID != "12345") {
+					t.Fatal("task identity lost")
 				}
-				t.Fatal("unexpected request", r.Method, r.URL.Path)
-				return nil, nil
-			}, j)
-			req := providers.CreateServerRequest{Identity: identity, RegionID: "EU", PlanID: "1B-1024-20", ImageID: "EU:ubuntu-24.04-64bit", SSHAuthorizedKeys: []string{fixtureKey(t)}}
-			result, e := d.CreateServer(context.Background(), req)
-			if e == nil || result.ServerID != "" || result.Outcome != providers.OutcomeAmbiguous {
-				t.Fatal("task mistaken for VM", result, e)
-			}
-			if !lost && (result.OperationID != "12345" || j.record.OperationID != "12345") {
-				t.Fatal("task identity lost")
-			}
-			for i := 0; i < 3; i++ {
-				_, _ = d.FindServerByIdentity(context.Background(), identity)
-				_, _ = d.CreateServer(context.Background(), req)
-			}
-			if creates != 1 {
-				t.Fatal("replayed a billable create", creates)
-			}
-			visible = true
-			servers, e := d.FindServerByIdentity(context.Background(), identity)
-			if e != nil || len(servers) != 1 || servers[0].ID != serverID || j.record.ID != serverID {
-				t.Fatal("durable reconciliation failed", e, servers)
-			}
-			for i := 0; i < 2; i++ {
-				if e = d.DeleteServer(context.Background(), serverID); e != nil {
-					t.Fatal(e)
+				for i := 0; i < 3; i++ {
+					_, _ = d.FindServerByIdentity(context.Background(), identity)
+					_, _ = d.CreateServer(context.Background(), req)
 				}
-			}
-			if deletes != 1 {
-				t.Fatal("termination redispatched while unresolved")
-			}
-			if e = d.DeleteServer(context.Background(), "33333333-3333-4333-8333-333333333333"); e == nil {
-				t.Fatal("unowned termination accepted")
-			}
-		})
+				if creates != 1 {
+					t.Fatal("replayed a billable create", creates)
+				}
+				visible = true
+				servers, e := d.FindServerByIdentity(context.Background(), identity)
+				if e != nil || len(servers) != 1 || servers[0].ID != serverID || j.record.ID != serverID {
+					t.Fatal("durable reconciliation failed", e, servers)
+				}
+				for i := 0; i < 2; i++ {
+					if e = d.DeleteServer(context.Background(), serverID); e != nil {
+						t.Fatal(e)
+					}
+				}
+				if deletes != 1 {
+					t.Fatal("termination redispatched while unresolved")
+				}
+				if e = d.DeleteServer(context.Background(), "33333333-3333-4333-8333-333333333333"); e == nil {
+					t.Fatal("unowned termination accepted")
+				}
+			})
+		}
 	}
 }
 
