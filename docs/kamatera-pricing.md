@@ -27,13 +27,23 @@ and Kamatera/cloudcli-server `ProxyServerPostProcessingMethods.php`.
 
 The public request uses the account's existing proxy transport, without provider
 headers or a cookie jar, and refuses redirects. It runs alongside capability reads,
-with a five-second maximum and two seconds reserved in a bounded parent deadline.
+with a five-second attempt limit and at most one retry for transient transport,
+read or HTTP 5xx failures. The total budget is twelve seconds, with two seconds
+reserved in a bounded parent deadline. Redirects, authorization errors and invalid
+price data are not retried. Regional reads retain three bounded concurrent bundles.
 There is no hardcoded price fallback or new mutation. A public-site outage leaves
 native account validation and plan availability intact. Existing catalog caching
-preserves the tariff observation time; cache version v3 invalidates older catalogs.
+preserves the tariff observation time; cache version v4 invalidates older catalogs.
 
 Verification includes exact regional totals, negative adjustments, missing/null
 prices, duplicate JSON keys and lookup entries, licences, unknown regions/images,
 credential-free routing, redirects, cancellation, and native catalog success when
 pricing fails. Mobile browser coverage exercises both New and Edit forms, regional
 price changes, unavailable plans, the single-save guard and late response isolation.
+
+A deployed CloudCLI empty-account inventory returns HTTP 500 with the exact
+message `No servers found (name='.*')`. Only that wildcard-read response triggers
+a second, authenticated basic inventory read. A valid empty array confirms an
+empty inventory; contradictory, malformed or failed basic reads remain errors.
+Other 500 responses never establish absence. Exact-ID disappearance confirmation,
+create-intent replay protection and deletion ownership checks remain required.
