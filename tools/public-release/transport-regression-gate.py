@@ -216,6 +216,10 @@ REQUIRED['internal/adminapi'] += ('TestAccountPurgeHistoricalScale',)
 REQUIRED['internal/providers/kamatera'] += ('TestKamateraFailedExactReadNeedsCompleteCorroboration','TestKamateraAlternateAbsencePreservesDurableFence')
 REQUIRED['internal/adminapi'] += ('TestAccountDeleteStopsPublicationBeforeCleanup','TestAccountDeletionBrowser','TestBlockedAccountPurgeBrowser')
 REQUIRED['internal/capacity'] = REQUIRED.get('internal/capacity', ()) + ('TestCreateBlockReasonSeparatesMaintenanceFromProviderDenial',)
+REQUIRED['internal/providers/kamatera'] += ('TestKamateraRegionalUncertaintyRejectsOnlyNewDispatch',)
+REQUIRED['internal/app'] += ('TestKamateraRegionalAdmissionIsAtomicAndAccountScoped','TestKamateraRegionalAdmissionPreservesCancellationAndUnknownScope')
+REQUIRED['internal/droplets'] += ('TestUndispatchedRegionalWaitDoesNotPoisonAccountHealth',)
+REQUIRED['internal/providers/kamatera'] += ('TestKamateraNativeLicenceRequiresExactRegionalEvidence','TestKamateraNativeLicenceReadPinsHostAndRejectsRedirects','TestKamateraCatalogFillsMissingMappingWithNativeLicence')
 
 def main(repo):
     if os.geteuid() == 0:

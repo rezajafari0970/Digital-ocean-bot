@@ -44,3 +44,18 @@ func TestAcceptedAsyncCreateDoesNotMarkAccountTransportError(t *testing.T) {
 		})
 	}
 }
+
+func TestUndispatchedRegionalWaitDoesNotPoisonAccountHealth(t *testing.T) {
+	for _, undispatched := range []bool{true, false} {
+		store := &opStore{}
+		failure := &providers.Error{Class: providers.ErrorRegionCapacity, Code: "REGION_CREATE_AWAITING_RECONCILIATION", Cause: providers.ErrRegionalCreateUnresolved}
+		p := &acceptedAsyncCompute{result: providers.CreateServerResult{Outcome: providers.OutcomeRejected, ComputeNotDispatched: undispatched}, failure: failure}
+		called, success := false, false
+		e := Executor{Operations: store, Provider: p, Gate: gateStub{}, OnCreateError: func(context.Context, error) { called = true }, OnCreateSuccess: func(context.Context, providers.CreateServerResult) { success = true }}
+		profile := Profile{Name: "owned", Region: "US-MI2", Size: "s", Image: "i", IdentityTag: "owned"}
+		op, err := e.Create(context.Background(), BuildCreateOperation("account", profile), profile)
+		if err == nil || called == undispatched || success || op.State != jobs.OperationFailed || op.ResourceID != "" || op.ErrorCode != string(providers.ErrorRegionCapacity) {
+			t.Fatalf("unexpected local wait handling: undispatched=%v callback=%v success=%v op=%+v err=%v", undispatched, called, success, op, err)
+		}
+	}
+}

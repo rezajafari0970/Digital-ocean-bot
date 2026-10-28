@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/cloudutil"
 	"strconv"
@@ -136,18 +137,28 @@ func (d *Driver) CreateServer(ctx context.Context, r providers.CreateServerReque
 			return problem(providers.ErrorUnavailable, "create_server", "DURABLE_INTENT_REQUIRED", 0)
 		}
 		intent, _ := json.Marshal(computeIntent{Region: r.RegionID, Plan: r.PlanID, Image: r.ImageID})
-		if e = recorder.PrepareIntent(ctx, string(intent)); e != nil {
-			return e
-		}
 		if s.Record().Attempted {
+			if e = recorder.PrepareIntent(ctx, string(intent)); e != nil {
+				return e
+			}
 			result = providers.CreateServerResult{Outcome: providers.OutcomeAmbiguous}
 			return pendingCreate()
 		}
-		started, e := s.BeginAttempt(ctx)
+		regional, ok := s.(providers.RegionalCreateSession)
+		if !ok {
+			return problem(providers.ErrorUnavailable, "create_admission", "DURABLE_REGIONAL_ADMISSION_REQUIRED", 0)
+		}
+		started, e := regional.BeginRegionalCreate(ctx, string(intent))
+		if errors.Is(e, providers.ErrRegionalCreateUnresolved) {
+			denial := problem(providers.ErrorRegionCapacity, "create_admission", "REGION_CREATE_AWAITING_RECONCILIATION", 0)
+			denial.Cause = providers.ErrRegionalCreateUnresolved
+			return denial
+		}
 		if e != nil {
 			return e
 		}
 		if !started {
+			result = providers.CreateServerResult{Outcome: providers.OutcomeAmbiguous}
 			return pendingCreate()
 		}
 		// Persist intent before dispatch. A lost response is observation-only forever;

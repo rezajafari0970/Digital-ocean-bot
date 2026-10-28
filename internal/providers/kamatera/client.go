@@ -115,6 +115,11 @@ func (c *client) do(ctx context.Context, method, path string, body, out any) (re
 	return c.doOnce(ctx, method, path, body, out)
 }
 func (c *client) doOnce(ctx context.Context, method, path string, body, out any) error {
+	return c.doOnceAt(ctx, endpoint, method, path, body, out)
+}
+
+// apiBase is supplied only by the driver's pinned CloudCLI/native read callers.
+func (c *client) doOnceAt(ctx context.Context, apiBase, method, path string, body, out any) error {
 	cred, e := credentials(ctx, c.credentials)
 	if e != nil {
 		return e
@@ -129,7 +134,7 @@ func (c *client) doOnce(ctx context.Context, method, path string, body, out any)
 			return problem(providers.ErrorInvalidRequest, "request", "INVALID_REQUEST", 0)
 		}
 	}
-	req, e := http.NewRequestWithContext(ctx, method, endpoint+path, bytes.NewReader(raw))
+	req, e := http.NewRequestWithContext(ctx, method, apiBase+path, bytes.NewReader(raw))
 	if e != nil {
 		return problem(providers.ErrorInvalidRequest, "request", "INVALID_REQUEST", 0)
 	}
@@ -178,7 +183,7 @@ func (c *client) doOnce(ctx context.Context, method, path string, body, out any)
 		// A generic 404 or malformed body is never proof that a server disappeared.
 		return problem(class, "request", code, resp.StatusCode)
 	}
-	if ((method == http.MethodGet && path == "/service/servers") || (method == http.MethodPost && path == "/service/server/info")) && resp.StatusCode != http.StatusOK {
+	if ((apiBase == "https://console.kamatera.com" && method == http.MethodGet) || (method == http.MethodGet && path == "/service/servers") || (method == http.MethodPost && path == "/service/server/info")) && resp.StatusCode != http.StatusOK {
 		return problem(providers.ErrorUnavailable, "inventory", "INVALID_INVENTORY_STATUS", resp.StatusCode)
 	}
 	if out != nil && (bytes.Equal(bytes.TrimSpace(raw), []byte("null")) || json.Unmarshal(raw, out) != nil) {
