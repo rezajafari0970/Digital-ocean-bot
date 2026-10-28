@@ -308,3 +308,24 @@ VLESS TCP بدون TLS و VLESS REALITY هر دو پشتیبانی می‌شون
 اعتبارسنجی AWS ابتدا STS و سپس دسترسی EC2 را بررسی می‌کند. موفقیت STS همراه با AuthFailure در EC2 به معنی تأیید هویت و حل‌نشدن دسترسی سرویس است؛ این وضعیت خودبه‌خود کلید را نامعتبر یا مجوز IAM مشخصی را مفقود اعلام نمی‌کند. خطاهای صریح مجوز، انقضا و توکن موقت جدا نمایش داده می‌شوند.
 
 در پاک‌کردن محلیِ صریحاً تأییدشده، تاریخچه‌های حجیم در تراکنش‌های محدود و قابل ادامه پاک می‌شوند. هر بخش قفل‌ها و تأیید همان منابع را دوباره بررسی می‌کند. رکوردهای عملیاتی و اعتبارنامه‌ها تا پاک‌سازی نهایی حفظ می‌شوند. حذف منابع ابری همچنان به اعتبارنامهٔ معتبر، مالکیت و تأیید نبود منابع نیاز دارد؛ حذف محلی به معنی حذف سرور از دیتاسنتر نیست.
+
+
+### Independent country priorities
+
+Each account can save its own ordered list under **Country priorities**, for
+example **US → TR → AUTO**. The selector checks eligible providers in the first
+country before descending, retains a healthy serving identity while checking for
+recovery, and verifies country and account isolation before publishing a new route.
+AUTO retains the existing selection behavior and must be the final choice. Accounts
+without an explicit list keep their existing AUTO policy.
+
+The core uses registered drivers with declared country, sticky-session, fixed-egress
+and dedicated-port capabilities. No particular provider is required. All ISO country
+codes and XK are configurable; actual availability depends on the assigned providers.
+Sticky providers expose a finite six-session candidate budget, not an enumeration of
+their entire address pool. Inconclusive observations do not authorize fallback.
+Existing routing, exclusions, security rules and account isolation remain in force.
+
+Account and proxy editors preserve omitted settings and saved choices. Concurrent
+or outdated drafts return a conflict and keep the entered values for review. Refresh
+an editor loaded before the versioned-save update before attempting a save.
