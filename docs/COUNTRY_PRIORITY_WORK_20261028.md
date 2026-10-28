@@ -163,3 +163,35 @@ These blockers remain open until authoritative provider evidence is available.
   bytes, 15 and 12,101 private values compared in memory; no values logged.
   Gitleaks PASS. Full exported-candidate scan remains a release requirement.
 - Final API review implementation2 remains in progress. No merge or deployment.
+
+### 06:04 UTC candidate and CI checkpoint
+
+- Gate 5 PASS: all 323 required roots, zero skips; the isolation test repeated
+  20 times. Full go test ./... and go vet ./... PASS (run 3). Gate 4 never started
+  because the shell PATH omitted runuser; the explicit executable path fixed it.
+- First source candidate 9c0d08a65d0d64abbdb78eb4b83b2c05c188b19d is draft PR32.
+  Its tree exactly matches local checkpoint a8070b72. No source merge or release.
+- Full export scan PASS: 1,838 files, 7,125,683 bytes; both live secret comparisons
+  (15 and 12,121 values) and Gitleaks passed without logging secret values.
+- Additional protection: a client must now explicitly send its settings revision
+  for account/proxy updates. A cached older form cannot substitute the latest
+  server revision and silently overwrite a newer draft. Updated fixtures obtain
+  real revisions; unversioned-save rejection is exercised. Interrupted advisory-lock
+  acquisition discards its SQL connection so an uncertain lock cannot reenter the pool.
+- Final focused PostgreSQL/race/browser suites PASS at 05:59, including validated
+  credential replacement and all country/legacy/settings cases.
+- PR32 CI run40640451431 passed general code checks and three account-editor browser
+  repetitions, then timed out in NewCloudProviderBrowser. Its stale fixture seeded
+  only client cache, but the fixed editor now reads the authoritative account list.
+  Fixture now supplies the account through HTTP and starts with a deliberately stale
+  client cache. Browser commands have bounded diagnostic timeouts. A second assertion
+  was updated to require unavailable saved choices remain in FormData AND prevent
+  a changed-region invalid save from dispatching. Full provider browser PASS (14.940s);
+  blocked-popup variant and updated-head CI remain pending. No assertion was skipped.
+- Local ephemeral execution environment disconnected at approximately05:57. Work
+  continues from the committed server checkout /root/projects/dob-country-final-20261028;
+  code/review/test evidence remains on servers and GitHub. Live services unaffected.
+- Final API review implementation2 still pending at06:01. Six later safety/test
+  files and browser-fixture changes are subsequent deltas, not silently included
+  in that already-submitted prompt. No original PostgreSQL cluster was restarted:
+  PostgreSQL18 main is down; umbrella service is active/exited with MainPID0.

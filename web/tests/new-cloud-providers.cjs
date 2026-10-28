@@ -13,7 +13,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   ws=new WebSocket(version.webSocketDebuggerUrl);await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j});
   let seq=0;const pending=new Map();
   ws.onmessage=({data})=>{const m=JSON.parse(data);if(m.id){const h=pending.get(m.id);if(h){pending.delete(m.id);m.error?h[1](Error(m.error.message)):h[0](m.result)}}};
-  const send=(method,params={},sessionId)=>new Promise((resolve,reject)=>{const id=++seq;pending.set(id,[resolve,reject]);ws.send(JSON.stringify({id,method,params,sessionId}))});
+  const send=(method,params={},sessionId)=>new Promise((resolve,reject)=>{const id=++seq,timer=setTimeout(()=>{pending.delete(id);reject(Error("Browser command timed out: "+method+" "+String(params.expression||"").slice(0,220)))},20000);pending.set(id,[v=>{clearTimeout(timer);resolve(v)},e=>{clearTimeout(timer);reject(e)}]);ws.send(JSON.stringify({id,method,params,sessionId}))});
   const {targetId}=await send('Target.createTarget',{url:'about:blank'});
   const {sessionId}=await send('Target.attachToTarget',{targetId,flatten:true});
   const call=(m,p)=>send(m,p,sessionId);
@@ -102,11 +102,16 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    assert.equal(await evaluate('cache.accounts===null'),true,'late '+mode+' invalidates accounts without touching the new form');
    await evaluate('document.querySelector("#modalCancel").click()');
   }
-  await evaluate('cache.accounts=[{id:"kamatera-edit",provider:"kamatera",name:"Edit fixture",regions:["US-SC"],size:"2B-4096-30",sizes:["2B-4096-30"],image:"ubuntu26",images:["ubuntu26"],max_concurrent:1}];editAccount("kamatera-edit")');
+  await evaluate('fetch("/fixture/account-edit",{method:"POST"})');
+  await evaluate('cache.accounts=[{id:"stale-fixture"}];editAccount("kamatera-edit")');
   await waitFor('document.querySelector("#modalTitle").textContent==="Edit Edit fixture"&&document.querySelector("#modal").open');
   assert.match(await evaluate('document.querySelector("[name=size]").selectedOptions[0].textContent'),/41.00\/730h base/);
   await evaluate('document.querySelector("[name=region]").value="US-AT";document.querySelector("[name=region]").dispatchEvent(new Event("change"))');
-  assert.equal(await evaluate('document.querySelector("[name=size]").selectedOptions[0].disabled'),true,'unavailable regional plan retained visibly for correction');
+  assert.equal(await evaluate('document.querySelector("[name=size]").selectedOptions[0].disabled'),false,'saved unavailable plan must remain in FormData');
+  const beforeInvalidSave=await evaluate('fetch("/fixture/save-count").then(r=>r.json())');
+  await evaluate('document.querySelector("#modalSubmit").click()');
+  assert.match(await evaluate('document.querySelector("#modalError").textContent'),/Select available plans/);
+  assert.equal(await evaluate('fetch("/fixture/save-count").then(r=>r.json())'),beforeInvalidSave,'changed region with unavailable plan must not dispatch');
   await evaluate('document.querySelector("[name=size]").value="1A-1024-20";document.querySelector("[name=size]").dispatchEvent(new Event("change"))');
   assert.match(await evaluate('document.querySelector("[data-kamatera-pricing]").textContent'),/Price unavailable/);
   await evaluate('document.querySelector("[name=region]").value="US-SC";document.querySelector("[name=region]").dispatchEvent(new Event("change"))');

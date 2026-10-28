@@ -24,6 +24,8 @@ func (c Container) acquireAccountRouteSharedLock(ctx context.Context, accountID 
 		return nil, err
 	}
 	if _, err := conn.ExecContext(ctx, `SELECT pg_advisory_lock_shared(hashtextextended($1,0))`, "account-route:"+accountID); err != nil {
+		// An interrupted acknowledgement cannot prove the session lock was not acquired.
+		_ = conn.Raw(func(any) error { return driver.ErrBadConn })
 		conn.Close()
 		return nil, err
 	}

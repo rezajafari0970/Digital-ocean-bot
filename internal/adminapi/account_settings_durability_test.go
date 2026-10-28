@@ -48,11 +48,15 @@ func TestAccountSettingsOmissionsConflictAndNoSilentClamp(t *testing.T) {
 	if string(b) != string(v) {
 		t.Fatalf("omitted settings changed\nbefore %s\nafter %s", b, v)
 	}
+	w = settingsRequest(s, a, `{"name":"stale unversioned client"}`)
+	if w.Code != 409 {
+		t.Fatal("unversioned draft accepted", w.Code, w.Body.String())
+	}
 	w = settingsRequest(s, a, `{"name":"stale","settings_revision":1}`)
 	if w.Code != 409 {
 		t.Fatal("stale edit accepted", w.Code, w.Body.String())
 	}
-	w = settingsRequest(s, a, `{"name":"invalid lifetime","lifetime_min_seconds":60,"lifetime_max_seconds":120}`)
+	w = settingsRequest(s, a, `{"settings_revision":2,"name":"invalid lifetime","lifetime_min_seconds":60,"lifetime_max_seconds":120}`)
 	if w.Code != 400 || !strings.Contains(w.Body.String(), "30_minutes") {
 		t.Fatal("silent clamp", w.Code, w.Body.String())
 	}
@@ -104,7 +108,7 @@ func TestAccountSettingsPreserveActiveFailover(t *testing.T) {
 	sqlMust(t, db, `INSERT INTO account_proxy_pool(account_id,proxy_id,priority,enabled) VALUES($1,$2,0,true),($1,$3,1,true)`, a, p1, p2)
 	sqlMust(t, db, `INSERT INTO account_network_identities(account_id,timezone,locale,exit_ip,subnet_key,last_health_ok) VALUES($1,'UTC','en-US','198.51.100.8','198.51.100.0/24',true)`, a)
 	s := &Server{DB: db}
-	w := settingsRequest(s, a, `{"name":"keep my route"}`)
+	w := settingsRequest(s, a, `{"name":"keep my route","settings_revision":1}`)
 	if w.Code != 200 {
 		t.Fatal(w.Code, w.Body.String())
 	}
@@ -195,6 +199,10 @@ func TestProxyNameSavePreservesIdentityAndConflicts(t *testing.T) {
 	}
 	if session != "must-survive" || ip != "198.18.30.8" || status != "down" || user != "private-base" || revision != 2 {
 		t.Fatal("rename changed route or credentials", session, ip, status, user, revision)
+	}
+	w = save(`{"name":"unversioned proxy draft"}`)
+	if w.Code != 409 {
+		t.Fatal("unversioned proxy draft accepted", w.Code, w.Body.String())
 	}
 	w = save(`{"name":"stale draft","settings_revision":1}`)
 	if w.Code != 409 {

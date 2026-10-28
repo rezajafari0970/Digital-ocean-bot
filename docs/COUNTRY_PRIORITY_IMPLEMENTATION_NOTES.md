@@ -56,7 +56,8 @@ observations execute after releasing that connection, avoiding pool self-deadloc
 
 Account and proxy saves preserve omitted fields, retain unavailable saved catalog
 choices, reject invalid values explicitly, and use configuration revisions to
-reject concurrent drafts. Account creation and secret writes are transactional.
+reject concurrent drafts. Account/proxy updates require the client
+revision; older cached forms must reload and review their draft. Account creation and secret writes are transactional.
 Renaming a proxy does not reset its learned identity; omitted passwords are never
 written back from an earlier read. Account schedules change only when relevant
 build settings change; installer-specific profile fields remain intact.

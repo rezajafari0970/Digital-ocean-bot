@@ -45,7 +45,15 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 	mux.HandleFunc("GET /api/v1/auth/me", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 200, map[string]any{"id": "isolated-browser-fixture", "role": "admin"})
 	})
-	mux.HandleFunc("GET /api/v1/accounts", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, 200, []any{}) })
+	var editFixture atomic.Bool
+	mux.HandleFunc("POST /fixture/account-edit", func(w http.ResponseWriter, r *http.Request) { editFixture.Store(true); w.WriteHeader(204) })
+	mux.HandleFunc("GET /api/v1/accounts", func(w http.ResponseWriter, r *http.Request) {
+		if editFixture.Load() {
+			writeJSON(w, 200, []any{map[string]any{"id": "kamatera-edit", "provider": "kamatera", "name": "Edit fixture", "regions": []string{"US-SC"}, "sizes": []string{"2B-4096-30"}, "image": "ubuntu26", "images": []string{"ubuntu26"}, "max_concurrent": 1, "settings_revision": 1}})
+			return
+		}
+		writeJSON(w, 200, []any{})
+	})
 	mux.HandleFunc("GET /api/v1/proxies", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, 200, []any{}) })
 
 	var saveCount atomic.Int32

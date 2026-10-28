@@ -63,8 +63,13 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 		saved := *x.FallbackAnyRegion
 		initial.FallbackAnyRegion = &saved
 	}
-	if json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&x) != nil || strings.TrimSpace(x.Name) == "" || x.SettingsRevision < 1 || x.FallbackAnyRegion == nil {
+	x.SettingsRevision = 0 // The revision must come from the client draft.
+	if json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&x) != nil || strings.TrimSpace(x.Name) == "" || x.FallbackAnyRegion == nil {
 		writeJSON(w, 400, map[string]string{"error": "invalid_request"})
+		return
+	}
+	if x.SettingsRevision < 1 {
+		writeJSON(w, 409, map[string]string{"error": "account_settings_revision_required", "detail": "Reload the account settings and review your draft before saving."})
 		return
 	}
 	x.ProxyIDs = normalizeProxyPool(x.ProxyID, x.ProxyIDs)

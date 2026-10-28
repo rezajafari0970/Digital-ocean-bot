@@ -68,7 +68,11 @@ func TestValidatedCredentialReplacementRearmsAuthRetriesPostgres(t *testing.T) {
 	sqlMust(t, db, `INSERT INTO operations(id,account_id,kind,idempotency_key,state) VALUES($1,$2,'DELETE_DROPLET',$3,'unknown')`, op, a, op)
 	sqlMust(t, db, `INSERT INTO worker_recovery_checkpoints(kind,item_id,account_id) VALUES('operation',$1,$2)`, op, a)
 	save := func(token string) *httptest.ResponseRecorder {
-		body, _ := json.Marshal(map[string]any{"name": "repair fixture", "token": token, "regions": []string{"ams"}, "sizes": []string{"small"}, "images": []string{"ubuntu-24-04-x64"}, "image": "ubuntu-24-04-x64", "network_mode": "direct", "lifetime_min_seconds": 3600, "lifetime_max_seconds": 5400, "build_spacing_minutes": 1, "build_spacing_max_minutes": 3, "desired_server_count": 1, "max_concurrent": 3, "fallback_any_region": true})
+		var revision int64
+		if err := db.QueryRow(`SELECT settings_revision FROM accounts WHERE id=$1`, a).Scan(&revision); err != nil {
+			t.Fatal(err)
+		}
+		body, _ := json.Marshal(map[string]any{"settings_revision": revision, "name": "repair fixture", "token": token, "regions": []string{"ams"}, "sizes": []string{"small"}, "images": []string{"ubuntu-24-04-x64"}, "image": "ubuntu-24-04-x64", "network_mode": "direct", "lifetime_min_seconds": 3600, "lifetime_max_seconds": 5400, "build_spacing_minutes": 1, "build_spacing_max_minutes": 3, "desired_server_count": 1, "max_concurrent": 3, "fallback_any_region": true})
 		r := httptest.NewRequest("PUT", "/", strings.NewReader(string(body)))
 		r.SetPathValue("id", a)
 		r = r.WithContext(context.WithValue(r.Context(), principalKey{}, auth.Principal{Role: auth.Admin}))

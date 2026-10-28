@@ -30,8 +30,13 @@ func (s *Server) updateProxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	x := old
-	if json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&x) != nil || x.Revision < 1 {
+	x.Revision = 0 // Never substitute the server revision for an older client draft.
+	if json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&x) != nil {
 		writeJSON(w, 400, map[string]string{"error": "invalid_request"})
+		return
+	}
+	if x.Revision < 1 {
+		writeJSON(w, 409, map[string]string{"error": "proxy_settings_revision_required", "detail": "Reload the proxy settings and review your draft before saving."})
 		return
 	}
 	check := x
