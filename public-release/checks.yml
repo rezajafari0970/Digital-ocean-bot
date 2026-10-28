@@ -36,21 +36,38 @@ jobs:
         run: python3 release/check-source.py
   install:
     if: startsWith(github.ref, 'refs/heads/release-candidate/')
-    runs-on: ubuntu-24.04
+    # The Ubuntu 24.04 hosted image currently has an unmitigated KHO/CMA
+    # anomaly. Keep the host guard and test Ubuntu 24.04 in a real systemd
+    # container on an independently checked 22.04 host.
+    runs-on: ubuntu-22.04
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
+      - name: Prepare checked host and disposable Ubuntu 24.04 guest
+        run: |
+          sudo python3 deploy/host-memory.py check
+          sudo snap install lxd --channel=5.21/stable
+          sudo /snap/bin/lxd init --minimal
+          sudo /snap/bin/lxc launch ubuntu:24.04 dob-release
+          sudo /snap/bin/lxc exec dob-release -- timeout 180 cloud-init status --wait
+          sudo /snap/bin/lxc exec dob-release -- bash -ec '. /etc/os-release; test "$ID" = ubuntu; test "$VERSION_ID" = 24.04; test "$(uname -m)" = x86_64; test "$(cat /proc/1/comm)" = systemd'
+          sudo /snap/bin/lxc exec dob-release -- env DEBIAN_FRONTEND=noninteractive apt-get update
+          sudo /snap/bin/lxc exec dob-release -- env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends git python3 ca-certificates
       - name: Install exact candidate from restrictive root checkout
         run: |
-          candidate="$RUNNER_TEMP/dob-release-candidate"
-          sudo cp -a "$GITHUB_WORKSPACE" "$candidate"
-          sudo chown -R root:root "$candidate"
-          sudo chmod -R go-rwx "$candidate"
-          sudo env NEEDRESTART_MODE=l bash "$candidate/install.sh" --source "$candidate"
-          sudo env GITHUB_ACTIONS=true RUNNER_ENVIRONMENT=github-hosted python3 "$candidate/deploy/release_smoke.py" --revision "$GITHUB_SHA"
+          archive="$RUNNER_TEMP/dob-release-candidate.tar.gz"
+          tar -czf "$archive" -C "$GITHUB_WORKSPACE" .
+          chmod 600 "$archive"
+          sudo /snap/bin/lxc file push "$archive" dob-release/root/candidate.tar.gz
+          sudo /snap/bin/lxc exec dob-release -- bash -ec 'mkdir -m 700 /root/candidate; tar -xzf /root/candidate.tar.gz -C /root/candidate; chown -R root:root /root/candidate; chmod -R go-rwx /root/candidate'
+          sudo /snap/bin/lxc exec dob-release -- bash -ec 'test "$(git -C /root/candidate rev-parse HEAD)" = "$1"; cd /root/candidate; python3 release/check-source.py' -- "$GITHUB_SHA"
+          sudo /snap/bin/lxc exec dob-release -- env NEEDRESTART_MODE=l bash /root/candidate/install.sh --source /root/candidate
+          sudo /snap/bin/lxc exec dob-release -- env GITHUB_ACTIONS=true RUNNER_ENVIRONMENT=github-hosted python3 /root/candidate/deploy/release_smoke.py --revision "$GITHUB_SHA"
       - name: Verify repeated install preserves identity
         run: |
-          candidate="$RUNNER_TEMP/dob-release-candidate"
-          sudo env GITHUB_ACTIONS=true RUNNER_ENVIRONMENT=github-hosted python3 "$candidate/deploy/release_smoke.py" --before
-          sudo env NEEDRESTART_MODE=l bash "$candidate/install.sh" --source "$candidate"
-          sudo env GITHUB_ACTIONS=true RUNNER_ENVIRONMENT=github-hosted python3 "$candidate/deploy/release_smoke.py" --revision "$GITHUB_SHA"
+          sudo /snap/bin/lxc exec dob-release -- env GITHUB_ACTIONS=true RUNNER_ENVIRONMENT=github-hosted python3 /root/candidate/deploy/release_smoke.py --before
+          sudo /snap/bin/lxc exec dob-release -- env NEEDRESTART_MODE=l bash /root/candidate/install.sh --source /root/candidate
+          sudo /snap/bin/lxc exec dob-release -- env GITHUB_ACTIONS=true RUNNER_ENVIRONMENT=github-hosted python3 /root/candidate/deploy/release_smoke.py --revision "$GITHUB_SHA"
+      - name: Remove disposable guest
+        if: always()
+        run: sudo /snap/bin/lxc delete --force dob-release || true

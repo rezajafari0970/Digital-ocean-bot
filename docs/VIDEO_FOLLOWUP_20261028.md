@@ -14,8 +14,9 @@ release `8515d676c5f64cbd7d51eacfa8f15a99add67053`.
 | Mobile account changes | Implemented | Compact native plan options; complete per-selection specs and region price below each field; disabled duplicate alternatives; legacy repeated preferences normalized visibly before saving. |
 | Scheduler diagnosis | Implemented | Profile-scoped concurrency now qualifies scheduler readiness separately from provider permission. Saturated unknown creates explain excluded expired servers. |
 | Deterministic verification | Passed | Final product candidate: 337 required regression roots, zero skipped; browser fixtures, all Go tests, go vet, and disposable backup restore passed. |
-| Independent OpenAI review | Blocked | Highest-model request `gpt-6-astra`, reasoning max/pro, failed with `credit_balance_exhausted`; no review output. |
-| Merge / public release / deployment | Pending | No release promotion, application update, manual create/delete, or alteration of unknown-operation evidence performed. |
+| Independent OpenAI review | In progress | After the user confirmed funding, one fresh `gpt-6-astra` max/pro request was accepted at 09:44:50 UTC. Follow its existing receipt; do not duplicate it. |
+| Public candidate installation | Fixing test environment | Exact exported candidate `bb405b4d` passes the manifest and live-secret scans; hosted Ubuntu 24.04 kernel preflight stopped installation. Guard remains unchanged. |
+| Merge / stable release / deployment | Pending | No stable promotion, application update, manual create/delete, or alteration of unknown-operation evidence performed. |
 
 ## Recording and root causes
 
@@ -47,7 +48,8 @@ release `8515d676c5f64cbd7d51eacfa8f15a99add67053`.
 
 At 07:52 UTC (11:22 Tehran), one managed server was EXPIRING and four were READY,
 all beyond recorded expiry. Three deployments remained CREATING; their CREATE
-operations retained one provider dispatch each and unknown outcome. No durable
+operations retained one recorded create attempt each and unknown outcome. This
+counter alone is not packet-level proof of dispatch. No durable
 provider task ID or server UUID was bound to these three intents. Their names
 and region intent remain in the private operational evidence.
 
@@ -122,7 +124,26 @@ receipt; no mutation or reservation release followed.
 ## Next action
 
 The deterministic checks are complete; keep the evidence with the candidate.
-After OpenAI API credit is restored, run a fresh final review of the exact
-candidate, resolve findings, then use the guarded source/public release process,
+The user restored OpenAI API credit. Poll the accepted final review of product
+commit `f6bcaf848852bbe2048f84ec99cabd9d1f6e69d1`, resolve findings, then use the guarded source/public release process,
 canary installation, runtime checks, and rollback checkpoints. Separately obtain
 conclusive Kamatera task outcomes; never infer them from empty inventory.
+
+## Funded continuation and installation environment
+
+- Source CI [40655881902](https://github.com/rezajafari0970/Digital-ocean-bot/actions/runs/40655881902)
+  completed successfully for `f6bcaf84`.
+- Funded review receipt: `resp_06ab7bdd841edd9b006ae1c412f07087d18916f4000c1be13c`.
+  At 10:04 UTC it remains in progress, with no completed review or reported usage.
+- The full 1,841-file export passed both live-secret comparisons and Gitleaks.
+  Public tree `8848d406edfcc1add5c81cd1d9d9db648d52cc53` exactly matches the scanned
+  local export. No live secret values were logged.
+- Public install run [40668782986](https://github.com/rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config/actions/runs/40668782986)
+  stopped at the unchanged host-memory preflight, before installation. An earlier
+  country candidate had the same runner failure: Azure kernel `7.0.0-1017-azure`,
+  `CmaTotal=0`, `CmaFree>0`, and no active KHO mitigation.
+- Installation CI now requests a 22.04 host, verifies it with the same guard,
+  and installs/reinstalls the exact candidate in an unprivileged Ubuntu 24.04
+  LXD systemd guest. OS, architecture, init process, commit, source manifest,
+  restrictive root permissions and the existing preservation smoke checks remain
+  required. This changes the test environment, not the production guard.
