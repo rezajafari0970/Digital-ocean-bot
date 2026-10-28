@@ -1,0 +1,295 @@
+{
+  "schema": 1,
+  "date": "2026-10-28",
+  "source": {
+    "repository": "rezajafari0970/Digital-ocean-bot",
+    "branch": "checkpoint/final-e2e-20260929",
+    "tested_commit": "589717c1a499bc5f4c805d5f2da900049a2d1b16",
+    "merge_commit": "f10eda8e44f2912ed71db6621741d19254e168e3",
+    "tree": "885e413465d1b720dceb45ff4e6077386558d12e",
+    "pr": 32
+  },
+  "public_release": {
+    "repository": "rezajafari0970/Datacenter-create-by-api-and-ssh-and-install-x-ui-and-create-config",
+    "commit": "35cc83c3a666dbdba72f00b26851ce6b7bf3dc97",
+    "tree": "63e480f00037efc5a56525ba04b0ebace60032f6",
+    "files": 1842,
+    "manifest_sha256": "8d572314bc84a6a55dd6ac5d93ab3e86451aeaa3f40ae0a42d9ef0eb8642113e",
+    "source_ci": 40676276738,
+    "public_ci": 40677026341,
+    "promotion_ci": 40677583560,
+    "all_success": true
+  },
+  "verification": {
+    "mandatory_roots": 341,
+    "skipped": 0,
+    "recovery_lifecycle_repetitions": 20,
+    "full_go": "PASS",
+    "vet": "PASS",
+    "browser": "PASS",
+    "native_race_postgres": "PASS",
+    "backup_restore_interruption": "PASS",
+    "private_scans_both_instances": "PASS",
+    "gitleaks": "PASS",
+    "snapshot_files_identical": 1843
+  },
+  "reviews": {
+    "model": "gpt-6-astra",
+    "effort": "max",
+    "mode": "pro",
+    "static_only": true,
+    "requests": [
+      {
+        "label": "funded-final1",
+        "verdict": "BLOCK",
+        "findings": 3,
+        "corrected": true,
+        "total_tokens": 606549
+      },
+      {
+        "label": "funded-fixes2",
+        "verdict": "BLOCK",
+        "findings": 1,
+        "corrected": true,
+        "total_tokens": 248149
+      },
+      {
+        "label": "funded-body3",
+        "verdict": "APPROVE",
+        "total_tokens": 63637
+      }
+    ],
+    "latest_response_id": "resp_0d952de1adbf1bb2006ae1d5a040ec87d1bc5f4fdc1bddfc5c",
+    "known_three_review_tokens": 918335,
+    "billed_cost_known": false
+  },
+  "rollout": {
+    "default": {
+      "status": "accepted",
+      "verified_at": "2026-10-28T11:13:09.415522+00:00",
+      "commit": "35cc83c3a666dbdba72f00b26851ce6b7bf3dc97",
+      "schema": "000204_account_proxy_country_policy",
+      "preservation_checks": {
+        "master_key_hash": true,
+        "environment_hash": true,
+        "creation_policy": true,
+        "output_policy": true,
+        "protection_policy": true,
+        "trojan_policy": true,
+        "unified": true,
+        "profile_policy": true,
+        "selective_ads_enabled": true,
+        "cloudflare_settings": true,
+        "cloudflare_secret_hashes": true,
+        "account_settings": true,
+        "schedule_policy": true,
+        "protocol_scope_all": true,
+        "dns_scope_all": true,
+        "profile_ownership": true,
+        "trojan_ownership": true
+      },
+      "preservation": {
+        "profile_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        },
+        "trojan_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        }
+      },
+      "active_binaries_with_matching_hashes": 3,
+      "healthy_readiness_checks": 5,
+      "html_and_assets": {
+        "html_hash_match": true,
+        "asset_hashes_match": 19
+      },
+      "deployment_pending": false
+    },
+    "production": {
+      "status": "accepted",
+      "verified_at": "2026-10-28T12:21:24.427755+00:00",
+      "commit": "35cc83c3a666dbdba72f00b26851ce6b7bf3dc97",
+      "schema": "000204_account_proxy_country_policy",
+      "preservation_checks": {
+        "master_key_hash": true,
+        "environment_hash": true,
+        "creation_policy": true,
+        "output_policy": true,
+        "protection_policy": true,
+        "trojan_policy": true,
+        "unified": true,
+        "profile_policy": true,
+        "selective_ads_enabled": true,
+        "cloudflare_settings": true,
+        "cloudflare_secret_hashes": true,
+        "account_settings": true,
+        "schedule_policy": true,
+        "protocol_scope_all": true,
+        "dns_scope_all": true,
+        "profile_ownership": true,
+        "trojan_ownership": true
+      },
+      "preservation": {
+        "profile_ownership": {
+          "common": 1685,
+          "unchanged": 1681,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 4,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 4
+        },
+        "trojan_ownership": {
+          "common": 10,
+          "unchanged": 10,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        }
+      },
+      "active_binaries_with_matching_hashes": 3,
+      "healthy_readiness_checks": 5,
+      "html_and_assets": {
+        "html_hash_match": true,
+        "asset_hashes_match": 19
+      },
+      "deployment_pending": false,
+      "native_update_receipt": {
+        "path": "production-rollout/resume2-result.json",
+        "exit": 0,
+        "at": "2026-10-28T12:20:40.016451+00:00"
+      },
+      "earlier_attempts": {
+        "status": "stopped safely at unchanged retention space guard before service swap",
+        "retained_receipts": [
+          "production-rollout/update-result.json",
+          "production-rollout/resume-result.json"
+        ]
+      }
+    }
+  },
+  "boundaries": {
+    "physical_android_picker_acceptance": false,
+    "installation_ci": "Ubuntu 24.04 userspace in unprivileged LXD on independently checked Ubuntu 22.04 host; unchanged production kernel guard",
+    "quarantined_original_cluster_untouched": true,
+    "unknown_kamatera_creates_replayed": false
+  },
+  "evidence": {
+    "development_host": "serverprojects.ptr.network",
+    "development_checkout": "/root/projects/dob-video-followup-20261028",
+    "runtime_host": "limited-lime.ptr.network",
+    "private_ops": "/root/dob-video-followup-20261028",
+    "checkpoint": "funded-continuation.json",
+    "tested_snapshot": "/tmp/dob-body-fixed-20261028"
+  },
+  "storage_recovery": {
+    "initial_cache_reclaim_bytes": 464211968,
+    "archived_runtime_and_source_paths": 22,
+    "archive_bytes": 321899812,
+    "archive_sha256": "e6df04ae273b20de4ee2eace67926ce8e52b902cdfc2adc1ff0cfa3ba019c02b",
+    "routine_old_backup_bytes": 648505458,
+    "routine_old_backup_sha256": "1f28e175432ebcc293434d93f65bf7a36e13407c1204b55a2689e8afe976442f",
+    "archive_host": "serverprojects.ptr.network",
+    "archive_root": "/root/dob-config-cleanup-archive-20261025/files",
+    "copies_verified": true,
+    "current_candidate_nearest_three_rollbacks_retained": true,
+    "fresh_native_and_incident_backups_retained": true,
+    "additional_clean_worktrees": 10,
+    "total_old_directories": 32,
+    "worktree_archive_bytes": 77936050,
+    "worktree_archive_sha256": "35b64b5dad01ad9230c34a72e8cf69fef87bf281b788a8875cfd2ae894fee0e4",
+    "git_bundle_bytes": 9215308,
+    "git_bundle_sha256": "e83b4284c97ecc041a118f23136255561d6e4aa1ae1a52debd65ac10e399bf85",
+    "common_git_and_dirty_worktrees_retained": true,
+    "preflight_free_bytes": 9176526848,
+    "preflight_required_bytes": 8489976893,
+    "final_free_disk_bytes": 9294561280
+  },
+  "updated_at": "2026-10-28T12:21:31.613156+00:00",
+  "status": "accepted",
+  "accepted_at": "2026-10-28T12:21:31.613156+00:00",
+  "accepted_at_tehran": "2026-10-28T15:51:31.613156+03:30",
+  "gateway": {
+    "at": "2026-10-28T12:21:22.317923+00:00",
+    "tls_verification": true,
+    "html_hash_match": true,
+    "asset_hashes_match": 19,
+    "commit": "35cc83c3a666dbdba72f00b26851ce6b7bf3dc97"
+  },
+  "final_observation": {
+    "at": "2026-10-28T12:21:31.613156+00:00",
+    "provider_observation": {
+      "kamatera_resources": [
+        {
+          "state": "EXPIRING",
+          "count": 1,
+          "expired": 1
+        },
+        {
+          "state": "READY",
+          "count": 4,
+          "expired": 4
+        }
+      ],
+      "create_operations": [
+        {
+          "state": "unknown",
+          "count": 3,
+          "min_attempt": 1,
+          "max_attempt": 1
+        }
+      ],
+      "unknown_durable_intents": 3,
+      "saved_aws_accounts": 0
+    },
+    "free_disk_bytes": 9294561280,
+    "instances": {
+      "default": {
+        "commit": "35cc83c3a666dbdba72f00b26851ce6b7bf3dc97",
+        "status": "ready",
+        "healthy_checks": 5,
+        "checks": 5,
+        "deployment_pending": false
+      },
+      "production": {
+        "commit": "35cc83c3a666dbdba72f00b26851ce6b7bf3dc97",
+        "status": "ready",
+        "healthy_checks": 5,
+        "checks": 5,
+        "deployment_pending": false
+      }
+    }
+  },
+  "remaining": {
+    "kamatera": {
+      "unknown_create_outcomes": 3,
+      "recorded_attempts_each": 1,
+      "expired_resources_excluded": 5,
+      "required_evidence": "Conclusive bound provider task/server outcome; do not replay creates or infer failure from empty inventory/queue"
+    },
+    "aws": {
+      "saved_accounts": 0,
+      "previous_provider_error": "InvalidClientTokenId",
+      "next": "Enter valid matching credentials securely in the panel"
+    },
+    "physical_android_native_picker": "Await device observation; mobile browser viewport tests passed",
+    "original_cluster": "Remains quarantined; physical root cause and exhaustive historical audit not claimed complete"
+  }
+}

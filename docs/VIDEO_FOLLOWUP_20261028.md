@@ -2,21 +2,20 @@
 
 ## Current checkpoint
 
-Source parent: `d6a2a487233abf1635b4242fec420c3ff00ca76e` (draft PR32).
-This follow-up continues the country-priority and account-save work; it does not
-claim that the candidate is installed. Both live instances still report public
-release `8515d676c5f64cbd7d51eacfa8f15a99add67053`.
+Read [VIDEO_COUNTRY_RELEASE_20261028.md](VIDEO_COUNTRY_RELEASE_20261028.md)
+and its JSON receipt for the latest acceptance boundary. Source `589717c1` passed
+all 341 mandatory roots without skips and final funded max/pro review APPROVE.
+PR32 merged as `f10eda8e` with the tested tree. Public `35cc83c3` passed independent
+fresh/repeated installation and atomic main/stable promotion. BOTH live instances
+are accepted at 12:21 UTC (15:51 Tehran), schema 204, with all 17 preservation
+comparisons per instance passed, six matching active binaries and ten healthy
+readiness checks. HTML, 19 assets and HTTPS verification passed. Two earlier
+production attempts stopped safely at the space guard; verified relocation of
+superseded archives enabled the successful native resume. Do not replay intents.
 
-| Phase | Status | Evidence / remaining work |
-|---|---|---|
-| Recording inspection | Complete | 337.432-second Android recording; whole-timeline sampling, dense save/reopen review, and final frames inspected. Silent audio. |
-| Live diagnosis | Complete for observed blockers | Read-only production queries establish five overdue Kamatera servers, three unresolved creates, and no fresh output snapshots for that account. |
-| Mobile account changes | Implemented | Compact native plan options; complete per-selection specs and region price below each field; disabled duplicate alternatives; legacy repeated preferences normalized visibly before saving. |
-| Scheduler diagnosis | Implemented | Profile-scoped concurrency now qualifies scheduler readiness separately from provider permission. Saturated unknown creates explain excluded expired servers. |
-| Deterministic verification | Passed | Final product candidate: 337 required regression roots, zero skipped; browser fixtures, all Go tests, go vet, and disposable backup restore passed. |
-| Independent OpenAI review | Findings being corrected | Funded review completed at 10:11 UTC: three high-priority defects; no critical defect established. Source approval is blocked until corrected and verified. |
-| Public candidate installation | Fixing test environment | Exact exported candidate `bb405b4d` passes the manifest and live-secret scans; hosted Ubuntu 24.04 kernel preflight stopped installation. Guard remains unchanged. |
-| Merge / stable release / deployment | Pending | No stable promotion, application update, manual create/delete, or alteration of unknown-operation evidence performed. |
+The following recording analysis and dated review/install notes preserve the
+investigation history; their earlier pending/failed statuses are historical.
+No physical Android acceptance or terminal Kamatera outcome is claimed.
 
 ## Recording and root causes
 

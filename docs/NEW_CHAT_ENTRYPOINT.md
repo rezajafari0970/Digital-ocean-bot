@@ -1,3 +1,42 @@
+# Latest continuation — country priorities and video repairs, 2026-10-28
+
+Read `docs/VIDEO_COUNTRY_RELEASE_20261028.md` and its JSON receipt first.
+This entry supersedes historical source/runtime boundaries below.
+
+PR32 is merged into `checkpoint/final-e2e-20260929` as
+`f10eda8e44f2912ed71db6621741d19254e168e3`; tested source is
+`589717c1a499bc5f4c805d5f2da900049a2d1b16` with the identical product tree.
+Public main/stable is `35cc83c3a666dbdba72f00b26851ce6b7bf3dc97`.
+The 341 mandatory roots passed without skips; full tests/vet, independent source
+and public installation CI passed. Final funded gpt-6-astra max/pro review APPROVE.
+
+Current stage: BOTH instances accepted at 2026-10-28 12:21 UTC (15:51 Tehran).
+Both run public `35cc83c3`, schema 204; all 17 preservation comparisons per
+instance passed, all six running binary hashes matched, and all ten readiness
+checks passed. HTML, 19 assets and normal HTTPS verification passed.
+Do not repeat completed update or production resume intents.
+Two production attempts stopped before service swap at the unchanged
+space guard; both failed receipts are intentionally retained. Older runtime/source
+and one routine audit backup were relocated with verified hashes and pointers.
+Current/candidate, nearest three rollbacks, fresh and incident backups remain.
+
+Development checkout: `/root/projects/dob-video-followup-20261028` on
+`serverprojects.ptr.network`; active runtime host: `limited-lime.ptr.network`.
+Private evidence/checkpoint on both hosts: `/root/dob-video-followup-20261028`.
+Final success: `production-rollout/resume2-result.json` (exit 0); final
+verification: `production-rollout/verify.json` and `final-observation.json`.
+No installer or funded API review remains pending. Continue only the external
+provider evidence/credentials and physical-device acceptance items below.
+The original damaged cluster and duplicate workers remain quarantined.
+
+Three Kamatera CREATE outcomes still require conclusive provider evidence; do not
+replay, release reservations or invent terminal outcomes from an empty queue.
+AWS needs valid matching credentials entered securely in the panel. Recorded
+attempt counts alone do not prove packet-level dispatch. Historical mastery and
+continuity scores below were not rerun or newly certified for this release.
+
+---
+
 # New Chat Entrypoint
 
 Mandatory first read: `docs/PROJECT_AI_OPERATING_SYSTEM.md` and `docs/PROJECT_AI_POLICY.json`. PROJECT_AI_OS_V4 governs every fresh chat, continuation, API job, manual patch, and release change in this project.
