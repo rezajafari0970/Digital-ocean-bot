@@ -1,3 +1,41 @@
+## Kamatera regional release — 2026-10-28T05:41:10+03:30
+
+Read `docs/KAMATERA_REGIONAL_RELEASE_20261028.md` and its JSON receipt first.
+Source a50bf1a13babf8aa838259a5043dac61fa8419fd merged in PR30 as
+01191dbc4bb4a0bf370d36bc5568397186132220. Public main/stable and BOTH runtime
+instances on limited-lime.ptr.network run 9f02a901f04261ef76c2d5b65dd17ced939de299,
+schema 000202_kamatera_provider. The following documentation checkpoint is newer
+than product source; do not confuse it with another runtime deployment.
+
+Source CI40610487455: 295 required / zero skipped, native/race/browser and
+independent restore passed. Public CI40617962697: tests, fresh/repeat install
+with identity preservation passed. Atomic leased promotion40618250725 passed.
+Both bounded runtime updates exited zero; preservation 17/17 each, six running
+hashes and ten readiness checks passed. HTML and19 assets verified on each
+instance and the HTTPS gateway with normal TLS validation. Production1593 profile
+and10 Trojan identities unchanged. Live catalog832/832 regional prices verified.
+Only513530079 bytes of reproducible compiler cache reclaimed; backup/space gates
+unchanged. No pending deployment or temporary rollout job remains after completion.
+
+THREE ambiguous native creates remain: two US-MI2 and one US-AT. They each retain
+dispatch count1 and original attempt timestamps. Official read-only queue/inventory
+returned HTTP200 but no matching result. Five earlier normal native creates had
+succeeded. Absence from these reads does not prove non-creation or authorize
+replaying the paid request, releasing reservation, or fabricating terminal state.
+New regional admission is deployed; exact concurrency and isolation were tested
+independently. Continue only with matching authoritative provider evidence.
+
+Private operational receipts: /root/dob-kamatera-regional-20261028.
+Source worktree: /root/projects/dob-kamatera-region-20261028.
+Historical whole-project audit, physical Android proof, upstream variability and
+prior OpenAI usage accounting are not closed by this release. Zero new paid OpenAI
+calls. The original quarantined host/services were not restarted.
+Do not repeat this completed deployment. Development agent stops after final reply;
+normal workers continue their durable observations. Historical sections below retain
+their original timestamps and are not current runtime instructions.
+
+---
+
 ## Profile port reuse after deletion — 2026-10-26T02:20:14.172246+03:30
 
 Read docs/PROFILE_PORT_REUSE_20261026.md and its JSON acceptance receipt.

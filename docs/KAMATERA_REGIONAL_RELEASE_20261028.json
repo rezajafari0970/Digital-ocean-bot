@@ -1,0 +1,214 @@
+{
+  "schema": 1,
+  "at": "2026-10-28T02:11:10.237385+00:00",
+  "overall_status": "RELEASE_COMPLETED_WITH_EXTERNAL_BLOCKERS",
+  "source_commit": "a50bf1a13babf8aa838259a5043dac61fa8419fd",
+  "source_merge": "01191dbc4bb4a0bf370d36bc5568397186132220",
+  "release_commit": "9f02a901f04261ef76c2d5b65dd17ced939de299",
+  "schema_version": "000202_kamatera_provider",
+  "source_ci": {
+    "run": 40610487455,
+    "status": "success",
+    "required_passed": 295,
+    "skipped": 0,
+    "isolated_restore_passed": true
+  },
+  "candidate_ci": {
+    "run": 40617962697,
+    "status": "success",
+    "fresh_install": "passed",
+    "repeated_install_identity": "passed"
+  },
+  "promotion": {
+    "run": 40618250725,
+    "status": "success",
+    "main_stable_verified": true
+  },
+  "live_catalog": {
+    "regions": 26,
+    "plans": 32,
+    "priced_options": 832,
+    "total_options": 832,
+    "observed_at": "2026-10-28T00:44:29.568713495Z"
+  },
+  "instances": [
+    {
+      "instance": "default",
+      "commit": "9f02a901f04261ef76c2d5b65dd17ced939de299",
+      "preservation_passed": 17,
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-28T02:11:10.194808566Z"
+      },
+      "ownership": {
+        "profile_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        },
+        "trojan_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        }
+      }
+    },
+    {
+      "instance": "production",
+      "commit": "9f02a901f04261ef76c2d5b65dd17ced939de299",
+      "preservation_passed": 17,
+      "services": [
+        {
+          "unit": "dob-production-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "dob-production-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "dob-production-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness": {
+        "status": "ready",
+        "checks": [
+          {
+            "name": "database",
+            "ok": true
+          },
+          {
+            "name": "worker_progress",
+            "ok": true
+          },
+          {
+            "name": "panel_worker_progress",
+            "ok": true
+          },
+          {
+            "name": "lifecycle_account_lanes",
+            "ok": true
+          },
+          {
+            "name": "client_mutation_progress",
+            "ok": true
+          }
+        ],
+        "at": "2026-10-28T02:11:10.202721968Z"
+      },
+      "ownership": {
+        "profile_ownership": {
+          "common": 1593,
+          "unchanged": 1593,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        },
+        "trojan_ownership": {
+          "common": 10,
+          "unchanged": 10,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        }
+      }
+    }
+  ],
+  "assets": {
+    "default": 19,
+    "production": 19,
+    "https_gateway": 19,
+    "tls_verification": true
+  },
+  "unknown_creates": {
+    "status": "WAITING_EXTERNAL_PROVIDER_EVIDENCE",
+    "count": 3,
+    "by_region": {
+      "US-MI2": 2,
+      "US-AT": 1
+    },
+    "dispatch_counts": [
+      1,
+      1,
+      1
+    ],
+    "same_attempt_timestamps": true,
+    "no_duplicate_create": true,
+    "queue_http_status": 200,
+    "matching_queue_records": 0,
+    "matching_inventory_records": 0,
+    "resolution": "Matching authoritative provider result required; no timeout, empty inventory, or generic 5xx permits replay."
+  },
+  "new_paid_openai_calls": 0,
+  "free_bytes": 8781860864,
+  "scope_limitations": [
+    "No physical Android acceptance",
+    "No claim that historical whole-project audit is complete",
+    "No proof of permanent upstream reliability"
+  ]
+}
