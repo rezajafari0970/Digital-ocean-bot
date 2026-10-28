@@ -222,7 +222,7 @@
     "preflight_required_bytes": 8489976893,
     "final_free_disk_bytes": 9294561280
   },
-  "updated_at": "2026-10-28T12:21:31.613156+00:00",
+  "updated_at": "2026-10-28T12:53:35.745492+00:00",
   "status": "accepted",
   "accepted_at": "2026-10-28T12:21:31.613156+00:00",
   "accepted_at_tehran": "2026-10-28T15:51:31.613156+03:30",
@@ -291,5 +291,35 @@
     },
     "physical_android_native_picker": "Await device observation; mobile browser viewport tests passed",
     "original_cluster": "Remains quarantined; physical root cause and exhaustive historical audit not claimed complete"
+  },
+  "continuation_followup": {
+    "observed_at": "2026-10-28T12:53:35.745492+00:00",
+    "observed_at_tehran": "2026-10-28T16:23:35.745492+03:30",
+    "runtime_commit_unchanged": true,
+    "ready_instances": 2,
+    "healthy_readiness_checks": 10,
+    "active_services": 6,
+    "service_restarts": 0,
+    "deployment_pending": false,
+    "provider_probe": {
+      "at": "2026-10-28T12:50:49.294777956Z",
+      "http_status": 200,
+      "valid_json": true,
+      "inventory_servers": 5,
+      "matching_intent_names": 0,
+      "queue_count": 0,
+      "exit": 0,
+      "provider_read_only": true,
+      "source_unchanged": true,
+      "temporary_worktree_removed": true
+    },
+    "unknown_kamatera_creates": 3,
+    "recorded_attempts_each": 1,
+    "bound_provider_task_ids": 0,
+    "saved_aws_accounts": 0,
+    "new_paid_api_reviews": 0,
+    "provider_support_packet": "Prepared privately with exact names, regions and timestamps; not sent or published",
+    "result": "No conclusive terminal provider evidence; preserve the three intents and reservations",
+    "next": "Obtain provider-confirmed original request outcomes; enter valid AWS credentials securely in the panel; physical Android native picker acceptance remains outstanding"
   }
 }

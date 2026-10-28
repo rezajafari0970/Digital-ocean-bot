@@ -104,3 +104,27 @@ userspace in an unprivileged LXD guest on a separately checked Ubuntu 22.04 host
 it does not establish native Ubuntu 24.04 host-kernel validation. The production
 memory guard is unchanged. Historical mastery/continuity scores are not newly
 verified by this release.
+
+## Continuation verification — 2026-10-28 16:23 Tehran
+
+A new native provider observation at 12:50:49 UTC (16:20:49 Tehran) completed
+successfully against the unchanged tested source. Inventory returned five servers
+and no matches for the three retained intent names. The queue returned HTTP 200,
+valid JSON and zero entries. No conclusive terminal result or bound task/server
+receipt was obtained; the three operations remain unknown with one recorded
+attempt each. Empty inventory matches and an empty queue still do not justify
+replaying, failing or releasing those intents.
+
+At 12:53:35 UTC (16:23:35 Tehran), both instances were ready on public `35cc83c3`,
+all ten readiness checks passed and all six services were active with zero
+reported restarts. No deployment was pending. Five known Kamatera resources
+remained expired and excluded, and no AWS account was saved. The isolated native
+probe worktree was removed after completion; the tested source stayed clean.
+No product source was changed and no further paid OpenAI review was submitted.
+
+A private provider-support packet is prepared with the three exact names, regions
+and recorded timestamps, asking for receipt, task outcome, server UUID and any
+pending execution/billing confirmation. It has not been sent. Identifying details
+are retained in private operational evidence, not this public repository.
+Continue with those conclusive provider outcomes, valid matching AWS credentials
+entered in the panel, and physical Android native-picker acceptance.
