@@ -9,11 +9,13 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
 	"net/http"
+	"slices"
 	"strings"
 	"time"
 )
 
 type accountUpdate struct {
+	SettingsRevision       int64    `json:"settings_revision"`
 	ApplyToExisting        bool     `json:"apply_to_existing"`
 	Name                   string   `json:"name"`
 	Token                  string   `json:"token"`
@@ -43,8 +45,25 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 403, map[string]string{"error": "forbidden"})
 		return
 	}
-	var x accountUpdate
-	if json.NewDecoder(r.Body).Decode(&x) != nil || x.Name == "" {
+	x, err := s.accountSettingsSnapshot(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeJSON(w, 404, map[string]string{"error": "not_found"})
+		} else {
+			writeJSON(w, 500, errorBody())
+		}
+		return
+	}
+	initial := x
+	initial.Regions = append([]string(nil), x.Regions...)
+	initial.Sizes = append([]string(nil), x.Sizes...)
+	initial.Images = append([]string(nil), x.Images...)
+	initial.ProxyIDs = append([]string(nil), x.ProxyIDs...)
+	if x.FallbackAnyRegion != nil {
+		saved := *x.FallbackAnyRegion
+		initial.FallbackAnyRegion = &saved
+	}
+	if json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&x) != nil || strings.TrimSpace(x.Name) == "" || x.SettingsRevision < 1 || x.FallbackAnyRegion == nil {
 		writeJSON(w, 400, map[string]string{"error": "invalid_request"})
 		return
 	}
@@ -54,48 +73,29 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	var currentLimit int
 	var accountProvider string
-	_ = s.DB.QueryRowContext(r.Context(), "SELECT provider FROM accounts WHERE id=$1", id).Scan(&accountProvider)
-	_ = s.DB.QueryRowContext(r.Context(), `SELECT COALESCE((SELECT COALESCE((ps.canonical->'Capacity'->>'ComputeLimit')::int,(ps.data->'Limits'->>'DropletLimit')::int) FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),0)`, id).Scan(&currentLimit)
+	if err := s.DB.QueryRowContext(r.Context(), "SELECT provider FROM accounts WHERE id=$1", id).Scan(&accountProvider); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	if err := s.DB.QueryRowContext(r.Context(), `SELECT COALESCE((SELECT COALESCE((ps.canonical->'Capacity'->>'ComputeLimit')::int,(ps.data->'Limits'->>'DropletLimit')::int) FROM provider_snapshots ps WHERE ps.account_id=$1 ORDER BY ps.created_at DESC LIMIT 1),0)`, id).Scan(&currentLimit); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	if code := validateAccountSettings(accountWrite{LifetimeMinSeconds: x.LifetimeMinSeconds, LifetimeMaxSeconds: x.LifetimeMaxSeconds, BuildSpacingMinutes: x.BuildSpacingMinutes, BuildSpacingMaxMinutes: x.BuildSpacingMaxMinutes, DesiredServerCount: x.DesiredServerCount, Regions: x.Regions, Sizes: x.Sizes, Images: x.Images}, currentLimit, accountProvider); code != "" {
 		writeJSON(w, 400, map[string]string{"error": code})
 		return
 	}
-	if x.LifetimeMinSeconds < 1800 {
-		x.LifetimeMinSeconds = 1800
-	}
-	if x.LifetimeMaxSeconds < x.LifetimeMinSeconds {
-		x.LifetimeMaxSeconds = x.LifetimeMinSeconds
-	}
 	x.LifetimeSeconds = x.LifetimeMinSeconds
-	if x.BuildSpacingMinutes < 1 {
-		x.BuildSpacingMinutes = 60
+	if x.IntervalSeconds < 1 || x.BatchSize < 1 || x.MaxConcurrent < 1 {
+		writeJSON(w, 400, map[string]string{"error": "interval_batch_and_concurrency_must_be_positive"})
+		return
 	}
-	if x.BuildSpacingMaxMinutes < x.BuildSpacingMinutes {
-		x.BuildSpacingMaxMinutes = x.BuildSpacingMinutes
+	if len(x.Regions) > 5 || len(x.Sizes) > 3 || len(x.Images) > 3 {
+		writeJSON(w, 400, map[string]string{"error": "too_many_build_choices", "detail": "Use at most 5 cloud regions, 3 plans and 3 images."})
+		return
 	}
-	x.IntervalSeconds = 60
-	if x.BatchSize < 1 {
-		x.BatchSize = 1
-	}
-	if x.DesiredServerCount < 1 {
-		x.DesiredServerCount = 1
-	}
-	if x.MaxConcurrent < 1 {
-		x.MaxConcurrent = 1
-	}
-	fallbackAnyRegion := true
-	if x.FallbackAnyRegion != nil {
-		fallbackAnyRegion = *x.FallbackAnyRegion
-	}
-	if len(x.Regions) > 5 {
-		x.Regions = x.Regions[:5]
-	}
-	if len(x.Sizes) > 3 {
-		x.Sizes = x.Sizes[:3]
-	}
-	if len(x.Images) > 3 {
-		x.Images = x.Images[:3]
-	}
+	fallbackAnyRegion := *x.FallbackAnyRegion
+	scheduleChanged := !slices.Equal(initial.Regions, x.Regions) || !slices.Equal(initial.Sizes, x.Sizes) || !slices.Equal(initial.Images, x.Images) || initial.LifetimeMinSeconds != x.LifetimeMinSeconds || initial.LifetimeMaxSeconds != x.LifetimeMaxSeconds || initial.BuildSpacingMinutes != x.BuildSpacingMinutes || initial.BuildSpacingMaxMinutes != x.BuildSpacingMaxMinutes || initial.DesiredServerCount != x.DesiredServerCount || initial.MaxConcurrent != x.MaxConcurrent || initial.IntervalSeconds != x.IntervalSeconds || initial.BatchSize != x.BatchSize
 	regions, _ := json.Marshal(x.Regions)
 	sizes, _ := json.Marshal(x.Sizes)
 	images, _ := json.Marshal(x.Images)
@@ -120,16 +120,38 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	if x.NetworkMode == "" {
-		x.NetworkMode = "direct"
+	var revision int64
+	if err := tx.QueryRowContext(r.Context(), `SELECT settings_revision FROM accounts WHERE id=$1 FOR UPDATE`, id).Scan(&revision); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	if revision != x.SettingsRevision {
+		writeJSON(w, 409, map[string]string{"error": "account_settings_conflict", "detail": "This account was edited elsewhere. Close and reopen the editor to review the latest saved settings."})
+		return
+	}
+	for _, prefix := range []string{"account-proxy:", "account-route:"} {
+		if _, err = tx.ExecContext(r.Context(), `SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, prefix+id); err != nil {
+			writeJSON(w, 500, errorBody())
+			return
+		}
 	}
 	if x.NetworkMode != "direct" && x.NetworkMode != "proxy_required" {
 		writeJSON(w, 400, map[string]string{"error": "invalid_network_mode"})
 		return
 	}
-	if x.NetworkMode == "proxy_required" {
+	var oldMode, oldProxyID string
+	if err := tx.QueryRowContext(r.Context(), `SELECT mode,COALESCE(proxy_id::text,'') FROM network_profiles WHERE account_id=$1`, id).Scan(&oldMode, &oldProxyID); err != nil && !errors.Is(err, sql.ErrNoRows) {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	poolUnchanged := oldMode == x.NetworkMode && initial.ProxyID == x.ProxyID && slices.Equal(initial.ProxyIDs, x.ProxyIDs)
+	routeProxyID := x.ProxyID
+	if poolUnchanged {
+		routeProxyID = oldProxyID
+	}
+	if x.NetworkMode == "proxy_required" && !poolUnchanged {
 		var status string
-		if x.ProxyID == "" || tx.QueryRowContext(r.Context(), `SELECT status FROM proxies WHERE id=$1`, x.ProxyID).Scan(&status) != nil || status != "healthy" {
+		if routeProxyID == "" || tx.QueryRowContext(r.Context(), `SELECT status FROM proxies WHERE id=$1`, routeProxyID).Scan(&status) != nil || status != "healthy" {
 			writeJSON(w, 409, map[string]string{"error": "proxy_unavailable", "detail": "Selected proxy is not currently usable"})
 			return
 		}
@@ -150,7 +172,7 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 404, map[string]string{"error": "not_found"})
 		return
 	}
-	res, err := tx.ExecContext(r.Context(), `UPDATE accounts SET name=$2,preferred_regions=$3,preferred_region=COALESCE(NULLIF($11,''),preferred_region),preferred_sizes=$4,preferred_images=$5,preferred_image=COALESCE(NULLIF($6,''),preferred_image),server_lifetime_seconds=$7,server_lifetime_min_seconds=$7,server_lifetime_max_seconds=$8,auto_interval_seconds=$9,auto_batch_size=$10,auto_max_concurrent=$12,desired_server_count=$13,fallback_any_region=$14,build_spacing_minutes=$15,build_spacing_max_minutes=$16,next_build_at=NULL,updated_at=now() WHERE id=$1`, id, x.Name, regions, sizes, images, func() string {
+	res, err := tx.ExecContext(r.Context(), `UPDATE accounts SET name=$2,preferred_regions=$3,preferred_region=COALESCE(NULLIF($11,''),preferred_region),preferred_sizes=$4,preferred_images=$5,preferred_image=COALESCE(NULLIF($6,''),preferred_image),server_lifetime_seconds=$7,server_lifetime_min_seconds=$7,server_lifetime_max_seconds=$8,auto_interval_seconds=$9,auto_batch_size=$10,auto_max_concurrent=$12,desired_server_count=$13,fallback_any_region=$14,build_spacing_minutes=$15,build_spacing_max_minutes=$16,next_build_at=CASE WHEN $17 THEN NULL ELSE next_build_at END,settings_revision=settings_revision+1,updated_at=now() WHERE id=$1`, id, x.Name, regions, sizes, images, func() string {
 		if len(x.Images) > 0 {
 			return x.Images[0]
 		}
@@ -160,7 +182,7 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 			return x.Regions[0]
 		}
 		return ""
-	}(), x.MaxConcurrent, x.DesiredServerCount, fallbackAnyRegion, x.BuildSpacingMinutes, x.BuildSpacingMaxMinutes)
+	}(), x.MaxConcurrent, x.DesiredServerCount, fallbackAnyRegion, x.BuildSpacingMinutes, x.BuildSpacingMaxMinutes, scheduleChanged)
 	if err != nil {
 		writeJSON(w, 500, errorBody())
 		return
@@ -177,9 +199,7 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	var oldMode, oldProxyID string
-	_ = tx.QueryRowContext(r.Context(), `SELECT mode,COALESCE(proxy_id::text,'') FROM network_profiles WHERE account_id=$1`, id).Scan(&oldMode, &oldProxyID)
-	if _, err = tx.ExecContext(r.Context(), `INSERT INTO network_profiles(id,account_id,mode,proxy_id) VALUES(gen_random_uuid(),$1,$2,CASE WHEN $2='proxy_required' THEN NULLIF($3,'')::uuid ELSE NULL END) ON CONFLICT(account_id) DO UPDATE SET mode=EXCLUDED.mode,proxy_id=EXCLUDED.proxy_id,updated_at=now()`, id, x.NetworkMode, x.ProxyID); err != nil {
+	if _, err = tx.ExecContext(r.Context(), `INSERT INTO network_profiles(id,account_id,mode,proxy_id) VALUES(gen_random_uuid(),$1,$2,CASE WHEN $2='proxy_required' THEN NULLIF($3,'')::uuid ELSE NULL END) ON CONFLICT(account_id) DO UPDATE SET mode=EXCLUDED.mode,proxy_id=EXCLUDED.proxy_id,updated_at=now()`, id, x.NetworkMode, routeProxyID); err != nil {
 		writeJSON(w, 500, errorBody())
 		return
 	}
@@ -191,12 +211,27 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 	} else {
 		_, _ = tx.ExecContext(r.Context(), `UPDATE account_proxy_pool SET enabled=false,updated_at=now() WHERE account_id=$1`, id)
 	}
-	if oldMode != x.NetworkMode || oldProxyID != x.ProxyID {
-		_, _ = tx.ExecContext(r.Context(), `UPDATE account_network_identities SET sticky_session=NULL,fallback_active=false,rotation_started_at=NULL,exit_ip=NULL,subnet_key=NULL,asn=NULL,country=NULL,country_code=NULL,preferred_country=NULL,preferred_country_code=NULL,last_health_ok=false,last_health_at=NULL,updated_at=now() WHERE account_id=$1`, id)
+	if oldMode != x.NetworkMode || oldProxyID != routeProxyID {
+		if _, err = app.FenceCountryWriterTx(r.Context(), tx, id); err != nil {
+			writeJSON(w, 500, errorBody())
+			return
+		}
+		_, err = tx.ExecContext(r.Context(), `UPDATE account_network_identities SET selected_target_country=NULL,sticky_session=NULL,fallback_active=false,rotation_started_at=NULL,exit_ip=NULL,subnet_key=NULL,asn=NULL,country=NULL,country_code=NULL,preferred_country=NULL,preferred_country_code=NULL,last_health_ok=false,last_health_at=NULL,updated_at=now() WHERE account_id=$1`, id)
+		if err != nil {
+			writeJSON(w, 500, errorBody())
+			return
+		}
 	}
-	if err := syncAccountAutomationTx(r.Context(), tx, id); err != nil {
-		writeJSON(w, 500, map[string]string{"error": "automation_sync_failed", "detail": err.Error()})
+	var automationExists bool
+	if err := tx.QueryRowContext(r.Context(), `SELECT EXISTS(SELECT 1 FROM schedules s JOIN deployment_profiles p ON p.id=s.profile_id WHERE s.account_id=$1 AND p.name='account-auto')`, id).Scan(&automationExists); err != nil {
+		writeJSON(w, 500, errorBody())
 		return
+	}
+	if scheduleChanged || !automationExists {
+		if err := syncAccountAutomationTx(r.Context(), tx, id); err != nil {
+			writeJSON(w, 500, map[string]string{"error": "automation_sync_failed", "detail": err.Error()})
+			return
+		}
 	}
 	if x.Token != "" {
 		if _, err = tx.ExecContext(r.Context(), `UPDATE accounts SET external_id=$2,email=NULLIF($3,''),provider_state='ACTIVE',provider_state_detail=NULL,provider_state_at=now(),provider_error_state=NULL,provider_error_detail=NULL,provider_checked_at=NULL,runtime_status=CASE WHEN deletion_requested_at IS NULL THEN 'ISOLATION_WAIT' ELSE 'DELETE_PENDING' END,runtime_status_detail='credential replaced; provider refresh pending',runtime_status_at=now(),next_build_at=NULL WHERE id=$1`, id, candidateExternalID, candidateEmail); err != nil {
@@ -222,30 +257,26 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 	// A later list request can fail or observe another edit; neither invalidates
 	// this successful commit acknowledgement.
 	var receipt []byte
-	if err = tx.QueryRowContext(r.Context(), `SELECT jsonb_build_object('id',a.id,'desired_server_count',a.desired_server_count,'rule_application',to_jsonb(p)-'account_id') FROM accounts a JOIN account_rule_application p ON p.account_id=a.id WHERE a.id=$1`, id).Scan(&receipt); err != nil {
+	if err = tx.QueryRowContext(r.Context(), `SELECT jsonb_build_object('id',a.id,'settings_revision',a.settings_revision,'regions',a.preferred_regions,'sizes',a.preferred_sizes,'images',a.preferred_images,'desired_server_count',a.desired_server_count,'rule_application',to_jsonb(p)-'account_id') FROM accounts a JOIN account_rule_application p ON p.account_id=a.id WHERE a.id=$1`, id).Scan(&receipt); err != nil {
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	var previousToken []byte
-	var credentialRef, providerForCredential string
 	if x.Token != "" {
-		_ = s.DB.QueryRowContext(r.Context(), `SELECT secret_ref,provider FROM accounts WHERE id=$1`, id).Scan(&credentialRef, &providerForCredential)
-		previousToken, _ = s.Container.Secrets.Get(r.Context(), id, credentialRef)
-		if err := s.Container.Secrets.Put(r.Context(), id, credentialRef, providerForCredential+"_credential", []byte(x.Token)); err != nil {
-			zeroBytes(previousToken)
-			writeJSON(w, 500, map[string]string{"error": "token_update_failed", "detail": err.Error()})
+		var credentialRef, providerForCredential string
+		if err := tx.QueryRowContext(r.Context(), `SELECT secret_ref,provider FROM accounts WHERE id=$1`, id).Scan(&credentialRef, &providerForCredential); err != nil {
+			writeJSON(w, 500, errorBody())
+			return
+		}
+		if err := s.Container.Secrets.PutInTransaction(r.Context(), tx, id, credentialRef, providerForCredential+"_credential", []byte(x.Token)); err != nil {
+			writeJSON(w, 500, map[string]string{"error": "token_update_failed"})
 			return
 		}
 	}
 	if err = tx.Commit(); err != nil {
-		if x.Token != "" && len(previousToken) > 0 {
-			_ = s.Container.Secrets.Put(r.Context(), id, credentialRef, providerForCredential+"_credential", previousToken)
-		}
-		zeroBytes(previousToken)
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	zeroBytes(previousToken)
+
 	writeJSON(w, 200, map[string]any{"ok": true, "account": json.RawMessage(receipt)})
 }
 func (s *Server) deleteAccount(w http.ResponseWriter, r *http.Request) {

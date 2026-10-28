@@ -95,7 +95,7 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 		password := []byte(nil)
 		var err error
 		if cfg.ProxySecretRef != "" {
-			password, err = c.Secrets.GetProxy(ctx, cfg.Proxy.ID, cfg.ProxySecretRef)
+			password, err = c.Secrets.GetProxyAtVersion(ctx, cfg.Proxy.ID, cfg.ProxySecretRef, cfg.ProxySecretVersion)
 			if err != nil {
 				return providerNetworkRuntime{}, err
 			}
@@ -126,7 +126,7 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 			policy := proxycontrol.DefaultPolicy()
 			healthy := cfg.Proxy.Status == network.StatusHealthy
 			var healthMu sync.Mutex
-			observed := network.ObserveTransport(gateway.Client.Transport, func(obs network.TransportObservation) {
+			observe := func(obs network.TransportObservation) {
 				healthMu.Lock()
 				defer healthMu.Unlock()
 				result, apply := classifyProviderProxyObservation(obs, healthy)
@@ -146,9 +146,9 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 					policy,
 					&healthy,
 				)
-			})
+			}
 			gateway.Client.Transport = accountNetworkGuardTransport{
-				Base: observed, Container: c, AccountID: cfg.ID, Provider: cfg.Provider,
+				Base: gateway.Client.Transport, Observe: observe, Container: c, AccountID: cfg.ID, Provider: cfg.Provider,
 				ProxyID: cfg.Proxy.ID, Generation: generation, TransportEpoch: transportEpoch,
 				StickySession: stickySession, ExitIP: exitIP,
 			}

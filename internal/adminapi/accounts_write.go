@@ -1,8 +1,6 @@
 package adminapi
 
 import (
-	"context"
-	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -154,23 +152,15 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 		fallbackAnyRegion = *x.FallbackAnyRegion
 	}
 
-	var writer interface {
-		QueryRowContext(context.Context, string, ...any) *sql.Row
-		ExecContext(context.Context, string, ...any) (sql.Result, error)
-	} = s.DB
-	var tx *sql.Tx
-	if x.AuthorizationID != "" {
-		var e error
-		tx, e = s.DB.BeginTx(r.Context(), nil)
-		if e != nil {
-			writeJSON(w, 500, errorBody())
-			return
-		}
-		defer tx.Rollback()
-		writer = tx
+	tx, err := s.DB.BeginTx(r.Context(), nil)
+	if err != nil {
+		writeJSON(w, 500, errorBody())
+		return
 	}
+	defer tx.Rollback()
+	writer := tx
 	var id string
-	err := writer.QueryRowContext(r.Context(), `INSERT INTO accounts(id,provider,name,external_id,email,preferred_region,secret_ref,auto_interval_seconds,auto_batch_size,auto_max_concurrent,server_lifetime_seconds,desired_server_count,fallback_any_region,build_spacing_minutes,build_spacing_max_minutes)
+	err = writer.QueryRowContext(r.Context(), `INSERT INTO accounts(id,provider,name,external_id,email,preferred_region,secret_ref,auto_interval_seconds,auto_batch_size,auto_max_concurrent,server_lifetime_seconds,desired_server_count,fallback_any_region,build_spacing_minutes,build_spacing_max_minutes)
 VALUES(gen_random_uuid(),$1,$2,$3,NULLIF($4,''),$5,'provider-primary',$6,$7,$8,$9,$10,$11,$12,$13)
 ON CONFLICT (provider,external_id) WHERE external_id IS NOT NULL DO NOTHING
 RETURNING id::text`, x.Provider, x.Name, x.ExternalID, x.Email, x.Region, x.IntervalSeconds, x.BatchSize, x.MaxConcurrent, x.LifetimeSeconds, x.DesiredServerCount, fallbackAnyRegion, x.BuildSpacingMinutes, x.BuildSpacingMaxMinutes).Scan(&id)
@@ -178,28 +168,12 @@ RETURNING id::text`, x.Provider, x.Name, x.ExternalID, x.Email, x.Region, x.Inte
 		writeJSON(w, http.StatusConflict, map[string]string{"error": "account_insert_failed", "detail": err.Error()})
 		return
 	}
-	created := true
-	cleanup := func() {
-		if !created {
-			return
-		}
-		// Account-scoped secrets are removed by the secrets.account_id
-		// ON DELETE CASCADE foreign key when the account is deleted.
-		_, _ = writer.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)
-	}
-	defer cleanup()
 	if _, err = writer.ExecContext(r.Context(), `UPDATE accounts SET preferred_regions=$2::jsonb,preferred_sizes=$3::jsonb,preferred_images=$4::jsonb,preferred_image=$5,server_lifetime_min_seconds=$6,server_lifetime_max_seconds=$7,build_spacing_minutes=$8,build_spacing_max_minutes=$9,next_build_at=NULL WHERE id=$1`, id, mustJSON(x.Regions), mustJSON(x.Sizes), mustJSON(x.Images), x.Images[0], x.LifetimeMinSeconds, x.LifetimeMaxSeconds, x.BuildSpacingMinutes, x.BuildSpacingMaxMinutes); err != nil {
-		_, _ = writer.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "account_preferences_failed", "detail": err.Error()})
 		return
 	}
-	if tx != nil {
-		err = s.Container.Secrets.PutInTransaction(r.Context(), tx, id, "provider-primary", x.Provider+"_credential", []byte(x.Token))
-	} else {
-		err = s.Container.Secrets.Put(r.Context(), id, "provider-primary", x.Provider+"_credential", []byte(x.Token))
-	}
+	err = s.Container.Secrets.PutInTransaction(r.Context(), tx, id, "provider-primary", x.Provider+"_credential", []byte(x.Token))
 	if err != nil {
-		_, _ = writer.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "secret_store_failed", "detail": err.Error()})
 		return
 	}
@@ -211,7 +185,6 @@ RETURNING id::text`, x.Provider, x.Name, x.ExternalID, x.Email, x.Region, x.Inte
 		}
 	}
 	if _, err = writer.ExecContext(r.Context(), `INSERT INTO network_profiles(id,account_id,mode,proxy_id) VALUES(gen_random_uuid(),$1,$2,CASE WHEN $2='proxy_required' THEN NULLIF($3,'')::uuid ELSE NULL END) ON CONFLICT (account_id) DO UPDATE SET mode=EXCLUDED.mode,proxy_id=EXCLUDED.proxy_id,updated_at=now()`, id, x.NetworkMode, x.ProxyID); err != nil {
-		_, _ = writer.ExecContext(r.Context(), `DELETE FROM accounts WHERE id=$1`, id)
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "network_profile_failed", "detail": err.Error()})
 		return
 	}
@@ -223,17 +196,13 @@ RETURNING id::text`, x.Provider, x.Name, x.ExternalID, x.Email, x.Region, x.Inte
 			}
 		}
 	}
-	if tx != nil {
-		err = syncAccountAutomationTx(r.Context(), tx, id)
-	} else {
-		err = s.syncAccountAutomation(r.Context(), id)
-	}
+	err = syncAccountAutomationTx(r.Context(), tx, id)
 	if err != nil {
 		writeJSON(w, 500, map[string]string{"error": "automation_sync_failed", "detail": err.Error()})
 		return
 	}
 
-	if tx != nil {
+	if x.AuthorizationID != "" {
 		result, e := tx.ExecContext(r.Context(), `UPDATE provider_authorizations SET state='USED',account_id=$3,ciphertext=NULL,nonce=NULL,key_version=NULL,updated_at=now() WHERE id=$1 AND owner_id=$2 AND state='VERIFIED'`, x.AuthorizationID, p.UserID, id)
 		var n int64
 		if e == nil {
@@ -243,12 +212,11 @@ RETURNING id::text`, x.Provider, x.Name, x.ExternalID, x.Email, x.Region, x.Inte
 			writeJSON(w, 409, map[string]string{"error": "authorization_no_longer_active"})
 			return
 		}
-		if e = tx.Commit(); e != nil {
-			writeJSON(w, 503, map[string]string{"error": "account_commit_unconfirmed", "detail": "Check this connection request's status before retrying."})
-			return
-		}
 	}
-	created = false
+	if err = tx.Commit(); err != nil {
+		writeJSON(w, 503, map[string]string{"error": "account_commit_unconfirmed", "detail": "Refresh the account list and check the connection request before retrying."})
+		return
+	}
 	log.Printf("account create committed id=%s provider=%s", id, x.Provider)
 	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
 }

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/vultrconsole"
 )
 
@@ -58,7 +59,11 @@ func main() {
 	}
 	defer bridge.Close()
 
-	profile := filepath.Join("/var/lib/digital-ocean-bot/browser-sessions", accountID)
+	browserRoot, err := network.BrowserSessionRoot()
+	if err != nil {
+		panic(err)
+	}
+	profile := filepath.Join(browserRoot, accountID)
 	if err = os.MkdirAll(profile, 0700); err != nil {
 		panic(err)
 	}

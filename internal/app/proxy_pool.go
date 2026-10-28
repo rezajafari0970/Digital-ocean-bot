@@ -7,6 +7,13 @@ import (
 )
 
 func (c Container) ensureActiveAccountProxy(ctx context.Context, accountID string) error {
+	explicit, err := explicitCountryPolicy(ctx, c.DB, accountID)
+	if err != nil {
+		return err
+	}
+	if explicit && ctx.Value(countryAutoRecoveryKey{}) != true {
+		return c.requireAccountNetworkReady(ctx, accountID)
+	}
 	tx, err := c.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return err

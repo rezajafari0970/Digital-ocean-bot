@@ -43,7 +43,7 @@ func observeStickyGeo(ctx context.Context, g *network.Gateway) (stickyGeo, error
 		} `json:"connection"`
 	}
 	if resp.StatusCode/100 != 2 || json.NewDecoder(resp.Body).Decode(&raw) != nil || func() bool { ip := net.ParseIP(strings.TrimSpace(raw.IP)); return ip == nil || ip.To4() == nil }() {
-		return stickyGeo{}, errors.New("invalid geo response")
+		return stickyGeo{}, ErrProxyObservationUnavailable
 	}
 	asn := strings.TrimSpace(raw.Connection.Org)
 	if raw.Connection.ASN > 0 {
@@ -56,6 +56,9 @@ func observeStickyGeoReliable(ctx context.Context, g *network.Gateway) (stickyGe
 	geo, err := observeStickyGeo(ctx, g)
 	if err == nil {
 		return geo, nil
+	}
+	if errors.Is(err, ErrProxyObservationUnavailable) {
+		return stickyGeo{}, err
 	}
 	if _, probeErr := parallelGatewayExitIP(ctx, g); probeErr == nil {
 		return stickyGeo{}, ErrProxyObservationUnavailable
@@ -96,8 +99,9 @@ func (c Container) stickyConfig(ctx context.Context, accountID string) (AccountC
 	var started *time.Time
 	// STICKY_CAP_FROM_ACCOUNT_CONFIG_V1: use the same adapter value loaded by Repository.Account.
 	// This removes the second adapter lookup and makes generic fail closed.
-	stickyCap := proxyAdapterByName(cfg.ProxyAdapter).Capabilities().StickySession
-	if stickyCap {
+	driverCaps := proxyAdapterByName(cfg.ProxyAdapter).Capabilities()
+	stickyCap := driverCaps.StickySession
+	if driverCaps.DedicatedPort {
 		stickyPort, perr := c.ensureAccountStickyPort(ctx, accountID)
 		if perr != nil {
 			return cfg, "", "", "", false, nil, perr
@@ -108,11 +112,11 @@ func (c Container) stickyConfig(ctx context.Context, accountID string) (AccountC
 	}
 	err = c.DB.QueryRowContext(ctx, `SELECT COALESCE(sticky_session,''),COALESCE(preferred_country_code,''),COALESCE(preferred_country,country,''),fallback_active,rotation_started_at FROM account_network_identities WHERE account_id=$1`, accountID).Scan(&session, &cc, &country, &fallback, &started)
 	if !stickyCap {
-		_, err = c.DB.ExecContext(ctx, `INSERT INTO account_network_identities(account_id,timezone,locale,sticky_session,fallback_active,rotation_started_at) VALUES($1,'UTC','en-US',NULL,false,NULL) ON CONFLICT(account_id) DO UPDATE SET sticky_session=NULL,fallback_active=false,rotation_started_at=NULL`, accountID)
+		_, err = c.execLegacyIdentity(ctx, `INSERT INTO account_network_identities(account_id,timezone,locale,sticky_session,fallback_active,rotation_started_at) VALUES($1,'UTC','en-US',NULL,false,NULL) ON CONFLICT(account_id) DO UPDATE SET sticky_session=NULL,fallback_active=false,rotation_started_at=NULL`, accountID)
 		return cfg, "", cc, country, false, nil, err
 	}
 	if err != nil || session == "" {
-		err = c.DB.QueryRowContext(ctx, `INSERT INTO account_network_identities(account_id,sticky_session,preferred_country,preferred_country_code) SELECT $1,replace(gen_random_uuid()::text,'-',''),COALESCE(p.country,''),lower(COALESCE(p.country_code,'')) FROM network_profiles np JOIN proxies p ON p.id=np.proxy_id WHERE np.account_id=$1 ON CONFLICT(account_id) DO UPDATE SET sticky_session=COALESCE(account_network_identities.sticky_session,EXCLUDED.sticky_session),preferred_country=COALESCE(NULLIF(account_network_identities.preferred_country,''),EXCLUDED.preferred_country),preferred_country_code=COALESCE(NULLIF(account_network_identities.preferred_country_code,''),EXCLUDED.preferred_country_code) RETURNING sticky_session,COALESCE(preferred_country_code,''),COALESCE(preferred_country,''),fallback_active,rotation_started_at`, accountID).Scan(&session, &cc, &country, &fallback, &started)
+		err = c.scanLegacyIdentity(ctx, accountID, `INSERT INTO account_network_identities(account_id,sticky_session,preferred_country,preferred_country_code) SELECT $1,replace(gen_random_uuid()::text,'-',''),COALESCE(p.country,''),lower(COALESCE(p.country_code,'')) FROM network_profiles np JOIN proxies p ON p.id=np.proxy_id WHERE np.account_id=$1 ON CONFLICT(account_id) DO UPDATE SET sticky_session=COALESCE(account_network_identities.sticky_session,EXCLUDED.sticky_session),preferred_country=COALESCE(NULLIF(account_network_identities.preferred_country,''),EXCLUDED.preferred_country),preferred_country_code=COALESCE(NULLIF(account_network_identities.preferred_country_code,''),EXCLUDED.preferred_country_code) RETURNING sticky_session,COALESCE(preferred_country_code,''),COALESCE(preferred_country,''),fallback_active,rotation_started_at`, []any{accountID}, &session, &cc, &country, &fallback, &started)
 	}
 	if err == nil && cc == "" {
 		var proxyCode, proxyCountry string
@@ -127,7 +131,7 @@ WHERE np.account_id=$1
 			}
 			if proxyCode != "" {
 				cc = strings.ToLower(proxyCode)
-				_, _ = c.DB.ExecContext(ctx, `
+				_, _ = c.execLegacyIdentity(ctx, `
 UPDATE account_network_identities
 SET preferred_country_code=$2,
     preferred_country=COALESCE(NULLIF(preferred_country,''),NULLIF($3,'')),
@@ -147,6 +151,23 @@ WHERE account_id=$1
 // Rotation starts only after failure. Preferred country gets five minutes of
 // retries; only then may another country be accepted.
 func (c Container) MaintainStickyIdentity(ctx context.Context, accountID string) error {
+	if ctx.Value(legacyIdentityFenceKey{}) == nil {
+		explicit, err := explicitCountryPolicy(ctx, c.DB, accountID)
+		if err != nil {
+			return err
+		}
+		if explicit {
+			if err = c.MaintainProxyControlPlane(ctx, accountID); err != nil {
+				return err
+			}
+			return c.requireAccountNetworkReady(ctx, accountID)
+		}
+	}
+	var fenceErr error
+	ctx, fenceErr = c.legacyIdentityContext(ctx, accountID)
+	if fenceErr != nil {
+		return fenceErr
+	}
 
 	// GENERIC_STATE_INVARIANT_V1
 	// Generic adapters never own sticky/fallback/rotation state.
@@ -159,7 +180,7 @@ WHERE np.account_id=$1
 `, accountID).Scan(&genericAdapter)
 
 	if genericAdapter {
-		_, err := c.DB.ExecContext(ctx, `
+		_, err := c.execLegacyIdentity(ctx, `
 UPDATE account_network_identities
 SET sticky_session=NULL,
     fallback_active=false,
@@ -185,16 +206,18 @@ WHERE account_id=$1
 		return nil
 	}
 	if cfg.Proxy == nil { // recover config without collision-sensitive repository path
-		var typ, host, user, ref, status, adapter string
+		var typ, host, user, ref, status, adapter, secretVersion string
 		var port int
 		var pid string
-		if err = c.DB.QueryRowContext(ctx, `SELECT p.id::text,p.type,p.host,p.port,COALESCE(p.username,''),COALESCE(p.secret_ref,''),p.status,COALESCE(p.adapter,'generic') FROM network_profiles np JOIN proxies p ON p.id=np.proxy_id WHERE np.account_id=$1`, accountID).Scan(&pid, &typ, &host, &port, &user, &ref, &status, &adapter); err != nil {
+		if err = c.DB.QueryRowContext(ctx, `SELECT p.id::text,p.type,p.host,p.port,COALESCE(p.username,''),COALESCE(p.secret_ref,''),p.status,COALESCE(p.adapter,'generic'),COALESCE((SELECT sec.xmin::text||':'||sec.updated_at::text FROM secrets sec WHERE sec.proxy_id=p.id AND sec.id=p.secret_ref),'') FROM network_profiles np JOIN proxies p ON p.id=np.proxy_id WHERE np.account_id=$1`, accountID).Scan(&pid, &typ, &host, &port, &user, &ref, &status, &adapter, &secretVersion); err != nil {
 			return err
 		}
 		id := pid
 		cfg.Network = network.Profile{AccountID: accountID, Mode: network.RouteProxyRequired, ProxyID: &id}
 		cfg.Proxy = &network.Proxy{ID: pid, Type: network.ProxyType(typ), Host: host, Port: port, Status: network.ProxyStatus(status)}
 		cfg.ProxyUsername = user
+		cfg.ProxyBaseUsername = user
+		cfg.ProxySecretVersion = secretVersion
 		cfg.ProxyAdapter = adapter
 		cfg.ProxySecretRef = ref
 	}
@@ -203,7 +226,7 @@ WHERE account_id=$1
 	}
 	var pass []byte
 	if cfg.ProxySecretRef != "" {
-		pass, err = c.Secrets.GetProxy(ctx, cfg.Proxy.ID, cfg.ProxySecretRef)
+		pass, err = c.Secrets.GetProxyAtVersion(ctx, cfg.Proxy.ID, cfg.ProxySecretRef, cfg.ProxySecretVersion)
 		if err != nil {
 			return err
 		}
@@ -232,7 +255,7 @@ WHERE account_id=$1
 
 		geo, err := observeStickyGeoReliable(probeCtx, g)
 		if err != nil {
-			_, _ = c.DB.ExecContext(ctx, `
+			_, _ = c.execLegacyIdentity(ctx, `
 				UPDATE account_network_identities
 				SET last_health_at=now(),
 				    last_health_ok=false,
@@ -266,7 +289,7 @@ WHERE account_id=$1
 
 		newLocale := geoctx.LocaleForCountry(geo.CountryCode)
 
-		_, err = c.DB.ExecContext(ctx, `
+		_, err = c.execLegacyIdentity(ctx, `
 			UPDATE account_network_identities
 			SET sticky_session=NULL,
 			    exit_ip=$2::inet,
@@ -297,7 +320,7 @@ WHERE account_id=$1
 
 	// First try the existing sticky session in the preferred country.
 	targeted := cap.CountryTargeting && !fallback && cc != ""
-	user := proxySessionUsername(cfg.ProxyAdapter, cfg.ProxyUsername, cc, session, targeted)
+	user := proxySessionUsername(cfg.ProxyAdapter, cfg.ProxyBaseUsername, cc, session, targeted)
 	g, err := c.newIdentityGateway(ctx, accountID, *cfg.Proxy, network.ProxyCredentials{Username: user, Password: string(pass)})
 	if err != nil {
 		return err
@@ -308,15 +331,23 @@ WHERE account_id=$1
 	ip, err := c.observeGatewayExitIP(checkCtx, g)
 	var oldIP string
 	_ = c.DB.QueryRowContext(ctx, `SELECT COALESCE(host(exit_ip),'') FROM account_network_identities WHERE account_id=$1`, accountID).Scan(&oldIP)
+	if err == nil && ip != "" {
+		var collision bool
+		if e := c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM account_network_identities WHERE account_id<>$1 AND (exit_ip=$2::inet OR subnet_key=host(network(set_masklen($2::inet,24)))||'/24'))`, accountID, ip).Scan(&collision); e != nil {
+			return e
+		} else if collision {
+			err = ErrNetworkIdentityCollision
+		}
+	}
 	if err == nil && oldIP != "" && ip == oldIP && !fallback {
-		_, _ = c.DB.ExecContext(ctx, `UPDATE account_network_identities SET last_health_at=now(),last_health_ok=true,rotation_started_at=NULL,fallback_active=false,updated_at=updated_at WHERE account_id=$1`, accountID)
+		_, _ = c.execLegacyIdentity(ctx, `UPDATE account_network_identities SET last_health_at=now(),last_health_ok=true,rotation_started_at=NULL,fallback_active=false,updated_at=updated_at WHERE account_id=$1`, accountID)
 		return nil
 	}
 	if err == nil && oldIP != "" && ip == oldIP && fallback {
 		// The temporary fallback is healthy. Keep serving through it, but probe
 		// the preferred country in the background every keeper cycle. Switch
 		// back only after a healthy, unique preferred-country candidate exists.
-		_, _ = c.DB.ExecContext(ctx, `UPDATE account_network_identities SET last_health_at=now(),last_health_ok=true WHERE account_id=$1`, accountID)
+		_, _ = c.execLegacyIdentity(ctx, `UPDATE account_network_identities SET last_health_at=now(),last_health_ok=true WHERE account_id=$1`, accountID)
 		if cc == "" {
 			return nil
 		}
@@ -324,7 +355,7 @@ WHERE account_id=$1
 		if c.DB.QueryRowContext(ctx, `SELECT replace(gen_random_uuid()::text,'-','')`).Scan(&preferredSession) != nil {
 			return nil
 		}
-		preferredUser := proxySessionUsername(cfg.ProxyAdapter, cfg.ProxyUsername, cc, preferredSession, cap.CountryTargeting)
+		preferredUser := proxySessionUsername(cfg.ProxyAdapter, cfg.ProxyBaseUsername, cc, preferredSession, cap.CountryTargeting)
 		pg, pgErr := c.newIdentityGateway(ctx, accountID, *cfg.Proxy, network.ProxyCredentials{Username: preferredUser, Password: string(pass)})
 		if pgErr != nil {
 			return nil
@@ -336,6 +367,19 @@ WHERE account_id=$1
 		if pgErr != nil || !strings.EqualFold(preferredGeo.CountryCode, cc) {
 			return nil
 		}
+		for range 2 {
+			vg, e := c.newIdentityGateway(ctx, accountID, *cfg.Proxy, network.ProxyCredentials{Username: preferredUser, Password: string(pass)})
+			if e != nil {
+				return nil
+			}
+			check, stop := context.WithTimeout(ctx, 4*time.Second)
+			observed, e := c.observeGatewayExitIP(check, vg)
+			stop()
+			vg.CloseIdleConnections()
+			if e != nil || observed != preferredGeo.IP {
+				return nil
+			}
+		}
 		var preferredCollision bool
 		if c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM account_network_identities WHERE account_id<>$1 AND (exit_ip=$2::inet OR subnet_key=(host(network(set_masklen($2::inet,24)))||'/24')))`, accountID, preferredGeo.IP).Scan(&preferredCollision) != nil || preferredCollision {
 			return nil
@@ -343,7 +387,7 @@ WHERE account_id=$1
 		var priorIP, priorCountry, priorTZ, priorLocale string
 		_ = c.DB.QueryRowContext(ctx, `SELECT COALESCE(host(exit_ip),''),COALESCE(country,''),timezone,locale FROM account_network_identities WHERE account_id=$1`, accountID).Scan(&priorIP, &priorCountry, &priorTZ, &priorLocale)
 		newLocale := geoctx.LocaleForCountry(preferredGeo.CountryCode)
-		_, pgErr = c.DB.ExecContext(ctx, `UPDATE account_network_identities SET sticky_session=$2,exit_ip=$3::inet,subnet_key=host(network(set_masklen($3::inet,24)))||'/24',country=$4,country_code=lower($5),timezone=COALESCE(NULLIF($6,''),timezone),locale=$7,last_health_at=now(),last_health_ok=true,rotation_started_at=NULL,fallback_active=false,updated_at=now() WHERE account_id=$1`, accountID, preferredSession, preferredGeo.IP, preferredGeo.Country, preferredGeo.CountryCode, preferredGeo.Timezone, newLocale)
+		_, pgErr = c.execLegacyIdentity(ctx, `UPDATE account_network_identities SET sticky_session=$2,exit_ip=$3::inet,subnet_key=host(network(set_masklen($3::inet,24)))||'/24',country=$4,country_code=lower($5),timezone=COALESCE(NULLIF($6,''),timezone),locale=$7,asn=$8,last_health_at=now(),last_health_ok=true,rotation_started_at=NULL,fallback_active=false,updated_at=now() WHERE account_id=$1`, accountID, preferredSession, preferredGeo.IP, preferredGeo.Country, preferredGeo.CountryCode, preferredGeo.Timezone, newLocale, preferredGeo.ASN)
 		if pgErr == nil && (priorIP != preferredGeo.IP || priorCountry != preferredGeo.Country || priorTZ != preferredGeo.Timezone || priorLocale != newLocale) {
 		}
 		// Provider refresh owns account readiness; this result proves network health only.
@@ -351,12 +395,12 @@ WHERE account_id=$1
 	}
 	// Existing address disappeared or changed: begin/continue recovery.
 	if started == nil {
-		_, _ = c.DB.ExecContext(ctx, `UPDATE account_network_identities SET rotation_started_at=now(),last_health_at=now(),last_health_ok=false WHERE account_id=$1`, accountID)
+		_, _ = c.execLegacyIdentity(ctx, `UPDATE account_network_identities SET rotation_started_at=now(),last_health_at=now(),last_health_ok=false WHERE account_id=$1`, accountID)
 		now := time.Now()
 		started = &now
 	}
 	if started != nil && retryPreviousProxyIP(oldIP, *started, time.Now()) {
-		_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ISOLATION_WAIT',runtime_status_detail='retrying previous proxy IPv4',runtime_status_at=now(),updated_at=now() WHERE id=$1 AND COALESCE(runtime_status,'') IN ('','READY','ISOLATION_WAIT','PROVIDER_PROXY_ERROR','PROVIDER_TRANSPORT_ERROR')`, accountID)
+		_, _ = c.execLegacyIdentity(ctx, `UPDATE accounts SET runtime_status='ISOLATION_WAIT',runtime_status_detail='retrying previous proxy IPv4',runtime_status_at=now(),updated_at=now() WHERE id=$1 AND COALESCE(runtime_status,'') IN ('','READY','ISOLATION_WAIT','PROVIDER_PROXY_ERROR','PROVIDER_TRANSPORT_ERROR')`, accountID)
 		return ErrIsolationWait
 	}
 	allowFallback := fallback
@@ -375,7 +419,7 @@ WHERE account_id=$1
 		if err = c.DB.QueryRowContext(ctx, `SELECT replace(gen_random_uuid()::text,'-','')`).Scan(&newSession); err != nil {
 			return err
 		}
-		user = proxySessionUsername(cfg.ProxyAdapter, cfg.ProxyUsername, cc, newSession, cap.CountryTargeting && !allowFallback && cc != "")
+		user = proxySessionUsername(cfg.ProxyAdapter, cfg.ProxyBaseUsername, cc, newSession, cap.CountryTargeting && !allowFallback && cc != "")
 		g2, gerr := c.newIdentityGateway(ctx, accountID, *cfg.Proxy, network.ProxyCredentials{Username: user, Password: string(pass)})
 		if gerr != nil {
 			candidateErr = gerr
@@ -385,23 +429,30 @@ WHERE account_id=$1
 		candidate, gerr := observeStickyCandidate(geoCtx, g2)
 		cancel2()
 		if gerr != nil {
+			if errors.Is(gerr, ErrProxyObservationUnavailable) {
+				return gerr
+			}
 			if errors.Is(gerr, network.ErrProxyAuth) {
 				return gerr
 			}
-			nextPort, rerr := c.rotateAccountStickyPort(ctx, accountID, cfg.Proxy.Port)
-			if rerr != nil {
-				return rerr
+			if cap.DedicatedPort {
+				nextPort, rerr := c.rotateAccountStickyPort(ctx, accountID, cfg.Proxy.Port)
+				if rerr != nil {
+					return rerr
+				}
+				cfg.Proxy.Port = nextPort
 			}
-			cfg.Proxy.Port = nextPort
 			candidateErr = ErrIsolationWait
 			continue
 		}
 		if cap.CountryTargeting && !allowFallback && cc != "" && !strings.EqualFold(candidate.CountryCode, cc) {
-			nextPort, rerr := c.rotateAccountStickyPort(ctx, accountID, cfg.Proxy.Port)
-			if rerr != nil {
-				return rerr
+			if cap.DedicatedPort {
+				nextPort, rerr := c.rotateAccountStickyPort(ctx, accountID, cfg.Proxy.Port)
+				if rerr != nil {
+					return rerr
+				}
+				cfg.Proxy.Port = nextPort
 			}
-			cfg.Proxy.Port = nextPort
 			candidateErr = ErrIsolationWait
 			continue
 		}
@@ -410,11 +461,13 @@ WHERE account_id=$1
 			return qerr
 		}
 		if collision {
-			nextPort, rerr := c.rotateAccountStickyPort(ctx, accountID, cfg.Proxy.Port)
-			if rerr != nil {
-				return rerr
+			if cap.DedicatedPort {
+				nextPort, rerr := c.rotateAccountStickyPort(ctx, accountID, cfg.Proxy.Port)
+				if rerr != nil {
+					return rerr
+				}
+				cfg.Proxy.Port = nextPort
 			}
-			cfg.Proxy.Port = nextPort
 			candidateErr = ErrIsolationWait
 			continue
 		}
@@ -440,11 +493,13 @@ WHERE account_id=$1
 			}
 		}
 		if !stable {
-			nextPort, rerr := c.rotateAccountStickyPort(ctx, accountID, cfg.Proxy.Port)
-			if rerr != nil {
-				return rerr
+			if cap.DedicatedPort {
+				nextPort, rerr := c.rotateAccountStickyPort(ctx, accountID, cfg.Proxy.Port)
+				if rerr != nil {
+					return rerr
+				}
+				cfg.Proxy.Port = nextPort
 			}
-			cfg.Proxy.Port = nextPort
 			continue
 		}
 		geo = candidate
@@ -453,7 +508,7 @@ WHERE account_id=$1
 	}
 	if !found {
 		detail := fmt.Sprintf("no unique proxy IPv4/subnet after %d session candidates", candidateAttempts)
-		_, _ = c.DB.ExecContext(ctx, `UPDATE accounts SET runtime_status='ISOLATION_WAIT',runtime_status_detail=$2,runtime_status_at=now() WHERE id=$1 AND COALESCE(runtime_status,'') IN ('','READY','ISOLATION_WAIT','PROVIDER_PROXY_ERROR','PROVIDER_TRANSPORT_ERROR')`, accountID, detail)
+		_, _ = c.execLegacyIdentity(ctx, `UPDATE accounts SET runtime_status='ISOLATION_WAIT',runtime_status_detail=$2,runtime_status_at=now() WHERE id=$1 AND COALESCE(runtime_status,'') IN ('','READY','ISOLATION_WAIT','PROVIDER_PROXY_ERROR','PROVIDER_TRANSPORT_ERROR')`, accountID, detail)
 		if candidateErr != nil && !errors.Is(candidateErr, ErrIsolationWait) {
 			return candidateErr
 		}
@@ -462,7 +517,7 @@ WHERE account_id=$1
 	var priorCountry, priorTZ, priorLocale string
 	_ = c.DB.QueryRowContext(ctx, `SELECT COALESCE(country,''),timezone,locale FROM account_network_identities WHERE account_id=$1`, accountID).Scan(&priorCountry, &priorTZ, &priorLocale)
 	newLocale := geoctx.LocaleForCountry(geo.CountryCode)
-	_, err = c.DB.ExecContext(ctx, `UPDATE account_network_identities SET sticky_session=$2,exit_ip=$3::inet,subnet_key=host(network(set_masklen($3::inet,24)))||'/24',country=$4,country_code=lower($5),timezone=COALESCE(NULLIF($6,''),timezone),locale=$7,last_health_at=now(),last_health_ok=true,rotation_started_at=NULL,fallback_active=$8,updated_at=now() WHERE account_id=$1`, accountID, newSession, geo.IP, geo.Country, geo.CountryCode, geo.Timezone, newLocale, allowFallback)
+	_, err = c.execLegacyIdentity(ctx, `UPDATE account_network_identities SET sticky_session=$2,exit_ip=$3::inet,subnet_key=host(network(set_masklen($3::inet,24)))||'/24',country=$4,country_code=lower($5),timezone=COALESCE(NULLIF($6,''),timezone),locale=$7,asn=$9,last_health_at=now(),last_health_ok=true,rotation_started_at=NULL,fallback_active=$8,updated_at=now() WHERE account_id=$1`, accountID, newSession, geo.IP, geo.Country, geo.CountryCode, geo.Timezone, newLocale, allowFallback, geo.ASN)
 	if err == nil && (priorCountry != geo.Country || priorTZ != geo.Timezone || priorLocale != newLocale) {
 	}
 	if err != nil {

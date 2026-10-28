@@ -76,3 +76,15 @@ header{gap:12px;flex-wrap:wrap}header>div{display:flex;flex-wrap:wrap;align-item
 .accountForm select{text-overflow:ellipsis}
 .accountForm .checkRow{display:flex;align-items:flex-start;gap:9px}
 .accountForm .checkRow input{width:auto;flex:0 0 auto;margin:3px 0 0}
+
+/* Preserve each diagnostic field's meaning on narrow screens. */
+@media(max-width:700px){
+ .diagnosticTable,.diagnosticTable tbody,.diagnosticTable tr,.diagnosticTable td{display:block;width:100%;min-width:0;box-sizing:border-box}
+ .diagnosticTable thead{display:none}
+ .diagnosticTable tr{border:1px solid #354366;border-radius:8px;margin:10px 0;padding:8px}
+ .diagnosticTable td{white-space:normal;overflow-wrap:anywhere;padding:6px;border:0}
+ .diagnosticTable td:before{content:attr(data-label);display:block;font-weight:600;color:#aebbd7;margin-bottom:3px}
+ .diagnosticTable pre,.diagnosticTable code{white-space:pre-wrap;overflow-wrap:anywhere}
+}
+
+.countryPriorityRow{display:flex;align-items:end;gap:12px;margin:12px 0}.countryPriorityRow label{flex:1;min-width:0}.countryPriorityRow .rowActions{flex-shrink:0;padding-bottom:4px}@media(max-width:500px){.countryPriorityRow{display:block}.countryPriorityRow .rowActions{display:flex;justify-content:flex-end;margin-top:6px}}

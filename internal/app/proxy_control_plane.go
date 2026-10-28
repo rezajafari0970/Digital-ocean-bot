@@ -50,6 +50,10 @@ func (c Container) MaintainProxyControlPlane(ctx context.Context, accountID stri
 	}
 	defer releaseProxyKeeperLock(lockTx)
 
+	return c.maintainOrderedCountry(ctx, accountID)
+}
+
+func (c Container) maintainLegacyProxyControlPlane(ctx context.Context, accountID string) error {
 	if err := c.ensureActiveAccountProxy(ctx, accountID); err != nil {
 		if errors.Is(err, ErrNetworkNotReady) {
 			if diagnosticErr := c.recordBlockedBaseProxy(ctx, accountID); diagnosticErr != nil {
@@ -93,6 +97,10 @@ WHERE a.id=$1 AND (a.enabled=true OR a.deletion_requested_at IS NOT NULL)
 		return nil
 	}
 
+	ctx, err = c.legacyIdentityContext(ctx, accountID)
+	if err != nil {
+		return err
+	}
 	beforeSession, beforeIP := proxyIdentitySignature(ctx, c.DB, accountID)
 	started := time.Now()
 	maintainErr := c.MaintainStickyIdentity(ctx, accountID)
@@ -129,7 +137,15 @@ WHERE a.id=$1 AND (a.enabled=true OR a.deletion_requested_at IS NOT NULL)
 		state = proxycontrol.BumpGeneration(state)
 	}
 
-	if err := store.Save(ctx, state); err != nil {
+	tx, err := c.beginLegacyIdentityWrite(ctx, accountID)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if err = proxycontrol.SaveStateTx(ctx, tx, state); err != nil {
+		return err
+	}
+	if err = c.commitLegacyIdentityWrite(ctx, tx, accountID); err != nil {
 		return err
 	}
 	return maintainErr

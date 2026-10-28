@@ -24,7 +24,16 @@ FROM deployments d JOIN provision_runs pr ON pr.droplet_id=d.droplet_id AND pr.a
 WHERE d.id=$1`, deploymentID).Scan(&runID, &state, &step, &attempt, &lastErr, &next)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			writeJSON(w, 404, map[string]string{"error": "provision_run_not_found"})
+			// A known deployment can be waiting for provider confirmation before
+			// SSH provisioning exists. Show that stage, not a misleading error.
+			err = tx.QueryRowContext(r.Context(), `SELECT state,current_step,attempt,COALESCE(last_error,'') FROM deployments WHERE id=$1`, deploymentID).Scan(&state, &step, &attempt, &lastErr)
+			if errors.Is(err, sql.ErrNoRows) {
+				writeJSON(w, 404, map[string]string{"error": "deployment_not_found"})
+			} else if err != nil {
+				writeJSON(w, 500, errorBody())
+			} else {
+				writeJSON(w, 200, map[string]any{"deployment_id": deploymentID, "provisioning_started": false, "state": state, "current_step": step, "attempt": attempt, "last_error": redact.Text(lastErr), "steps": []any{}, "events": []any{}})
+			}
 		} else {
 			writeJSON(w, 500, errorBody())
 		}

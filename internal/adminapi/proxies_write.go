@@ -2,12 +2,14 @@ package adminapi
 
 import (
 	"encoding/json"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"net/http"
 	"strings"
 )
 
 type proxyWrite struct {
+	Revision int64  `json:"settings_revision"`
 	Name     string `json:"name"`
 	Host     string `json:"host"`
 	Port     int    `json:"port"`
@@ -20,7 +22,7 @@ type proxyWrite struct {
 func validProxyWrite(x proxyWrite) bool {
 	x.Name = strings.TrimSpace(x.Name)
 	x.Host = strings.TrimSpace(x.Host)
-	return x.Name != "" && x.Host != "" && x.Port > 0 && x.Port <= 65535 && (x.Adapter == "" || x.Adapter == "generic" || x.Adapter == "suffix-session")
+	return x.Name != "" && x.Host != "" && x.Port > 0 && x.Port <= 65535 && app.ProxyAdapterRegistered(x.Adapter)
 }
 func resolveProxyType(r *http.Request, x proxyWrite) (network.ProxyType, error) {
 	if x.Type == "" || x.Type == "auto" {
@@ -47,33 +49,37 @@ func (s *Server) createProxy(w http.ResponseWriter, r *http.Request) {
 	if x.Adapter == "" {
 		x.Adapter = "generic"
 	}
+	tx, err := s.DB.BeginTx(r.Context(), nil)
+	if err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	defer tx.Rollback()
 	var id string
-	err = s.DB.QueryRowContext(r.Context(), `INSERT INTO proxies(id,name,type,host,port,username,secret_ref,status,adapter) VALUES(gen_random_uuid(),$1,$2,$3,$4,NULLIF($5,''),NULL,'unknown',$6) RETURNING id::text`, x.Name, string(typ), x.Host, x.Port, x.Username, x.Adapter).Scan(&id)
+	err = tx.QueryRowContext(r.Context(), `INSERT INTO proxies(id,name,type,host,port,username,secret_ref,status,adapter) VALUES(gen_random_uuid(),$1,$2,$3,$4,NULLIF($5,''),NULL,'healthy',$6) RETURNING id::text`, x.Name, string(typ), x.Host, x.Port, x.Username, x.Adapter).Scan(&id)
 	if err != nil {
 		writeJSON(w, 409, errorBody())
 		return
 	}
-	cleanup := func() { _, _ = s.DB.ExecContext(r.Context(), `DELETE FROM proxies WHERE id=$1`, id) }
 	if x.Password != "" {
-		if err = s.Container.Secrets.PutProxy(r.Context(), id, "proxy-password", "proxy_password", []byte(x.Password)); err != nil {
-			cleanup()
+		if err = s.Container.Secrets.PutProxyTx(r.Context(), tx, id, "proxy-password", "proxy_password", []byte(x.Password)); err != nil {
 			writeJSON(w, 500, errorBody())
 			return
 		}
-		if _, err = s.DB.ExecContext(r.Context(), `UPDATE proxies SET secret_ref='proxy-password' WHERE id=$1`, id); err != nil {
-			_ = s.Container.Secrets.DeleteProxy(r.Context(), id, "proxy-password")
-			cleanup()
+		if _, err = tx.ExecContext(r.Context(), `UPDATE proxies SET secret_ref='proxy-password' WHERE id=$1`, id); err != nil {
 			writeJSON(w, 500, errorBody())
 			return
 		}
 	}
-	_, err = s.DB.ExecContext(r.Context(), `UPDATE proxies SET status='healthy',failure_count=0,consecutive_successes=0,last_checked_at=now(),last_success_at=now() WHERE id=$1`, id)
-	if err != nil {
-		_ = s.Container.Secrets.DeleteProxy(r.Context(), id, "proxy-password")
-		cleanup()
+	if _, err = tx.ExecContext(r.Context(), `UPDATE proxies SET last_checked_at=now(),last_success_at=now(),failure_count=0,consecutive_successes=0 WHERE id=$1`, id); err != nil {
 		writeJSON(w, 500, errorBody())
 		return
 	}
+	if err = tx.Commit(); err != nil {
+		writeJSON(w, 503, map[string]string{"error": "proxy_create_unconfirmed", "detail": "Refresh the proxy list before retrying."})
+		return
+	}
+
 	writeJSON(w, 201, map[string]string{"id": id, "type": string(typ)})
 }
 
@@ -120,6 +126,50 @@ func (s *Server) assignProxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer tx.Rollback()
+	for _, prefix := range []string{"account-proxy:", "account-route:"} {
+		if _, err = tx.ExecContext(r.Context(), `SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, prefix+accountID); err != nil {
+			writeJSON(w, 409, errorBody())
+			return
+		}
+	}
+	var accountRevision int64
+	if err = tx.QueryRowContext(r.Context(), `SELECT settings_revision FROM accounts WHERE id=$1 FOR UPDATE NOWAIT`, accountID).Scan(&accountRevision); err != nil {
+		writeJSON(w, 409, map[string]string{"error": "account_busy"})
+		return
+	}
+	var currentMode, currentProxy string
+	if err = tx.QueryRowContext(r.Context(), `SELECT mode,COALESCE(proxy_id::text,'') FROM network_profiles WHERE account_id=$1`, accountID).Scan(&currentMode, &currentProxy); err != nil {
+		writeJSON(w, 404, errorBody())
+		return
+	}
+	if x.Mode == "direct" {
+		x.ProxyID = ""
+	}
+	var desiredMatches bool
+	if err = tx.QueryRowContext(r.Context(), `SELECT CASE WHEN $2='direct' THEN NOT EXISTS(SELECT 1 FROM account_proxy_pool WHERE account_id=$1 AND enabled) ELSE
+ (SELECT count(*)=1 AND bool_and(proxy_id=NULLIF($3,'')::uuid) FROM account_proxy_pool WHERE account_id=$1 AND enabled) END`, accountID, x.Mode, x.ProxyID).Scan(&desiredMatches); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	if currentMode == x.Mode && currentProxy == x.ProxyID && desiredMatches {
+		w.WriteHeader(204)
+		return
+	}
+	if x.Mode == "proxy_required" {
+		if err = syncAccountProxyPool(r.Context(), tx, accountID, []string{x.ProxyID}); err != nil {
+			writeJSON(w, 409, errorBody())
+			return
+		}
+	} else {
+		if _, err = tx.ExecContext(r.Context(), `UPDATE account_proxy_pool SET enabled=false WHERE account_id=$1`, accountID); err != nil {
+			writeJSON(w, 500, errorBody())
+			return
+		}
+	}
+	if _, err = tx.ExecContext(r.Context(), `UPDATE accounts SET settings_revision=settings_revision+1,updated_at=now() WHERE id=$1`, accountID); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	res, err := tx.ExecContext(r.Context(), `UPDATE network_profiles SET mode=$2,proxy_id=CASE WHEN $2='direct' THEN NULL ELSE $3::uuid END,updated_at=now() WHERE account_id=$1`, accountID, x.Mode, x.ProxyID)
 	if err != nil {
 		writeJSON(w, 409, errorBody())
@@ -130,7 +180,15 @@ func (s *Server) assignProxy(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 404, map[string]string{"error": "account_not_found"})
 		return
 	}
-	_, _ = tx.ExecContext(r.Context(), `UPDATE account_network_identities SET sticky_session=NULL,fallback_active=false,rotation_started_at=NULL,exit_ip=NULL,subnet_key=NULL,asn=NULL,country=NULL,country_code=NULL,preferred_country=NULL,preferred_country_code=NULL,last_health_ok=false,last_health_at=NULL,updated_at=now() WHERE account_id=$1`, accountID)
+	if _, err = app.FenceCountryWriterTx(r.Context(), tx, accountID); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	_, err = tx.ExecContext(r.Context(), `UPDATE account_network_identities SET selected_target_country=NULL,sticky_session=NULL,fallback_active=false,rotation_started_at=NULL,exit_ip=NULL,subnet_key=NULL,asn=NULL,country=NULL,country_code=NULL,preferred_country=NULL,preferred_country_code=NULL,last_health_ok=false,last_health_at=NULL,updated_at=now() WHERE account_id=$1`, accountID)
+	if err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	if err := tx.Commit(); err != nil {
 		writeJSON(w, 500, errorBody())
 		return

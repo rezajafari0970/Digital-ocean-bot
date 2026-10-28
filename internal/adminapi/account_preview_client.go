@@ -16,15 +16,15 @@ func (s *Server) previewClient(w http.ResponseWriter, r *http.Request, proxyID s
 	var closeFn func()
 	if proxyID != "" {
 		var px network.Proxy
-		var user, ref, adapter string
-		if err := s.DB.QueryRowContext(r.Context(), `SELECT id::text,name,type,host,port,COALESCE(username,''),COALESCE(secret_ref,''),status,COALESCE(adapter,'generic') FROM proxies WHERE id=$1`, proxyID).Scan(&px.ID, &px.Name, &px.Type, &px.Host, &px.Port, &user, &ref, &px.Status, &adapter); err != nil || px.Status != network.StatusHealthy {
+		var user, ref, adapter, secretVersion string
+		if err := s.DB.QueryRowContext(r.Context(), `SELECT id::text,name,type,host,port,COALESCE(username,''),COALESCE(secret_ref,''),status,COALESCE(adapter,'generic') ,COALESCE((SELECT sec.xmin::text||':'||sec.updated_at::text FROM secrets sec WHERE sec.proxy_id=proxies.id AND sec.id=proxies.secret_ref),'') FROM proxies WHERE id=$1`, proxyID).Scan(&px.ID, &px.Name, &px.Type, &px.Host, &px.Port, &user, &ref, &px.Status, &adapter, &secretVersion); err != nil || px.Status != network.StatusHealthy {
 			writeJSON(w, 409, map[string]string{"error": "proxy_not_healthy"})
 			return nil, nil, "", false
 		}
 		pass := []byte(nil)
 		if ref != "" {
 			var err error
-			pass, err = s.Container.Secrets.GetProxy(r.Context(), px.ID, ref)
+			pass, err = s.Container.Secrets.GetProxyAtVersion(r.Context(), px.ID, ref, secretVersion)
 			if err != nil {
 				writeJSON(w, 500, errorBody())
 				return nil, nil, "", false

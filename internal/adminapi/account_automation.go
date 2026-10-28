@@ -46,7 +46,7 @@ func (s *Server) syncAccountAutomation(ctx context.Context, accountID string) er
 	var profileID string
 	err = s.DB.QueryRowContext(ctx, `INSERT INTO deployment_profiles(id,account_id,name,version,config,enabled)
 VALUES(gen_random_uuid(),$1,'account-auto',1,$2,true)
-ON CONFLICT(account_id,name,version) DO UPDATE SET config=EXCLUDED.config,enabled=true,updated_at=now()
+ON CONFLICT(account_id,name,version) DO UPDATE SET config=deployment_profiles.config||jsonb_build_object('region',EXCLUDED.config->'region','size',EXCLUDED.config->'size','image',EXCLUDED.config->'image','lifetime',EXCLUDED.config->'lifetime'),updated_at=now()
 RETURNING id::text`, accountID, raw).Scan(&profileID)
 	if err != nil {
 		return err
@@ -54,7 +54,7 @@ RETURNING id::text`, accountID, raw).Scan(&profileID)
 
 	_, err = s.DB.ExecContext(ctx, `INSERT INTO schedules(id,account_id,profile_id,enabled,interval_seconds,batch_size,max_concurrent,next_run_at)
 VALUES(gen_random_uuid(),$1,$2,true,$3,$4,$5,now()+make_interval(secs => $3::int))
-ON CONFLICT(account_id,profile_id) DO UPDATE SET enabled=true,interval_seconds=EXCLUDED.interval_seconds,batch_size=EXCLUDED.batch_size,max_concurrent=EXCLUDED.max_concurrent,next_run_at=CASE WHEN schedules.interval_seconds IS DISTINCT FROM EXCLUDED.interval_seconds THEN now()+make_interval(secs => $3::int) ELSE schedules.next_run_at END,updated_at=now()`, accountID, profileID, interval, batch, concurrent)
+ON CONFLICT(account_id,profile_id) DO UPDATE SET interval_seconds=EXCLUDED.interval_seconds,batch_size=EXCLUDED.batch_size,max_concurrent=EXCLUDED.max_concurrent,next_run_at=CASE WHEN schedules.interval_seconds IS DISTINCT FROM EXCLUDED.interval_seconds THEN now()+make_interval(secs => $3::int) ELSE schedules.next_run_at END,updated_at=now()`, accountID, profileID, interval, batch, concurrent)
 	return err
 }
 
@@ -81,9 +81,9 @@ func syncAccountAutomationTx(ctx context.Context, tx *sql.Tx, accountID string) 
 		return err
 	}
 	var profileID string
-	if err = tx.QueryRowContext(ctx, `INSERT INTO deployment_profiles(id,account_id,name,version,config,enabled) VALUES(gen_random_uuid(),$1,'account-auto',1,$2,true) ON CONFLICT(account_id,name,version) DO UPDATE SET config=EXCLUDED.config,enabled=true,updated_at=now() RETURNING id::text`, accountID, raw).Scan(&profileID); err != nil {
+	if err = tx.QueryRowContext(ctx, `INSERT INTO deployment_profiles(id,account_id,name,version,config,enabled) VALUES(gen_random_uuid(),$1,'account-auto',1,$2,true) ON CONFLICT(account_id,name,version) DO UPDATE SET config=deployment_profiles.config||jsonb_build_object('region',EXCLUDED.config->'region','size',EXCLUDED.config->'size','image',EXCLUDED.config->'image','lifetime',EXCLUDED.config->'lifetime'),updated_at=now() RETURNING id::text`, accountID, raw).Scan(&profileID); err != nil {
 		return err
 	}
-	_, err = tx.ExecContext(ctx, `INSERT INTO schedules(id,account_id,profile_id,enabled,interval_seconds,batch_size,max_concurrent,next_run_at) VALUES(gen_random_uuid(),$1,$2,true,$3,$4,$5,now()+make_interval(secs => $3::int)) ON CONFLICT(account_id,profile_id) DO UPDATE SET enabled=true,interval_seconds=EXCLUDED.interval_seconds,batch_size=EXCLUDED.batch_size,max_concurrent=EXCLUDED.max_concurrent,next_run_at=CASE WHEN schedules.interval_seconds IS DISTINCT FROM EXCLUDED.interval_seconds THEN now()+make_interval(secs => $3::int) ELSE schedules.next_run_at END,updated_at=now()`, accountID, profileID, interval, batch, concurrent)
+	_, err = tx.ExecContext(ctx, `INSERT INTO schedules(id,account_id,profile_id,enabled,interval_seconds,batch_size,max_concurrent,next_run_at) VALUES(gen_random_uuid(),$1,$2,true,$3,$4,$5,now()+make_interval(secs => $3::int)) ON CONFLICT(account_id,profile_id) DO UPDATE SET interval_seconds=EXCLUDED.interval_seconds,batch_size=EXCLUDED.batch_size,max_concurrent=EXCLUDED.max_concurrent,next_run_at=CASE WHEN schedules.interval_seconds IS DISTINCT FROM EXCLUDED.interval_seconds THEN now()+make_interval(secs => $3::int) ELSE schedules.next_run_at END,updated_at=now()`, accountID, profileID, interval, batch, concurrent)
 	return err
 }
