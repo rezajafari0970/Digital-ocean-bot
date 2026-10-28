@@ -1,3 +1,5 @@
+> Completed rollout: [Strict country and output release](STRICT_COUNTRY_OUTPUT_RELEASE_20261029.md). Historical work notes below retain their original stage status.
+
 # Strict country onboarding and live output repair — 2026-10-28
 
 Status: implementation complete; final gates active; no new release or runtime mutation yet.

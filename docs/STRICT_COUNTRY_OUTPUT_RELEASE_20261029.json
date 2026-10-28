@@ -1,0 +1,178 @@
+{
+  "date_tehran": "2026-10-29",
+  "source_commit": "05da12cd017243aa0bdf314e55614478ed43bbdc",
+  "source_tree": "88daf3f2b6d4e74c98800bd6d9626a984ef226df",
+  "source_pr": 33,
+  "source_run": 40781992072,
+  "public_candidate": "67f91d2886e0b2b6dec6754700066a35eb2fccae",
+  "public_tree": "5b149b90c738cdfc6bd72b996ca92549ad670f74",
+  "public_run": 40782066235,
+  "public_run_conclusion": "success",
+  "source_run_conclusion": "success",
+  "baseline": "35cc83c3a666dbdba72f00b26851ce6b7bf3dc97",
+  "promotion_run": 40783249408,
+  "rollout": "complete; both installations and actual HTTP outputs verified",
+  "local_validation": {
+    "mandatory_roots_passed": 345,
+    "skipped": 0,
+    "recovery_repetitions": 20,
+    "final_focused_roots": 14,
+    "full_go": true,
+    "vet": true,
+    "bootstrap_tests": 25,
+    "update_tests": 11,
+    "gate_tests": 10,
+    "changed_source_gitleaks": true,
+    "export_gitleaks": true,
+    "live_secret_scans_both_instances": true,
+    "exported_files": 1850
+  },
+  "kamatera": {
+    "at_utc": "2026-10-28T22:44:29Z",
+    "inventory_http": 200,
+    "servers": 5,
+    "matching_unknown_create_names": 0,
+    "queue_items": 0,
+    "unresolved_creates": 3,
+    "mutation_replays": 0,
+    "post_rollout_unknown_operations": 3,
+    "post_rollout_max_attempt": 1,
+    "post_rollout_provider_receipts": 0
+  },
+  "openai_review": {
+    "model": "gpt-6-astra",
+    "status": "failed",
+    "error": "credit_balance_exhausted",
+    "review_output": false,
+    "usage": null
+  },
+  "limits": [
+    "No physical Android acceptance claim",
+    "Unknown Kamatera creates require provider receipts; no duplicated paid creates",
+    "API review failure is not approval"
+  ],
+  "source_merge": "76e1b12182ae837590c2b74f67901c1b3a025fd0",
+  "promotion_status": "success",
+  "restore_drill": {
+    "passed": true,
+    "migrations": 205,
+    "unknown_intent_preserved": true,
+    "encrypted_identity_verified": true,
+    "failed_restore_atomic": true,
+    "interrupted_transaction_rolled_back": true
+  },
+  "production_attempts": [
+    {
+      "attempt": 1,
+      "result": "insufficient_retention_workspace",
+      "before_service_swap": true,
+      "prior_runtime_healthy": true
+    },
+    {
+      "attempt": 2,
+      "result": "success",
+      "reuse": "exact sealed candidate; native backup/integrity/reserve gates repeated"
+    }
+  ],
+  "storage_recovery": {
+    "compiler_cache_reclaimed_after_staging": true,
+    "identical_git_pack_copies_deduplicated": 4,
+    "git_pack_logical_bytes_reclaimed": 560791608,
+    "git_paths_and_contents_preserved": true,
+    "manual_backup_deletions": 0
+  },
+  "accepted_at_utc": "2026-10-28T23:20:03.634440+00:00",
+  "live_acceptance": {
+    "at": "2026-10-28T23:20:03.634440+00:00",
+    "free_bytes": 9839792128,
+    "instances": {
+      "default": {
+        "commit": "67f91d2886e0b2b6dec6754700066a35eb2fccae",
+        "schema": "000205_authorization_proxy_country",
+        "preservation_checks": 18,
+        "all_preserved": true,
+        "service_hashes": 3,
+        "services_match": true,
+        "readiness_checks": 5,
+        "ready": true,
+        "preservation": {
+          "profile_ownership": {
+            "common": 0,
+            "unchanged": 0,
+            "unexpected_changes": 0,
+            "confirmed_expired_retirements": 0,
+            "confirmed_initial_activations": 0,
+            "confirmed_preupdate_initial_activations": 0,
+            "retired_since_backup": 0,
+            "new_since_backup": 0
+          },
+          "trojan_ownership": {
+            "common": 0,
+            "unchanged": 0,
+            "unexpected_changes": 0,
+            "confirmed_expired_retirements": 0,
+            "confirmed_initial_activations": 0,
+            "confirmed_preupdate_initial_activations": 0,
+            "retired_since_backup": 0,
+            "new_since_backup": 0
+          }
+        }
+      },
+      "production": {
+        "commit": "67f91d2886e0b2b6dec6754700066a35eb2fccae",
+        "schema": "000205_authorization_proxy_country",
+        "preservation_checks": 18,
+        "all_preserved": true,
+        "service_hashes": 3,
+        "services_match": true,
+        "readiness_checks": 5,
+        "ready": true,
+        "preservation": {
+          "profile_ownership": {
+            "common": 1745,
+            "unchanged": 1743,
+            "unexpected_changes": 0,
+            "confirmed_expired_retirements": 2,
+            "confirmed_initial_activations": 0,
+            "confirmed_preupdate_initial_activations": 0,
+            "retired_since_backup": 0,
+            "new_since_backup": 2
+          },
+          "trojan_ownership": {
+            "common": 10,
+            "unchanged": 10,
+            "unexpected_changes": 0,
+            "confirmed_expired_retirements": 0,
+            "confirmed_initial_activations": 0,
+            "confirmed_preupdate_initial_activations": 0,
+            "retired_since_backup": 0,
+            "new_since_backup": 0
+          }
+        }
+      }
+    },
+    "kamatera": {
+      "unknown_operations": 3,
+      "kinds": [
+        {
+          "kind": "CREATE_DROPLET",
+          "state": "unknown",
+          "count": 3,
+          "max_attempt": 1,
+          "with_provider_receipt": 0
+        }
+      ]
+    },
+    "live_output": {
+      "raw_endpoints": 8,
+      "viewers": 4,
+      "all_status_200": true,
+      "global_direct": 90,
+      "global_residential": 90,
+      "account_direct": 6,
+      "account_residential": 4,
+      "withheld": 0
+    }
+  },
+  "next_action": "Obtain definitive receipts for the three old Kamatera creates without replaying them. No pending code rollout."
+}

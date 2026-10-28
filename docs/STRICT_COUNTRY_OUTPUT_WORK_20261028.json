@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "at": "2026-10-28T22:30:38.223084+00:00",
+  "at": "2026-10-28T23:20:03.634440+00:00",
   "source_base": "ee595e7503947243d5840075bfcabd7a79b13965",
   "branch": "fix/video-strict-country-output-20261028",
   "runtime_base": "35cc83c3a666dbdba72f00b26851ce6b7bf3dc97",
@@ -16,11 +16,11 @@
     "video_review": "complete; detailed review around 110–128 seconds complete",
     "live_reproduction": "confirmed HTTP500 in global and account DIRECT/RESIDENTIAL raw outputs, both localhost and HTTPS; view shell HTTP200",
     "root_cause": "confirmed: native Trojan HTTP headerType and Shadowsocks SIP002 HTTP plugin rejected by publication",
-    "implementation": "implemented; final verification active",
-    "regression_tests": "345 mandatory roots and 20 recovery repetitions pass, zero skipped; full Go and vet pass; country browser fixture repaired and passes. Final early-release SQL-connection change awaits focused and exact-commit CI.",
+    "implementation": "merged through PR33; deployed release 67f91d2886e0b2b6dec6754700066a35eb2fccae",
+    "regression_tests": "345 mandatory roots, zero skipped, 20 repetitions; final focused 14 roots; full Go, vet and browser checks pass on exact source CI",
     "independent_review": "API strict1 failed credit_balance_exhausted; no review/usage returned; no retry submitted",
-    "source_public_ci": "pending",
-    "rollout_acceptance": "pending; no runtime replacement"
+    "source_public_ci": "source 40781992072, public installation 40782066235 and atomic promotion 40783249408 all success",
+    "rollout_acceptance": "both instances on schema205; 18 preservation checks each; six binary hashes; ten readiness checks; eight raw outputs and four viewers HTTP200"
   },
   "required_behavior": [
     "Country selection available before provider validation/account creation, default AUTO",
@@ -85,5 +85,6 @@
     "error": "credit_balance_exhausted",
     "usage": null
   },
-  "kamatera_observation": "Original dispatch journals classify all three responses PROVIDER_UNAVAILABLE; no action/resource receipt. Each actual dispatch count remains one; do not infer absence or replay."
+  "kamatera_observation": "Original dispatch journals classify all three responses PROVIDER_UNAVAILABLE; no action/resource receipt. Each actual dispatch count remains one; do not infer absence or replay.",
+  "final_report": "STRICT_COUNTRY_OUTPUT_RELEASE_20261029.md"
 }

@@ -1,3 +1,13 @@
+## Latest verified continuation — 2026-10-29 Tehran
+
+Start with [strict country and output release](STRICT_COUNTRY_OUTPUT_RELEASE_20261029.md). Both installations run `67f91d2886e0b2b6dec6754700066a35eb2fccae`, schema 205, verified at 2026-10-28 23:20 UTC. Source PR33 and independent CI passed 345 mandatory roots with zero skips; Ubuntu install/reinstall, restore drill and atomic publication passed. Eighteen preservation checks per installation, six running binary hashes, ten readiness checks, eight real raw output requests and four viewers passed. The observed global outputs contained 90 Direct and 90 Residential URIs, with no malformed row withheld.
+
+Country selection is available before account validation/creation, defaults AUTO, and explicit choices cannot silently fall back to another country or direct access. The native Trojan/SS HTTP output contract is repaired. Saved choices and routing rules were preserved.
+
+Open: three prior Kamatera creates remain UNKNOWN, each dispatched once without a provider receipt. Read-only inventory/queue evidence is not terminal absence proof. Do not replay those creates, reset their attempts, silently widen deletion, or start the quarantined original cluster/duplicate workers. The attempted OpenAI review failed `credit_balance_exhausted`; no review or usage receipt was returned and no paid retry was submitted.
+
+No code rollout remains pending. Recheck current live state on a later continuation, then address the provider receipts. Earlier entries below are historical.
+
 # Latest continuation — country priorities and video repairs, 2026-10-28
 
 Read `docs/VIDEO_COUNTRY_RELEASE_20261028.md` and its JSON receipt first.
