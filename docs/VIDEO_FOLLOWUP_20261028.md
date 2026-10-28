@@ -179,3 +179,26 @@ The isolated Ubuntu 24.04 install runner passed its host guard and guest setup,
 then package downloads failed with outbound connection timeouts. The harness
 now permits only its disposable LXD bridge and established replies; repository
 refresh errors fail explicitly. No production guard or live firewall was changed.
+
+## Second funded review and rejected-body cleanup
+
+The complete 340-root no-skip gate, full Go tests and vet passed on source
+`447b32d1`. Source CI 40673357732 and public install/reinstall CI 40673947112
+also passed. Public candidate `b735122b` was not promoted or installed.
+
+Review `resp_06a53efdbd7349a1006ae1d061d89087d1afe7bb59623db2b1`
+confirmed all three preceding repairs but blocked release on one adjacent defect:
+the guard returned pre-dispatch admission errors without closing the request
+body. Recorded usage was 181,530 input and 66,619 output tokens, 248,149 total.
+This was static review, not independent test execution.
+
+The guard now closes the request body on each of its four pre-dispatch rejection
+paths. Cleanup is explicit before delegation; successful early responses do not
+close unfinished uploads. The new mandatory PostgreSQL regression uses streaming
+pipe producers and asserts one Close, producer release and zero base dispatches
+for stale routing, canceled lock acquisition, an injected check failure and a
+missing base transport. All four cases fail on 447b32d1 and pass after correction
+with the race detector. The existing native HTTP/2 ownership and route-fencing
+tests also pass. Durable logs are body-baseline and body-fixed on the original
+development host. The expanded 341-root gate, Go/vet and final narrow review
+are pending; both live instances and public main/stable remain at 8515d676.

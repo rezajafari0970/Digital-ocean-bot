@@ -76,23 +76,31 @@ type accountNetworkGuardTransport struct {
 // The route remains pinned for the complete exchange, including request-body
 // upload after early HTTP/2 response headers. Observers run only after release.
 func (t accountNetworkGuardTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	// Until Base receives the request, this transport owns error-path cleanup.
+	// Do not defer this over dispatch: an early response may still be uploading.
+	reject := func(err error) (*http.Response, error) {
+		if req.Body != nil {
+			_ = req.Body.Close()
+		}
+		return nil, err
+	}
 	var conn *sql.Conn
 	if t.Check == nil {
 		var err error
 		conn, err = t.Container.acquireAccountRouteSharedLock(req.Context(), t.AccountID)
 		if err != nil {
-			return nil, err
+			return reject(err)
 		}
 		if err = t.checkConnection(req.Context(), conn); err != nil {
 			releaseAccountRouteSharedLock(conn, t.AccountID)
-			return nil, err
+			return reject(err)
 		}
 	} else if err := t.Check(req.Context()); err != nil {
-		return nil, err
+		return reject(err)
 	}
 	if t.Base == nil {
 		releaseAccountRouteSharedLock(conn, t.AccountID)
-		return nil, ErrNetworkNotReady
+		return reject(ErrNetworkNotReady)
 	}
 	ctx, cancel := context.WithCancel(req.Context())
 	copy := req.Clone(ctx)

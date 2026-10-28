@@ -4,7 +4,7 @@
   "date": "2026-10-28",
   "feature": "Durable account settings and independent driver-based proxy country priorities",
   "publication_gates": {
-    "cloudflare_transport_fleet_no_skip": "340 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
+    "cloudflare_transport_fleet_no_skip": "341 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
     "exact_candidate_ubuntu_24_amd64_install": "required before stable promotion; disposable Ubuntu 24.04 systemd guest on a GitHub-hosted machine that passes the unchanged kernel-memory guard",
     "full_go_and_vet_unprivileged": "required before push",
     "live_secret_scan_and_gitleaks": "required before push",

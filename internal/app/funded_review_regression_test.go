@@ -134,6 +134,97 @@ func TestFundedReviewDirectRouteFencePostgres(t *testing.T) {
 	})
 }
 
+func TestFundedReviewRejectedBodyCleanupPostgres(t *testing.T) {
+	for _, cause := range []string{"stale-route", "lock-canceled", "check-failure", "missing-base"} {
+		t.Run(cause, func(t *testing.T) {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			base := &countRoundTripper{}
+			guard := accountNetworkGuardTransport{Base: base}
+			want := ErrNetworkNotReady
+			switch cause {
+			case "stale-route", "lock-canceled":
+				db := installerBootstrapDB(t)
+				c, a, ps := countryFixture(t, db, "")
+				execBootstrap(t, db, "UPDATE network_profiles SET mode='direct',proxy_id=NULL WHERE account_id=$1", a)
+				cfg, err := c.Accounts.Account(ctx, a)
+				if err != nil {
+					t.Fatal(err)
+				}
+				rt, err := c.buildProviderNetworkRuntime(ctx, cfg)
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer rt.CloseIdleConnections()
+				var ok bool
+				guard, ok = rt.Client.Transport.(accountNetworkGuardTransport)
+				if !ok {
+					t.Fatal("direct runtime missing guard")
+				}
+				guard.Base = base
+				if cause == "stale-route" {
+					execBootstrap(t, db, "UPDATE network_profiles SET mode='proxy_required',proxy_id=$2 WHERE account_id=$1", a, ps[0])
+					want = ErrStaleAccountNetwork
+				} else {
+					cancel()
+					want = context.Canceled
+				}
+			case "check-failure":
+				want = errors.New("injected admission failure")
+				guard.Check = func(context.Context) error { return want }
+			case "missing-base":
+				guard.Check = func(context.Context) error { return nil }
+				guard.Base = nil
+			}
+			reader, writer := io.Pipe()
+			body := &fundedCloseRecorder{ReadCloser: reader, called: make(chan struct{})}
+			// Cleanup uses the underlying reader, so it cannot conceal a missed
+			// transport Close or inflate the observed transport close count.
+			defer reader.Close()
+			defer writer.Close()
+			started, produced := make(chan struct{}), make(chan error, 1)
+			go func() {
+				close(started)
+				_, err := writer.Write([]byte("streaming provider payload"))
+				produced <- err
+			}()
+			<-started
+			select {
+			case err := <-produced:
+				t.Fatalf("producer finished before admission: %v", err)
+			default:
+			}
+			req, err := http.NewRequestWithContext(ctx, "POST", "http://127.0.0.1:1/never-dispatched", body)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var response *http.Response
+			if cause == "stale-route" {
+				response, err = (&http.Client{Transport: guard}).Do(req)
+			} else {
+				response, err = guard.RoundTrip(req)
+			}
+			if response != nil || !errors.Is(err, want) {
+				t.Fatalf("unexpected rejection: response=%v err=%v want=%v", response, err, want)
+			}
+			if base.calls.Load() != 0 {
+				t.Fatal("rejected request reached base transport")
+			}
+			if body.count.Load() != 1 {
+				t.Errorf("rejected request body closed %d times, want one", body.count.Load())
+			}
+			select {
+			case err := <-produced:
+				if !errors.Is(err, io.ErrClosedPipe) {
+					t.Fatalf("producer error=%v", err)
+				}
+			case <-time.After(time.Second):
+				t.Error("rejected streaming producer remains stranded")
+			}
+		})
+	}
+}
+
 type fundedCloseRecorder struct {
 	io.ReadCloser
 	called chan struct{}

@@ -255,7 +255,7 @@ REQUIRED['internal/app'] += ('TestCountryReviewTwoSnapshotCannotAdoptFreshFenceP
 REQUIRED['internal/adminapi'] += ('TestCountryReviewTwoAccountListOneConnectionPostgres', 'TestCountryReviewTwoUUIDAliasUsesSameRouteLockPostgres', 'TestCountryReviewTwoInvalidModeCannotValidateReplacementPostgres', 'TestCountryReviewTwoAccountProxyObservationCASPostgres')
 REQUIRED['internal/app'] += ('TestProxyKeeperLockSerializesAcrossConnectionsPostgresE2E',)
 REQUIRED['internal/proxyselection'] += ('TestCountryReviewTwoLargeFiniteSweepCompletes',)
-REQUIRED['internal/app'] += ('TestFundedReviewDirectRouteFencePostgres', 'TestFundedReviewNativeEOFThenClosePostgres', 'TestFundedReviewOrderedPassiveHealthCASPostgres')
+REQUIRED['internal/app'] += ('TestFundedReviewDirectRouteFencePostgres', 'TestFundedReviewNativeEOFThenClosePostgres', 'TestFundedReviewOrderedPassiveHealthCASPostgres', 'TestFundedReviewRejectedBodyCleanupPostgres')
 
 def main(repo):
     if os.geteuid() == 0:
