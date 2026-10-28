@@ -1,3 +1,32 @@
+# Latest continuation — AWS credential snapshot release, 2026-10-28
+
+Accepted at 2026-10-28T03:02:50.114639+00:00 (2026-10-28 06:32:50 Asia/Tehran). PR #31 is merged.
+Source tested 842280df43f8397705b738766c7603ba328b793c; merge bde88a2860e0ad0e591934f4dc99d2d9d00a1d76.
+Public main/stable and BOTH runtime instances are 8515d676c5f64cbd7d51eacfa8f15a99add67053.
+Full source CI 40622027133 passed (295 required roots, zero skipped, isolated restore).
+Public test/install CI 40622281389 and atomic promotion 40623047707 passed.
+Both updates and 17 preservation checks per instance passed; HTTPS assets verified.
+
+Read docs/AWS_CREDENTIAL_RELEASE_20261028.md and its JSON first.
+Worktree: /root/projects/dob-aws-auth-20261028.
+Operations: /root/dob-aws-auth-20261028.
+Do NOT rerun completed updates. Original host remains quarantined; current runtime is on limited-lime.
+
+Reproduced/fixed: silent credential autofill left hidden JSON stale; preview and Save
+now bind provider, visible credentials and primary proxy. Failed user's AWS preview
+was real STS InvalidClientTokenId/403; no AWS account or unsaved credentials exist.
+A successful test with valid credentials entered securely in the panel remains required.
+
+External blockers: same 3 Kamatera unknown creates (one send each, original timestamps,
+no task/server IDs), 3 DO accounts report warning and full 3/3 capacity, OpenAI API key
+and canonical budget ledger unavailable on disconnected original device. No OpenAI
+API call was submitted; prepared prompt is NOT a completed review. OVH transient proxy
+error recovered in subsequent normal observation. No active unfinished account purge.
+No duplicate create, fabricated terminal outcome, credential/budget reset, direct egress
+fallback, physical Android acceptance or exhaustive historical audit claim.
+
+---
+
 ## Kamatera regional release — 2026-10-28T05:41:10+03:30
 
 Read `docs/KAMATERA_REGIONAL_RELEASE_20261028.md` and its JSON receipt first.
