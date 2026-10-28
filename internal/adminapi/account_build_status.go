@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/capacity"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
 	"strings"
@@ -153,8 +154,24 @@ func (s *Server) accountBuildState(ctx context.Context, id string) (accountBuild
 			x.SchedulerReason = "Ready to build"
 		}
 	}
+	// Provider permission is not scheduler admission. A healthy API may coexist
+	// with every configured build slot occupied by unresolved provider work.
+	blocked, unresolved, expired, err := s.accountSchedulerConcurrency(ctx, id)
+	if err != nil {
+		return x, err
+	}
+	if x.SchedulerCanBuild && blocked {
+		x.SchedulerCanBuild = false
+		x.SchedulerReason = "Concurrent build limit reached; waiting for existing builds"
+		if unresolved > 0 {
+			x.SchedulerReason = fmt.Sprintf("Concurrent build limit reached: %d create request(s) await a verified provider result. No duplicate create will be sent.", unresolved)
+			if expired > 0 {
+				x.SchedulerReason += fmt.Sprintf(" %d expired server(s) are excluded from output; retirement waits for pending builds.", expired)
+			}
+		}
+	}
 	// Unknown/stale capacity stays unknown. A definitive block is a known zero.
-	knownBlocked := (accountStatus == "trial_restricted" && !x.TrialCompatible) || !x.Enabled || x.Block != nil || (x.State != "ACTIVE" && x.State != "UNKNOWN" && x.State != "") || errorState != "" || x.DesiredRemaining == 0
+	knownBlocked := blocked || (accountStatus == "trial_restricted" && !x.TrialCompatible) || !x.Enabled || x.Block != nil || (x.State != "ACTIVE" && x.State != "UNKNOWN" && x.State != "") || errorState != "" || x.DesiredRemaining == 0
 	if knownBlocked {
 		n := 0
 		x.Buildable = &n
@@ -166,4 +183,21 @@ func (s *Server) accountBuildState(ctx context.Context, id string) (accountBuild
 		x.Buildable = &n
 	}
 	return x, nil
+}
+
+// Use the scheduler's profile-scoped concurrency rule. One saturated schedule
+// must not hide another enabled profile that still has room. This is advisory
+// display state only; mutation admission always revalidates its own guards.
+func (s *Server) accountSchedulerConcurrency(ctx context.Context, id string) (blocked bool, unresolved, expired int, err error) {
+	err = s.DB.QueryRowContext(ctx, `WITH configured AS (
+  SELECT sc.max_concurrent,(SELECT count(*) FROM deployments d
+   WHERE d.account_id=sc.account_id AND d.profile_id=sc.profile_id
+   AND d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC')
+   AND (d.droplet_id IS NULL OR EXISTS(SELECT 1 FROM droplets r WHERE r.id=d.droplet_id AND r.state<>'DELETED'))) AS active
+  FROM schedules sc JOIN deployment_profiles p ON p.id=sc.profile_id AND p.account_id=sc.account_id
+  WHERE sc.account_id=$1 AND sc.enabled AND p.enabled
+ ) SELECT EXISTS(SELECT 1 FROM configured) AND NOT EXISTS(SELECT 1 FROM configured WHERE max_concurrent<=0 OR active<max_concurrent),
+ (SELECT count(*) FROM operations WHERE account_id=$1 AND kind='CREATE_DROPLET' AND state='unknown' AND COALESCE(resource_id,'')=''),
+ (SELECT count(*) FROM droplets WHERE account_id=$1 AND state IN ('READY','EXPIRING') AND expires_at<=now())`, id).Scan(&blocked, &unresolved, &expired)
+	return
 }

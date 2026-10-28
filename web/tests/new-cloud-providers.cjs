@@ -49,11 +49,12 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    await waitFor('cache.accountPreview?.provider==="kamatera"&&!document.querySelector("#modalSubmit").disabled&&!document.querySelector("#discoverAccount").disabled');
   }
   await prepareKamatera();
-  assert.match(await evaluate('document.querySelector("[name=size]").selectedOptions[0].textContent'),/Availability.*USD.*4.00\/730h base/);
+  assert.equal(await evaluate('document.querySelector("[name=size]").selectedOptions[0].textContent'),'1A-1024-20 · 1 GB / 1 CPU');
+  assert.match(await evaluate('document.querySelector("[data-plan-summary=size]").textContent'),/Availability.*USD.*4.00\/730h base/);
   assert.match(await evaluate('document.querySelector("[data-kamatera-pricing]").textContent'),/traffic is charged separately/);
   assert.match(await evaluate('document.querySelector("[data-kamatera-pricing]").textContent'),/Custom configuration verified/);
   await evaluate('document.querySelector("[name=region]").value="US-AT";document.querySelector("[name=region]").dispatchEvent(new Event("change"))');
-  assert.match(await evaluate('document.querySelector("[name=size]").selectedOptions[0].textContent'),/Price unavailable/);
+  assert.match(await evaluate('document.querySelector("[data-plan-summary=size]").textContent'),/Price unavailable/);
   assert.equal(await evaluate('document.querySelector("[data-kamatera-pricing]").textContent.includes("4.00/730h")'),false,'old region price leaked');
   await evaluate('document.querySelector("[name=region]").value="US-SC";document.querySelector("[name=region]").dispatchEvent(new Event("change"))');
 
@@ -65,6 +66,11 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   assert.equal(await evaluate('document.querySelector(".discoveryOk").textContent.includes("kamatera-key:")'),false);
   assert.equal(await evaluate('document.querySelector("[name=size2]").value'), '');
   assert.equal(await evaluate('document.querySelector("[name=size3]").value'), '');
+  for(const prefix of ['size','image','region']){
+   assert.equal(await evaluate('(()=>{const a=document.querySelector("[name='+prefix+']"),b=document.querySelector("[name='+prefix+'2]");return [...b.options].find(o=>o.value===a.value).disabled})()'),true,'native picker prevents duplicate '+prefix);
+   assert.equal(await evaluate('new FormData(document.querySelector("#modalForm")).get("'+prefix+'")===document.querySelector("[name='+prefix+']").value'),true,'selected '+prefix+' is submitted');
+  }
+
   await evaluate('document.querySelector("[name=size2]").value="2B-4096-30";document.querySelector("[name=size2]").dispatchEvent(new Event("change"));document.querySelector("[name=size]").value="2B-4096-30";document.querySelector("[name=size]").dispatchEvent(new Event("change"))');
   assert.equal(await evaluate('document.querySelector("[name=size2]").value'), '');
   assert.match(await evaluate('document.querySelector("[data-kamatera-pricing]").textContent'),/41.00\/730h base/);
@@ -105,7 +111,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   await evaluate('fetch("/fixture/account-edit",{method:"POST"})');
   await evaluate('cache.accounts=[{id:"stale-fixture"}];editAccount("kamatera-edit")');
   await waitFor('document.querySelector("#modalTitle").textContent==="Edit Edit fixture"&&document.querySelector("#modal").open');
-  assert.match(await evaluate('document.querySelector("[name=size]").selectedOptions[0].textContent'),/41.00\/730h base/);
+  assert.match(await evaluate('document.querySelector("[data-plan-summary=size]").textContent'),/41.00\/730h base/);
   await evaluate('document.querySelector("[name=region]").value="US-AT";document.querySelector("[name=region]").dispatchEvent(new Event("change"))');
   assert.equal(await evaluate('document.querySelector("[name=size]").selectedOptions[0].disabled'),false,'saved unavailable plan must remain in FormData');
   const beforeInvalidSave=await evaluate('fetch("/fixture/save-count").then(r=>r.json())');
@@ -116,6 +122,10 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   assert.match(await evaluate('document.querySelector("[data-kamatera-pricing]").textContent'),/Price unavailable/);
   await evaluate('document.querySelector("[name=region]").value="US-SC";document.querySelector("[name=region]").dispatchEvent(new Event("change"))');
   assert.match(await evaluate('document.querySelector("[data-kamatera-pricing]").textContent'),/4.00\/730h base/);
+  await evaluate('document.querySelector("[name=size2]").value="2B-4096-30";document.querySelector("[name=size2]").dispatchEvent(new Event("change"))');
+  assert.match(await evaluate('document.querySelector("[data-plan-summary=size2]").textContent'),/41.00\/730h base/);
+  assert.equal(await evaluate('[...document.querySelector("[name=size3]").options].filter(o=>o.value&&o.disabled).length'),2,'both selected plans are disabled in the third picker');
+  assert.equal(await evaluate('new FormData(document.querySelector("#modalForm")).get("size2")'),'2B-4096-30');
   await assertSaveVisible('Kamatera edit regional prices');
   await evaluate('document.querySelector("#modalCancel").click();cache.accounts=null;document.querySelector("#primaryAction").click()');await waitFor('document.querySelector("#modal").open');
   console.log('KAMATERA_MOBILE_LAYOUT_UNIQUE_CHOICES_SINGLE_SAVE_AND_STALE_RESPONSE PASS');
@@ -229,7 +239,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
     assert.equal(await evaluate('document.querySelector("#modalSubmit").disabled&&document.querySelector("#discoverAccount").disabled'),true);
     await waitFor('cache.accountPreview!==null&&!document.querySelector("#discoverAccount").disabled');
     await evaluate('fetch("/fixture/preview-mode?mode=",{method:"POST"})');
-    assert.match(await evaluate('document.querySelector("#accountSize").selectedOptions[0].textContent'),/USD 0.0114\/h compute/);
+    assert.match(await evaluate('document.querySelector("[data-plan-summary=size]").textContent'),/USD 0.0114\/h compute/);
     assert.deepEqual(await evaluate('[...document.querySelectorAll("[data-discovery-key^=region_]")].map(el=>({value:el.value,empty:[...el.options].filter(o=>o.value==="").length,primaryDisabled:[...el.options].find(o=>o.value==="eu-west-1").disabled}))'),Array.from({length:4},()=>({value:'',empty:1,primaryDisabled:true})));
     await evaluate('(()=>{const change=(key,value)=>{const el=document.querySelector("[data-discovery-key="+key+"]");el.value=value;el.dispatchEvent(new Event("change"))};change("region_2","us-east-1");change("region","us-east-1")})()');
     assert.equal(await evaluate('document.querySelector("[data-discovery-key=region_2]").value'),'');

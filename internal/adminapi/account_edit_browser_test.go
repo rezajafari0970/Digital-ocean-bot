@@ -26,6 +26,14 @@ func TestAccountEditBrowser(t *testing.T) {
 	for _, p := range providers {
 		accounts = append(accounts, map[string]any{"id": p, "provider": p, "name": p + " fixture", "enabled": true, "provider_state": "ACTIVE", "regions": []string{"r1"}, "sizes": []string{"plan-1"}, "images": []string{"ubuntu-1"}, "image": "ubuntu-1", "proxy_id": "saved-proxy", "proxy_ids": []string{"saved-proxy"}, "desired_server_count": 10, "max_concurrent": 3, "lifetime_min_seconds": 96000, "lifetime_max_seconds": 99000, "build_spacing_minutes": 15, "build_spacing_max_minutes": 260})
 	}
+	// Legacy rows in the phone recording contain repeated alternatives. They
+	// must open as one effective choice rather than disappear only after Save.
+	for _, row := range accounts {
+		if row["provider"] == "digitalocean" {
+			row["sizes"] = []string{"plan-1", "plan-1", "plan-1"}
+			row["images"] = []string{"ubuntu-1", "ubuntu-1", "ubuntu-1"}
+		}
+	}
 	accounts = append(accounts, map[string]any{"id": "saved-choice", "provider": "kamatera", "name": "Saved choices", "settings_revision": 7, "enabled": true, "regions": []string{"retired-region", "r2"}, "sizes": []string{"retired-plan", "plan-2"}, "images": []string{"retired-image", "ubuntu-2"}, "image": "retired-image", "proxy_id": "saved-proxy", "proxy_ids": []string{"saved-proxy", "other-proxy", "third-saved-proxy", "fourth-saved-proxy"}, "desired_server_count": 10, "max_concurrent": 5, "lifetime_min_seconds": 96001, "lifetime_max_seconds": 99000, "build_spacing_minutes": 15, "build_spacing_max_minutes": 260})
 	mux.HandleFunc("GET /api/v1/accounts", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, 200, accounts) })
 	mux.HandleFunc("GET /api/v1/proxies", func(w http.ResponseWriter, r *http.Request) {

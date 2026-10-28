@@ -250,3 +250,16 @@ These blockers remain open until authoritative provider evidence is available.
   previous review and dispositions; 230,558 bytes, SHA256
   ad97217b3b65ad8d2054888b8529671434093905a68f9348f9f96dd8b7286371.
   No output-token/request/spending cap was added. Pending, no approval assumed.
+
+
+### Video follow-up continuation (2026-10-28)
+
+See `docs/VIDEO_FOLLOWUP_20261028.md` for the new 337-second recording,
+read-only live diagnosis and phase-by-phase status. The candidate adds compact
+native mobile plan labels with complete per-selection price/specification
+summaries, visible legacy preference deduplication, and truthful profile-scoped
+scheduler concurrency status. Final 337-root mandatory gate, full Go tests,
+vet, browser cases and backup restore pass. New strongest-model OpenAI review
+`video-followup1` failed with `credit_balance_exhausted` and no output. Source
+remains a draft; neither runtime has been updated. Three ambiguous Kamatera
+creates still lack terminal provider evidence; do not replay or clear them.

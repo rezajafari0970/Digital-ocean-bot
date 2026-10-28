@@ -35,7 +35,7 @@ REQUIRED = {
     "internal/panels/residentialsync": ("TestProofRechecksDueAfterQueuedOwnership","TestGeneratedTrojanPassesStrictResidentialSniffing","TestNativeRouteBatchPreservesCompleteMatrix","TestGoogleAdsSelectiveScopeAndRollback","TestGoogleAdsSelectiveRoutingAndProxyOutage","TestInstalledCoreGoogleAdsSelectiveTrafficAndOutage"),
     "internal/proxyselection": ("TestCountryPriorityExhaustsPeersBeforeFallback","TestCountryPriorityUnknownNeverAuthorizesLowerCountry","TestCountryPriorityResumeScopeAndFailback","TestCountryPriorityValidation"),
     "internal/adminapi": (
-        "TestAccountEditBrowser", "TestAccountRuleApplicationBrowser", "TestPerformanceBrowser",
+        "TestAccountBuildConcurrencyExplainsUnknownCreatesPostgres", "TestAccountEditBrowser", "TestAccountRuleApplicationBrowser", "TestPerformanceBrowser",
         "TestCountryPolicyPersistenceFencingAndLegacyReset",
         "TestProxyNameSavePreservesIdentityAndConflicts",
         "TestAccountSettingsOmissionsConflictAndNoSilentClamp",

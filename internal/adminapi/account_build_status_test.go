@@ -242,3 +242,52 @@ func TestWarningMessageIsActionableWithoutChangingAdmission(t *testing.T) {
 		t.Fatal(v, err)
 	}
 }
+
+func TestAccountBuildConcurrencyExplainsUnknownCreatesPostgres(t *testing.T) {
+	db := adminTestDB(t)
+	s := Server{DB: db}
+	ctx := context.Background()
+	id := seedBuildAccount(t, db, "kamatera")
+	putBuildSnapshot(t, db, id, "active", false, 0, 0)
+	profile := perfUUID()
+	sqlMust(t, db, "INSERT INTO deployment_profiles(id,account_id,name,config,enabled) VALUES($1,$2,'pending fixture','{}',true)", profile, id)
+	sqlMust(t, db, "INSERT INTO schedules(id,account_id,profile_id,enabled,interval_seconds,batch_size,max_concurrent,next_run_at) VALUES(gen_random_uuid(),$1,$2,true,60,1,1,now())", id, profile)
+	dep := perfUUID()
+	sqlMust(t, db, "INSERT INTO deployments(id,account_id,profile_id,state,current_step) VALUES($1,$2,$3,'CREATING','create')", dep, id, profile)
+	sqlMust(t, db, "INSERT INTO operations(id,account_id,kind,idempotency_key,state,attempt) VALUES(gen_random_uuid(),$1,'CREATE_DROPLET','unknown-fixture','unknown',1)", id)
+	sqlMust(t, db, "INSERT INTO droplets(id,account_id,profile_id,provider_resource_id,state,profile,expires_at) VALUES(gen_random_uuid(),$1,$2,'expired-fixture','EXPIRING','{}',now()-interval '1 hour')", id, profile)
+	check := func(blocked bool) {
+		t.Helper()
+		x, e := s.accountBuildState(ctx, id)
+		if e != nil {
+			t.Fatal(e)
+		}
+		if !x.ProviderCanCreate || x.SchedulerCanBuild == blocked {
+			t.Fatalf("incorrect permission/admission split: %+v", x)
+		}
+		if blocked && (x.Buildable == nil || *x.Buildable != 0 || !strings.Contains(x.SchedulerReason, "1 create request(s)") || !strings.Contains(x.SchedulerReason, "1 expired server(s)")) {
+			t.Fatalf("missing concrete blocker: %+v", x)
+		}
+	}
+	check(true)
+	// Independent accounts and profiles must not share the blocked state.
+	other := seedBuildAccount(t, db, "kamatera")
+	putBuildSnapshot(t, db, other, "active", false, 0, 0)
+	x, e := s.accountBuildState(ctx, other)
+	if e != nil || !x.SchedulerCanBuild {
+		t.Fatal(x, e)
+	}
+	sibling := perfUUID()
+	sqlMust(t, db, "INSERT INTO deployment_profiles(id,account_id,name,config,enabled) VALUES($1,$2,'free fixture','{}',true)", sibling, id)
+	sqlMust(t, db, "INSERT INTO schedules(id,account_id,profile_id,enabled,interval_seconds,batch_size,max_concurrent,next_run_at) VALUES(gen_random_uuid(),$1,$2,true,60,1,1,now())", id, sibling)
+	check(false)
+	sqlMust(t, db, "UPDATE schedules SET enabled=false WHERE profile_id=$1", sibling)
+	check(true)
+	sqlMust(t, db, "UPDATE deployments SET state='PANEL_COMPLETE' WHERE id=$1", dep)
+	check(false)
+	var state string
+	var attempt int
+	if err := db.QueryRow("SELECT state,attempt FROM operations WHERE account_id=$1", id).Scan(&state, &attempt); err != nil || state != "unknown" || attempt != 1 {
+		t.Fatal("display read changed durable provider evidence", state, attempt, err)
+	}
+}

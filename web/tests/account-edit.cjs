@@ -42,6 +42,10 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    for(const name of ['size2','size3','image2','image3','proxy_id2','proxy_id3','region2','region3']){
     assert.equal(await evaluate('document.querySelector("[name='+name+']").value'),'',provider+' preserves optional '+name);
    }
+   if(provider==='digitalocean'){
+    assert.equal(await evaluate('document.querySelector("#modalFields").textContent.includes("Duplicate saved choices are shown once")'),true);
+    assert.equal(await evaluate('document.querySelector("[data-plan-summary=size2]").hidden&&document.querySelector("[data-plan-summary=size3]").hidden'),true);
+   }
    for(const size of [{width:320,height:480},{width:390,height:420},{width:844,height:390},{width:390,height:844}]){
     await call('Emulation.setDeviceMetricsOverride',{...size,deviceScaleFactor:1,mobile:true});
     for(const scroll of [0,99999]){
