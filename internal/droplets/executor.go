@@ -92,7 +92,8 @@ func (e Executor) Create(ctx context.Context, op jobs.Operation, profile Profile
 		// A native asynchronous job was accepted; waiting for its server UUID
 		// is not an account transport failure. Real provider errors still publish.
 		acceptedPending := result.OperationID != "" && result.Outcome == providers.OutcomeAmbiguous && class == providers.ErrorAmbiguousOutcome
-		if e.OnCreateError != nil && !acceptedPending {
+		localRegionalWait := result.ComputeNotDispatched && result.Outcome == providers.OutcomeRejected && errors.Is(err, providers.ErrRegionalCreateUnresolved)
+		if e.OnCreateError != nil && !acceptedPending && !localRegionalWait {
 			e.OnCreateError(ctx, err)
 		}
 		if (result.ComputeNotDispatched && result.Outcome == providers.OutcomeRejected) || class == providers.ErrorAuthentication || class == providers.ErrorPermissionDenied || class == providers.ErrorAccountLocked || class == providers.ErrorCapacity || class == providers.ErrorRegionCapacity || class == providers.ErrorImageUnavailable || class == providers.ErrorInvalidRequest || class == providers.ErrorNotFound || errors.Is(err, ErrMutationBlocked) {

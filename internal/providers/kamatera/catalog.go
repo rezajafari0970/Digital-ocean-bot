@@ -96,7 +96,7 @@ func (d *Driver) images(ctx context.Context, region string) ([]imageData, error)
 	}
 	return xs, nil
 }
-func (d *Driver) CatalogCacheVersion() string { return "kamatera-cloudcli-public-pricing-v4" }
+func (d *Driver) CatalogCacheVersion() string { return "kamatera-cloudcli-public-pricing-v5" }
 func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 	regions, e := d.locations(ctx)
 	if e != nil {
@@ -156,12 +156,18 @@ func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 	out := providers.Catalog{CacheVersion: d.CatalogCacheVersion(), FetchedAt: time.Now().UTC(), Regions: []providers.Region{}, Plans: []providers.Plan{}, Images: []providers.Image{}, Pricing: &providers.CatalogPricing{Status: "unavailable", Basis: "Official public base price unavailable; retry catalog refresh", Source: pricingURL}}
 	plans := map[string]*providers.Plan{}
 	images := map[string]*providers.Image{}
+	licenceCtx, cancelLicences := context.WithTimeout(ctx, 8*time.Second)
+	defer cancelLicences()
 	for i, r := range regions {
 		b := bs[i]
 		if b.err != nil {
 			return providers.Catalog{}, b.err
 		}
 		out.Regions = append(out.Regions, providers.Region{ID: r.ID, Name: r.City + ", " + r.Country, CountryCode: locationCountryCode(r), Available: true})
+		var nativeLicences map[string]bool
+		if tariff.needsNativeLicences(r.ID, b.images) {
+			nativeLicences = d.nativeImageLicences(licenceCtx, r.ID, b.images)
+		}
 		for _, s := range b.sizes {
 			if !s.valid() || !supportedSize(s, b.images) {
 				continue
@@ -182,7 +188,7 @@ func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 			}
 			p.DetailsByRegion[r.ID] = providers.PlanRegionDetails{NativeID: s.ID, CPUType: s.CPUType, CatalogOrigin: origin, BillingCycle: "hourly", CPU: s.Cores, MemoryMB: s.RAM, DiskGB: s.Disk, Supported: true, OS: "Ubuntu"}
 			total++
-			if price, ok := tariff.quote(s, r.ID, b.images); ok {
+			if price, ok := tariff.quoteWithNativeLicences(s, r.ID, b.images, nativeLicences); ok {
 				p.PricesByRegion[r.ID] = price
 				priced++
 			}
@@ -238,6 +244,9 @@ func (d *Driver) Catalog(ctx context.Context) (providers.Catalog, error) {
 		return a.ID < b.ID
 	})
 	sort.Slice(out.Images, func(i, j int) bool { return out.Images[i].Version > out.Images[j].Version })
+	if ctx.Err() != nil {
+		return providers.Catalog{}, ctx.Err()
+	}
 	if len(providers.CatalogRegionsWithOptions(out)) == 0 {
 		return providers.Catalog{}, problem(providers.ErrorUnavailable, "catalog", "NO_SUPPORTED_UBUNTU_PLANS", 200)
 	}

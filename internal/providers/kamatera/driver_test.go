@@ -54,9 +54,10 @@ func fixtureKey(t *testing.T) string {
 }
 
 type memoryJournal struct {
-	mu         sync.Mutex
-	record     providers.AccountResource
-	operations int
+	mu            sync.Mutex
+	record        providers.AccountResource
+	operations    int
+	regionalError error
 }
 type memorySession struct{ j *memoryJournal }
 
@@ -82,6 +83,15 @@ func (j *memoryJournal) List(context.Context) ([]providers.AccountResource, erro
 	return []providers.AccountResource{j.record}, nil
 }
 func (s *memorySession) Record() providers.AccountResource { return s.j.record }
+func (s *memorySession) BeginRegionalCreate(ctx context.Context, intent string) (bool, error) {
+	if s.j.regionalError != nil {
+		return false, s.j.regionalError
+	}
+	if err := s.PrepareIntent(ctx, intent); err != nil {
+		return false, err
+	}
+	return s.BeginAttempt(ctx)
+}
 func (s *memorySession) BeginAttempt(context.Context) (bool, error) {
 	if s.j.record.Attempted {
 		return false, nil

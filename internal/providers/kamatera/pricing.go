@@ -239,6 +239,10 @@ func hasString(xs []string, s string) bool {
 }
 
 func (p *publicTariff) quote(s sizeData, region string, images []imageData) (providers.PlanPrice, bool) {
+	return p.quoteWithNativeLicences(s, region, images, nil)
+}
+
+func (p *publicTariff) quoteWithNativeLicences(s sizeData, region string, images []imageData, native map[string]bool) (providers.PlanPrice, bool) {
 	if p == nil || len(p.Regions[region]) == 0 {
 		return providers.PlanPrice{}, false
 	}
@@ -248,23 +252,27 @@ func (p *publicTariff) quote(s sizeData, region string, images []imageData) (pro
 	if !a || !b || !c {
 		return providers.PlanPrice{}, false
 	}
-	// Every selectable Ubuntu variant must have an exact regional match and no
-	// licence surcharge. Otherwise a plan-only price could hide an OS charge.
+	// Every selectable Ubuntu variant needs verified zero licence cost. Native
+	// regional evidence may fill a missing public mapping, never a missing price
+	// or a conflicting/ambiguous public image identity.
 	matched := false
 	for _, im := range images {
 		if !hasString([]string{"22.04", "24.04", "26.04"}, im.version()) {
 			continue
 		}
-		matches := 0
+		matches, identityMatches := 0, 0
 		for _, os := range p.Images {
-			if (os.Name == strings.TrimPrefix(im.Code, region+":") || os.ID == strings.TrimPrefix(im.ID, region+":")) && hasString(os.Regions, region) {
+			if os.Name == strings.TrimPrefix(im.Code, region+":") || os.ID == strings.TrimPrefix(im.ID, region+":") {
+				identityMatches++
 				if os.Price == nil || *os.Price != 0 {
 					return providers.PlanPrice{}, false
 				}
-				matches++
+				if hasString(os.Regions, region) || (native[im.ID] && strings.HasPrefix(im.ID, region+":")) {
+					matches++
+				}
 			}
 		}
-		if matches != 1 {
+		if matches != 1 || identityMatches != 1 {
 			return providers.PlanPrice{}, false
 		}
 		matched = true
