@@ -196,6 +196,10 @@ func (c Container) verifyCountryCandidate(ctx context.Context, s countrySnapshot
 	return c.verifyCountryCandidateWithGateway(ctx, s, p, v, c.newIdentityGateway)
 }
 func (c Container) verifyCountryCandidateWithGateway(ctx context.Context, s countrySnapshot, p countryProxy, v countryCandidate, gatewayFor countryGatewayFactory) (countryCandidate, proxyselection.Evaluation) {
+	return c.verifyCountryCandidateUsing(ctx, s, p, v, gatewayFor, c.DB, c.Secrets.GetProxyAtVersion)
+}
+
+func (c Container) verifyCountryCandidateUsing(ctx context.Context, s countrySnapshot, p countryProxy, v countryCandidate, gatewayFor countryGatewayFactory, query countryQuery, passwordFor func(context.Context, string, string, string) ([]byte, error)) (countryCandidate, proxyselection.Evaluation) {
 	unknown := func(reason string) (countryCandidate, proxyselection.Evaluation) {
 		return v, proxyselection.Evaluation{Health: proxyselection.Unknown, Reason: reason}
 	}
@@ -215,7 +219,7 @@ func (c Container) verifyCountryCandidateWithGateway(ctx context.Context, s coun
 	var password []byte
 	var err error
 	if p.SecretRef != "" {
-		password, err = c.Secrets.GetProxyAtVersion(ctx, p.ID, p.SecretRef, p.SecretVersion)
+		password, err = passwordFor(ctx, p.ID, p.SecretRef, p.SecretVersion)
 		if err != nil {
 			return unknown("proxy credential unavailable")
 		}
@@ -278,7 +282,7 @@ func (c Container) verifyCountryCandidateWithGateway(ctx context.Context, s coun
 		}
 	}
 	var collision bool
-	err = c.DB.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM account_network_identities WHERE account_id<>$1
+	err = query.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM account_network_identities WHERE account_id<>$1
  AND (exit_ip=$2::inet OR subnet_key=host(network(set_masklen($2::inet,24)))||'/24'))`, s.Config.Account, geo.IP).Scan(&collision)
 	if err != nil {
 		return unknown("isolation check unavailable")

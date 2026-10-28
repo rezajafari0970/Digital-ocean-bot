@@ -13,6 +13,12 @@
   const ram=plan.MemoryMB>=1024?(plan.MemoryMB/1024)+' GB':plan.MemoryMB+' MB';
   return ram+' RAM | '+plan.CPU+' vCPU '+type+(types[type]?' '+types[type]:'')+' | '+plan.DiskGB+' GB SSD | '+priceLabel(plan,region)+' | '+plan.ID;
  }
+ function optionLabel(plan){
+  const match=/^(\d+[ABTD])-(\d+)-(\d+)$/.exec(plan.ID||'');
+  if(!match)return String(plan.ID||'');
+  const ram=Number(match[2]);
+  return match[1]+' · '+(ram>=1024?ram/1024+' GB':ram+' MB')+' · '+match[3]+' GB SSD';
+ }
  function mount(root,catalog,region){
   let box=root.querySelector('[data-kamatera-pricing]');
   if(!box){box=document.createElement('div');box.dataset.kamateraPricing='';box.className='muted';root.querySelector('[name=size]')?.closest('label')?.before(box)}
@@ -30,6 +36,6 @@
   if(Number.isFinite(observed.getTime())&&observed.getUTCFullYear()>2000)source.append(' · Checked '+observed.toISOString());
   box.append(source);
  }
- const api={priceLabel,planLabel,mount};
+ const api={priceLabel,planLabel,optionLabel,mount};
  if(typeof module==='object'&&module.exports)module.exports=api;else window.KamateraCatalog=api;
 })();

@@ -11,6 +11,18 @@ import (
 
 const Auto = "AUTO"
 
+// Country is the strict onboarding choice: AUTO or exactly one country.
+func Country(raw string) (string, error) {
+	if strings.TrimSpace(raw) == "" {
+		return Auto, nil
+	}
+	values, err := Normalize([]string{raw})
+	if err != nil {
+		return "", err
+	}
+	return values[0], nil
+}
+
 func Normalize(countries []string) ([]string, error) {
 	if len(countries) == 0 {
 		return []string{Auto}, nil

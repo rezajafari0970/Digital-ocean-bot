@@ -257,6 +257,10 @@ REQUIRED['internal/app'] += ('TestProxyKeeperLockSerializesAcrossConnectionsPost
 REQUIRED['internal/proxyselection'] += ('TestCountryReviewTwoLargeFiniteSweepCompletes',)
 REQUIRED['internal/app'] += ('TestFundedReviewDirectRouteFencePostgres', 'TestFundedReviewNativeEOFThenClosePostgres', 'TestFundedReviewOrderedPassiveHealthCASPostgres', 'TestFundedReviewRejectedBodyCleanupPostgres')
 
+REQUIRED['internal/app'] += ('TestExplicitCountryCannotUseDirectRuntimePostgres',)
+REQUIRED['internal/adminapi'] += ('TestStrictCountryOnboardingAtomicAndBindingPostgres',)
+REQUIRED['internal/panels/export'] = REQUIRED.get('internal/panels/export', ()) + ('TestNativeDriverPublicationContract', 'TestTrojanHTTPPublicationRejectsInvalidTransport')
+
 def main(repo):
     if os.geteuid() == 0:
         raise RuntimeError("gate must run as the unprivileged release builder")
@@ -346,6 +350,7 @@ def main(repo):
             raise RuntimeError('database/race regression command failed')
         count = verify_events(result.stdout.splitlines())
         subprocess.run(['node', 'web/tests/aws-catalog.cjs'], cwd=repo, env=env, check=True, timeout=30)
+        subprocess.run(['node', 'web/tests/proxy-country.cjs'], cwd=repo, env=env, check=True, timeout=30)
         subprocess.run(['node', 'web/tests/account-catalog.cjs'], cwd=repo, env=env, check=True, timeout=30)
         subprocess.run(['node', 'web/tests/account-module-recovery.cjs'], cwd=repo, env=env, check=True, timeout=90)
         subprocess.run(['node', 'web/tests/database-health.cjs'], cwd=repo, env=env, check=True, timeout=30)

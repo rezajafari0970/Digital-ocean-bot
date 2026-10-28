@@ -1,10 +1,10 @@
 {
   "schema": 2,
   "status": "release_requirements_and_limits",
-  "date": "2026-10-28",
-  "feature": "Durable account settings and independent driver-based proxy country priorities",
+  "date": "2026-10-29",
+  "feature": "Strict proxy-country onboarding, native output contract repair and preserved account isolation",
   "publication_gates": {
-    "cloudflare_transport_fleet_no_skip": "341 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
+    "cloudflare_transport_fleet_no_skip": "345 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
     "exact_candidate_ubuntu_24_amd64_install": "required before stable promotion; disposable Ubuntu 24.04 systemd guest on a GitHub-hosted machine that passes the unchanged kernel-memory guard",
     "full_go_and_vet_unprivileged": "required before push",
     "live_secret_scan_and_gitleaks": "required before push",
@@ -37,7 +37,9 @@
     "account_purge_scale": "970000 history rows with bounded fixture seeding; fast enqueue, resumable native worker passes and unrelated account preservation",
     "aws_identity": "Official SigV4 vectors, STS before EC2, shared credential/token normalization and identity-aware errors in preview and background operations",
     "country_priorities": "Country-major search across the assigned pool; configuration/secret/session fences, atomic IPv4-/24 claims, native HTTP/2 upload/response completion, finite resumable sweeps and unchanged legacy AUTO",
-    "settings_durability": "Mandatory draft revisions; omitted fields and unavailable saved choices retained; conflicting edits rejected without discarding the draft; whole saved account state compared in PostgreSQL/browser fixtures"
+    "settings_durability": "Mandatory draft revisions; omitted fields and unavailable saved choices retained; conflicting edits rejected without discarding the draft; whole saved account state compared in PostgreSQL/browser fixtures",
+    "strict_country_onboarding": "AUTO default; one explicit country before validation and atomic account creation; authorization country binding; current guarded route for credential replacement; native CONNECT/TLS drift rejection; encrypted proxy proof with a one-connection SQL pool",
+    "native_output_publication": "All public driver URI variants including Trojan TCP HTTP and Shadowsocks SIP002 HTTP; invalid independent rows withheld without bypassing scope, ownership, policy, expiry or revision checks; real raw HTTP output verified after deployment"
   },
   "notes": [
     "Existing single-region AWS credentials retain their original identity and region boundaries.",
@@ -64,9 +66,10 @@
     "Per-resolver TCP timeout is 2000ms with parallel queries and positive cache. If all upstreams fail on an uncached name, the pinned core may drop the query; the client controls its final timeout. This is not a two-second end-to-end DNS guarantee.",
     "Client FinalMask capability does not mass-enable fragmentation on existing profiles. Shadowsocks SIP002 export remains explicitly unsupported by the v2rayNG importer; no Android device acceptance claim.",
     "Country priorities are independent per account and opt-in; absent policy remains legacy AUTO. Existing routes, exclusions and security policies remain authoritative.",
-    "All ISO country choices are available, plus Kosovo XK; actual selection requires driver capability, healthy configured endpoints and verified isolated egress. AUTO must be last.",
+    "All ISO country choices are available, plus Kosovo XK. New creation and edits choose AUTO or exactly one explicit country; no new alternate-country or AUTO fallback is accepted. Existing legacy ordered policies are retained until an explicit edit.",
     "Sticky drivers expose a finite six-session candidate budget. Unknown observations cannot authorize a lower country. This does not claim enumeration of every address in an unbounded provider pool.",
-    "Settings changes require the revision of the loaded draft. Reload an older cached editor before saving; a conflict preserves the current draft for review."
+    "Settings changes require the revision of the loaded draft. Reload an older cached editor before saving; a conflict preserves the current draft for review.",
+    "The attempted independent OpenAI API review ended with credit_balance_exhausted and no review output or usage receipt. It is not recorded as approval."
   ],
   "evidence_location": "Exact-commit source and installation results are attached through GitHub Actions. Production preservation evidence is recorded separately in private operations reports."
 }

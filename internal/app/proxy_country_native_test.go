@@ -18,6 +18,7 @@ import (
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/proxyselection"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/secrets"
 )
 
 type countryTransportFunc func(*http.Request) (*http.Response, error)
@@ -34,8 +35,14 @@ func TestCountryCandidateNativeTunnelAndReconnectPostgres(t *testing.T) {
 	}
 	var rotating, wrongCountry, observerOutage, rejectAuth, fixedMode, missingCountry atomic.Bool
 	var connects, geoCalls, ipCalls atomic.Int32
+	var providerCalls atomic.Int32
 	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		if r.Header.Get("X-Fixture-Observer") == "provider.fixture" {
+			providerCalls.Add(1)
+			w.Write([]byte(`{"ok":true}`))
+			return
+		}
 		if r.Header.Get("X-Fixture-Observer") == "ipwho.is" {
 			geoCalls.Add(1)
 			if observerOutage.Load() {
@@ -72,7 +79,7 @@ func TestCountryCandidateNativeTunnelAndReconnectPostgres(t *testing.T) {
 		auth := r.Clone(r.Context())
 		auth.Header.Set("Authorization", r.Header.Get("Proxy-Authorization"))
 		user, _, ok := auth.BasicAuth()
-		if !ok || (!fixedMode.Load() && !strings.Contains(user, "cr.us;sid.native-proof")) || (fixedMode.Load() && user != "base") {
+		if !ok || (!fixedMode.Load() && !strings.Contains(user, "cr.us;sid.")) || (fixedMode.Load() && user != "base") {
 			http.Error(w, "wrong driver grammar", 407)
 			return
 		}
@@ -186,5 +193,69 @@ func TestCountryCandidateNativeTunnelAndReconnectPostgres(t *testing.T) {
 	_, result = c.verifyCountryCandidateWithGateway(ctx, s, p, v, factory)
 	if result.Health != proxyselection.Unusable || !result.ExhaustProvider {
 		t.Fatal("auth rejection not isolated to provider", result)
+	}
+	rejectAuth.Store(false)
+	store, err := secrets.NewStore(secrets.SQLRepository{DB: db}, make([]byte, 32), 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c.Secrets = store
+	if err = store.PutProxy(ctx, p.ID, "onboarding-fixture", "proxy_password", []byte("fixture")); err != nil {
+		t.Fatal(err)
+	}
+	execBootstrap(t, db, `UPDATE proxies SET secret_ref='onboarding-fixture' WHERE id=$1`, p.ID)
+	db.SetMaxOpenConns(1)
+	probeCtx, cancel := context.WithTimeout(ctx, 12*time.Second)
+	defer cancel()
+	client, closeFn, observed, err := c.onboardingClient(probeCtx, p.ID, "US", factory)
+	if err != nil || observed != "198.18.64.2" {
+		t.Fatal("strict onboarding failed", err)
+	}
+	defer closeFn()
+	response, err := client.Get("https://provider.fixture/account")
+	if err != nil {
+		t.Fatal(err)
+	}
+	io.Copy(io.Discard, response.Body)
+	response.Body.Close()
+	if providerCalls.Load() != 1 {
+		t.Fatal("provider not reached after proof")
+	}
+	wrongCountry.Store(true)
+	if response, err = client.Get("https://provider.fixture/account"); err == nil {
+		response.Body.Close()
+		t.Fatal("country drift reached provider")
+	}
+	if providerCalls.Load() != 1 {
+		t.Fatal("credential request leaked after country drift")
+	}
+	db.SetMaxOpenConns(4)
+	if _, _, _, err = c.onboardingClient(ctx, p.ID, "US", factory); err == nil {
+		t.Fatal("wrong-country onboarding admitted")
+	}
+	wrongCountry.Store(false)
+	// A definition edit waits for the complete preview client lifetime.
+	changed := make(chan error, 1)
+	go func() { _, err := db.Exec(`UPDATE proxies SET username='changed' WHERE id=$1`, p.ID); changed <- err }()
+	select {
+	case err := <-changed:
+		t.Fatal("proxy changed during preview", err)
+	case <-time.After(100 * time.Millisecond):
+	}
+	closeFn()
+	select {
+	case err := <-changed:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-time.After(3 * time.Second):
+		t.Fatal("preview lock leaked")
+	}
+	if response, err = client.Get("https://provider.fixture/account"); err == nil {
+		response.Body.Close()
+		t.Fatal("closed preview dispatched")
+	}
+	if providerCalls.Load() != 1 {
+		t.Fatal("closed preview leaked")
 	}
 }

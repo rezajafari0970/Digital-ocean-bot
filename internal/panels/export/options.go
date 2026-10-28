@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/url"
 	"strings"
+
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/configdriver"
 )
 
 // OutputOptions control publication only. Stored native contracts and complete
@@ -18,7 +20,7 @@ type OutputOptions struct {
 // particular, it must not form-decode '+' or re-encode existing URI values.
 func ApplyOutputOptions(uri string, options OutputOptions) (string, error) {
 	if strings.HasPrefix(uri, "vmess://") || strings.HasPrefix(uri, "ss://") {
-		if !validAdditionalURI(uri) {
+		if !validAdditionalURI(uri, options.IndependentProfile) {
 			return "", ErrInvalidVLESS
 		}
 		return uri, nil
@@ -30,6 +32,15 @@ func ApplyOutputOptions(uri string, options OutputOptions) (string, error) {
 			return "", ErrInvalidVLESS
 		}
 		for k := range q {
+			if len(q[k]) != 1 {
+				return "", ErrInvalidVLESS
+			}
+			if options.IndependentProfile && k == "headerType" {
+				if q.Get(k) != "http" || configdriver.ValidateTCPHeader(configdriver.Spec{Network: q.Get("type"), Security: q.Get("security"), HeaderType: q.Get(k), Host: q.Get("host"), Path: q.Get("path")}) != nil {
+					return "", ErrInvalidVLESS
+				}
+				continue
+			}
 			if options.IndependentProfile && k == "sni" && q.Get("security") == "tls" && validVMessHost(q.Get(k)) {
 				continue
 			}

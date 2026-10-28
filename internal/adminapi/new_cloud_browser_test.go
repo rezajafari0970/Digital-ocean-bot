@@ -41,6 +41,7 @@ func TestNewCloudProviderBrowser(t *testing.T) {
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("../../web/static"))))
 	mux.HandleFunc("GET /admin/", func(w http.ResponseWriter, r *http.Request) { http.ServeFile(w, r, "../../web/static/index.html") })
 	mux.HandleFunc("GET /api/v1/providers", s.providersMetadata)
+	mux.HandleFunc("GET /api/v1/proxy-drivers", s.proxyDrivers)
 	// Match the authenticated panel bootstrap before exercising visible account controls.
 	mux.HandleFunc("GET /api/v1/auth/me", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 200, map[string]any{"id": "isolated-browser-fixture", "role": "admin"})

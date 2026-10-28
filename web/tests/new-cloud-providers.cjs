@@ -31,6 +31,13 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   await evaluate('document.querySelector("#primaryAction").click()');
   await waitFor('document.querySelector("#modalFields [name=provider]")!==null');
   assert.deepEqual((await evaluate('[...document.querySelector("#modalFields [name=provider]").options].map(x=>x.value)')).sort(),['aws','digitalocean','kamatera','linode','ovh','upcloud','vultr']);
+  assert.equal(await evaluate('document.querySelector("[name=proxy_country]").value'),'AUTO');
+  assert.equal(await evaluate('document.querySelector("[name=proxy_country]").options.length'),251);
+  await evaluate('document.querySelector("[name=proxy_country]").value="US";document.querySelector("#discoverAccount").click()');
+  await waitFor('document.querySelector("#modalError").textContent.includes("Select a proxy")');
+  assert.equal(await evaluate('cache.accountPreview'),null,'no provider validation before a valid country route');
+  await evaluate('document.querySelector("[name=proxy_country]").value="AUTO";document.querySelector("[name=proxy_country]").dispatchEvent(new Event("change"))');
+
 
   async function assertSaveVisible(label){
    const state=await evaluate('(()=>{const e=document.querySelector("#modalSubmit"),r=e.getBoundingClientRect(),v=window.visualViewport;return {hidden:e.hidden,width:r.width,height:r.height,top:r.top,bottom:r.bottom,right:r.right,viewportHeight:v?.height||innerHeight,viewportWidth:v?.width||innerWidth,hit:document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.id}})()');
@@ -49,7 +56,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    await waitFor('cache.accountPreview?.provider==="kamatera"&&!document.querySelector("#modalSubmit").disabled&&!document.querySelector("#discoverAccount").disabled');
   }
   await prepareKamatera();
-  assert.equal(await evaluate('document.querySelector("[name=size]").selectedOptions[0].textContent'),'1A-1024-20 · 1 GB / 1 CPU');
+  assert.equal(await evaluate('document.querySelector("[name=size]").selectedOptions[0].textContent'),'1A · 1 GB · 20 GB SSD');
   assert.match(await evaluate('document.querySelector("[data-plan-summary=size]").textContent'),/Availability.*USD.*4.00\/730h base/);
   assert.match(await evaluate('document.querySelector("[data-kamatera-pricing]").textContent'),/traffic is charged separately/);
   assert.match(await evaluate('document.querySelector("[data-kamatera-pricing]").textContent'),/Custom configuration verified/);

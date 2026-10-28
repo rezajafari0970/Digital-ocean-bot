@@ -21,7 +21,8 @@ func (s *Server) proxyCountryPolicy(w http.ResponseWriter, r *http.Request) {
  'network_mode',COALESCE(n.mode,'direct'),'active_country',COALESCE(i.country_code,''),
  'active_proxy',COALESCE(px.name,''),'active_stage',COALESCE(s.active_stage,''),
  'applied_revision',COALESCE(s.applied_revision,0),'status',COALESCE(s.status,'legacy'),
- 'detail',COALESCE(s.detail,''),'checked_at',s.checked_at)
+ 'detail',COALESCE(s.detail,''),'checked_at',s.checked_at,
+ 'identity_verified',COALESCE(i.last_health_ok,false) AND i.rotation_started_at IS NULL AND n.mode='proxy_required')
  FROM accounts a LEFT JOIN account_proxy_country_policies p ON p.account_id=a.id
  LEFT JOIN account_proxy_selection s ON s.account_id=a.id LEFT JOIN network_profiles n ON n.account_id=a.id
  LEFT JOIN account_network_identities i ON i.account_id=a.id LEFT JOIN proxies px ON px.id=n.proxy_id WHERE a.id=$1`, r.PathValue("id")).Scan(&raw)
@@ -57,6 +58,10 @@ func (s *Server) saveProxyCountryPolicy(w http.ResponseWriter, r *http.Request) 
 		writeJSON(w, 400, map[string]string{"error": "invalid_country_priorities", "detail": err.Error()})
 		return
 	}
+	if len(countries) != 1 {
+		writeJSON(w, 400, map[string]string{"error": "single_proxy_country_required", "detail": "Choose AUTO or one country. An explicit country cannot fall back to another country or AUTO."})
+		return
+	}
 	account, idErr := network.CanonicalAccountID(r.PathValue("id"))
 	if idErr != nil {
 		writeJSON(w, 400, map[string]string{"error": "invalid_account_id"})
@@ -85,6 +90,10 @@ func (s *Server) saveProxyCountryPolicy(w http.ResponseWriter, r *http.Request) 
 		} else {
 			writeJSON(w, 409, map[string]string{"error": "account_busy"})
 		}
+		return
+	}
+	if !proxyselection.Legacy(countries) && (mode != "proxy_required" || proxy == "") {
+		writeJSON(w, 409, map[string]string{"error": "proxy_country_requires_proxy", "detail": "Assign an account proxy before selecting a country."})
 		return
 	}
 	revision := int64(0)
@@ -149,5 +158,5 @@ func (s *Server) proxyDrivers(w http.ResponseWriter, r *http.Request) {
 		cap := app.ProxyAdapterCapabilities(name)
 		drivers = append(drivers, map[string]any{"name": name, "country_targeting": cap.CountryTargeting, "sticky_session": cap.StickySession, "fixed_egress": cap.FixedEgress, "dedicated_port": cap.DedicatedPort})
 	}
-	writeJSON(w, 200, map[string]any{"drivers": drivers})
+	writeJSON(w, 200, map[string]any{"drivers": drivers, "country_options": geoctx.CountryOptions()})
 }

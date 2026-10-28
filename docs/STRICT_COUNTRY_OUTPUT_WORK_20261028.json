@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "at": "2026-10-28T22:30:38.223084+00:00",
+  "source_base": "ee595e7503947243d5840075bfcabd7a79b13965",
+  "branch": "fix/video-strict-country-output-20261028",
+  "runtime_base": "35cc83c3a666dbdba72f00b26851ce6b7bf3dc97",
+  "video": {
+    "duration_seconds": 154.087574,
+    "sha256": "db11dc1fd0610c7a308e0d7c89c6d86c47fec8072a7435b38c040a6aeb922ba9",
+    "full_duration_sample_frames": 77,
+    "additional_output_detail_frames": 36,
+    "audio_peak_db": -91,
+    "audio_note": "effectively silent"
+  },
+  "stages": {
+    "video_review": "complete; detailed review around 110–128 seconds complete",
+    "live_reproduction": "confirmed HTTP500 in global and account DIRECT/RESIDENTIAL raw outputs, both localhost and HTTPS; view shell HTTP200",
+    "root_cause": "confirmed: native Trojan HTTP headerType and Shadowsocks SIP002 HTTP plugin rejected by publication",
+    "implementation": "implemented; final verification active",
+    "regression_tests": "345 mandatory roots and 20 recovery repetitions pass, zero skipped; full Go and vet pass; country browser fixture repaired and passes. Final early-release SQL-connection change awaits focused and exact-commit CI.",
+    "independent_review": "API strict1 failed credit_balance_exhausted; no review/usage returned; no retry submitted",
+    "source_public_ci": "pending",
+    "rollout_acceptance": "pending; no runtime replacement"
+  },
+  "required_behavior": [
+    "Country selection available before provider validation/account creation, default AUTO",
+    "Explicit country requires verified egress from that country for all provider requests; no silent AUTO/direct fallback",
+    "Driver capabilities and per-account isolation stay modular",
+    "Preserve saved account choices and concurrency revisions; existing settings are not reset by omitted fields",
+    "Fix raw output HTTP500 without weakening ownership, route, expiry, revision, cleanup or protection checks",
+    "Investigate Kamatera beyond presentation; never replay three unknown billable creates without terminal evidence"
+  ],
+  "video_findings": [
+    {
+      "time": "00:16–00:24",
+      "issue": "Kamatera Active/Ready provider labels coexist with blocked scheduling and three unknown creates; expired resources remain visible as provider READY"
+    },
+    {
+      "time": "00:30–00:34",
+      "issue": "Android native plan choice labels still wrap for some options; need physical-view regression-oriented shortening"
+    },
+    {
+      "time": "00:40–00:48",
+      "issue": "Country editor is separate from onboarding; Add country silently chooses arbitrary alphabetic countries; AUTO reports pending despite an observed legacy identity"
+    },
+    {
+      "time": "01:00–01:14",
+      "issue": "Account network/egress diagnostics show unknown operation or awaiting identity while global service badge remains Ready; distinguish scope"
+    },
+    {
+      "time": "01:52–02:07",
+      "issue": "Output view loads then unavailable/blank. cPanel appears after navigation/back gesture; direct gateway tests show no cPanel redirect, so causality is unproven"
+    },
+    {
+      "time": "02:16–02:28",
+      "issue": "Account-specific output repeatedly loads without usable configs"
+    }
+  ],
+  "constraints": [
+    "Keep original damaged cluster and duplicate workers quarantined",
+    "No provider credentials/config URIs/share tokens in logs or public artifacts",
+    "Use existing native installation/backup/disk/integrity/preservation gates",
+    "Do not claim physical no-bug acceptance from synthetic browser tests"
+  ],
+  "read_only_live_output_repair": {
+    "status": 200,
+    "global_all": 196,
+    "global_direct": 98,
+    "global_residential": 98,
+    "account_direct": 6,
+    "account_residential": 6,
+    "withheld": 0,
+    "at": "2026-10-28T22:26:06Z",
+    "runtime_unchanged": true
+  },
+  "api_review": {
+    "label": "strict1",
+    "model": "gpt-6-astra",
+    "reasoning": {
+      "effort": "max",
+      "mode": "pro"
+    },
+    "response_id": "resp_0c70e4e658338b15006ae204302be087d1a71abb40e32f41cf",
+    "status": "failed",
+    "error": "credit_balance_exhausted",
+    "usage": null
+  },
+  "kamatera_observation": "Original dispatch journals classify all three responses PROVIDER_UNAVAILABLE; no action/resource receipt. Each actual dispatch count remains one; do not infer absence or replay."
+}

@@ -40,7 +40,7 @@ func TestCountryReviewTwoUUIDAliasUsesSameRouteLockPostgres(t *testing.T) {
 	defer conn.ExecContext(ctx, `SELECT pg_advisory_unlock_shared(hashtextextended($1,0))`, "account-route:"+a)
 	done := make(chan *httptest.ResponseRecorder, 1)
 	go func() {
-		done <- countrySave(&Server{DB: db}, strings.ToUpper(a), `{"revision":0,"countries":["US","AUTO"]}`)
+		done <- countrySave(&Server{DB: db}, strings.ToUpper(a), `{"revision":0,"countries":["US"]}`)
 	}()
 	select {
 	case w := <-done:
@@ -52,7 +52,7 @@ func TestCountryReviewTwoUUIDAliasUsesSameRouteLockPostgres(t *testing.T) {
 	}
 	select {
 	case w := <-done:
-		if w.Code != 200 {
+		if w.Code != 409 || !strings.Contains(w.Body.String(), "proxy_country_requires_proxy") {
 			t.Fatal(w.Code, w.Body.String())
 		}
 	case <-time.After(3 * time.Second):

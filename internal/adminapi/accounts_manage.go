@@ -8,6 +8,7 @@ import (
 	"github.com/lib/pq"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/proxyselection"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
 	"net/http"
 	"slices"
@@ -113,6 +114,12 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 400, map[string]string{"error": "invalid_network_mode"})
 		return
 	}
+	// Replacing a credential uses the existing verified route. Save route edits
+	// separately so credentials are never tested on an uncommitted connection.
+	if x.Token != "" && (initial.NetworkMode != x.NetworkMode || initial.ProxyID != x.ProxyID || !slices.Equal(initial.ProxyIDs, x.ProxyIDs)) {
+		writeJSON(w, 409, map[string]string{"error": "credential_route_change_requires_save", "detail": "Save proxy changes first, wait for its country and identity verification, then replace the credential."})
+		return
+	}
 	var candidateEmail, candidateExternalID string
 	if x.Token != "" {
 		var providerName string
@@ -146,6 +153,23 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 	for _, prefix := range []string{"account-proxy:", "account-route:"} {
 		if _, err = tx.ExecContext(r.Context(), `SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, prefix+id); err != nil {
 			writeJSON(w, 500, errorBody())
+			return
+		}
+	}
+	if x.NetworkMode != "proxy_required" {
+		var policy []byte
+		err = tx.QueryRowContext(r.Context(), `SELECT countries FROM account_proxy_country_policies WHERE account_id=$1`, id).Scan(&policy)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			writeJSON(w, 500, errorBody())
+			return
+		}
+		var countries []string
+		if len(policy) > 0 && json.Unmarshal(policy, &countries) != nil {
+			writeJSON(w, 500, errorBody())
+			return
+		}
+		if !proxyselection.Legacy(countries) {
+			writeJSON(w, 409, map[string]string{"error": "proxy_country_requires_proxy", "detail": "This account has an explicit country. Select AUTO before switching to direct access."})
 			return
 		}
 	}

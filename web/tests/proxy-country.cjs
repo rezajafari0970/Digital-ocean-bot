@@ -1,0 +1,13 @@
+const assert=require('node:assert/strict'),country=require('../static/proxy-country.js');
+assert.match(country.field([{code:'US',label:'United States'}]),/value="AUTO" selected/);
+assert.throws(()=>country.validate('US',''),/Select a proxy/);
+assert.throws(()=>country.validate('AUTO','',['secondary']),/primary proxy/);
+assert.doesNotThrow(()=>country.validate('US','primary',['secondary']));
+assert.match(country.status({countries:['AUTO'],identity_verified:true,active_country:'IT'}),/^Automatic selection.*Verified country: IT/);
+assert.match(country.status({countries:['US'],identity_verified:true,revision:2,applied_revision:1,active_stage:'US',active_country:'US'}),/^Country verification pending.*Previous observation/);
+assert.match(country.status({countries:['US'],identity_verified:true,revision:2,applied_revision:2,active_stage:'US',active_country:'US'}),/^Country verified/);
+assert.doesNotMatch(country.field([{code:'US',label:'<script>bad</script>'}]),/<script>/);
+const kamatera=require('../static/kamatera-catalog.js');
+assert.equal(kamatera.optionLabel({ID:'1B-1024-20'}),'1B · 1 GB · 20 GB SSD');
+assert.notEqual(kamatera.optionLabel({ID:'1B-1024-20'}),kamatera.optionLabel({ID:'1T-1024-20'}));
+console.log('Single-country defaults, fail-closed form, verification status and compact native plans PASS');

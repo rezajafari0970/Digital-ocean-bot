@@ -8,7 +8,7 @@ import (
 
 // TCP HTTP headers are an explicit transport option. They do not enable TLS,
 // change routing, or relax protocol/client security requirements.
-func validateTCPHeader(s Spec) error {
+func ValidateTCPHeader(s Spec) error {
 	if s.HeaderType == "" {
 		return nil
 	}
@@ -26,6 +26,9 @@ func validateTCPHeader(s Spec) error {
 	}
 	if s.Host == "" {
 		return errors.New("profile_http_host_required")
+	}
+	if len(s.Host) > 253 || !hostname.MatchString(s.Host) {
+		return errors.New("profile_host_invalid")
 	}
 	path := tcpHTTPPath(s)
 	if len(path) > 4096 || !strings.HasPrefix(path, "/") ||
@@ -65,4 +68,15 @@ func tcpHTTPSettings(s Spec) map[string]any {
 // generic VLESS headerType/host query fields are ignored for Shadowsocks.
 func shadowsocksHTTPPlugin(s Spec) string {
 	return "obfs-local;obfs=http;obfs-host=" + s.Host + ";path=" + tcpHTTPPath(s)
+}
+
+// ValidateShadowsocksHTTPPlugin shares the native TCP contract with publication.
+// Only the exact SIP002 representation emitted by this driver is supported.
+func ValidateShadowsocksHTTPPlugin(value string) error {
+	rest, ok := strings.CutPrefix(value, "obfs-local;obfs=http;obfs-host=")
+	host, path, hasPath := strings.Cut(rest, ";path=")
+	if !ok || !hasPath || path == "" {
+		return errors.New("profile_http_plugin_invalid")
+	}
+	return ValidateTCPHeader(Spec{Network: "tcp", Security: "none", HeaderType: "http", Host: host, Path: path})
 }

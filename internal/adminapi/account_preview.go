@@ -17,6 +17,7 @@ type previewAccount struct {
 	Selection       map[string]string `json:"selection,omitempty"`
 	Provider        string            `json:"provider"`
 	Token           string            `json:"token"`
+	ProxyCountry    string            `json:"proxy_country"`
 	ProxyID         string            `json:"proxy_id"`
 }
 type previewCredential struct{ token []byte }
@@ -67,7 +68,7 @@ func (s *Server) runAccountPreview(w http.ResponseWriter, r *http.Request) {
 		}
 		defer unlock()
 		var e error
-		flow, flowSecret, e = s.authorizationCredential(r.Context(), x.AuthorizationID, x.Provider, x.ProxyID, false)
+		flow, flowSecret, e = s.authorizationCredential(r.Context(), x.AuthorizationID, x.Provider, x.ProxyID, false, x.ProxyCountry)
 		if e != nil {
 			writeJSON(w, 409, map[string]string{"error": "authorization_not_ready"})
 			return
@@ -87,7 +88,7 @@ func (s *Server) runAccountPreview(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	previewStage(r.Context(), "connection")
-	client, closeFn, observed, ok := s.previewClient(w, r, x.ProxyID, true)
+	client, closeFn, observed, ok := s.previewClient(w, r, x.ProxyID, x.ProxyCountry, true)
 	if !ok {
 		return
 	}
@@ -136,6 +137,9 @@ func (s *Server) runAccountPreview(w http.ResponseWriter, r *http.Request) {
 	}
 	previewStage(r.Context(), "catalog")
 	catalog, err := cr.Catalog(r.Context())
+	// Provider I/O has finished. Release the definition transaction before
+	// local catalog/authorization SQL so previews cannot exhaust the pool.
+	closeFn()
 	if err != nil {
 		fail(err, "catalog")
 		return
