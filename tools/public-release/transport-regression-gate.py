@@ -33,7 +33,15 @@ REQUIRED = {
     "internal/provisioning": ("TestSSHInputUsesPinnedEncryptedStdin",),
     "internal/panels/sanaei": ("TestLocalRouteBatchReadOnlyAndComplete",),
     "internal/panels/residentialsync": ("TestProofRechecksDueAfterQueuedOwnership","TestGeneratedTrojanPassesStrictResidentialSniffing","TestNativeRouteBatchPreservesCompleteMatrix","TestGoogleAdsSelectiveScopeAndRollback","TestGoogleAdsSelectiveRoutingAndProxyOutage","TestInstalledCoreGoogleAdsSelectiveTrafficAndOutage"),
+    "internal/proxyselection": ("TestCountryPriorityExhaustsPeersBeforeFallback","TestCountryPriorityUnknownNeverAuthorizesLowerCountry","TestCountryPriorityResumeScopeAndFailback","TestCountryPriorityValidation"),
     "internal/adminapi": (
+        "TestAccountBuildConcurrencyExplainsUnknownCreatesPostgres", "TestAccountEditBrowser", "TestAccountRuleApplicationBrowser", "TestPerformanceBrowser",
+        "TestCountryPolicyPersistenceFencingAndLegacyReset",
+        "TestProxyNameSavePreservesIdentityAndConflicts",
+        "TestAccountSettingsOmissionsConflictAndNoSilentClamp",
+        "TestAccountSettingsPreserveActiveFailover",
+        "TestProvisionDiagnosticsBeforeSSH",
+        "TestOrdinaryAccountCreationIsAtomic",
         "TestConfigProfileFinalMaskPersistence",
         "TestLatestAccountSnapshotBoundsHistoryReads",
         "TestProviderAuthorizationJournalConcurrencyRestartAndOwnership",
@@ -221,6 +229,34 @@ REQUIRED['internal/app'] += ('TestKamateraRegionalAdmissionIsAtomicAndAccountSco
 REQUIRED['internal/droplets'] += ('TestUndispatchedRegionalWaitDoesNotPoisonAccountHealth',)
 REQUIRED['internal/providers/kamatera'] += ('TestKamateraNativeLicenceRequiresExactRegionalEvidence','TestKamateraNativeLicenceReadPinsHostAndRejectsRedirects','TestKamateraCatalogFillsMissingMappingWithNativeLicence')
 
+REQUIRED['internal/network'] = REQUIRED.get('internal/network', ()) + ('TestBrowserSessionRootIsProcessScoped',)
+REQUIRED['internal/app'] += (
+ 'TestCountryRuntimeAtomicPublicationAndFencesPostgres',
+ 'TestCountryRuntimeIndependentClaimsAndCollisionPostgres',
+ 'TestCountryRuntimePriorityStabilityAndNoChurnPostgres',
+ 'TestLegacyIdentityRejectsStaleConfigurationPostgres',
+ 'TestCountryCandidateNativeTunnelAndReconnectPostgres',
+ 'TestCountryAutoCompatibilityLeaseAndRecoveryPostgres',
+)
+
+REQUIRED['internal/app'] += (
+ 'TestCountryCredentialSnapshotBlocksBeforeGatewayPostgres',
+ 'TestCountrySavedCandidateConsumedOncePostgres',
+ 'TestCountryGuardOneConnectionAndStreamingPostgres',
+ 'TestCountryExpiredProofPreservesIncumbentPostgres',
+ 'TestCountrySharedProxyInvalidationOrderPostgres',
+ 'TestCountryIndependentDriverContractPostgres',
+)
+REQUIRED['internal/proxyselection'] += ('TestCountryPriorityLongSweepCannotStarveAuto',)
+REQUIRED['internal/app'] += ('TestCountryAcquirePreservesHealthHistoryPostgres',)
+
+
+REQUIRED['internal/app'] += ('TestCountryReviewTwoSnapshotCannotAdoptFreshFencePostgres', 'TestCountryReviewTwoNativeHTTP2UploadFencePostgres', 'TestCountryReviewTwoPublicKeeperOneConnectionPostgres', 'TestCountryReviewTwoPassiveHealthCannotBeOverwrittenPostgres', 'TestCountryReviewTwoProofExpiresDuringAllocationPostgres', 'TestCountryReviewTwoMixedObserverFailureStaysUnknownPostgres', 'TestCountryReviewTwoExistingGenericAutoSurvivesHigherUnknownPostgres')
+REQUIRED['internal/adminapi'] += ('TestCountryReviewTwoAccountListOneConnectionPostgres', 'TestCountryReviewTwoUUIDAliasUsesSameRouteLockPostgres', 'TestCountryReviewTwoInvalidModeCannotValidateReplacementPostgres', 'TestCountryReviewTwoAccountProxyObservationCASPostgres')
+REQUIRED['internal/app'] += ('TestProxyKeeperLockSerializesAcrossConnectionsPostgresE2E',)
+REQUIRED['internal/proxyselection'] += ('TestCountryReviewTwoLargeFiniteSweepCompletes',)
+REQUIRED['internal/app'] += ('TestFundedReviewDirectRouteFencePostgres', 'TestFundedReviewNativeEOFThenClosePostgres', 'TestFundedReviewOrderedPassiveHealthCASPostgres', 'TestFundedReviewRejectedBodyCleanupPostgres')
+
 def main(repo):
     if os.geteuid() == 0:
         raise RuntimeError("gate must run as the unprivileged release builder")
@@ -252,6 +288,8 @@ def main(repo):
                 raise RuntimeError('isolated database identity check failed')
             run([pg / 'createdb', 'bulk_test_transport'], stdout=output, stderr=subprocess.STDOUT)
             run([pg / 'psql', '-X', '-v', 'ON_ERROR_STOP=1', '-c', 'CREATE ROLE digitaloceanbot; CREATE ROLE digitaloceanbot_readonly;'], stdout=output, stderr=subprocess.STDOUT)
+        env['DOB_BROWSER_SESSIONS_DIR'] = str(work/'browser-sessions')
+        (work/'browser-sessions').mkdir(mode=0o700)
         env['DOB_PURGE_SCALE'] = '1'
         env['DOB_RUN_BROWSER_TEST'] = '1'
         env['BULK_TEST_DATABASE_URL'] = 'postgresql://dob_gate@/bulk_test_transport?' + urlencode({'host': str(socket), 'port': '55435', 'sslmode': 'disable'})

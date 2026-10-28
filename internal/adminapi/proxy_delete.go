@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 
 	"github.com/lib/pq"
 )
@@ -75,9 +76,16 @@ func (s *Server) removeProxy(ctx context.Context, id string, residentialOnly boo
 	}
 	for _, q := range []string{
 		`UPDATE account_transport_state SET transport_epoch=transport_epoch+1,active_proxy_id=NULL,transition_reason='proxy-deleted',updated_at=now() WHERE account_id::text=ANY($1::text[])`,
-		`UPDATE account_network_identities SET sticky_session=NULL,exit_ip=NULL,subnet_key=NULL,last_health_ok=false,last_health_at=NULL,rotation_started_at=NULL,updated_at=now() WHERE account_id::text=ANY($1::text[])`,
 	} {
 		if _, err = tx.ExecContext(ctx, q, pq.Array(ids)); err != nil {
+			return false, err
+		}
+	}
+	for _, a := range ids {
+		if _, err = app.FenceCountryWriterTx(ctx, tx, a); err != nil {
+			return false, err
+		}
+		if _, err = tx.ExecContext(ctx, `UPDATE account_network_identities SET selected_target_country=NULL,sticky_session=NULL,exit_ip=NULL,subnet_key=NULL,last_health_ok=false,last_health_at=NULL,rotation_started_at=NULL,updated_at=now() WHERE account_id=$1`, a); err != nil {
 			return false, err
 		}
 	}

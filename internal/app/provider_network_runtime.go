@@ -77,6 +77,9 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 		generation := int64(1)
 		transportEpoch := int64(0)
 		if c.DB != nil {
+			if cfg.ProxyRouteFingerprint == "" {
+				return providerNetworkRuntime{}, ErrStaleAccountNetwork
+			}
 			state, allowed, err := (proxycontrol.SQLStore{DB: c.DB}).Acquire(
 				ctx, cfg.ID, cfg.Proxy.ID, cfg.Provider, time.Now().UTC(), 30*time.Second,
 			)
@@ -95,7 +98,7 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 		password := []byte(nil)
 		var err error
 		if cfg.ProxySecretRef != "" {
-			password, err = c.Secrets.GetProxy(ctx, cfg.Proxy.ID, cfg.ProxySecretRef)
+			password, err = c.Secrets.GetProxyAtVersion(ctx, cfg.Proxy.ID, cfg.ProxySecretRef, cfg.ProxySecretVersion)
 			if err != nil {
 				return providerNetworkRuntime{}, err
 			}
@@ -105,7 +108,7 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 		if err != nil {
 			return providerNetworkRuntime{}, err
 		}
-		stickySession, exitIP := proxyIdentitySignature(ctx, c.DB, cfg.ID)
+		stickySession, exitIP := cfg.NetworkSession, cfg.NetworkExitIP
 		creds := network.ProxyCredentials{Username: cfg.ProxyUsername, Password: string(password)}
 		var gateway *network.Gateway
 		if economy && c.ProxyTransports != nil {
@@ -126,7 +129,7 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 			policy := proxycontrol.DefaultPolicy()
 			healthy := cfg.Proxy.Status == network.StatusHealthy
 			var healthMu sync.Mutex
-			observed := network.ObserveTransport(gateway.Client.Transport, func(obs network.TransportObservation) {
+			observe := func(obs network.TransportObservation) {
 				healthMu.Lock()
 				defer healthMu.Unlock()
 				result, apply := classifyProviderProxyObservation(obs, healthy)
@@ -146,23 +149,37 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 					policy,
 					&healthy,
 				)
-			})
+			}
 			gateway.Client.Transport = accountNetworkGuardTransport{
-				Base: observed, Container: c, AccountID: cfg.ID, Provider: cfg.Provider,
+				Base: gateway.Client.Transport, Observe: observe, Container: c, AccountID: cfg.ID, Provider: cfg.Provider,
 				ProxyID: cfg.Proxy.ID, Generation: generation, TransportEpoch: transportEpoch,
-				StickySession: stickySession, ExitIP: exitIP,
+				StickySession: stickySession, ExitIP: exitIP, RouteFingerprint: cfg.ProxyRouteFingerprint, NativeWriteTrace: true,
 			}
 		}
 		return providerNetworkRuntime{Client: gateway.Client, Gateway: gateway, Gate: gate, Generation: generation, TransportEpoch: transportEpoch, closeIdle: gateway.CloseIdleConnections}, nil
 	}
 
+	if cfg.Network.Mode != network.RouteDirect {
+		return providerNetworkRuntime{}, network.ErrProxyConfigInvalid
+	}
+	if c.DB != nil && cfg.ProxyRouteFingerprint == "" {
+		return providerNetworkRuntime{}, ErrStaleAccountNetwork
+	}
 	bundle, err := network.NewIsolatedDirectClient(cfg.ID)
 	if err != nil {
 		return providerNetworkRuntime{}, err
 	}
+	if c.DB != nil {
+		bundle.Client.Transport = accountNetworkGuardTransport{
+			Base: bundle.Transport, Container: c, AccountID: cfg.ID, Provider: cfg.Provider,
+			Direct: true, TransportEpoch: cfg.NetworkTransportEpoch,
+			RouteFingerprint: cfg.ProxyRouteFingerprint, NativeWriteTrace: true,
+		}
+	}
 	return providerNetworkRuntime{
-		Client:    bundle.Client,
-		Gate:      network.AccountGate{Profile: cfg.Network},
-		closeIdle: bundle.CloseIdleConnections,
+		Client:         bundle.Client,
+		Gate:           network.AccountGate{Profile: cfg.Network},
+		TransportEpoch: cfg.NetworkTransportEpoch,
+		closeIdle:      bundle.CloseIdleConnections,
 	}, nil
 }

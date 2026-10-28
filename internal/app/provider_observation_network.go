@@ -27,6 +27,22 @@ func providerObservationNetworkReady(ctx context.Context, tx *sql.Tx, rt Account
 	if mode != "proxy_required" || rt.Config.Proxy == nil || proxy != rt.Config.Proxy.ID {
 		return false, nil
 	}
+	// Policy saves and candidate commits must not race provider READY publication.
+	var countryRevision int64
+	e := tx.QueryRowContext(ctx, `SELECT revision FROM account_proxy_country_policies WHERE account_id=$1 FOR SHARE NOWAIT`, rt.Config.ID).Scan(&countryRevision)
+	if e != nil && !errors.Is(e, sql.ErrNoRows) {
+		return false, e
+	}
+	if e == nil {
+		var fence int64
+		e = tx.QueryRowContext(ctx, `SELECT fence FROM account_proxy_selection WHERE account_id=$1 FOR SHARE NOWAIT`, rt.Config.ID).Scan(&fence)
+		if e != nil && !errors.Is(e, sql.ErrNoRows) {
+			return false, e
+		}
+	}
+	if ready, e := countryPolicyReady(ctx, tx, rt.Config.ID); e != nil || !ready {
+		return false, e
+	}
 	var healthy, identityFresh, baseFresh bool
 	err = tx.QueryRowContext(ctx, `SELECT status='healthy',COALESCE(last_success_at<=clock_timestamp() AND last_success_at>clock_timestamp()-($2*interval '1 second'),false) FROM proxies WHERE id=$1 FOR SHARE NOWAIT`, proxy, int(network.EconomyBaseMaxAge.Seconds())).Scan(&healthy, &baseFresh)
 	if err != nil {

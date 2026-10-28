@@ -79,10 +79,31 @@ func (s SQLStore) Save(ctx context.Context, x State) error {
 	if s.DB == nil {
 		return errors.New("proxy control store unavailable")
 	}
+	return saveState(ctx, s.DB, x)
+}
+
+// SaveStateTx allows identity and generation publication to share a route fence.
+var ErrStateConflict = errors.New("proxy health observation changed")
+
+func SaveStateTx(ctx context.Context, tx *sql.Tx, x State) error {
+	if x.ObservationVersion != "" {
+		var version string
+		if err := tx.QueryRowContext(ctx, `SELECT xmin::text FROM proxy_runtime_state WHERE account_id=$1 AND proxy_id=$2 AND provider=$3 FOR UPDATE`, x.AccountID, x.ProxyID, x.Provider).Scan(&version); err != nil {
+			return err
+		}
+		if version != x.ObservationVersion {
+			return ErrStateConflict
+		}
+	}
+	return saveState(ctx, tx, x)
+}
+func saveState(ctx context.Context, db interface {
+	ExecContext(context.Context, string, ...any) (sql.Result, error)
+}, x State) error {
 	if x.Generation < 1 {
 		x.Generation = 1
 	}
-	_, err := s.DB.ExecContext(ctx, `
+	_, err := db.ExecContext(ctx, `
 INSERT INTO proxy_runtime_state(
     account_id,proxy_id,provider,health_state,circuit_state,
     consecutive_failures,consecutive_successes,retry_after,generation,
@@ -137,24 +158,41 @@ ON CONFLICT(account_id,proxy_id,provider) DO NOTHING
 		return x, false, err
 	}
 
-	var retry, probeLease sql.NullTime
-	if err = tx.QueryRowContext(ctx, `
-SELECT circuit_state,retry_after,half_open_probe_in_flight,half_open_probe_lease_until,generation
+	var retry, checked, success, probeLease sql.NullTime
+	var errClass, errDetail sql.NullString
+	err = tx.QueryRowContext(ctx, `
+SELECT health_state,circuit_state,consecutive_failures,consecutive_successes,
+       retry_after,generation,last_error_class,last_error_detail,last_checked_at,last_success_at,
+       half_open_probe_in_flight,half_open_probe_lease_until
 FROM proxy_runtime_state
 WHERE account_id=$1 AND proxy_id=$2 AND provider=$3
 FOR UPDATE
 `, accountID, proxyID, provider).Scan(
-		&x.CircuitState, &retry, &x.HalfOpenProbeInFlight, &probeLease, &x.Generation,
-	); err != nil {
+		&x.HealthState, &x.CircuitState, &x.ConsecutiveFailures, &x.ConsecutiveSuccesses,
+		&retry, &x.Generation, &errClass, &errDetail, &checked, &success,
+		&x.HalfOpenProbeInFlight, &probeLease,
+	)
+	if err != nil {
 		return x, false, err
 	}
 	if retry.Valid {
 		x.RetryAfter = &retry.Time
 	}
+	if checked.Valid {
+		x.LastCheckedAt = &checked.Time
+	}
+	if success.Valid {
+		x.LastSuccessAt = &success.Time
+	}
 	if probeLease.Valid {
 		x.HalfOpenProbeLeaseUntil = &probeLease.Time
 	}
-
+	if errClass.Valid {
+		x.LastErrorClass = errClass.String
+	}
+	if errDetail.Valid {
+		x.LastErrorDetail = errDetail.String
+	}
 	allowed := false
 	switch x.CircuitState {
 	case "", "closed":
@@ -201,6 +239,9 @@ WHERE account_id=$1 AND proxy_id=$2 AND provider=$3
 		allowed = false
 	}
 
+	if err = tx.QueryRowContext(ctx, `SELECT xmin::text FROM proxy_runtime_state WHERE account_id=$1 AND proxy_id=$2 AND provider=$3`, accountID, proxyID, provider).Scan(&x.ObservationVersion); err != nil {
+		return x, false, err
+	}
 	if err = tx.Commit(); err != nil {
 		return x, false, err
 	}

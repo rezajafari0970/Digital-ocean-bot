@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/vultrconsole"
 )
 
@@ -39,13 +40,13 @@ func main() {
 		panic(err)
 	}
 	defer a.Close()
-	var proxyID, host, user, ref string
+	var proxyID, host, user, ref, secretVersion string
 	var port int
-	err = a.DB.QueryRowContext(ctx, `SELECT COALESCE(p.id::text,''),COALESCE(p.host,''),COALESCE(p.port,0),COALESCE(p.username,''),COALESCE(p.secret_ref,'') FROM account_proxy_pool ap JOIN proxies p ON p.id=ap.proxy_id WHERE ap.account_id=$1 AND ap.enabled=true ORDER BY ap.priority LIMIT 1`, accountID).Scan(&proxyID, &host, &port, &user, &ref)
+	err = a.DB.QueryRowContext(ctx, `SELECT COALESCE(p.id::text,''),COALESCE(p.host,''),COALESCE(p.port,0),COALESCE(p.username,''),COALESCE(p.secret_ref,''),COALESCE((SELECT sec.xmin::text||':'||sec.updated_at::text FROM secrets sec WHERE sec.proxy_id=p.id AND sec.id=p.secret_ref),'') FROM account_proxy_pool ap JOIN proxies p ON p.id=ap.proxy_id WHERE ap.account_id=$1 AND ap.enabled=true ORDER BY ap.priority LIMIT 1`, accountID).Scan(&proxyID, &host, &port, &user, &ref, &secretVersion)
 	if err != nil {
 		panic(err)
 	}
-	pass, err := a.Container.Secrets.GetProxy(ctx, proxyID, ref)
+	pass, err := a.Container.Secrets.GetProxyAtVersion(ctx, proxyID, ref, secretVersion)
 	if err != nil {
 		panic(err)
 	}
@@ -58,7 +59,11 @@ func main() {
 	}
 	defer bridge.Close()
 
-	profile := filepath.Join("/var/lib/digital-ocean-bot/browser-sessions", accountID)
+	browserRoot, err := network.BrowserSessionRoot()
+	if err != nil {
+		panic(err)
+	}
+	profile := filepath.Join(browserRoot, accountID)
 	if err = os.MkdirAll(profile, 0700); err != nil {
 		panic(err)
 	}

@@ -18,7 +18,7 @@ async function refreshResidentialPerformance(){
   const verified=e?.counts?.verified??targets.filter(t=>t.state==='APPLIED'&&t.verified).length,total=e?.counts?.total??targets.length;
   const tuning=e?.active_tuning,progress=e?.tuning_progress;
   const phaseTitle={TESTING:'TESTING · Candidate settings',PUBLISHING:'PUBLISHING · Awaiting verification',RESTORING:'RESTORING · Previous settings pending verification'};
-  const title=phaseTitle[tuning?.phase]||(e?.state==='KEPT'?(e.inherits_future?'PUBLISHED · All current and future servers':'PERMANENT · Selected servers'):e?.state);
+  const title=phaseTitle[tuning?.phase]||(e?.state==='KEPT'?(e.inherits_future?'PUBLISHED · All current and future servers':'PERMANENT · Selected servers'):e?.state==='ROLLED_BACK'?'ROLLED BACK · Publication history':e?.state);
   const tuningDetail=tuning?'<div role="status" class="performanceRecovery"><p><strong>'+(['RESTORED','PUBLISHED'].includes(tuning.phase)?'Last speed-tuning result: ':'Speed tuning: ')+esc(tuning.phase)+'</strong>'+ (tuning.reason?' · '+esc(tuning.reason):'')+'</p>'+
    (tuning.phase==='RESTORED'?'<p class="muted">This trial was rolled back. Current publication and server verification are shown below.</p>':'')+
    (tuning.phase==='TESTING'?'<p>Trial deadline: '+esc(new Date(tuning.deadline).toLocaleString())+'</p>':'')+
@@ -35,6 +35,7 @@ async function refreshResidentialPerformance(){
    (e&&['RUNNING','KEPT'].includes(e.state)&&!e.inherits_future?'<button data-performance="publish">Publish to all current & future servers</button>':'')+
    (e&&['RUNNING','KEPT','ROLLING_BACK'].includes(e.state)?'<button class="danger" data-performance="rollback" '+(e.state==='ROLLING_BACK'?'disabled':'')+'>'+(e.state==='ROLLING_BACK'?'Rollback pending…':'Rollback all settings')+'</button>':'')+'</div>'+
    tuningDetail+
+   (e?.state==='ROLLED_BACK'?'<p class="muted">This publication ended'+(e.updated_at?' on '+esc(new Date(e.updated_at).toLocaleString()):'')+'. Its settings and server results remain in history. Current residential routing is shown separately above.</p>':'')+
    (e?'<p role="status"><strong>'+esc(title)+'</strong> · '+(e.state==='RUNNING'?'Auto rollback: '+esc(new Date(e.deadline).toLocaleString()):e.state==='KEPT'?'No expiry · Manual rollback available':esc(e.reason||''))+'</p>'+
     '<p class="muted">'+esc(e.config.fast_share)+'% fast group · '+esc(e.config.fast_count||'auto')+' paths · '+esc(e.config.dns_mode.toUpperCase())+' DNS'+(e.state==='KEPT'||e.state==='RUNNING'?' · '+verified+' freshly verified / '+total+' assigned'+(e?.counts?.retired?' · '+e.counts.retired+' retired':'')+(waiting?' · '+waiting+' awaiting assignment':''):'')+'</p>'+
     (e.inherits_future?'<p>New servers inherit this profile automatically. Rollback stops inheritance and restores every server assigned to this publication.</p>':'')+

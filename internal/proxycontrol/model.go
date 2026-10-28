@@ -8,6 +8,7 @@ import (
 )
 
 type State struct {
+	ObservationVersion      string `json:"-"`
 	AccountID               string
 	ProxyID                 string
 	Provider                string

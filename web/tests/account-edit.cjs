@@ -42,6 +42,10 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    for(const name of ['size2','size3','image2','image3','proxy_id2','proxy_id3','region2','region3']){
     assert.equal(await evaluate('document.querySelector("[name='+name+']").value'),'',provider+' preserves optional '+name);
    }
+   if(provider==='digitalocean'){
+    assert.equal(await evaluate('document.querySelector("#modalFields").textContent.includes("Duplicate saved choices are shown once")'),true);
+    assert.equal(await evaluate('document.querySelector("[data-plan-summary=size2]").hidden&&document.querySelector("[data-plan-summary=size3]").hidden'),true);
+   }
    for(const size of [{width:320,height:480},{width:390,height:420},{width:844,height:390},{width:390,height:844}]){
     await call('Emulation.setDeviceMetricsOverride',{...size,deviceScaleFactor:1,mobile:true});
     for(const scroll of [0,99999]){
@@ -54,6 +58,46 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
    await waitFor('!document.querySelector("#modalForm").classList.contains("accountForm")');
    await waitFor('cache.accounts!==null&&activePageView&&!activePageView.loading');
   }
+  // Two asynchronous openings must not steal one shared dialog.
+  await evaluate(`window.__originalAPI=api;window.__releaseOptions=null;api=async(...args)=>{if(args[0]==='/api/v1/accounts/aws/options')await new Promise(r=>window.__releaseOptions=r);return window.__originalAPI(...args)};void window.editAccount('aws')`);
+  await waitFor('typeof window.__releaseOptions==="function"');
+  await evaluate('window.editAccount("ovh")');await waitFor('document.querySelector("#modal").open');
+  await evaluate('window.__releaseOptions();api=window.__originalAPI');
+  await new Promise(r=>setTimeout(r,200));assert.match(await evaluate('document.querySelector("#modalTitle").textContent'),/ovh/);
+  await evaluate('document.querySelector("#modal").close()');
+  // A committed save with a late response cannot close a newer account's draft.
+  await evaluate('window.editAccount("aws")');await waitFor('document.querySelector("#modal").open');
+  await evaluate(`api=async(...args)=>{const result=await window.__originalAPI(...args);if(args[0]==='/api/v1/accounts/aws'&&args[1]?.method==='PUT')await new Promise(r=>window.__releaseSave=r);return result};document.querySelector('#modalSubmit').click()`);
+  await waitFor('typeof window.__releaseSave==="function"');
+  await evaluate('document.querySelector("#modal").close();window.editAccount("ovh")');await waitFor('document.querySelector("#modal").open');
+  await evaluate('window.__releaseSave();api=window.__originalAPI');await new Promise(r=>setTimeout(r,200));
+  assert.equal(await evaluate('document.querySelector("#modal").open'),true);assert.match(await evaluate('document.querySelector("#modalTitle").textContent'),/ovh/);
+  await evaluate('document.querySelector("#modal").close()');
+  await evaluate('window.editAccount("saved-choice")');
+  await waitFor('document.querySelector("#modal").open');
+  for(const [name,value] of Object.entries({region:'retired-region',region2:'r2',size:'retired-plan',size2:'plan-2',image:'retired-image',image2:'ubuntu-2',proxy_id:'saved-proxy',proxy_id2:'other-proxy'})){
+   assert.equal(await evaluate('document.querySelector("[name='+name+']").value'),value,'saved unavailable '+name);
+  }
+  assert.equal(await evaluate('document.querySelector("[name=proxy_id3]").options[1].disabled'),true,'same proxy cannot masquerade as independent fallback');
+  assert.equal(await evaluate('formatDate("0001-01-01T00:00:00Z")'),'—','unknown provider date');
+  await evaluate('document.querySelector("#modalSubmit").click()');
+  await waitFor('!document.querySelector("#modal").open');
+  await waitFor('cache.accounts!==null&&!activePageView.loading');
+  // Independent country editor preserves ordered intent and a conflict draft.
+  await evaluate(`window.__countryWrites=[];window.__countryConflict=true;window.__countryBaseAPI=api;api=async(path,options)=>{if(path.endsWith('/proxy-country-policy')){if(options?.method==='PUT'){const body=JSON.parse(options.body);window.__countryWrites.push({path,body});if(window.__countryConflict)throw Error('country_policy_conflict');return {saved:true,countries:body.countries,revision:10}}return {policy:{revision:9,countries:['US','TR','AUTO'],network_mode:'proxy_required',status:'pending'},country_options:[{code:'US',label:'United States'},{code:'TR',label:'Türkiye'},{code:'DE',label:'Germany'}]}}return window.__countryBaseAPI(path,options)};window.editProxyCountries('aws')`);
+  await waitFor('document.querySelector("#modal").open');
+  assert.deepEqual(await evaluate('[...document.querySelectorAll("[data-country-index]")].map(x=>x.value)'),['US','TR','AUTO']);
+  assert.equal(await evaluate('document.querySelector("[data-country-index] option[value=TR]").disabled'),true);
+  await evaluate('document.querySelector("#countryPriorityAdd").click()');
+  assert.deepEqual(await evaluate('[...document.querySelectorAll("[data-country-index]")].map(x=>x.value)'),['US','TR','DE','AUTO']);
+  await evaluate('document.querySelector("#modalSubmit").click()');
+  await waitFor('document.querySelector("#modalError").textContent.includes("country_policy_conflict")');
+  assert.equal(await evaluate('document.querySelector("#modal").open'),true,'CAS conflict retains draft');
+  assert.equal(await evaluate('window.__countryWrites[0].body.revision'),9);
+  assert.deepEqual(await evaluate('window.__countryWrites[0].body.countries'),['US','TR','DE','AUTO']);
+  await evaluate('window.__countryConflict=false;document.querySelector("#modalSubmit").click()');
+  await waitFor('!document.querySelector("#modal").open');
+  await evaluate('api=window.__countryBaseAPI');
   await evaluate('load("settings")');
   await waitFor('current==="settings"&&cache.settings!==null&&!activePageView.loading');
   await evaluate('document.querySelector("[data-action=edit-settings]").click()');

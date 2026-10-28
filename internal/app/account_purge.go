@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/ipam"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
 	"golang.org/x/sys/unix"
 	"os"
@@ -114,7 +115,11 @@ func lockAccountPurge(ctx context.Context, tx *sql.Tx, id string) error {
 // gates are closed before SET NULL can accidentally widen their scope to fleet.
 func commitAccountPurge(ctx context.Context, tx *sql.Tx, id string) error {
 	return commitAccountPurgeWithArtifacts(ctx, tx, id, func(canonicalID string) error {
-		return removeAccountBrowserSession("/var/lib/digital-ocean-bot/browser-sessions", canonicalID)
+		root, err := network.BrowserSessionRoot()
+		if err != nil {
+			return err
+		}
+		return removeAccountBrowserSession(root, canonicalID)
 	})
 }
 

@@ -12,7 +12,7 @@ func (c Container) ensureAccountStickyPort(ctx context.Context, accountID string
 	if c.DB == nil {
 		return 0, ErrStickyPortUnavailable
 	}
-	tx, err := c.DB.BeginTx(ctx, nil)
+	tx, err := c.beginLegacyIdentityWrite(ctx, accountID)
 	if err != nil {
 		return 0, err
 	}
@@ -28,7 +28,7 @@ func (c Container) ensureAccountStickyPort(ctx context.Context, accountID string
 		return 0, err
 	}
 	if port.Valid && port.Int64 >= 10000 && port.Int64 <= 20000 {
-		if err := tx.Commit(); err != nil {
+		if err := c.commitLegacyIdentityWrite(ctx, tx, accountID); err != nil {
 			return 0, err
 		}
 		return int(port.Int64), nil
@@ -57,7 +57,7 @@ ON CONFLICT(account_id) DO UPDATE SET sticky_port=$2,updated_at=now()
 	if err != nil {
 		return 0, err
 	}
-	if err := tx.Commit(); err != nil {
+	if err := c.commitLegacyIdentityWrite(ctx, tx, accountID); err != nil {
 		return 0, err
 	}
 	return next, nil
@@ -67,7 +67,7 @@ func (c Container) rotateAccountStickyPort(ctx context.Context, accountID string
 	if c.DB == nil {
 		return 0, ErrStickyPortUnavailable
 	}
-	tx, err := c.DB.BeginTx(ctx, nil)
+	tx, err := c.beginLegacyIdentityWrite(ctx, accountID)
 	if err != nil {
 		return 0, err
 	}
@@ -112,7 +112,7 @@ WHERE account_id=$1
 		return 0, err
 	}
 
-	if err := tx.Commit(); err != nil {
+	if err := c.commitLegacyIdentityWrite(ctx, tx, accountID); err != nil {
 		return 0, err
 	}
 	return next, nil

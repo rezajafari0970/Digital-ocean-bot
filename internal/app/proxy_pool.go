@@ -4,9 +4,21 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 )
 
 func (c Container) ensureActiveAccountProxy(ctx context.Context, accountID string) error {
+	accountID, err := network.CanonicalAccountID(accountID)
+	if err != nil {
+		return err
+	}
+	explicit, err := explicitCountryPolicy(ctx, c.DB, accountID)
+	if err != nil {
+		return err
+	}
+	if explicit && ctx.Value(countryAutoRecoveryKey{}) != true {
+		return c.requireAccountNetworkReady(ctx, accountID)
+	}
 	tx, err := c.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -44,6 +56,9 @@ func (c Container) ensureActiveAccountProxy(ctx context.Context, accountID strin
 	}
 	if current != next {
 		if _, err = tx.ExecContext(ctx, `SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, "account-route:"+accountID); err != nil {
+			return err
+		}
+		if err = checkProxyKeeperLease(ctx, tx, accountID); err != nil {
 			return err
 		}
 		if _, err = tx.ExecContext(ctx, `UPDATE network_profiles SET proxy_id=$2::uuid,updated_at=now() WHERE account_id=$1`, accountID, next); err != nil {

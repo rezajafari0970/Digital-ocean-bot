@@ -4,7 +4,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
  if(!base?.startsWith('http://127.0.0.1:')||!token)throw Error('local ephemeral session required');
  const root=process.env.DOB_UI_ARTIFACT_DIR||os.tmpdir(),profile=fs.mkdtempSync(path.join(root,'ui-profile-'));
  const log=fs.openSync(path.join(root,'browser.log'),'w');
- const chrome=spawn('/snap/bin/chromium',['--headless','--no-sandbox','--disable-dev-shm-usage','--disable-gpu','--remote-debugging-port=0','--remote-debugging-address=127.0.0.1','--user-data-dir='+profile,'about:blank'],{stdio:['ignore',log,log],env:{...process.env,TMPDIR:root}});
+ const chrome=spawn(process.env.DOB_TEST_CHROMIUM||'/snap/bin/chromium',['--headless','--no-sandbox','--disable-dev-shm-usage','--disable-gpu','--remote-debugging-port=0','--remote-debugging-address=127.0.0.1','--user-data-dir='+profile,'about:blank'],{stdio:['ignore',log,log],env:{...process.env,TMPDIR:root}});
  let ws;try{
   const until=Date.now()+20000;let port;
   while(Date.now()<until){try{port=Number(fs.readFileSync(path.join(profile,'DevToolsActivePort'),'utf8').split('\n')[0]);break}catch{};await new Promise(r=>setTimeout(r,200))}
@@ -13,7 +13,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   ws=new WebSocket(version.webSocketDebuggerUrl);await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j});
   let seq=0;const pending=new Map();
   ws.onmessage=({data})=>{const m=JSON.parse(data);if(m.id){const h=pending.get(m.id);if(h){pending.delete(m.id);m.error?h[1](Error(m.error.message)):h[0](m.result)}}};
-  const send=(method,params={},sessionId)=>new Promise((resolve,reject)=>{const id=++seq;pending.set(id,[resolve,reject]);ws.send(JSON.stringify({id,method,params,sessionId}))});
+  const send=(method,params={},sessionId)=>new Promise((resolve,reject)=>{const id=++seq,timer=setTimeout(()=>{pending.delete(id);reject(Error('Browser command timed out: '+method))},20000);pending.set(id,[v=>{clearTimeout(timer);resolve(v)},e=>{clearTimeout(timer);reject(e)}]);ws.send(JSON.stringify({id,method,params,sessionId}))});
   const {targetId}=await send('Target.createTarget',{url:'about:blank'});
   const {sessionId}=await send('Target.attachToTarget',{targetId,flatten:true});
   const call=(m,p)=>send(m,p,sessionId);
@@ -50,13 +50,12 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   const imageLabels=await evaluate("[...document.querySelector('#accountDiscovery [name=image]').options].map(o=>o.textContent)");
   assert.equal(new Set(imageLabels).size,4);assert.ok(imageLabels.every(x=>x.includes('x86_64')&&x.includes('cloud-init')));
   assert.ok(imageLabels[1].includes('ubuntu24-a'));assert.ok(imageLabels[2].includes('ubuntu24-b'));
-  assert.ok((await evaluate("document.querySelector('#accountSize').options[0].textContent")).includes('EUR 0.0075/h | ≈5.04/mo'));
+  assert.ok((await evaluate("document.querySelector('[data-plan-summary=size]').textContent")).includes('EUR 0.0075/h | ≈5.04/mo'));
   await evaluate("document.querySelector('#accountDiscovery [name=size2]').value='DEV-1xCPU-1GB';document.querySelector('#accountDiscovery [name=image2]').value='ubuntu24-b';document.querySelector('#accountDiscovery [name=region]').value='es-mad1';document.querySelector('#accountDiscovery [name=region]').dispatchEvent(new Event('change'))");
-  const labels=await evaluate("['size','size2','size3'].map(n=>document.querySelector('#accountDiscovery [name='+n+']').options[0].textContent)");
-  assert.ok(labels.every(x=>x.includes('EUR 0.01/h | ≈6.72/mo')));
+  assert.ok((await evaluate("document.querySelector('[data-plan-summary=size]').textContent")).includes('EUR 0.01/h | ≈6.72/mo'));
   assert.equal(await evaluate("document.querySelector('#accountDiscovery [name=size2]').value"),'DEV-1xCPU-1GB');
   assert.equal(await evaluate("document.querySelector('#accountDiscovery [name=image2]').value"),'ubuntu24-b');
-  assert.ok((await evaluate("document.querySelector('#accountDiscovery [name=size2]').selectedOptions[0].textContent")).includes('Price unavailable'));
+  assert.ok((await evaluate("document.querySelector('[data-plan-summary=size2]').textContent")).includes('Price unavailable'));
   assert.equal(await evaluate("catalogPriceLabel({PriceMonthly:6},'fra1','digitalocean')"),'$6/mo');
   assert.equal(await evaluate("catalogPriceLabel({PriceMonthly:5},'fra1','vultr')"),'$5/mo');
   assert.equal(await evaluate("catalogPriceLabel({PriceMonthly:6},'fi-hel1','upcloud')"),'Price unavailable');
@@ -67,13 +66,15 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   await call('Emulation.setDeviceMetricsOverride',{width:1365,height:950,deviceScaleFactor:1,mobile:false});
   snap=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(root,'upcloud-account-desktop.png'),Buffer.from(snap.data,'base64'));
   await evaluate('document.querySelector("#modalFields [name=provider]").value="vultr";document.querySelector("#modalFields [name=provider]").dispatchEvent(new Event("change"))');
-  assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").hidden&&document.querySelector("#accountDiscovery").textContent===""'),true);
+  assert.equal(await evaluate('cache.accountPreview===null&&!document.querySelector("#modalSubmit").hidden&&document.querySelector("#modalSubmit").disabled&&document.querySelector("#accountDiscovery").textContent===""'),true);
 
-  await evaluate("document.querySelector('#modal').close();cache.accounts=[{id:'upcloud-fixture',provider:'upcloud',name:'Fixture',region:'fi-hel1',regions:['fi-hel1','es-mad1'],sizes:['1xCPU-2GB','DEV-1xCPU-1GB','1xCPU-2GB'],image:'ubuntu24-b',images:['ubuntu24-b','ubuntu26','ubuntu22']}];window.oldFixtureFetch=window.fetch;window.fetch=async(url,opt)=>url==='/api/v1/accounts/upcloud-fixture/options'?new Response(JSON.stringify(window.savedFixture),{status:200}):window.oldFixtureFetch(url,opt);editAccount('upcloud-fixture')");
+  await evaluate("document.querySelector('#modal').close();window.editFixture=[{id:'upcloud-fixture',provider:'upcloud',name:'Fixture',region:'fi-hel1',regions:['fi-hel1','es-mad1'],sizes:['1xCPU-2GB','DEV-1xCPU-1GB','1xCPU-2GB'],image:'ubuntu24-b',images:['ubuntu24-b','ubuntu26','ubuntu22']}];window.oldFixtureFetch=window.fetch;window.fetch=async(url,opt)=>url==='/api/v1/accounts'?new Response(JSON.stringify(window.editFixture),{status:200}):url==='/api/v1/accounts/upcloud-fixture/options'?new Response(JSON.stringify(window.savedFixture),{status:200}):window.oldFixtureFetch(url,opt);editAccount('upcloud-fixture')");
   await waitFor("document.querySelector('#modalTitle').textContent==='Edit Fixture'");
   assert.deepEqual(await evaluate("['image','image2','image3'].map(n=>document.querySelector('#modalFields [name='+n+']').value)"),['ubuntu24-b','ubuntu26','ubuntu22']);
   await evaluate("document.querySelector('#modalFields [name=region]').value='es-mad1';document.querySelector('#modalFields [name=region]').dispatchEvent(new Event('change'))");
-  assert.ok((await evaluate("['size','size2','size3'].map(n=>document.querySelector('#modalFields [name='+n+']').options[0].textContent)")).every(x=>x.includes('EUR 0.01/h')));
+  assert.ok((await evaluate("document.querySelector('[data-plan-summary=size]').textContent")).includes('EUR 0.01/h'));
+  assert.ok((await evaluate("document.querySelector('[data-plan-summary=size2]').textContent")).includes('Price unavailable'));
+  assert.equal(await evaluate("document.querySelector('#modalFields [name=size3]').value"),'','legacy duplicate is visible as one effective choice');
   assert.equal(await evaluate("document.querySelector('#modalFields [name=size2]').value"),'DEV-1xCPU-1GB');
 
   await evaluate("document.querySelector('#modal').close()");

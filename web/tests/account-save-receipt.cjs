@@ -10,7 +10,7 @@ const helpers=source.slice(source.indexOf('function accountRuleApplicationView('
   const requests=[],messages=[],button={},modal={close(){this.closed=true}},error={};
   const rule={apply_to_existing:false,shrink_pending:false,replacement_revision:null,waiting_droplet_id:null};
   const receipt={id:scenario==='wrong_receipt'?'other':'owned',desired_server_count:10,rule_application:rule};
-  const ctx=vm.createContext({id:'owned',payload:{desired_server_count:10},cache:{accounts:[]},console:{info(){}},performance:{now:()=>0},esc:String,formatDate:String,
+  const ctx=vm.createContext({owns:()=>true,id:'owned',payload:{desired_server_count:10},cache:{accounts:[]},console:{info(){}},performance:{now:()=>0},esc:String,formatDate:String,
    $:s=>s==='#modalSubmit'?button:s==='#modal'?modal:error,
    toast:(text,kind)=>messages.push({text,kind}),
    api:async(path,opt)=>{requests.push({path,opt});if(scenario==='write_failed')throw Error('fixture write failed');return {ok:true,account:receipt}},

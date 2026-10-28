@@ -10,6 +10,9 @@ import (
 )
 
 func (s *Server) validateReplacementToken(ctx context.Context, accountID, providerName, token, mode, proxyID string) (providers.Account, error) {
+	if mode != "direct" && mode != "proxy_required" {
+		return providers.Account{}, errors.New("invalid_network_mode")
+	}
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 	if providerName == "" {
@@ -19,8 +22,8 @@ func (s *Server) validateReplacementToken(ctx context.Context, accountID, provid
 	var closeFn func()
 	if mode == "proxy_required" {
 		var px network.Proxy
-		var user, ref string
-		if err := s.DB.QueryRowContext(ctx, `SELECT id::text,name,type,host,port,COALESCE(username,''),COALESCE(secret_ref,''),status FROM proxies WHERE id=$1`, proxyID).Scan(&px.ID, &px.Name, &px.Type, &px.Host, &px.Port, &user, &ref, &px.Status); err != nil {
+		var user, ref, secretVersion string
+		if err := s.DB.QueryRowContext(ctx, `SELECT id::text,name,type,host,port,COALESCE(username,''),COALESCE(secret_ref,''),status ,COALESCE((SELECT sec.xmin::text||':'||sec.updated_at::text FROM secrets sec WHERE sec.proxy_id=proxies.id AND sec.id=proxies.secret_ref),'') FROM proxies WHERE id=$1`, proxyID).Scan(&px.ID, &px.Name, &px.Type, &px.Host, &px.Port, &user, &ref, &px.Status, &secretVersion); err != nil {
 			return providers.Account{}, err
 		}
 		if px.Status != network.StatusHealthy {
@@ -29,7 +32,7 @@ func (s *Server) validateReplacementToken(ctx context.Context, accountID, provid
 		var pass []byte
 		if ref != "" {
 			var err error
-			pass, err = s.Container.Secrets.GetProxy(ctx, px.ID, ref)
+			pass, err = s.Container.Secrets.GetProxyAtVersion(ctx, px.ID, ref, secretVersion)
 			if err != nil {
 				return providers.Account{}, err
 			}

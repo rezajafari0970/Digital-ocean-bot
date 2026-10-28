@@ -136,7 +136,6 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 		d.Network["last_operation_state"] = opState
 		d.Network["last_operation_resource"] = opResource
 		d.Network["last_operation_at"] = opAt.Time
-		d.Network["egress_fail_closed"] = opState == "unknown"
 	}
 	// Dashboard is strictly read-only. Proxy identity is owned and refreshed by
 	// the shared Proxy Control Plane worker, never by UI reads.
@@ -146,7 +145,10 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 	var lastHealthOK sql.NullBool
 	var rotationStarted sql.NullTime
 	if err := s.DB.QueryRowContext(r.Context(), `SELECT COALESCE(host(exit_ip),''),COALESCE(subnet_key,''),COALESCE(asn,''),COALESCE(country,''),COALESCE(country_code,''),timezone,locale,COALESCE(preferred_country,''),COALESCE(preferred_country_code,''),COALESCE(sticky_session,''),fallback_active,last_health_at,last_health_ok,rotation_started_at FROM account_network_identities WHERE account_id=$1`, id).Scan(&exitIP, &subnet, &asn, &country, &countryCode, &timezone, &locale, &preferredCountry, &preferredCode, &stickySession, &fallbackActive, &lastHealth, &lastHealthOK, &rotationStarted); err == nil {
-		isolation := "isolated"
+		isolation := "unverified"
+		if exitIP != "" && lastHealthOK.Valid && lastHealthOK.Bool && !rotationStarted.Valid {
+			isolation = "isolated"
+		}
 		var collision bool
 		if err := s.DB.QueryRowContext(r.Context(), `SELECT EXISTS(SELECT 1 FROM account_network_identities WHERE account_id<>$1 AND ((exit_ip IS NOT NULL AND exit_ip=NULLIF($2,'')::inet) OR (subnet_key<>'' AND subnet_key=$3)))`, id, exitIP, subnet).Scan(&collision); err != nil && !errors.Is(err, sql.ErrNoRows) {
 			writeJSON(w, 500, errorBody())
@@ -172,6 +174,28 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 		d.Network["rotation_started_at"] = rotationStarted.Time
 		d.Network["sticky_ttl_seconds"] = 1800
 	}
+
+	var unknownOperations int
+	if err := s.DB.QueryRowContext(r.Context(), `SELECT count(*) FROM operations WHERE account_id=$1 AND kind IN ('CREATE_DROPLET','DELETE_DROPLET') AND state='unknown'`, id).Scan(&unknownOperations); err != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	d.Network["unknown_operations"] = unknownOperations
+	guard := "Explicit direct route"
+	blocked := false
+	if mode == "proxy_required" {
+		guard = "Last identity check passed"
+		if status != "healthy" || exitIP == "" || !lastHealthOK.Valid || !lastHealthOK.Bool || rotationStarted.Valid || d.Network["isolation_status"] != "isolated" {
+			guard = "Awaiting verified proxy identity"
+			blocked = true
+		}
+	}
+	if unknownOperations > 0 {
+		guard = "Provider outcome unresolved — reconciling"
+		blocked = true
+	}
+	d.Network["egress_guard_label"] = guard
+	d.Network["egress_fail_closed"] = blocked
 
 	var circuit string
 	var failures int
@@ -293,8 +317,10 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 					continue
 				}
 				seen[x.ID] = true
-				age := int64(0)
+				var age any
+				var createdAt any
 				if !x.CreatedAt.IsZero() {
+					createdAt = x.CreatedAt
 					age = int64(time.Since(x.CreatedAt).Seconds())
 				}
 				info, managed := managedIDs[x.ID]
@@ -316,7 +342,7 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 				if info.ExpiresAt.Valid {
 					expiresAt = info.ExpiresAt.Time
 				}
-				d.Droplets = append(d.Droplets, map[string]any{"id": x.ID, "name": x.Name, "provider": provider, "ip": x.PrimaryIPv4, "region": x.RegionID, "status": x.State, "lifecycle_state": info.State, "expires_at": expiresAt, "created_at": x.CreatedAt, "age_seconds": age, "managed": managed, "ownership": ownership, "tags": x.Tags})
+				d.Droplets = append(d.Droplets, map[string]any{"id": x.ID, "name": x.Name, "provider": provider, "ip": x.PrimaryIPv4, "region": x.RegionID, "status": x.State, "lifecycle_state": info.State, "expires_at": expiresAt, "created_at": createdAt, "age_seconds": age, "managed": managed, "ownership": ownership, "tags": x.Tags})
 			}
 			d.Resources = map[string]any{"total": len(d.Droplets), "managed": managedCount, "unmanaged": len(d.Droplets) - managedCount - pendingCount, "pending_creation": pendingCount, "active": activeCount, "data_available": true}
 		}

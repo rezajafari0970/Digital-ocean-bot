@@ -4,7 +4,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
  if(!base?.startsWith('http://127.0.0.1:')||!token)throw Error('local ephemeral session required');
  const root=process.env.DOB_UI_ARTIFACT_DIR||os.tmpdir(),profile=fs.mkdtempSync(path.join(root,'ui-profile-'));
  const log=fs.openSync(path.join(root,'browser.log'),'w');
- const chrome=spawn('/snap/bin/chromium',['--headless','--no-sandbox','--disable-dev-shm-usage','--disable-gpu','--remote-debugging-port=0','--remote-debugging-address=127.0.0.1','--user-data-dir='+profile,'about:blank'],{stdio:['ignore',log,log],env:{...process.env,TMPDIR:root}});
+ const chrome=spawn(process.env.DOB_TEST_CHROMIUM||'/snap/bin/chromium',['--headless','--no-sandbox','--disable-dev-shm-usage','--disable-gpu','--remote-debugging-port=0','--remote-debugging-address=127.0.0.1','--user-data-dir='+profile,'about:blank'],{stdio:['ignore',log,log],env:{...process.env,TMPDIR:root}});
  let ws;try{
   const until=Date.now()+20000;let port;
   while(Date.now()<until){try{port=Number(fs.readFileSync(path.join(profile,'DevToolsActivePort'),'utf8').split('\n')[0]);break}catch{};await new Promise(r=>setTimeout(r,200))}
@@ -13,7 +13,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   ws=new WebSocket(version.webSocketDebuggerUrl);await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j});
   let seq=0;const pending=new Map();
   ws.onmessage=({data})=>{const m=JSON.parse(data);if(m.id){const h=pending.get(m.id);if(h){pending.delete(m.id);m.error?h[1](Error(m.error.message)):h[0](m.result)}}};
-  const send=(method,params={},sessionId)=>new Promise((resolve,reject)=>{const id=++seq;pending.set(id,[resolve,reject]);ws.send(JSON.stringify({id,method,params,sessionId}))});
+  const send=(method,params={},sessionId)=>new Promise((resolve,reject)=>{const id=++seq,timer=setTimeout(()=>{pending.delete(id);reject(Error('Browser command timed out: '+method))},20000);pending.set(id,[v=>{clearTimeout(timer);resolve(v)},e=>{clearTimeout(timer);reject(e)}]);ws.send(JSON.stringify({id,method,params,sessionId}))});
   const {targetId}=await send('Target.createTarget',{url:'about:blank'});
   const {sessionId}=await send('Target.attachToTarget',{targetId,flatten:true});
   const call=(m,p)=>send(m,p,sessionId);
@@ -41,12 +41,12 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   assert.equal(await evaluate('window.previewRequests[0].provider'),'linode');
   assert.equal(await evaluate('document.querySelector("#accountDiscovery [name=desired_server_count]").value'),'5');
   assert.deepEqual(await evaluate("['image','image2','image3'].map(n=>document.querySelector('#accountDiscovery [name='+n+']').value)"),['linode/ubuntu26.04','linode/ubuntu24.04','linode/ubuntu22.04']);
-  assert.ok((await evaluate("document.querySelector('#accountSize').options[0].textContent")).includes('USD 0.0075/h | 5.00/mo'));
+  assert.ok((await evaluate("document.querySelector('[data-plan-summary=size]').textContent")).includes('USD 0.0075/h | 5.00/mo'));
   assert.ok((await evaluate("document.querySelector('[data-catalog-price-note]').textContent")).includes('provider-listed caps'));
   await evaluate("document.querySelector('#accountDiscovery [name=size2]').value='hourly';document.querySelector('#accountDiscovery [name=region]').value='id-cgk';document.querySelector('#accountDiscovery [name=region]').dispatchEvent(new Event('change'))");
-  assert.ok((await evaluate("document.querySelector('#accountSize').options[0].textContent")).includes('USD 0.009/h | 6.00/mo'));
+  assert.ok((await evaluate("document.querySelector('[data-plan-summary=size]').textContent")).includes('USD 0.009/h | 6.00/mo'));
   assert.equal(await evaluate("document.querySelector('#accountDiscovery [name=size2]').value"),'hourly');
-  assert.ok((await evaluate("document.querySelector('#accountDiscovery [name=size2]').selectedOptions[0].textContent")).includes('USD 0.03/h | hourly billing'));
+  assert.ok((await evaluate("document.querySelector('[data-plan-summary=size2]').textContent")).includes('USD 0.03/h | hourly billing'));
   assert.equal(await evaluate("catalogPriceLabel(fixture.plans[1],'us-east','linode')"),'USD 0.02/h | hourly billing');
   assert.equal(await evaluate("catalogPriceLabel(fixture.plans[1],'missing','linode')"),'Price unavailable');
   assert.equal(await evaluate("catalogPriceLabel({PriceMonthly:6},'us-east','digitalocean')"),'$6/mo');
@@ -57,11 +57,11 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   await call('Emulation.setDeviceMetricsOverride',{width:1365,height:950,deviceScaleFactor:1,mobile:false});
   snap=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(root,'linode-account-desktop.png'),Buffer.from(snap.data,'base64'));
   await evaluate('document.querySelector("#modalFields [name=provider]").value="vultr";document.querySelector("#modalFields [name=provider]").dispatchEvent(new Event("change"))');
-  assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").hidden&&document.querySelector("#accountDiscovery").textContent===""'),true);
-  await evaluate("document.querySelector('#modal').close();cache.accounts=[{id:'linode-fixture',provider:'linode',name:'Fixture',region:'us-east',regions:['us-east','id-cgk'],sizes:['g6-nanode-1','hourly'],image:'linode/ubuntu24.04',images:['linode/ubuntu24.04','linode/ubuntu26.04','linode/ubuntu22.04']}];window.fixtureFetch=window.fetch;window.fetch=async(url,opt)=>url==='/api/v1/accounts/linode-fixture/options'?new Response(JSON.stringify(window.fixture),{status:200}):window.fixtureFetch(url,opt);editAccount('linode-fixture')");
+  assert.equal(await evaluate('cache.accountPreview===null&&!document.querySelector("#modalSubmit").hidden&&document.querySelector("#modalSubmit").disabled&&document.querySelector("#accountDiscovery").textContent===""'),true);
+  await evaluate("document.querySelector('#modal').close();window.editFixture=[{id:'linode-fixture',provider:'linode',name:'Fixture',region:'us-east',regions:['us-east','id-cgk'],sizes:['g6-nanode-1','hourly'],image:'linode/ubuntu24.04',images:['linode/ubuntu24.04','linode/ubuntu26.04','linode/ubuntu22.04']}];window.fixtureFetch=window.fetch;window.fetch=async(url,opt)=>url==='/api/v1/accounts'?new Response(JSON.stringify(window.editFixture),{status:200}):url==='/api/v1/accounts/linode-fixture/options'?new Response(JSON.stringify(window.fixture),{status:200}):window.fixtureFetch(url,opt);editAccount('linode-fixture')");
   await waitFor("document.querySelector('#modalTitle').textContent==='Edit Fixture'");
   await evaluate("document.querySelector('#modalFields [name=region]').value='id-cgk';document.querySelector('#modalFields [name=region]').dispatchEvent(new Event('change'))");
-  assert.ok((await evaluate("document.querySelector('#modalFields [name=size]').options[0].textContent")).includes('USD 0.009/h | 6.00/mo'));
+  assert.ok((await evaluate("document.querySelector('[data-plan-summary=size]').textContent")).includes('USD 0.009/h | 6.00/mo'));
   assert.equal(await evaluate("document.querySelector('#modalFields [name=size2]').value"),'hourly');
   assert.ok(await evaluate("accountCard({id:'linode-fixture',name:'Linode fixture',provider:'linode',enabled:true,provider_state:'ACTIVE',capacity_state:'UNKNOWN',capacity_limit_known:false,capacity_freshness:'fresh',provider_freshness:'fresh',droplet_limit:0,provider_droplets:0,desired_server_count:5,buildable_now:null}).includes('Unknown')"));
   console.log('LINODE_FORM_PREVIEW_PRICE_EDIT_UNKNOWN_CAPACITY_MOBILE_DESKTOP_REGRESSION PASS');

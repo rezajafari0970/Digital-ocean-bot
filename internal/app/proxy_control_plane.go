@@ -10,46 +10,92 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/proxycontrol"
 )
 
-func (c Container) acquireProxyKeeperLock(ctx context.Context, accountID string) (*sql.Tx, bool, error) {
+type proxyKeeperLeaseKey struct{}
+type proxyKeeperLease struct {
+	db             *sql.DB
+	account, owner string
+}
+
+func (c Container) acquireProxyKeeperLock(ctx context.Context, accountID string) (*proxyKeeperLease, bool, error) {
 	if c.DB == nil {
 		return nil, false, ErrNetworkNotReady
+	}
+	accountID, err := network.CanonicalAccountID(accountID)
+	if err != nil {
+		return nil, false, err
+	}
+	owner, err := countrySession()
+	if err != nil {
+		return nil, false, err
 	}
 	tx, err := c.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, false, err
 	}
+	defer tx.Rollback()
 	var locked bool
-	if err := tx.QueryRowContext(ctx, `SELECT pg_try_advisory_xact_lock(hashtextextended($1,0))`, "proxy-keeper:"+accountID).Scan(&locked); err != nil {
-		_ = tx.Rollback()
+	if err = tx.QueryRowContext(ctx, `SELECT pg_try_advisory_xact_lock(hashtextextended($1,0))`, "proxy-keeper:"+accountID).Scan(&locked); err != nil {
 		return nil, false, err
 	}
 	if !locked {
-		_ = tx.Rollback()
 		return nil, false, nil
 	}
-	return tx, true, nil
-}
-
-func releaseProxyKeeperLock(tx *sql.Tx) {
-	if tx != nil {
-		_ = tx.Rollback()
+	var claimed string
+	err = tx.QueryRowContext(ctx, `INSERT INTO account_proxy_selection(account_id,fence,keeper_owner,keeper_lease_until) VALUES($1,1,$2,clock_timestamp()+interval '60 seconds')
+ ON CONFLICT(account_id) DO UPDATE SET fence=account_proxy_selection.fence+1,keeper_owner=EXCLUDED.keeper_owner,keeper_lease_until=EXCLUDED.keeper_lease_until,legacy_lease_until=NULL
+ WHERE account_proxy_selection.keeper_lease_until IS NULL OR account_proxy_selection.keeper_lease_until<=clock_timestamp() RETURNING keeper_owner`, accountID, owner).Scan(&claimed)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, false, nil
 	}
+	if err != nil {
+		return nil, false, err
+	}
+	if err = tx.Commit(); err != nil {
+		return nil, false, err
+	}
+	return &proxyKeeperLease{db: c.DB, account: accountID, owner: claimed}, true, nil
+}
+func releaseProxyKeeperLock(lease *proxyKeeperLease) {
+	if lease == nil {
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	_, _ = lease.db.ExecContext(ctx, `UPDATE account_proxy_selection SET keeper_owner=NULL,keeper_lease_until=NULL WHERE account_id=$1 AND keeper_owner=$2`, lease.account, lease.owner)
+}
+func checkProxyKeeperLease(ctx context.Context, tx *sql.Tx, account string) error {
+	lease, _ := ctx.Value(proxyKeeperLeaseKey{}).(*proxyKeeperLease)
+	if lease == nil {
+		return nil
+	}
+	var valid bool
+	err := tx.QueryRowContext(ctx, `SELECT keeper_owner=$2 AND keeper_lease_until>clock_timestamp() FROM account_proxy_selection WHERE account_id=$1 FOR UPDATE NOWAIT`, account, lease.owner).Scan(&valid)
+	if err != nil {
+		return err
+	}
+	if !valid || account != lease.account {
+		return ErrStaleAccountNetwork
+	}
+	return nil
 }
 
-// MaintainProxyControlPlane is the provider-agnostic proxy keeper.
-// A PostgreSQL transaction-scoped advisory lock serializes the full
-// load/recovery/save sequence per account, including across accidental
-// duplicate worker processes. Transaction scope prevents orphaned locks.
+// A bounded lease serializes keepers without pinning a pool connection during
+// probes. Every publication validates ownership; a crash recovers after expiry.
 func (c Container) MaintainProxyControlPlane(ctx context.Context, accountID string) error {
-	lockTx, locked, err := c.acquireProxyKeeperLock(ctx, accountID)
+	lease, locked, err := c.acquireProxyKeeperLock(ctx, accountID)
 	if err != nil {
 		return err
 	}
 	if !locked {
 		return nil
 	}
-	defer releaseProxyKeeperLock(lockTx)
+	defer releaseProxyKeeperLock(lease)
+	work, cancel := context.WithTimeout(ctx, 50*time.Second)
+	defer cancel()
+	return c.maintainOrderedCountry(context.WithValue(work, proxyKeeperLeaseKey{}, lease), lease.account)
+}
 
+func (c Container) maintainLegacyProxyControlPlane(ctx context.Context, accountID string) error {
 	if err := c.ensureActiveAccountProxy(ctx, accountID); err != nil {
 		if errors.Is(err, ErrNetworkNotReady) {
 			if diagnosticErr := c.recordBlockedBaseProxy(ctx, accountID); diagnosticErr != nil {
@@ -93,6 +139,10 @@ WHERE a.id=$1 AND (a.enabled=true OR a.deletion_requested_at IS NOT NULL)
 		return nil
 	}
 
+	ctx, err = c.legacyIdentityContext(ctx, accountID)
+	if err != nil {
+		return err
+	}
 	beforeSession, beforeIP := proxyIdentitySignature(ctx, c.DB, accountID)
 	started := time.Now()
 	maintainErr := c.MaintainStickyIdentity(ctx, accountID)
@@ -129,7 +179,15 @@ WHERE a.id=$1 AND (a.enabled=true OR a.deletion_requested_at IS NOT NULL)
 		state = proxycontrol.BumpGeneration(state)
 	}
 
-	if err := store.Save(ctx, state); err != nil {
+	tx, err := c.beginLegacyIdentityWrite(ctx, accountID)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if err = proxycontrol.SaveStateTx(ctx, tx, state); err != nil {
+		return err
+	}
+	if err = c.commitLegacyIdentityWrite(ctx, tx, accountID); err != nil {
 		return err
 	}
 	return maintainErr

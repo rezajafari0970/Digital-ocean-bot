@@ -38,7 +38,11 @@ func ruleFixture(t *testing.T, db *sql.DB, provider string, n int) (string, []st
 }
 func ruleSave(t *testing.T, db *sql.DB, a string, apply bool, desired, min, max int) *httptest.ResponseRecorder {
 	t.Helper()
-	body, _ := json.Marshal(map[string]any{"name": "rule fixture", "regions": []string{"ams"}, "sizes": []string{"small"},
+	var revision int64
+	if err := db.QueryRow(`SELECT settings_revision FROM accounts WHERE id=$1`, a).Scan(&revision); err != nil {
+		t.Fatal(err)
+	}
+	body, _ := json.Marshal(map[string]any{"settings_revision": revision, "name": "rule fixture", "regions": []string{"ams"}, "sizes": []string{"small"},
 		"image": "ubuntu-24-04-x64", "images": []string{"ubuntu-24-04-x64"}, "network_mode": "direct", "lifetime_min_seconds": min,
 		"lifetime_max_seconds": max, "build_spacing_minutes": 1, "build_spacing_max_minutes": 3,
 		"desired_server_count": desired, "max_concurrent": 3, "fallback_any_region": true, "apply_to_existing": apply})
