@@ -83,7 +83,20 @@ func (s SQLStore) Save(ctx context.Context, x State) error {
 }
 
 // SaveStateTx allows identity and generation publication to share a route fence.
-func SaveStateTx(ctx context.Context, tx *sql.Tx, x State) error { return saveState(ctx, tx, x) }
+var ErrStateConflict = errors.New("proxy health observation changed")
+
+func SaveStateTx(ctx context.Context, tx *sql.Tx, x State) error {
+	if x.ObservationVersion != "" {
+		var version string
+		if err := tx.QueryRowContext(ctx, `SELECT xmin::text FROM proxy_runtime_state WHERE account_id=$1 AND proxy_id=$2 AND provider=$3 FOR UPDATE`, x.AccountID, x.ProxyID, x.Provider).Scan(&version); err != nil {
+			return err
+		}
+		if version != x.ObservationVersion {
+			return ErrStateConflict
+		}
+	}
+	return saveState(ctx, tx, x)
+}
 func saveState(ctx context.Context, db interface {
 	ExecContext(context.Context, string, ...any) (sql.Result, error)
 }, x State) error {
@@ -226,6 +239,9 @@ WHERE account_id=$1 AND proxy_id=$2 AND provider=$3
 		allowed = false
 	}
 
+	if err = tx.QueryRowContext(ctx, `SELECT xmin::text FROM proxy_runtime_state WHERE account_id=$1 AND proxy_id=$2 AND provider=$3`, accountID, proxyID, provider).Scan(&x.ObservationVersion); err != nil {
+		return x, false, err
+	}
 	if err = tx.Commit(); err != nil {
 		return x, false, err
 	}

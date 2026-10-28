@@ -78,3 +78,16 @@ settings/country-editor conflict tests. The canonical gate forbids missing/skipp
 required tests. Independent OpenAI API reviews and all failed/corrected test runs
 are recorded in the work log. Source CI, public export scans, native installation
 and both-runtime preservation checks must complete before reporting release success.
+
+## Final admission and concurrency safeguards
+
+Repository connection parameters and the route fingerprint share one SQL snapshot.
+Provider dispatch requires that fingerprint plus current generation/epoch and ready
+country policy under the held route connection. Native request-write completion and
+response consumption jointly determine release; EOF does not cancel an upload.
+Keeper work uses a durable per-account owner lease without holding a SQL pool slot
+through network probes. Its work deadline precedes lease expiry; every route
+publication checks the lease. Health publication also rejects newer passive evidence.
+Country proof windows scale to the finite configured driver work, with a five-minute
+minimum and 30 seconds per attempt/tier. This prevents large finite scans from
+restarting forever; an indeterminate observer never counts as exhaustion.

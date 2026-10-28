@@ -66,6 +66,26 @@ func (s Selector) Select(ctx context.Context, scope string, countries []string, 
 	maxAge := s.MaxSweepAge
 	if maxAge <= 0 {
 		maxAge = 5 * time.Minute
+		attempts := 0
+		for _, p := range providers {
+			n := p.Attempts
+			if n < 1 {
+				n = 1
+			}
+			attempts += n
+		}
+		tiers := 0
+		for _, c := range countries {
+			if c != Auto {
+				tiers++
+			}
+		}
+		// Seven-second probes, incumbent checks and keeper resumption gaps must
+		// fit before evidence expires. Unknown results still never exhaust a tier.
+		budget := time.Duration(attempts) * time.Duration(tiers) * 30 * time.Second
+		if budget > maxAge {
+			maxAge = budget
+		}
 	}
 	if state.Scope != scope || state.Countries == nil || (!state.RetryAfter.IsZero() && !state.RetryAfter.After(now())) {
 		*state = Checkpoint{Scope: scope, Countries: map[string]*Sweep{}}

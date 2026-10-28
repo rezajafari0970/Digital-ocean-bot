@@ -99,7 +99,11 @@ func (s *Server) assignProxy(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 400, map[string]string{"error": "invalid_request"})
 		return
 	}
-	accountID := r.PathValue("id")
+	accountID, idErr := network.CanonicalAccountID(r.PathValue("id"))
+	if idErr != nil {
+		writeJSON(w, 400, map[string]string{"error": "invalid_account_id"})
+		return
+	}
 	if x.Mode != "direct" && x.Mode != "proxy_required" {
 		writeJSON(w, 400, map[string]string{"error": "invalid_mode"})
 		return

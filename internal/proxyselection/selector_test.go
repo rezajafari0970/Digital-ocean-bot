@@ -140,3 +140,22 @@ func TestCountryPriorityLongSweepCannotStarveAuto(t *testing.T) {
 		t.Fatal("completed sweep stopped failback", final)
 	}
 }
+
+func TestCountryReviewTwoLargeFiniteSweepCompletes(t *testing.T) {
+	now := time.Now()
+	selector := Selector{Now: func() time.Time { return now }}
+	state := Checkpoint{}
+	providers := []Provider{}
+	for i := 0; i < 8; i++ {
+		providers = append(providers, Provider{ID: string(rune('a' + i)), Attempts: 6})
+	}
+	calls := 0
+	decision := selector.Select(context.Background(), "large", []string{"US", "AUTO"}, providers, &state, func(context.Context, Request) Evaluation {
+		calls++
+		now = now.Add(6500 * time.Millisecond)
+		return Evaluation{Health: Unusable}
+	})
+	if calls != 48 || decision.Kind != "legacy" {
+		t.Fatal("finite sweep repeatedly expires", calls, decision)
+	}
+}

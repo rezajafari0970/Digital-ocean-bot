@@ -17,6 +17,8 @@ CREATE TABLE account_proxy_selection (
  candidate jsonb,
  active_stage text NOT NULL DEFAULT '',
  legacy_lease_until timestamptz,
+ keeper_owner text,
+ keeper_lease_until timestamptz,
  status text NOT NULL DEFAULT 'pending',
  detail text NOT NULL DEFAULT '',
  checked_at timestamptz,

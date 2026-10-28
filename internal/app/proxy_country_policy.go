@@ -4,12 +4,18 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 )
 
 // FenceCountryWriterTx invalidates older candidate publishers and authorizes
 // only this transaction to change an explicit account's committed identity.
 func FenceCountryWriterTx(ctx context.Context, tx *sql.Tx, account string) (int64, error) {
 	var fence int64
+	var canonicalErr error
+	account, canonicalErr = network.CanonicalAccountID(account)
+	if canonicalErr != nil {
+		return 0, canonicalErr
+	}
 	err := tx.QueryRowContext(ctx, `INSERT INTO account_proxy_selection(account_id,fence) VALUES($1,1)
  ON CONFLICT(account_id) DO UPDATE SET fence=account_proxy_selection.fence+1,legacy_lease_until=NULL,updated_at=now() RETURNING fence`, account).Scan(&fence)
 	if err != nil {

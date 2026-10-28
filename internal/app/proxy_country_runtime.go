@@ -7,7 +7,6 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net"
 	"sort"
@@ -104,6 +103,11 @@ func loadCountrySnapshot(ctx context.Context, q countryQuery, account string) (c
 }
 
 func countryRouteTx(ctx context.Context, db *sql.DB, account string) (*sql.Tx, error) {
+	var canonicalErr error
+	account, canonicalErr = network.CanonicalAccountID(account)
+	if canonicalErr != nil {
+		return nil, canonicalErr
+	}
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
@@ -118,6 +122,10 @@ func countryRouteTx(ctx context.Context, db *sql.DB, account string) (*sql.Tx, e
 	// reverse-order wait; the next keeper tick safely retries from a new snapshot.
 	var id string
 	if err = tx.QueryRowContext(ctx, `SELECT id::text FROM accounts WHERE id=$1 FOR SHARE NOWAIT`, account).Scan(&id); err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	if err = checkProxyKeeperLease(ctx, tx, account); err != nil {
 		tx.Rollback()
 		return nil, err
 	}
@@ -228,10 +236,10 @@ func (c Container) verifyCountryCandidateWithGateway(ctx context.Context, s coun
 	}
 	geo, err := observeStickyCandidate(probeCtx, gateway)
 	if err != nil {
-		if errors.Is(err, ErrProxyObservationUnavailable) || ctx.Err() != nil {
-			return unknown("country observation unavailable")
+		if network.IsProxyAuthFailure(err) {
+			return unusable("proxy authentication rejected", true)
 		}
-		return unusable("candidate connection failed", network.IsProxyAuthFailure(err))
+		return unknown("country observation unavailable")
 	}
 	if net.ParseIP(geo.IP) == nil || net.ParseIP(geo.IP).To4() == nil {
 		return unknown("IPv4 observation unavailable")
@@ -245,7 +253,7 @@ func (c Container) verifyCountryCandidateWithGateway(ctx context.Context, s coun
 	if v.Target != "" && !strings.EqualFold(geo.CountryCode, v.Target) {
 		return unusable("candidate is in a different country", cap.FixedEgress)
 	}
-	if v.Geo.IP != "" && v.Geo.IP != geo.IP {
+	if v.Geo.IP != "" && v.Geo.IP != geo.IP && (v.Target != "" || cap.StickySession || cap.FixedEgress) {
 		return unusable("candidate identity changed", cap.FixedEgress)
 	}
 	// Two independent connections must agree; never infer stickiness from one
@@ -451,6 +459,19 @@ func (c Container) finishCountryWork(ctx context.Context, s countrySnapshot, act
  status=$6,detail=$7,checked_at=now(),legacy_lease_until=NULL,updated_at=now() WHERE account_id=$1`, s.Config.Account, checkpoint, rawCandidate, stage, applied, status, detail)
 	if err != nil {
 		return err
+	}
+	// Allocation, constraints and row updates may have waited after initial checks.
+	if active != nil {
+		at := active.ObservedAt
+		if at.IsZero() {
+			at = active.FirstSeen
+		}
+		if at.IsZero() || at.After(time.Now()) || time.Since(at) > 30*time.Second {
+			return ErrNetworkNotReady
+		}
+	}
+	if selected && active != nil && !countryDecisionCurrent(s, active.Target, time.Now()) {
+		return ErrNetworkNotReady
 	}
 	return tx.Commit()
 }

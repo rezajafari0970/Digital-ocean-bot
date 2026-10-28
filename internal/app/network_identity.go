@@ -45,7 +45,7 @@ func fastGatewayExitIP(ctx context.Context, g *network.Gateway) (string, error) 
 				}
 			}
 			if err == nil {
-				err = errors.New("invalid exit ip")
+				err = ErrProxyObservationUnavailable
 			}
 		}
 		cancel()
@@ -96,7 +96,7 @@ func parallelGatewayExitIP(ctx context.Context, g *network.Gateway) (string, err
 				IP string `json:"ip"`
 			}
 			if resp.StatusCode/100 != 2 || json.NewDecoder(resp.Body).Decode(&v) != nil || func() bool { ip := net.ParseIP(strings.TrimSpace(v.IP)); return ip == nil || ip.To4() == nil }() {
-				ch <- result{err: errors.New("invalid exit ip")}
+				ch <- result{err: ErrProxyObservationUnavailable}
 				return
 			}
 			ch <- result{ip: strings.TrimSpace(v.IP)}

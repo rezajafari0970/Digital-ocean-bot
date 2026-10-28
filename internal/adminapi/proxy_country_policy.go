@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"net/http"
 	"slices"
 
@@ -56,7 +57,11 @@ func (s *Server) saveProxyCountryPolicy(w http.ResponseWriter, r *http.Request) 
 		writeJSON(w, 400, map[string]string{"error": "invalid_country_priorities", "detail": err.Error()})
 		return
 	}
-	account := r.PathValue("id")
+	account, idErr := network.CanonicalAccountID(r.PathValue("id"))
+	if idErr != nil {
+		writeJSON(w, 400, map[string]string{"error": "invalid_account_id"})
+		return
+	}
 	tx, err := s.DB.BeginTx(r.Context(), nil)
 	if err != nil {
 		writeJSON(w, 500, errorBody())

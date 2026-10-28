@@ -195,3 +195,58 @@ These blockers remain open until authoritative provider evidence is available.
   files and browser-fixture changes are subsequent deltas, not silently included
   in that already-submitted prompt. No original PostgreSQL cluster was restarted:
   PostgreSQL18 main is down; umbrella service is active/exited with MainPID0.
+
+### 06:44 UTC second-review corrections (not deployed)
+
+- PR32 head eba29fc3 CI run40641899256 PASS. New-cloud real browser PASS in
+  both normal (14.940s) and popup-blocked (14.846s) modes. These precede this delta.
+- API implementation2 completed, receipt resp_08f890e95102dd8a006ae18ab299e887d1866b9482511640a6:
+  519,215 input (154,087 cached), 112,928 output (105,352 reasoning), 632,143 total.
+  Recommendation BLOCK: eight high and four medium findings. They were accepted
+  as release blockers; the draft PR and live revisions remained unchanged.
+- H1: repository credentials, rendered session/port and route fingerprint now come
+  from one SQL snapshot; admission compares that fingerprint before dispatch.
+  Stale-session and same-proxy-ID endpoint regressions pass with zero sends.
+- H2: production guards use native WroteRequest completion. Source-body Close and
+  cancellation do not prove upload settlement. EOF marks only response completion,
+  avoiding native HTTP/2 Close's cancellation/wait of an unfinished upload. Early
+  errors lacking WroteRequest close the exact native connection before releasing.
+  Real HTTP/2 EOF, explicit Close and cancel regressions all pass, including blocked
+  exclusive route writes. First run exposed the EOF/Close wait; fixed, not skipped.
+- H3: keeper uses a 60-second durable owner lease and 50-second work deadline;
+  publications validate owner under the route transaction. No pooled connection
+  is held during probes. Account listing drains rows before nested enrichment.
+  Both public keeper/list endpoints pass with MaxOpenConns=1; stale owner rejected.
+- H4: proof/observation expiry rechecked after allocation/constraint waits directly
+  before commit. Test forces higher-country proof to expire behind the global port
+  lock; the complete incumbent route/epoch/applied state is preserved.
+- H5: mixed transport/observer errors and malformed IP evidence stay Unknown;
+  explicit proxy authentication rejection remains provider-negative evidence.
+- H6: existing generic AUTO may retain its legacy changing IP under higher-country
+  Unknown, with isolation checked. Explicit/fixed/sticky identity rules unchanged.
+- H7: UUID aliases canonicalized before route/proxy locks and writer tokens.
+  Uppercase policy editor and route writer wait on the canonical in-flight lock.
+- H8: invalid network modes rejected before replacement credential validation;
+  validator independently rejects unsupported modes before constructing transport.
+- M1: proof budget accounts for finite provider attempts/country count (minimum
+  five minutes, 30 seconds per configured attempt/tier for probe/resumption margin).
+  Eight providers x six 6.5-second failures reach AUTO rather than restart forever.
+  Unknown still cannot authorize descent; these are finite driver budgets, not
+  enumeration of an unbounded residential address pool. Longer lists imply a longer
+  evidence window; retry scheduling remains separate and restarts after 30 seconds.
+- M2: keeper health saves compare captured row version under FOR UPDATE. Three
+  newer passive failures survive a late Unknown keeper result unchanged.
+- M3: vultr-browser-session uses the exact captured secret version.
+- M4: account-proxy test publication compares proxy settings and secret versions
+  for both failure and success, checks affected rows, and returns conflict on change.
+- Focused race run2 PASS: app 14.153s, admin/browser suites PASS, native HTTP/2
+  three modes PASS, selector PASS. M4 helper/CAS tests and mandatory gate additions
+  came after that run; full gate6 and final unit/vet remain pending.
+- No original quarantined PostgreSQL runtime or database has been started.
+  No merge, public promotion, live installation, or new cloud CREATE was performed.
+
+- Implementation3 submitted once at06:44:37 UTC, gpt-6-astra max/pro, receipt
+  resp_07fc94902f6a77f8006ae199d69e5887d197d273b361fac329; 25 current files,
+  previous review and dispositions; 230,558 bytes, SHA256
+  ad97217b3b65ad8d2054888b8529671434093905a68f9348f9f96dd8b7286371.
+  No output-token/request/spending cap was added. Pending, no approval assumed.

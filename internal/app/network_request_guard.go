@@ -6,7 +6,9 @@ import (
 	"database/sql/driver"
 	"errors"
 	"io"
+	"net"
 	"net/http"
+	"net/http/httptrace"
 	"sync"
 	"time"
 
@@ -18,6 +20,10 @@ var ErrStaleAccountNetwork = errors.New("stale account network runtime")
 func (c Container) acquireAccountRouteSharedLock(ctx context.Context, accountID string) (*sql.Conn, error) {
 	if c.DB == nil {
 		return nil, ErrNetworkNotReady
+	}
+	accountID, err := network.CanonicalAccountID(accountID)
+	if err != nil {
+		return nil, err
 	}
 	conn, err := c.DB.Conn(ctx)
 	if err != nil {
@@ -36,6 +42,12 @@ func releaseAccountRouteSharedLock(conn *sql.Conn, accountID string) {
 	if conn == nil {
 		return
 	}
+	accountID, err := network.CanonicalAccountID(accountID)
+	if err != nil {
+		_ = conn.Raw(func(any) error { return driver.ErrBadConn })
+		conn.Close()
+		return
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 	if _, err := conn.ExecContext(ctx, `SELECT pg_advisory_unlock_shared(hashtextextended($1,0))`, "account-route:"+accountID); err != nil {
@@ -45,17 +57,19 @@ func releaseAccountRouteSharedLock(conn *sql.Conn, accountID string) {
 }
 
 type accountNetworkGuardTransport struct {
-	Base           http.RoundTripper
-	Container      Container
-	AccountID      string
-	Provider       string
-	ProxyID        string
-	Generation     int64
-	TransportEpoch int64
-	StickySession  string
-	ExitIP         string
-	Check          func(context.Context) error
-	Observe        network.TransportObserver
+	Base             http.RoundTripper
+	Container        Container
+	AccountID        string
+	Provider         string
+	ProxyID          string
+	Generation       int64
+	TransportEpoch   int64
+	StickySession    string
+	ExitIP           string
+	RouteFingerprint string
+	NativeWriteTrace bool
+	Check            func(context.Context) error
+	Observe          network.TransportObserver
 }
 
 // The route remains pinned for the complete exchange, including request-body
@@ -83,11 +97,28 @@ func (t accountNetworkGuardTransport) RoundTrip(req *http.Request) (*http.Respon
 	copy := req.Clone(ctx)
 	exchange := &guardExchange{release: func() { releaseAccountRouteSharedLock(conn, t.AccountID) }, observe: t.Observe, cancel: cancel}
 	if req.Body == nil || req.Body == http.NoBody {
-		exchange.uploadDone = true
+		exchange.uploadDone = !t.NativeWriteTrace
 	} else {
-		body := &guardBody{ReadCloser: req.Body, done: func() { exchange.complete(true) }, closeOnEOF: false}
+		body := &guardBody{ReadCloser: req.Body, done: func() {
+			if !t.NativeWriteTrace {
+				exchange.complete(true)
+			}
+		}, closeOnEOF: false}
 		exchange.requestBody = body
 		copy.Body = body
+	}
+	if t.NativeWriteTrace {
+		copy = copy.WithContext(httptrace.WithClientTrace(copy.Context(), &httptrace.ClientTrace{
+			GotConn: func(info httptrace.GotConnInfo) {
+				exchange.mu.Lock()
+				exchange.nativeConn = info.Conn
+				exchange.uploadDone = false
+				exchange.wroteHeaders = false
+				exchange.mu.Unlock()
+			},
+			WroteHeaders: func() { exchange.mu.Lock(); exchange.wroteHeaders = true; exchange.mu.Unlock() },
+			WroteRequest: func(httptrace.WroteRequestInfo) { exchange.complete(true) },
+		}))
 	}
 	stop := context.AfterFunc(ctx, exchange.abort)
 	defer func() {
@@ -112,6 +143,9 @@ func (t accountNetworkGuardTransport) RoundTrip(req *http.Request) (*http.Respon
 		resp.Body = body
 	}
 	exchange.mu.Unlock()
+	if t.NativeWriteTrace && (err != nil || ctx.Err() != nil) {
+		exchange.settleBeforeHeaders()
+	}
 	if err != nil || ctx.Err() != nil {
 		exchange.abort()
 	} else {
@@ -124,20 +158,20 @@ func (t accountNetworkGuardTransport) checkConnection(ctx context.Context, q cou
 	if err := requireAccountNetworkReadyQuery(ctx, q, t.AccountID, t.Container.Economy != nil); err != nil {
 		return err
 	}
-	var proxy, session, ip string
+	var proxy, session, ip, fingerprint string
 	var generation, epoch int64
-	err := q.QueryRowContext(ctx, `SELECT COALESCE(n.proxy_id::text,''),COALESCE(i.sticky_session,''),COALESCE(host(i.exit_ip),''),r.generation,e.transport_epoch
- FROM network_profiles n LEFT JOIN account_network_identities i ON i.account_id=n.account_id
+	err := q.QueryRowContext(ctx, `SELECT COALESCE(n.proxy_id::text,''),COALESCE(i.sticky_session,''),COALESCE(host(i.exit_ip),''),r.generation,e.transport_epoch,`+routeFingerprintSQL+`
+ FROM network_profiles n JOIN proxies p ON p.id=n.proxy_id LEFT JOIN account_network_identities i ON i.account_id=n.account_id
  JOIN proxy_runtime_state r ON r.account_id=n.account_id AND r.proxy_id=n.proxy_id AND r.provider=$2
  JOIN account_transport_state e ON e.account_id=n.account_id AND e.provider=$2
- WHERE n.account_id=$1`, t.AccountID, t.Provider).Scan(&proxy, &session, &ip, &generation, &epoch)
+ WHERE n.account_id=$1`, t.AccountID, t.Provider).Scan(&proxy, &session, &ip, &generation, &epoch, &fingerprint)
 	if errors.Is(err, sql.ErrNoRows) {
 		return ErrStaleAccountNetwork
 	}
 	if err != nil {
 		return err
 	}
-	if proxy != t.ProxyID || session != t.StickySession || ip != t.ExitIP || generation != t.Generation || epoch != t.TransportEpoch {
+	if (t.RouteFingerprint != "" && fingerprint != t.RouteFingerprint) || proxy != t.ProxyID || session != t.StickySession || ip != t.ExitIP || generation != t.Generation || epoch != t.TransportEpoch {
 		return ErrStaleAccountNetwork
 	}
 	return nil
@@ -145,6 +179,8 @@ func (t accountNetworkGuardTransport) checkConnection(ctx context.Context, q cou
 
 type guardExchange struct {
 	mu                                              sync.Mutex
+	nativeConn                                      net.Conn
+	wroteHeaders                                    bool
 	uploadDone, responseDone, headersDone, finished bool
 	requestBody, responseBody                       io.Closer
 	release                                         func()
@@ -183,6 +219,19 @@ func (e *guardExchange) maybeFinish() {
 		e.observe(obs)
 	}
 }
+func (e *guardExchange) settleBeforeHeaders() {
+	e.mu.Lock()
+	pending := !e.uploadDone && !e.wroteHeaders
+	conn := e.nativeConn
+	e.mu.Unlock()
+	if !pending {
+		return
+	}
+	if conn != nil {
+		_ = conn.Close()
+	}
+	e.complete(true)
+}
 func (e *guardExchange) abort() {
 	e.mu.Lock()
 	request, response := e.requestBody, e.responseBody
@@ -206,15 +255,20 @@ type guardBody struct {
 
 func (b *guardBody) Read(p []byte) (int, error) {
 	n, err := b.ReadCloser.Read(p)
-	if err != nil && b.closeOnEOF {
-		b.Close()
+	if err == io.EOF && b.closeOnEOF {
+		// Native HTTP/2 Body.Close may cancel or wait for the still-active upload.
+		// EOF already drained the response; only mark this half complete.
+		b.once.Do(b.done)
+	} else if err != nil && b.closeOnEOF {
+		b.finish(true)
 	}
 	return n, err
 }
-func (b *guardBody) Close() error {
+func (b *guardBody) Close() error { return b.finish(true) }
+func (b *guardBody) finish(abort bool) error {
 	var err error
 	b.once.Do(func() {
-		if b.beforeClose != nil {
+		if abort && b.beforeClose != nil {
 			b.beforeClose()
 		}
 		err = b.ReadCloser.Close()

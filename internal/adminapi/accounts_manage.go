@@ -7,6 +7,7 @@ import (
 	"errors"
 	"github.com/lib/pq"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
 	"net/http"
 	"slices"
@@ -39,7 +40,11 @@ type accountUpdate struct {
 }
 
 func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
+	id, idErr := network.CanonicalAccountID(r.PathValue("id"))
+	if idErr != nil {
+		writeJSON(w, 400, map[string]string{"error": "invalid_account_id"})
+		return
+	}
 	p, _ := principal(r.Context())
 	if !p.CanAdmin() {
 		writeJSON(w, 403, map[string]string{"error": "forbidden"})
@@ -104,6 +109,10 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 	regions, _ := json.Marshal(x.Regions)
 	sizes, _ := json.Marshal(x.Sizes)
 	images, _ := json.Marshal(x.Images)
+	if x.NetworkMode != "direct" && x.NetworkMode != "proxy_required" {
+		writeJSON(w, 400, map[string]string{"error": "invalid_network_mode"})
+		return
+	}
 	var candidateEmail, candidateExternalID string
 	if x.Token != "" {
 		var providerName string
@@ -139,10 +148,6 @@ func (s *Server) updateAccount(w http.ResponseWriter, r *http.Request) {
 			writeJSON(w, 500, errorBody())
 			return
 		}
-	}
-	if x.NetworkMode != "direct" && x.NetworkMode != "proxy_required" {
-		writeJSON(w, 400, map[string]string{"error": "invalid_network_mode"})
-		return
 	}
 	var oldMode, oldProxyID string
 	if err := tx.QueryRowContext(r.Context(), `SELECT mode,COALESCE(proxy_id::text,'') FROM network_profiles WHERE account_id=$1`, id).Scan(&oldMode, &oldProxyID); err != nil && !errors.Is(err, sql.ErrNoRows) {
@@ -290,7 +295,11 @@ func (s *Server) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 403, map[string]string{"error": "forbidden"})
 		return
 	}
-	id := r.PathValue("id")
+	id, idErr := network.CanonicalAccountID(r.PathValue("id"))
+	if idErr != nil {
+		writeJSON(w, 400, map[string]string{"error": "invalid_account_id"})
+		return
+	}
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 	r = r.WithContext(ctx)
@@ -448,7 +457,11 @@ func (s *Server) purgeAccount(w http.ResponseWriter, r *http.Request) {
 		RequestedAt   time.Time `json:"expected_deletion_requested_at"`
 		ResourceScope string    `json:"expected_resource_scope"`
 	}
-	id := r.PathValue("id")
+	id, idErr := network.CanonicalAccountID(r.PathValue("id"))
+	if idErr != nil {
+		writeJSON(w, 400, map[string]string{"error": "invalid_account_id"})
+		return
+	}
 	if json.NewDecoder(http.MaxBytesReader(w, r.Body, 4096)).Decode(&req) != nil || req.AccountID != id || req.Remaining == nil || *req.Remaining < 0 || !req.Acknowledge || req.RequestedAt.IsZero() || len(req.ResourceScope) != 64 {
 		writeJSON(w, 400, map[string]string{"error": "explicit_local_purge_acknowledgement_required"})
 		return

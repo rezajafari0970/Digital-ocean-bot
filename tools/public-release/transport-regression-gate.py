@@ -251,6 +251,11 @@ REQUIRED['internal/proxyselection'] += ('TestCountryPriorityLongSweepCannotStarv
 REQUIRED['internal/app'] += ('TestCountryAcquirePreservesHealthHistoryPostgres',)
 
 
+REQUIRED['internal/app'] += ('TestCountryReviewTwoSnapshotCannotAdoptFreshFencePostgres', 'TestCountryReviewTwoNativeHTTP2UploadFencePostgres', 'TestCountryReviewTwoPublicKeeperOneConnectionPostgres', 'TestCountryReviewTwoPassiveHealthCannotBeOverwrittenPostgres', 'TestCountryReviewTwoProofExpiresDuringAllocationPostgres', 'TestCountryReviewTwoMixedObserverFailureStaysUnknownPostgres', 'TestCountryReviewTwoExistingGenericAutoSurvivesHigherUnknownPostgres')
+REQUIRED['internal/adminapi'] += ('TestCountryReviewTwoAccountListOneConnectionPostgres', 'TestCountryReviewTwoUUIDAliasUsesSameRouteLockPostgres', 'TestCountryReviewTwoInvalidModeCannotValidateReplacementPostgres', 'TestCountryReviewTwoAccountProxyObservationCASPostgres')
+REQUIRED['internal/app'] += ('TestProxyKeeperLockSerializesAcrossConnectionsPostgresE2E',)
+REQUIRED['internal/proxyselection'] += ('TestCountryReviewTwoLargeFiniteSweepCompletes',)
+
 def main(repo):
     if os.geteuid() == 0:
         raise RuntimeError("gate must run as the unprivileged release builder")

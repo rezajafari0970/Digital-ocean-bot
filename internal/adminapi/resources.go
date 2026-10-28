@@ -14,21 +14,114 @@ func (s *Server) accounts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer rows.Close()
-	out := make([]map[string]any, 0)
+	type accountRow struct {
+		id                    string
+		name                  string
+		email                 string
+		region                string
+		provider              string
+		mode                  string
+		proxy                 string
+		image                 string
+		proxyID               string
+		runtimeStatus         string
+		runtimeDetail         string
+		providerStateDB       string
+		providerStateDetail   string
+		providerErrorState    string
+		providerErrorDetail   string
+		regions               []byte
+		sizes                 []byte
+		images                []byte
+		ruleApplication       []byte
+		interval              int
+		batch                 int
+		spacingMinutes        int
+		spacingMaxMinutes     int
+		concurrent            int
+		lifetime              int
+		lifetimeMin           int
+		lifetimeMax           int
+		desired               int
+		dropletLimit          int
+		providerDroplets      int
+		enabled               bool
+		fallbackAnyRegion     bool
+		limitKnown            bool
+		settingsRevision      int64
+		created               time.Time
+		capacityCheckedAt     sql.NullTime
+		providerStateAt       sql.NullTime
+		providerObservationAt sql.NullTime
+		lastDropletCreated    sql.NullTime
+		lastDropletDeleted    sql.NullTime
+		nextDropletDelete     sql.NullTime
+		capacityChangedAt     sql.NullTime
+		capacityOld           sql.NullInt64
+		capacityNew           sql.NullInt64
+		capacityDelta         sql.NullInt64
+	}
+	records := make([]accountRow, 0)
 	for rows.Next() {
-		var id, name, email, region, provider, mode, proxy, image, proxyID, runtimeStatus, runtimeDetail, providerStateDB, providerStateDetail, providerErrorState, providerErrorDetail string
-		var regions, sizes, images, ruleApplication []byte
-		var interval, batch, spacingMinutes, spacingMaxMinutes, concurrent, lifetime, lifetimeMin, lifetimeMax, desired, dropletLimit, providerDroplets int
-		var enabled, fallbackAnyRegion, limitKnown bool
-		var settingsRevision int64
-		var created time.Time
-		var capacityCheckedAt, providerStateAt, providerObservationAt, lastDropletCreated, lastDropletDeleted, nextDropletDelete sql.NullTime
-		var capacityChangedAt sql.NullTime
-		var capacityOld, capacityNew, capacityDelta sql.NullInt64
-		if err := rows.Scan(&id, &name, &email, &region, &provider, &enabled, &created, &mode, &proxy, &regions, &sizes, &images, &image, &lifetimeMin, &lifetimeMax, &interval, &batch, &spacingMinutes, &spacingMaxMinutes, &concurrent, &lifetime, &proxyID, &runtimeStatus, &runtimeDetail, &desired, &fallbackAnyRegion, &dropletLimit, &limitKnown, &providerDroplets, &capacityCheckedAt, &lastDropletCreated, &lastDropletDeleted, &nextDropletDelete, &capacityOld, &capacityNew, &capacityDelta, &capacityChangedAt, &providerStateDB, &providerStateDetail, &providerErrorState, &providerErrorDetail, &providerStateAt, &providerObservationAt, &settingsRevision, &ruleApplication); err != nil {
+		var row accountRow
+		if err := rows.Scan(&row.id, &row.name, &row.email, &row.region, &row.provider, &row.enabled, &row.created, &row.mode, &row.proxy, &row.regions, &row.sizes, &row.images, &row.image, &row.lifetimeMin, &row.lifetimeMax, &row.interval, &row.batch, &row.spacingMinutes, &row.spacingMaxMinutes, &row.concurrent, &row.lifetime, &row.proxyID, &row.runtimeStatus, &row.runtimeDetail, &row.desired, &row.fallbackAnyRegion, &row.dropletLimit, &row.limitKnown, &row.providerDroplets, &row.capacityCheckedAt, &row.lastDropletCreated, &row.lastDropletDeleted, &row.nextDropletDelete, &row.capacityOld, &row.capacityNew, &row.capacityDelta, &row.capacityChangedAt, &row.providerStateDB, &row.providerStateDetail, &row.providerErrorState, &row.providerErrorDetail, &row.providerStateAt, &row.providerObservationAt, &row.settingsRevision, &row.ruleApplication); err != nil {
 			writeDatabaseReadError(w, err, "accounts_scan_failed")
 			return
 		}
+		records = append(records, row)
+	}
+	if err := rows.Err(); err != nil {
+		writeDatabaseReadError(w, err, "accounts_query_failed")
+		return
+	}
+	if err := rows.Close(); err != nil {
+		writeDatabaseReadError(w, err, "accounts_query_failed")
+		return
+	}
+	out := make([]map[string]any, 0, len(records))
+	for _, row := range records {
+		id := row.id
+		name := row.name
+		email := row.email
+		region := row.region
+		provider := row.provider
+		mode := row.mode
+		proxy := row.proxy
+		image := row.image
+		proxyID := row.proxyID
+		runtimeStatus := row.runtimeStatus
+		runtimeDetail := row.runtimeDetail
+		providerErrorState := row.providerErrorState
+		regions := row.regions
+		sizes := row.sizes
+		images := row.images
+		ruleApplication := row.ruleApplication
+		interval := row.interval
+		batch := row.batch
+		spacingMinutes := row.spacingMinutes
+		spacingMaxMinutes := row.spacingMaxMinutes
+		concurrent := row.concurrent
+		lifetime := row.lifetime
+		lifetimeMin := row.lifetimeMin
+		lifetimeMax := row.lifetimeMax
+		desired := row.desired
+		dropletLimit := row.dropletLimit
+		providerDroplets := row.providerDroplets
+		enabled := row.enabled
+		fallbackAnyRegion := row.fallbackAnyRegion
+		limitKnown := row.limitKnown
+		settingsRevision := row.settingsRevision
+		created := row.created
+		capacityCheckedAt := row.capacityCheckedAt
+		providerStateAt := row.providerStateAt
+		providerObservationAt := row.providerObservationAt
+		lastDropletCreated := row.lastDropletCreated
+		lastDropletDeleted := row.lastDropletDeleted
+		nextDropletDelete := row.nextDropletDelete
+		capacityChangedAt := row.capacityChangedAt
+		capacityOld := row.capacityOld
+		capacityNew := row.capacityNew
+		capacityDelta := row.capacityDelta
 		var providerChecked, providerObserved, capacityChecked, ldc, ldd, ndd, cca any
 		providerFreshness := "never"
 		capacityFreshness := "never"

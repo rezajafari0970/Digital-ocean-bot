@@ -57,6 +57,9 @@ func observeStickyGeoReliable(ctx context.Context, g *network.Gateway) (stickyGe
 	if err == nil {
 		return geo, nil
 	}
+	if network.IsProxyAuthFailure(err) {
+		return stickyGeo{}, err
+	}
 	if errors.Is(err, ErrProxyObservationUnavailable) {
 		return stickyGeo{}, err
 	}

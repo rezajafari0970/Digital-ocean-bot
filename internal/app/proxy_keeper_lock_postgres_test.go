@@ -2,49 +2,35 @@ package app
 
 import (
 	"context"
-	"database/sql"
-	"os"
 	"testing"
-
-	_ "github.com/lib/pq"
+	"time"
 )
 
 func TestProxyKeeperLockSerializesAcrossConnectionsPostgresE2E(t *testing.T) {
-	dsn := os.Getenv("DOB_E2E_DSN")
-	if dsn == "" {
-		t.Skip("DOB_E2E_DSN not set")
-	}
-	db, err := sql.Open("postgres", dsn)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer db.Close()
-
-	c := Container{DB: db}
-	ctx := context.Background()
-	key := "keeper-e2e"
-
-	conn1, ok, err := c.acquireProxyKeeperLock(ctx, key)
+	db := installerBootstrapDB(t)
+	c, a, _ := countryFixture(t, db, "")
+	db.SetMaxOpenConns(1)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	first, ok, err := c.acquireProxyKeeperLock(ctx, a)
 	if err != nil || !ok {
-		t.Fatalf("first lock ok=%v err=%v", ok, err)
+		t.Fatal(ok, err)
 	}
-	defer releaseProxyKeeperLock(conn1)
-
-	conn2, ok, err := c.acquireProxyKeeperLock(ctx, key)
-	if err != nil {
-		t.Fatal(err)
+	defer releaseProxyKeeperLock(first)
+	second, ok, err := c.acquireProxyKeeperLock(ctx, a)
+	if err != nil || ok {
+		releaseProxyKeeperLock(second)
+		t.Fatal(ok, err)
 	}
-	if ok {
-		releaseProxyKeeperLock(conn2)
-		t.Fatal("second connection acquired an already-held keeper lock")
-	}
-
-	releaseProxyKeeperLock(conn1)
-	conn1 = nil
-
-	conn3, ok, err := c.acquireProxyKeeperLock(ctx, key)
+	releaseProxyKeeperLock(first)
+	third, ok, err := c.acquireProxyKeeperLock(ctx, a)
 	if err != nil || !ok {
-		t.Fatalf("reacquire ok=%v err=%v", ok, err)
+		t.Fatal(ok, err)
 	}
-	releaseProxyKeeperLock(conn3)
+	defer releaseProxyKeeperLock(third)
+	stale := context.WithValue(ctx, proxyKeeperLeaseKey{}, first)
+	if tx, err := countryRouteTx(stale, db, a); err == nil {
+		tx.Rollback()
+		t.Fatal("expired owner published")
+	}
 }

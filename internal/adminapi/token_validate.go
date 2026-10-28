@@ -10,6 +10,9 @@ import (
 )
 
 func (s *Server) validateReplacementToken(ctx context.Context, accountID, providerName, token, mode, proxyID string) (providers.Account, error) {
+	if mode != "direct" && mode != "proxy_required" {
+		return providers.Account{}, errors.New("invalid_network_mode")
+	}
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 	if providerName == "" {
