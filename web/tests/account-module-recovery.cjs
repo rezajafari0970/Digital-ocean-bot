@@ -5,7 +5,7 @@ const {spawn}=require('node:child_process'),assert=require('node:assert/strict')
 (async()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'dob-account-modules-'));
  const blocked=new Set(['aws-catalog.js','ovh-catalog.js']),scriptRequests=[],previews=[],saves=[];
- let delayedModule='',releaseModule=null,apiError='';
+ let delayedModule='',releaseModule=null,apiError='',realCredentials=false,delayPreview=false,releasePreview=null;
  const providers=['digitalocean','vultr','upcloud','linode','kamatera','aws','ovh'];
  const server=http.createServer(async(req,res)=>{
   const u=new URL(req.url,'http://localhost');
@@ -23,8 +23,9 @@ const {spawn}=require('node:child_process'),assert=require('node:assert/strict')
   }
   if(u.pathname==='/admin/'){res.setHeader('Content-Type','text/html');res.end(fs.readFileSync('web/static/index.html'));return}
   if(u.pathname==='/api/v1/auth/me'){json(200,{id:'fixture',role:'admin'});return}
-  if(u.pathname==='/api/v1/providers'){json(200,providers.map(name=>({name,display_name:name,status:'ready'})));return}
-  if(u.pathname==='/api/v1/proxies'||u.pathname==='/api/v1/accounts'&&req.method==='GET'){json(200,[]);return}
+  if(u.pathname==='/api/v1/providers'){json(200,providers.map(name=>({name,display_name:name,status:'ready',...(realCredentials&&name==='aws'?{credential_fields:[{key:'access_key_id',label:'Access key ID',secret:true},{key:'secret_access_key',label:'Secret access key',secret:true},{key:'session_token',label:'Session token',secret:true,optional:true}]}:{})})));return}
+  if(u.pathname==='/api/v1/proxies'){json(200,[{id:'fixture-proxy',name:'Fixture proxy',status:'healthy'}]);return}
+  if(u.pathname==='/api/v1/accounts'&&req.method==='GET'){json(200,[]);return}
   if(u.pathname==='/readyz'){json(200,{status:'ready',checks:[{name:'database',ok:true}]});return}
   if(req.method==='POST'&&['/api/v1/accounts/preview','/api/v1/accounts'].includes(u.pathname)){
    let raw='';for await(const chunk of req)raw+=chunk;
@@ -32,6 +33,7 @@ const {spawn}=require('node:child_process'),assert=require('node:assert/strict')
    if(!providers.includes(body.provider)){json(400,{error:'bad provider'});return}
    if(u.pathname.endsWith('/preview')){
     previews.push(body);
+    if(delayPreview){delayPreview=false;await new Promise(resolve=>{releasePreview=resolve})}
     if(apiError){json(401,{error:'provider_credential_invalid',detail:apiError});return}
     const d={provider:body.provider,account:{id:'fixture-'+body.provider},regions:[{ID:'region-1',Name:'Region one',Available:true}],
      plans:[{ID:'plan-1',Available:true,CPU:1,MemoryMB:1024,DiskGB:20,PriceMonthly:6}],images:[{ID:'ubuntu',Available:true,Family:'ubuntu',Version:'24.04'}],defaults:{region:'region-1'},policy:{},server_limit:10};
@@ -155,10 +157,59 @@ const {spawn}=require('node:child_process'),assert=require('node:assert/strict')
   blocked.delete('account-catalog.js');apiError='';
   await open('vultr');await validate();await ready();await save('vultr');
   console.log('PASS unavailable shared module has visible opening error and recovery');
+
+  // Password managers may update .value with no input event, or emit only change.
+  // The real provider metadata intentionally renders credential fields without names.
+  realCredentials=true;
+  const fillCredentials=async (secret='fixture-secret-current',event='')=>evaluate('(()=>{for(const [key,value] of Object.entries('+JSON.stringify({access_key_id:'ASIAFIXTUREONLY000001',secret_access_key:secret,session_token:'fixture-session-current'})+')){const el=document.querySelector("[data-provider-credential="+key+"]");el.value=value;'+(event?'el.dispatchEvent(new Event('+JSON.stringify(event)+',{bubbles:true}));':'')+'}})()');
+  const consent=()=>evaluate('document.querySelector("[name=approve_managed_network]").click()');
+  await open('aws');await fillCredentials();await validate();await ready();
+  assert.deepEqual(JSON.parse(previews.at(-1).token),{access_key_id:'ASIAFIXTUREONLY000001',secret_access_key:'fixture-secret-current',session_token:'fixture-session-current'},'validation reads the visible fields even without input events');
+  await consent();
+  const beforeCredentialSave=saves.length;
+  await fillCredentials('fixture-secret-replaced');
+  await evaluate('document.querySelector("#modalSubmit").click()');
+  assert.equal(saves.length,beforeCredentialSave,'changed silent credential must not save against an earlier validation');
+  assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").disabled'),true);
+  assert.match(await evaluate('document.querySelector("#modalError").textContent'),/changed.*validate again/i);
+  await validate();await ready();await consent();
+  await fillCredentials('fixture-secret-change-only','change');
+  assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").disabled'),true,'change-only autofill invalidates validation');
+  await validate();await ready();await consent();
+  await evaluate('document.querySelector("#modalSubmit").click()');
+  await wait('!document.querySelector("#modal").open');
+  assert.equal(saves.length,beforeCredentialSave+1);
+  assert.equal(JSON.parse(saves.at(-1).token).secret_access_key,'fixture-secret-change-only');
+  assert.equal(JSON.parse(saves.at(-1).token).session_token,'fixture-session-current');
+  console.log('PASS visible AWS credentials are captured at validation; silent and change-only edits require revalidation before Save');
+
+  await open('aws');await fillCredentials();delayPreview=true;await validate();
+  for(let i=0;i<100&&!releasePreview;i++)await new Promise(r=>setTimeout(r,20));
+  assert(releasePreview,'preview fixture was delayed');
+  await fillCredentials('fixture-secret-during-preview');releasePreview();releasePreview=null;
+  await wait('!document.querySelector("#discoverAccount").disabled');
+  assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").disabled'),true,'in-flight preview cannot validate silently changed inputs');
+  await validate();await ready();await consent();
+  await evaluate('document.querySelector("[name=proxy_id]").value="fixture-proxy";document.querySelector("#modalSubmit").click()');
+  assert.equal(saves.length,beforeCredentialSave+1,'primary route is bound to validation');
+  assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").disabled'),true);
+  await evaluate('document.querySelector("#modalCancel").click()');
+  console.log('PASS delayed AWS response and silent primary proxy edit cannot reuse stale validation');
+
+  await open('vultr');await validate();await ready();
+  await evaluate('document.querySelector("[name=token]").value="fixture-replaced-token";document.querySelector("#modalSubmit").click()');
+  assert.equal(saves.length,beforeCredentialSave+1,'raw token provider is also bound to validation');
+  assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").disabled'),true);
+  await validate();await ready();
+  await evaluate('document.querySelector("[name=token]").dispatchEvent(new Event("change"))');
+  assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").disabled'),true,'change-only raw token invalidates validation');
+  await evaluate('document.querySelector("#modalCancel").click()');
+  console.log('PASS raw token credentials use the same validation boundary');
+
   assert.deepEqual(errors,[],'no uncaught browser exceptions');
   console.log('PASS genuine provider rejection remains blocked; no script exception or mutation replay');
  }finally{
-  releaseModule?.();ws?.close();chrome.kill('SIGTERM');server.closeAllConnections();
+  releaseModule?.();releasePreview?.();ws?.close();chrome.kill('SIGTERM');server.closeAllConnections();
   await new Promise(resolve=>server.close(resolve));fs.closeSync(log);
  }
 })().catch(e=>{console.error(e);process.exitCode=1});
