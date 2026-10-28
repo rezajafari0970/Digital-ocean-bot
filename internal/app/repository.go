@@ -26,6 +26,7 @@ type AccountConfig struct {
 	ProxySecretVersion            string
 	ProxyRouteFingerprint         string
 	ProxySettingsRevision         int64
+	NetworkTransportEpoch         int64
 	NetworkSession, NetworkExitIP string
 }
 
@@ -50,7 +51,7 @@ func (r Repository) account(ctx context.Context, id string, allowDisabled bool) 
 	var cc string
 	var fallback bool
 	var stickyPort int
-	err := r.DB.QueryRowContext(ctx, `SELECT a.id::text,a.provider,a.secret_ref,a.enabled,n.mode,COALESCE(n.proxy_id::text,''),COALESCE(p.type,''),COALESCE(p.host,''),COALESCE(p.port,0),COALESCE(p.secret_ref,''),COALESCE(p.username,''),COALESCE(p.status,'unknown'),COALESCE(p.exit_ip::text,''),COALESCE(p.country,''),COALESCE(p.country_code,''),COALESCE(p.asn,''),COALESCE(p.adapter,'generic'),COALESCE((SELECT sec.xmin::text||':'||sec.updated_at::text FROM secrets sec WHERE sec.proxy_id=p.id AND sec.id=p.secret_ref),''),COALESCE(p.settings_revision,0),COALESCE(i.sticky_session,''),COALESCE(host(i.exit_ip),''),COALESCE(i.selected_target_country,i.preferred_country_code,''),CASE WHEN i.selected_target_country IS NOT NULL THEN false ELSE COALESCE(i.fallback_active,false) END,COALESCE(i.sticky_port,0),`+routeFingerprintSQL+` FROM accounts a JOIN network_profiles n ON n.account_id=a.id LEFT JOIN proxies p ON p.id=n.proxy_id LEFT JOIN account_network_identities i ON i.account_id=a.id WHERE a.id=$1`, id).Scan(&a.ID, &a.Provider, &a.SecretRef, &a.Enabled, &mode, &proxyID, &proxyType, &host, &port, &proxySecret, &proxyUser, &proxyStatus, &proxyExit, &proxyCountry, &proxyCountryCode, &proxyASN, &a.ProxyAdapter, &a.ProxySecretVersion, &a.ProxySettingsRevision, &a.NetworkSession, &a.NetworkExitIP, &cc, &fallback, &stickyPort, &a.ProxyRouteFingerprint)
+	err := r.DB.QueryRowContext(ctx, `SELECT a.id::text,a.provider,a.secret_ref,a.enabled,n.mode,COALESCE(n.proxy_id::text,''),COALESCE(p.type,''),COALESCE(p.host,''),COALESCE(p.port,0),COALESCE(p.secret_ref,''),COALESCE(p.username,''),COALESCE(p.status,'unknown'),COALESCE(p.exit_ip::text,''),COALESCE(p.country,''),COALESCE(p.country_code,''),COALESCE(p.asn,''),COALESCE(p.adapter,'generic'),COALESCE((SELECT sec.xmin::text||':'||sec.updated_at::text FROM secrets sec WHERE sec.proxy_id=p.id AND sec.id=p.secret_ref),''),COALESCE(p.settings_revision,0),COALESCE(i.sticky_session,''),COALESCE(host(i.exit_ip),''),COALESCE(i.selected_target_country,i.preferred_country_code,''),CASE WHEN i.selected_target_country IS NOT NULL THEN false ELSE COALESCE(i.fallback_active,false) END,COALESCE(i.sticky_port,0),`+routeFingerprintSQL+`,COALESCE((SELECT t.transport_epoch FROM account_transport_state t WHERE t.account_id=a.id AND t.provider=a.provider),0) FROM accounts a JOIN network_profiles n ON n.account_id=a.id LEFT JOIN proxies p ON p.id=n.proxy_id LEFT JOIN account_network_identities i ON i.account_id=a.id WHERE a.id=$1`, id).Scan(&a.ID, &a.Provider, &a.SecretRef, &a.Enabled, &mode, &proxyID, &proxyType, &host, &port, &proxySecret, &proxyUser, &proxyStatus, &proxyExit, &proxyCountry, &proxyCountryCode, &proxyASN, &a.ProxyAdapter, &a.ProxySecretVersion, &a.ProxySettingsRevision, &a.NetworkSession, &a.NetworkExitIP, &cc, &fallback, &stickyPort, &a.ProxyRouteFingerprint, &a.NetworkTransportEpoch)
 	if err != nil {
 		return a, err
 	}

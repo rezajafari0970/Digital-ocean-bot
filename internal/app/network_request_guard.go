@@ -68,6 +68,7 @@ type accountNetworkGuardTransport struct {
 	ExitIP           string
 	RouteFingerprint string
 	NativeWriteTrace bool
+	Direct           bool
 	Check            func(context.Context) error
 	Observe          network.TransportObserver
 }
@@ -135,9 +136,12 @@ func (t accountNetworkGuardTransport) RoundTrip(req *http.Request) (*http.Respon
 	exchange.mu.Lock()
 	exchange.observation = network.TransportObservation{StartedAt: started, Latency: time.Since(started), Err: err, ProxyAuthRequired: resp != nil && resp.StatusCode == http.StatusProxyAuthRequired}
 	exchange.headersDone = true
-	if resp == nil || resp.Body == nil || resp.Body == http.NoBody {
+	if resp == nil || resp.Body == nil {
 		exchange.responseDone = true
 	} else {
+		// An explicitly empty response is already drained, but its caller still
+		// owns Close as a way to cancel an unfinished native request upload.
+		exchange.responseDone = resp.Body == http.NoBody
 		body := &guardBody{ReadCloser: resp.Body, done: func() { exchange.complete(false) }, closeOnEOF: true, beforeClose: cancel}
 		exchange.responseBody = body
 		resp.Body = body
@@ -155,6 +159,27 @@ func (t accountNetworkGuardTransport) RoundTrip(req *http.Request) (*http.Respon
 }
 
 func (t accountNetworkGuardTransport) checkConnection(ctx context.Context, q countryQuery) error {
+	if t.Direct {
+		var mode, proxy, provider, fingerprint string
+		var epoch int64
+		err := q.QueryRowContext(ctx, `SELECT n.mode,COALESCE(n.proxy_id::text,''),a.provider,
+ COALESCE(e.transport_epoch,0),`+routeFingerprintSQL+`
+ FROM accounts a JOIN network_profiles n ON n.account_id=a.id
+ LEFT JOIN proxies p ON p.id=n.proxy_id LEFT JOIN account_network_identities i ON i.account_id=a.id
+ LEFT JOIN account_transport_state e ON e.account_id=a.id AND e.provider=a.provider
+ WHERE a.id=$1`, t.AccountID).Scan(&mode, &proxy, &provider, &epoch, &fingerprint)
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrStaleAccountNetwork
+		}
+		if err != nil {
+			return err
+		}
+		if mode != string(network.RouteDirect) || proxy != "" || provider != t.Provider ||
+			epoch != t.TransportEpoch || t.RouteFingerprint == "" || fingerprint != t.RouteFingerprint {
+			return ErrStaleAccountNetwork
+		}
+		return nil
+	}
 	if err := requireAccountNetworkReadyQuery(ctx, q, t.AccountID, t.Container.Economy != nil); err != nil {
 		return err
 	}
@@ -247,7 +272,9 @@ func (e *guardExchange) abort() {
 
 type guardBody struct {
 	io.ReadCloser
-	once        sync.Once
+	doneOnce    sync.Once
+	closeOnce   sync.Once
+	closeErr    error
 	done        func()
 	beforeClose func()
 	closeOnEOF  bool
@@ -258,7 +285,7 @@ func (b *guardBody) Read(p []byte) (int, error) {
 	if err == io.EOF && b.closeOnEOF {
 		// Native HTTP/2 Body.Close may cancel or wait for the still-active upload.
 		// EOF already drained the response; only mark this half complete.
-		b.once.Do(b.done)
+		b.doneOnce.Do(b.done)
 	} else if err != nil && b.closeOnEOF {
 		b.finish(true)
 	}
@@ -266,15 +293,14 @@ func (b *guardBody) Read(p []byte) (int, error) {
 }
 func (b *guardBody) Close() error { return b.finish(true) }
 func (b *guardBody) finish(abort bool) error {
-	var err error
-	b.once.Do(func() {
+	b.closeOnce.Do(func() {
 		if abort && b.beforeClose != nil {
 			b.beforeClose()
 		}
-		err = b.ReadCloser.Close()
-		b.done()
+		b.closeErr = b.ReadCloser.Close()
+		b.doneOnce.Do(b.done)
 	})
-	return err
+	return b.closeErr
 }
 
 func (c Container) requireAccountNetworkReadyForProxy(ctx context.Context, accountID, proxyID string) error {

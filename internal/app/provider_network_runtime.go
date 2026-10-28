@@ -159,13 +159,27 @@ func (c Container) buildProviderNetworkRuntime(ctx context.Context, cfg AccountC
 		return providerNetworkRuntime{Client: gateway.Client, Gateway: gateway, Gate: gate, Generation: generation, TransportEpoch: transportEpoch, closeIdle: gateway.CloseIdleConnections}, nil
 	}
 
+	if cfg.Network.Mode != network.RouteDirect {
+		return providerNetworkRuntime{}, network.ErrProxyConfigInvalid
+	}
+	if c.DB != nil && cfg.ProxyRouteFingerprint == "" {
+		return providerNetworkRuntime{}, ErrStaleAccountNetwork
+	}
 	bundle, err := network.NewIsolatedDirectClient(cfg.ID)
 	if err != nil {
 		return providerNetworkRuntime{}, err
 	}
+	if c.DB != nil {
+		bundle.Client.Transport = accountNetworkGuardTransport{
+			Base: bundle.Transport, Container: c, AccountID: cfg.ID, Provider: cfg.Provider,
+			Direct: true, TransportEpoch: cfg.NetworkTransportEpoch,
+			RouteFingerprint: cfg.ProxyRouteFingerprint, NativeWriteTrace: true,
+		}
+	}
 	return providerNetworkRuntime{
-		Client:    bundle.Client,
-		Gate:      network.AccountGate{Profile: cfg.Network},
-		closeIdle: bundle.CloseIdleConnections,
+		Client:         bundle.Client,
+		Gate:           network.AccountGate{Profile: cfg.Network},
+		TransportEpoch: cfg.NetworkTransportEpoch,
+		closeIdle:      bundle.CloseIdleConnections,
 	}, nil
 }

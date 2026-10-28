@@ -48,10 +48,14 @@ jobs:
           sudo python3 deploy/host-memory.py check
           sudo snap install lxd --channel=5.21/stable
           sudo /snap/bin/lxd init --minimal
+          # Docker's forwarding policy on hosted runners otherwise drops guest
+          # package downloads. Allow only this disposable bridge and its replies.
+          sudo iptables -I FORWARD -i lxdbr0 -j ACCEPT
+          sudo iptables -I FORWARD -o lxdbr0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
           sudo /snap/bin/lxc launch ubuntu:24.04 dob-release
           sudo /snap/bin/lxc exec dob-release -- timeout 180 cloud-init status --wait
           sudo /snap/bin/lxc exec dob-release -- bash -ec '. /etc/os-release; test "$ID" = ubuntu; test "$VERSION_ID" = 24.04; test "$(uname -m)" = x86_64; test "$(cat /proc/1/comm)" = systemd'
-          sudo /snap/bin/lxc exec dob-release -- env DEBIAN_FRONTEND=noninteractive apt-get update
+          sudo /snap/bin/lxc exec dob-release -- env DEBIAN_FRONTEND=noninteractive apt-get -o APT::Update::Error-Mode=any update
           sudo /snap/bin/lxc exec dob-release -- env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends git python3 ca-certificates
       - name: Install exact candidate from restrictive root checkout
         run: |

@@ -15,6 +15,7 @@ import (
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/geoctx"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/proxycontrol"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/proxyselection"
 )
 
@@ -48,6 +49,7 @@ type countrySnapshot struct {
 	Checkpoint                                         proxyselection.Checkpoint
 	Candidate                                          *countryCandidate
 	Scope                                              string
+	HealthVersion                                      string
 }
 type countryQuery interface {
 	QueryRowContext(context.Context, string, ...any) *sql.Row
@@ -67,12 +69,12 @@ func loadCountrySnapshot(ctx context.Context, q countryQuery, account string) (c
  COALESCE(n.proxy_id::text,''),COALESCE(i.sticky_session,''),COALESCE(host(i.exit_ip),''),
  COALESCE(i.selected_target_country,''),COALESCE(i.sticky_port,0),COALESCE(i.last_health_ok,false) AND i.rotation_started_at IS NULL,
  COALESCE(t.transport_epoch,0),COALESCE(s.fence,0),COALESCE(s.applied_revision,0),COALESCE(s.active_stage,''),
- COALESCE(s.checkpoint,'{}'::jsonb),s.candidate,COALESCE(i.preferred_country_code,''),COALESCE(i.fallback_active,false)
+ COALESCE(s.checkpoint,'{}'::jsonb),s.candidate,COALESCE(i.preferred_country_code,''),COALESCE(i.fallback_active,false),COALESCE((SELECT r.xmin::text FROM proxy_runtime_state r WHERE r.account_id=a.id AND r.proxy_id=n.proxy_id AND r.provider=a.provider),'')
  FROM accounts a JOIN network_profiles n ON n.account_id=a.id
  LEFT JOIN account_proxy_country_policies p ON p.account_id=a.id
  LEFT JOIN account_proxy_selection s ON s.account_id=a.id
  LEFT JOIN account_network_identities i ON i.account_id=a.id
- LEFT JOIN account_transport_state t ON t.account_id=a.id WHERE a.id=$1`, account).Scan(&raw, &s.Active, &s.Session, &s.IP, &s.Target, &s.Port, &s.Health, &s.Epoch, &s.Fence, &s.Applied, &s.Stage, &checkpoint, &candidate, &s.LearnedCountry, &s.LegacyFallback)
+ LEFT JOIN account_transport_state t ON t.account_id=a.id WHERE a.id=$1`, account).Scan(&raw, &s.Active, &s.Session, &s.IP, &s.Target, &s.Port, &s.Health, &s.Epoch, &s.Fence, &s.Applied, &s.Stage, &checkpoint, &candidate, &s.LearnedCountry, &s.LegacyFallback, &s.HealthVersion)
 	if err != nil {
 		return s, err
 	}
@@ -522,6 +524,27 @@ func (c Container) publishCountryIdentityTx(ctx context.Context, tx *sql.Tx, s c
 	if latest.Scope != s.Scope || latest.Fence != s.Fence {
 		return ErrStaleAccountNetwork
 	}
+	portChanged := ProxyAdapterCapabilities(p.Adapter).DedicatedPort && s.Port != v.Port
+	changed := s.Active != v.ProxyID || s.Session != v.Session || s.IP != v.Geo.IP || portChanged || s.Target != v.Target
+	if !changed {
+		// The incumbent probe predates the higher-country search. Lock and compare
+		// its observation version before publishing any part of that older proof.
+		var version string
+		if err = tx.QueryRowContext(ctx, `SELECT xmin::text FROM proxy_runtime_state
+ WHERE account_id=$1 AND proxy_id=$2 AND provider=$3 FOR UPDATE`, s.Config.Account, v.ProxyID, s.Config.Provider).Scan(&version); err != nil {
+			return err
+		}
+		if s.HealthVersion == "" || version != s.HealthVersion {
+			return proxycontrol.ErrStateConflict
+		}
+	}
+	// A new route is not available to provider requests until this transaction
+	// commits. Its fresh proof may replace old-route health while bumping the
+	// generation, so delayed observations of that old route can no longer apply.
+	observedAt := v.ObservedAt
+	if observedAt.IsZero() {
+		observedAt = v.FirstSeen
+	}
 	if _, err = tx.ExecContext(ctx, `UPDATE network_profiles SET proxy_id=$2,updated_at=now() WHERE account_id=$1 AND mode='proxy_required'`, s.Config.Account, v.ProxyID); err != nil {
 		return err
 	}
@@ -531,22 +554,20 @@ func (c Container) publishCountryIdentityTx(ctx context.Context, tx *sql.Tx, s c
 	}
 	_, err = tx.ExecContext(ctx, `INSERT INTO account_network_identities(account_id,sticky_session,sticky_port,selected_target_country,
  exit_ip,subnet_key,country,country_code,timezone,locale,asn,last_health_at,last_health_ok,fallback_active,rotation_started_at,updated_at)
- VALUES($1,NULLIF($2,''),$3,NULLIF($4,''),$5::inet,host(network(set_masklen($5::inet,24)))||'/24',$6,lower($7),$8,$9,$10,now(),true,false,NULL,now())
+ VALUES($1,NULLIF($2,''),$3,NULLIF($4,''),$5::inet,host(network(set_masklen($5::inet,24)))||'/24',$6,lower($7),$8,$9,$10,$12,true,false,NULL,now())
  ON CONFLICT(account_id) DO UPDATE SET sticky_session=EXCLUDED.sticky_session,sticky_port=EXCLUDED.sticky_port,
  selected_target_country=EXCLUDED.selected_target_country,exit_ip=EXCLUDED.exit_ip,subnet_key=EXCLUDED.subnet_key,country=EXCLUDED.country,
- country_code=EXCLUDED.country_code,timezone=EXCLUDED.timezone,locale=EXCLUDED.locale,asn=EXCLUDED.asn,last_health_at=now(),
- last_health_ok=true,fallback_active=$11,rotation_started_at=NULL,updated_at=now()`, s.Config.Account, v.Session, stickyPort, v.Target, v.Geo.IP, v.Geo.Country, v.Geo.CountryCode, v.Geo.Timezone, geoctx.LocaleForCountry(v.Geo.CountryCode), v.Geo.ASN, v.Target == "" && s.LegacyFallback)
+ country_code=EXCLUDED.country_code,timezone=EXCLUDED.timezone,locale=EXCLUDED.locale,asn=EXCLUDED.asn,last_health_at=EXCLUDED.last_health_at,
+ last_health_ok=true,fallback_active=$11,rotation_started_at=NULL,updated_at=now()`, s.Config.Account, v.Session, stickyPort, v.Target, v.Geo.IP, v.Geo.Country, v.Geo.CountryCode, v.Geo.Timezone, geoctx.LocaleForCountry(v.Geo.CountryCode), v.Geo.ASN, v.Target == "" && s.LegacyFallback, observedAt)
 	if err != nil {
 		return err
 	}
-	portChanged := ProxyAdapterCapabilities(p.Adapter).DedicatedPort && s.Port != v.Port
-	changed := s.Active != v.ProxyID || s.Session != v.Session || s.IP != v.Geo.IP || portChanged || s.Target != v.Target
 	_, err = tx.ExecContext(ctx, `INSERT INTO proxy_runtime_state(account_id,proxy_id,provider,health_state,circuit_state,generation,
- consecutive_successes,last_checked_at,last_success_at) VALUES($1,$2,$3,'healthy','closed',1,1,now(),now())
+ consecutive_successes,last_checked_at,last_success_at) VALUES($1,$2,$3,'healthy','closed',1,1,$5,$5)
  ON CONFLICT(account_id,proxy_id,provider) DO UPDATE SET health_state='healthy',circuit_state='closed',
  generation=proxy_runtime_state.generation+CASE WHEN $4 THEN 1 ELSE 0 END,consecutive_failures=0,consecutive_successes=proxy_runtime_state.consecutive_successes+1,
- retry_after=NULL,last_error_class=NULL,last_error_detail=NULL,last_checked_at=now(),last_success_at=now(),
- half_open_probe_in_flight=false,half_open_probe_lease_until=NULL,updated_at=now()`, s.Config.Account, v.ProxyID, s.Config.Provider, changed)
+ retry_after=NULL,last_error_class=NULL,last_error_detail=NULL,last_checked_at=$5,last_success_at=$5,
+ half_open_probe_in_flight=false,half_open_probe_lease_until=NULL,updated_at=now()`, s.Config.Account, v.ProxyID, s.Config.Provider, changed, observedAt)
 	return err
 }
 

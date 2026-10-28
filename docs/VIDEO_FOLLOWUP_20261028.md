@@ -14,7 +14,7 @@ release `8515d676c5f64cbd7d51eacfa8f15a99add67053`.
 | Mobile account changes | Implemented | Compact native plan options; complete per-selection specs and region price below each field; disabled duplicate alternatives; legacy repeated preferences normalized visibly before saving. |
 | Scheduler diagnosis | Implemented | Profile-scoped concurrency now qualifies scheduler readiness separately from provider permission. Saturated unknown creates explain excluded expired servers. |
 | Deterministic verification | Passed | Final product candidate: 337 required regression roots, zero skipped; browser fixtures, all Go tests, go vet, and disposable backup restore passed. |
-| Independent OpenAI review | In progress | After the user confirmed funding, one fresh `gpt-6-astra` max/pro request was accepted at 09:44:50 UTC. Follow its existing receipt; do not duplicate it. |
+| Independent OpenAI review | Findings being corrected | Funded review completed at 10:11 UTC: three high-priority defects; no critical defect established. Source approval is blocked until corrected and verified. |
 | Public candidate installation | Fixing test environment | Exact exported candidate `bb405b4d` passes the manifest and live-secret scans; hosted Ubuntu 24.04 kernel preflight stopped installation. Guard remains unchanged. |
 | Merge / stable release / deployment | Pending | No stable promotion, application update, manual create/delete, or alteration of unknown-operation evidence performed. |
 
@@ -147,3 +147,35 @@ conclusive Kamatera task outcomes; never infer them from empty inventory.
   LXD systemd guest. OS, architecture, init process, commit, source manifest,
   restrictive root permissions and the existing preservation smoke checks remain
   required. This changes the test environment, not the production guard.
+
+## Funded review findings
+
+The accepted max/pro review completed with 512,619 input tokens and 93,930 output
+tokens (88,729 reasoning), 606,549 total. This is the recorded usage, not a cost
+estimate. The static reviewer ran no tests. Its verdict is **BLOCK** for three
+source defects, independent of Kamatera's external receipt uncertainty:
+
+1. Direct provider runtimes lacked the request-level shared route lock and
+   current mode/configuration check, so a captured direct configuration could
+   dispatch after the administrator enabled a required proxy.
+2. Response EOF consumed the same once-guard as explicit Close, preventing
+   subsequent native body closure/cancellation while HTTP/2 upload was unfinished.
+3. Ordered incumbent publication lacked the legacy health observation CAS and
+   could erase newer passive authentication failures during higher-country search.
+
+The correction in progress adds direct route epoch/configuration fencing,
+separate completion/closure ownership, and a locked health-version comparison
+for unchanged incumbents. New-route publication deliberately advances generation
+and records the observation time rather than publication time. Native HTTP/2
+and PostgreSQL reproducers fail on the old candidate and pass after repair.
+The native test also reproduces and fixes explicit Close of an empty early
+response while the upload is unfinished. Baseline evidence: funded-baseline-3
+and funded-baseline-native-4; corrected evidence: funded-focused-4. The broader
+focused run passed, with one older optional E2E fixture skipped for its separate
+DSN; the three new mandatory roots did not skip. The complete 340-root gate,
+full Go tests and vet are running on the immutable corrected snapshot.
+
+The isolated Ubuntu 24.04 install runner passed its host guard and guest setup,
+then package downloads failed with outbound connection timeouts. The harness
+now permits only its disposable LXD bridge and established replies; repository
+refresh errors fail explicitly. No production guard or live firewall was changed.
