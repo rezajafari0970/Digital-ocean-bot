@@ -25,6 +25,7 @@ const {spawn}=require('node:child_process'),assert=require('node:assert/strict')
   if(u.pathname==='/api/v1/auth/me'){json(200,{id:'fixture',role:'admin'});return}
   if(u.pathname==='/api/v1/providers'){json(200,providers.map(name=>({name,display_name:name,status:'ready',...(realCredentials&&name==='aws'?{credential_fields:[{key:'access_key_id',label:'Access key ID',secret:true},{key:'secret_access_key',label:'Secret access key',secret:true},{key:'session_token',label:'Session token',secret:true,optional:true}]}:{})})));return}
   if(u.pathname==='/api/v1/proxies'){json(200,[{id:'fixture-proxy',name:'Fixture proxy',status:'healthy'}]);return}
+  if(u.pathname==='/api/v1/proxy-drivers'){json(200,{drivers:[],country_options:[{code:'US',label:'United States'},{code:'DE',label:'Germany'}]});return}
   if(u.pathname==='/api/v1/accounts'&&req.method==='GET'){json(200,[]);return}
   if(u.pathname==='/readyz'){json(200,{status:'ready',checks:[{name:'database',ok:true}]});return}
   if(req.method==='POST'&&['/api/v1/accounts/preview','/api/v1/accounts'].includes(u.pathname)){
@@ -196,9 +197,24 @@ const {spawn}=require('node:child_process'),assert=require('node:assert/strict')
   await evaluate('document.querySelector("#modalCancel").click()');
   console.log('PASS delayed AWS response and silent primary proxy edit cannot reuse stale validation');
 
+  await open('vultr');
+  assert.equal(await evaluate('document.querySelector("[name=proxy_country]").value'),'AUTO');
+  await evaluate('document.querySelector("[name=proxy_id]").value="fixture-proxy";document.querySelector("[name=proxy_country]").value="US"');
+  await validate();await ready();
+  assert.equal(previews.at(-1).proxy_country,'US','country selected before provider validation');
+  const beforeCountrySave=saves.length;
+  await evaluate('document.querySelector("[name=proxy_country]").value="DE";document.querySelector("#modalSubmit").click()');
+  assert.equal(saves.length,beforeCountrySave,'silent country change requires new proof');
+  assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").disabled'),true);
+  await validate();await ready();
+  assert.equal(previews.at(-1).proxy_country,'DE');
+  await save('vultr');
+  assert.equal(saves.at(-1).proxy_country,'DE','country committed with account');
+  console.log('PASS country defaults AUTO and preview/save cannot cross a changed country');
+
   await open('vultr');await validate();await ready();
   await evaluate('document.querySelector("[name=token]").value="fixture-replaced-token";document.querySelector("#modalSubmit").click()');
-  assert.equal(saves.length,beforeCredentialSave+1,'raw token provider is also bound to validation');
+  assert.equal(saves.length,beforeCountrySave+1,'raw token provider is also bound to validation');
   assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").disabled'),true);
   await validate();await ready();
   await evaluate('document.querySelector("[name=token]").dispatchEvent(new Event("change"))');

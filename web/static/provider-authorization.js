@@ -34,10 +34,11 @@
    box.before(ui);
    const manual=ui.querySelector('[data-auth-manual]'),status=ui.querySelector('[data-auth-status]'),link=ui.querySelector('[data-auth-link]'),reset=ui.querySelector('[data-auth-reset]'),button=form.querySelector('#discoverAccount');
    const originalButtonLabel=button.textContent;
+   const country=form.querySelector('[name=proxy_country]');
    const proxies=['proxy_id','proxy_id2','proxy_id3'].map(n=>form.querySelector('[name='+n+']'));
-   let id='',state='',timer=0,closed=false,busy=false,readyNotified=false,route='',approvalWindow=null;
+   let id='',state='',timer=0,closed=false,busy=false,readyNotified=false,route='',routeCountry='AUTO',approvalWindow=null;
    function remember(value){try{value?sessionStorage.setItem(storageKey,value):sessionStorage.removeItem(storageKey)}catch{}}
-   function lock(active){manual.disabled=active;box.querySelectorAll('input').forEach(x=>{x.readOnly=active;if(active)x.required=false;else{x.required=!(meta.credential_fields.find(f=>f.key===x.dataset.providerCredential)?.optional)}});proxies.forEach(x=>{x.inert=active;x.setAttribute('aria-disabled',String(active))});mode()}
+   function lock(active){manual.disabled=active;box.querySelectorAll('input').forEach(x=>{x.readOnly=active;if(active)x.required=false;else{x.required=!(meta.credential_fields.find(f=>f.key===x.dataset.providerCredential)?.optional)}});[...proxies,country].filter(Boolean).forEach(x=>{x.inert=active;x.setAttribute('aria-disabled',String(active))});mode()}
    function mode(){const auto=!manual.checked,active=auto&&!!id;ck.closest('label').hidden=auto;ck.required=!auto&&!id;box.hidden=active;credentialHeading.hidden=active;manual.closest('label').hidden=active;ui.querySelector('[data-auth-help]').hidden=!auto||active;button.hidden=active&&['DISPATCHED','PENDING'].includes(state);button.textContent=auto&&!id?'Connect automatically to OVH':'Reload provider options'}
    function reserveApprovalWindow(){
     try{approvalWindow=window.open('about:blank','_blank');if(!approvalWindow)return;approvalWindow.opener=null;const d=approvalWindow.document;d.title='Connecting to OVH';const m=d.createElement('meta');m.name='referrer';m.content='no-referrer';d.head.append(m);d.body.textContent='Preparing your OVH approval page. Keep the panel open; it will continue automatically after approval.'}catch{closeBlankApprovalWindow()}
@@ -54,7 +55,7 @@
    function clearSecrets(){box.querySelectorAll('input[data-provider-credential]').forEach(x=>x.value='');raw.value=''}
    function paint(x){
     if(closed||x.id!==id)return;
-    state=x.state;if(['PENDING','READY','VERIFIED'].includes(state))clearSecrets();route=x.proxy_id||'';link.hidden=true;link.removeAttribute('href');reset.hidden=false;mode();
+    state=x.state;if(['PENDING','READY','VERIFIED'].includes(state))clearSecrets();route=x.proxy_id||'';routeCountry=x.proxy_country||'AUTO';if(country)country.value=routeCountry;link.hidden=true;link.removeAttribute('href');reset.hidden=false;mode();
     const labels={DISPATCHED:'Step 1 of 3: preparing secure OVH access…',PENDING:'Step 2 of 3: approve access once on OVH, then return here. The next steps continue automatically.',READY:'Step 3 of 3: access approved. Loading projects, capacity and server options…',VERIFIED:'OVH access is verified. Checking current projects and server options…',FAILED:'OVH connection failed. '+(x.diagnostic||'Check the application keys and permissions.'),UNKNOWN:'OVH may have received the request. It will not be sent again automatically. Check your OVH API credentials before starting a new request.',EXPIRED:'This connection request expired. Start a new request.',CANCELLED:'Connection request cancelled.',USED:'This connection has already been saved as an account.'};
     status.textContent=labels[state]||'Checking connection…';if(['FAILED','UNKNOWN'].includes(state)){if(x.detail)status.textContent+=' '+x.detail;status.textContent+=' Reference: '+id+(x.diagnostic?' · '+x.diagnostic:'')}reset.textContent=terminal.has(state)?'Clear this connection request':'Cancel this connection request';
     if(state==='PENDING'&&validApprovalURL(x.validation_url)){link.href=x.validation_url;link.hidden=false;openPreparedApproval(x.validation_url)}
@@ -84,13 +85,13 @@
    return {
     async beforePreview(){
      if(manual.checked)return {token:raw.value};
-     if(id){if(!['READY','VERIFIED'].includes(state)){await poll();return null}if(proxies[0].value!==route)throw Error('Connection changed. Cancel this request before changing proxy.');return {authorization_id:id,token:''}}
+     if(id){if(!['READY','VERIFIED'].includes(state)){await poll();return null}if(proxies[0].value!==route||(country?.value||'AUTO')!==routeCountry)throw Error('Connection changed. Cancel this request before changing proxy.');return {authorization_id:id,token:''}}
      if(busy)return null;
      const values=JSON.parse(raw.value||'{}');
      if(!values.application_key||!values.application_secret)throw Error('Enter Application key and Application secret.');
      if(!proxies[0].value&&proxies.slice(1).some(x=>x.value))throw Error('Select the primary proxy first, or clear all proxies for a direct connection.');
-     reserveApprovalWindow();delete values.consumer_key;id=uuid();state='DISPATCHED';route=proxies[0].value;remember(id);lock(true);busy=true;status.textContent='Step 1 of 3: preparing secure OVH access…';
-     try{const x=await api('/api/v1/providers/'+meta.name+'/authorizations',{method:'POST',body:JSON.stringify({id,token:JSON.stringify(values),proxy_id:route})});if(!closed){clearSecrets();paint(x)}}
+     reserveApprovalWindow();delete values.consumer_key;id=uuid();state='DISPATCHED';route=proxies[0].value;routeCountry=country?.value||'AUTO';remember(id);lock(true);busy=true;status.textContent='Step 1 of 3: preparing secure OVH access…';
+     try{const x=await api('/api/v1/providers/'+meta.name+'/authorizations',{method:'POST',body:JSON.stringify({id,token:JSON.stringify(values),proxy_id:route,proxy_country:routeCountry})});if(!closed){clearSecrets();paint(x)}}
      catch(e){if(!closed){status.textContent='Checking the existing request after an interrupted response. '+e.message;schedule()}}
      finally{busy=false}
      return null;
@@ -99,9 +100,9 @@
     previewLoading(){if(id&&['READY','VERIFIED'].includes(state))status.textContent='OVH access is approved. Checking current server options…'},
     previewComplete(ready){if(id)status.textContent=ready?'Connected to OVH. Server options are ready; review and save your account.':'OVH access is approved. No compatible server options are available in this region; choose another region or reload provider options.'},
     previewFailed(){if(id&&['READY','VERIFIED'].includes(state))status.textContent='OVH access is approved. Provider options could not be loaded; use Reload provider options to retry.'},
-    credential(){if(manual.checked)return null;if(!id||!['READY','VERIFIED'].includes(state))throw Error('Complete OVH authorization first.');if(proxies[0].value!==route)throw Error('Connection changed. Reconnect before saving.');return {authorization_id:id,token:''}},
+    credential(){if(manual.checked)return null;if(!id||!['READY','VERIFIED'].includes(state))throw Error('Complete OVH authorization first.');if(proxies[0].value!==route||(country?.value||'AUTO')!==routeCountry)throw Error('Connection changed. Reconnect before saving.');return {authorization_id:id,token:''}},
     complete(){remember('');this.dispose()},
-    dispose(){closed=true;stop();closeBlankApprovalWindow();window.removeEventListener('focus',resume);window.removeEventListener('online',resume);document.removeEventListener('visibilitychange',resume);box.hidden=false;credentialHeading.hidden=false;button.hidden=false;button.textContent=originalButtonLabel;proxies.forEach(x=>{x.inert=false;x.removeAttribute('aria-disabled')});ui.remove()}
+    dispose(){closed=true;stop();closeBlankApprovalWindow();window.removeEventListener('focus',resume);window.removeEventListener('online',resume);document.removeEventListener('visibilitychange',resume);box.hidden=false;credentialHeading.hidden=false;button.hidden=false;button.textContent=originalButtonLabel;[...proxies,country].filter(Boolean).forEach(x=>{x.inert=false;x.removeAttribute('aria-disabled')});ui.remove()}
    };
   }
  };

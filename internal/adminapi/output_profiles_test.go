@@ -28,7 +28,9 @@ func TestProfileOutputRevisionScopeAndCountries(t *testing.T) {
 			spec.SNI = "example.com"
 		}
 		if protocol == "trojan" {
-			spec.Security = "tls"
+			spec.HeaderType = "http"
+			spec.Host = "play.googleapis.com"
+			spec.Path = "/"
 		}
 		raw, _ := json.Marshal(spec)
 		sqlMust(t, db, "INSERT INTO config_driver_profiles(id,name,spec,enabled,fleet,classes) VALUES($1,$2,$3,true,true,ARRAY['DIRECT'])", id, protocol, raw)
@@ -92,6 +94,17 @@ func TestProfileOutputRevisionScopeAndCountries(t *testing.T) {
 	check(strings.Fields(readAccountOutput(s, token, "").Body.String()), 0)
 	token = accountOutputToken(t, s, x.Account, "DIRECT")
 	check(strings.Fields(readAccountOutput(s, token, "").Body.String()), 4)
+	// An invalid owned profile is withheld, without poisoning valid siblings.
+	bad := strings.Replace(uris[2], "headerType=http", "headerType=unknown", 1)
+	sqlMust(t, db, "UPDATE output_config_snapshots SET uri=$2 WHERE config_profile_id=$1", ids[2], bad)
+	w := httptest.NewRecorder()
+	s.outputSnapshotClass(w, httptest.NewRequest("GET", "/", nil), "DIRECT")
+	if w.Code != 200 || w.Header().Get("X-Output-Withheld-Count") != "1" {
+		t.Fatal("invalid profile poisoned output", w.Code)
+	}
+	check(strings.Fields(w.Body.String()), 3)
+	check(strings.Fields(readAccountOutput(s, token, "").Body.String()), 3)
+	sqlMust(t, db, "UPDATE output_config_snapshots SET uri=$2 WHERE config_profile_id=$1", ids[2], uris[2])
 	// A fresh snapshot from the previous revision must not leak during/after apply.
 	sqlMust(t, db, "UPDATE config_driver_profiles SET revision=2 WHERE id=$1", ids[0])
 	check(read("ALL"), 3)

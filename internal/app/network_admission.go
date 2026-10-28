@@ -28,13 +28,13 @@ WHERE np.account_id=$1
 	if err != nil {
 		return err
 	}
-	if mode != string(network.RouteProxyRequired) {
-		return nil
-	}
 	if ready, e := countryPolicyReady(ctx, db, accountID); e != nil {
 		return e
 	} else if !ready {
 		return ErrNetworkNotReady
+	}
+	if mode != string(network.RouteProxyRequired) {
+		return nil
 	}
 	if proxyStatus != string(network.StatusHealthy) {
 		return ErrNetworkNotReady

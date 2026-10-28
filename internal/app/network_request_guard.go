@@ -168,6 +168,11 @@ func (t accountNetworkGuardTransport) RoundTrip(req *http.Request) (*http.Respon
 
 func (t accountNetworkGuardTransport) checkConnection(ctx context.Context, q countryQuery) error {
 	if t.Direct {
+		if ready, err := countryPolicyReady(ctx, q, t.AccountID); err != nil {
+			return err
+		} else if !ready {
+			return ErrNetworkNotReady
+		}
 		var mode, proxy, provider, fingerprint string
 		var epoch int64
 		err := q.QueryRowContext(ctx, `SELECT n.mode,COALESCE(n.proxy_id::text,''),a.provider,

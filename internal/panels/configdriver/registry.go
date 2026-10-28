@@ -149,7 +149,7 @@ func ValidatePort(port int) error {
 	return nil
 }
 func (r *Registry) Validate(s Spec, public bool) error {
-	if err := validateTCPHeader(s); err != nil {
+	if err := ValidateTCPHeader(s); err != nil {
 		return err
 	}
 	if err := ValidateCloudflare(s); err != nil {

@@ -8,6 +8,8 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/configdriver"
 )
 
 func DecodeVMess(uri string) (map[string]any, error) {
@@ -72,7 +74,7 @@ func URIPort(uri string) (int, error) {
 	}
 	return strconv.Atoi(u.Port())
 }
-func validAdditionalURI(uri string) bool {
+func validAdditionalURI(uri string, independent bool) bool {
 	port, e := URIPort(uri)
 	if e != nil || port < 1 || port > 65535 {
 		return false
@@ -96,7 +98,14 @@ func validAdditionalURI(uri string) bool {
 			return false
 		}
 		method, password, ok := strings.Cut(string(b), ":")
-		return ok && method == "aes-128-gcm" && len(password) >= 32 && u.RawQuery == ""
+		if !ok || method != "aes-128-gcm" || len(password) < 32 {
+			return false
+		}
+		if u.RawQuery == "" {
+			return true
+		}
+		q, err := url.ParseQuery(u.RawQuery)
+		return independent && err == nil && len(q) == 1 && len(q["plugin"]) == 1 && configdriver.ValidateShadowsocksHTTPPlugin(q.Get("plugin")) == nil
 	}
 	return false
 }

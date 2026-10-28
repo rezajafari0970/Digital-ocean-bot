@@ -83,18 +83,18 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   await evaluate('document.querySelector("#modalSubmit").click()');
   await waitFor('!document.querySelector("#modal").open');
   await waitFor('cache.accounts!==null&&!activePageView.loading');
-  // Independent country editor preserves ordered intent and a conflict draft.
-  await evaluate(`window.__countryWrites=[];window.__countryConflict=true;window.__countryBaseAPI=api;api=async(path,options)=>{if(path.endsWith('/proxy-country-policy')){if(options?.method==='PUT'){const body=JSON.parse(options.body);window.__countryWrites.push({path,body});if(window.__countryConflict)throw Error('country_policy_conflict');return {saved:true,countries:body.countries,revision:10}}return {policy:{revision:9,countries:['US','TR','AUTO'],network_mode:'proxy_required',status:'pending'},country_options:[{code:'US',label:'United States'},{code:'TR',label:'Türkiye'},{code:'DE',label:'Germany'}]}}return window.__countryBaseAPI(path,options)};window.editProxyCountries('aws')`);
+  // A single explicit country cannot acquire an accidental alphabetic fallback.
+  await evaluate(`window.__countryWrites=[];window.__countryConflict=true;window.__countryBaseAPI=api;api=async(path,options)=>{if(path.endsWith('/proxy-country-policy')){if(options?.method==='PUT'){const body=JSON.parse(options.body);window.__countryWrites.push({path,body});if(window.__countryConflict)throw Error('country_policy_conflict');return {saved:true,countries:body.countries,revision:10}}return {policy:{revision:9,countries:['AUTO'],network_mode:'proxy_required',status:'pending',active_country:'IT',identity_verified:true},country_options:[{code:'US',label:'United States'},{code:'TR',label:'Türkiye'},{code:'DE',label:'Germany'}]}}return window.__countryBaseAPI(path,options)};window.editProxyCountries('aws')`);
   await waitFor('document.querySelector("#modal").open');
-  assert.deepEqual(await evaluate('[...document.querySelectorAll("[data-country-index]")].map(x=>x.value)'),['US','TR','AUTO']);
-  assert.equal(await evaluate('document.querySelector("[data-country-index] option[value=TR]").disabled'),true);
-  await evaluate('document.querySelector("#countryPriorityAdd").click()');
-  assert.deepEqual(await evaluate('[...document.querySelectorAll("[data-country-index]")].map(x=>x.value)'),['US','TR','DE','AUTO']);
-  await evaluate('document.querySelector("#modalSubmit").click()');
+  assert.equal(await evaluate('document.querySelector("[name=proxy_country]").value'),'AUTO');
+  assert.equal(await evaluate('document.querySelector("#countryPriorityAdd")'),null);
+  assert.match(await evaluate('document.querySelector("#countryPolicyStatus").textContent'),/Automatic selection.*Verified country: IT/);
+  await evaluate('document.querySelector("[name=proxy_country]").value="DE";document.querySelector("#modalSubmit").click()');
   await waitFor('document.querySelector("#modalError").textContent.includes("country_policy_conflict")');
   assert.equal(await evaluate('document.querySelector("#modal").open'),true,'CAS conflict retains draft');
+  assert.equal(await evaluate('document.querySelector("[name=proxy_country]").value'),'DE');
   assert.equal(await evaluate('window.__countryWrites[0].body.revision'),9);
-  assert.deepEqual(await evaluate('window.__countryWrites[0].body.countries'),['US','TR','DE','AUTO']);
+  assert.deepEqual(await evaluate('window.__countryWrites[0].body.countries'),['DE']);
   await evaluate('window.__countryConflict=false;document.querySelector("#modalSubmit").click()');
   await waitFor('!document.querySelector("#modal").open');
   await evaluate('api=window.__countryBaseAPI');

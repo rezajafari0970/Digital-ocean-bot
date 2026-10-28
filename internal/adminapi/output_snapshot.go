@@ -225,6 +225,7 @@ func (s *Server) outputSnapshotScoped(w http.ResponseWriter, r *http.Request, cl
 	}
 	defer rows.Close()
 	var out strings.Builder
+	withheld := 0
 	for rows.Next() {
 		var raw, provider, regionID, regionName, countryCode sql.NullString
 		var revision sql.NullInt64
@@ -244,6 +245,12 @@ func (s *Server) outputSnapshotScoped(w http.ResponseWriter, r *http.Request, cl
 		if outputProfilePortAllowed(raw.String, ports) {
 			u, err := export.ApplyOutputOptions(raw.String, export.OutputOptions{IncludeXHTTPExtra: extra.Bool, IncludeFinalMask: mask.Bool, IndependentProfile: independent.Bool})
 			if err != nil {
+				if independent.Bool {
+					// This owned profile failed its URI contract. Withhold only
+					// that row; policy/SQL failures still reject the whole snapshot.
+					withheld++
+					continue
+				}
 				writeJSON(w, 500, errorBody())
 				return
 			}
@@ -256,6 +263,7 @@ func (s *Server) outputSnapshotScoped(w http.ResponseWriter, r *http.Request, cl
 		writeJSON(w, 500, errorBody())
 		return
 	}
+	w.Header().Set("X-Output-Withheld-Count", strconv.Itoa(withheld))
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-store")
 	_, _ = w.Write([]byte(out.String()))

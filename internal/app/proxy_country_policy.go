@@ -31,8 +31,9 @@ func countryPolicyReady(ctx context.Context, db countryQuery, account string) (b
  SELECT 1 FROM account_proxy_country_policies p
  LEFT JOIN account_proxy_selection s ON s.account_id=p.account_id
  LEFT JOIN account_network_identities i ON i.account_id=p.account_id
+ LEFT JOIN network_profiles n ON n.account_id=p.account_id
  WHERE p.account_id=$1 AND p.countries<>'["AUTO"]'::jsonb
- AND (s.applied_revision IS DISTINCT FROM p.revision OR s.active_stage='' OR
+ AND (n.mode IS DISTINCT FROM 'proxy_required' OR n.proxy_id IS NULL OR s.applied_revision IS DISTINCT FROM p.revision OR s.active_stage='' OR
       NOT (p.countries ? s.active_stage) OR
  (s.active_stage='AUTO' AND i.selected_target_country IS NOT NULL) OR
  (s.active_stage<>'AUTO' AND (i.selected_target_country IS DISTINCT FROM s.active_stage OR upper(i.country_code) IS DISTINCT FROM s.active_stage))))`, account).Scan(&ready)

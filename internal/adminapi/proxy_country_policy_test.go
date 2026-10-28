@@ -47,7 +47,7 @@ func TestCountryPolicyPersistenceFencingAndLegacyReset(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	w = countrySave(s, a, `{"revision":0,"countries":["US","TR","AUTO"]}`)
+	w = countrySave(s, a, `{"revision":0,"countries":["US"]}`)
 	if w.Code != 200 {
 		t.Fatal(w.Code, w.Body.String())
 	}
@@ -121,7 +121,7 @@ func TestCountryPolicyPersistenceFencingAndLegacyReset(t *testing.T) {
 	if err := db.QueryRow(`SELECT preferred_country_code,selected_target_country,last_health_ok FROM account_network_identities WHERE account_id=$1`, a).Scan(&learned, &target, &health); err != nil || learned != "it" || target != nil || health {
 		t.Fatal("AUTO reset lost learned preference", learned, target, health, err)
 	}
-	for _, body := range []string{`{"revision":2}`, `{"revision":2,"countries":["AUTO","US"]}`, `{"revision":2,"countries":["US","US"]}`, `{"revision":2,"countries":["ZZ"]}`, `{"revision":2,"countries":["TR"],"unknown_field":true}`} {
+	for _, body := range []string{`{"revision":2}`, `{"revision":2,"countries":["AUTO","US"]}`, `{"revision":2,"countries":["US","AUTO"]}`, `{"revision":2,"countries":["US","TR"]}`, `{"revision":2,"countries":["US","US"]}`, `{"revision":2,"countries":["ZZ"]}`, `{"revision":2,"countries":["TR"],"unknown_field":true}`} {
 		if w := countrySave(s, a, body); w.Code != 400 {
 			t.Fatal("invalid intent accepted", body, w.Code)
 		}

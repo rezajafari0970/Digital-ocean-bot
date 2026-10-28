@@ -3,9 +3,7 @@ package adminapi
 import (
 	"context"
 	"errors"
-	"github.com/rezajafari0970/Digital-ocean-bot/internal/network"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
-	"net/http"
 	"time"
 )
 
@@ -18,39 +16,11 @@ func (s *Server) validateReplacementToken(ctx context.Context, accountID, provid
 	if providerName == "" {
 		providerName = "digitalocean"
 	}
-	var client *http.Client
-	var closeFn func()
-	if mode == "proxy_required" {
-		var px network.Proxy
-		var user, ref, secretVersion string
-		if err := s.DB.QueryRowContext(ctx, `SELECT id::text,name,type,host,port,COALESCE(username,''),COALESCE(secret_ref,''),status ,COALESCE((SELECT sec.xmin::text||':'||sec.updated_at::text FROM secrets sec WHERE sec.proxy_id=proxies.id AND sec.id=proxies.secret_ref),'') FROM proxies WHERE id=$1`, proxyID).Scan(&px.ID, &px.Name, &px.Type, &px.Host, &px.Port, &user, &ref, &px.Status, &secretVersion); err != nil {
-			return providers.Account{}, err
-		}
-		if px.Status != network.StatusHealthy {
-			return providers.Account{}, errors.New("proxy_not_healthy")
-		}
-		var pass []byte
-		if ref != "" {
-			var err error
-			pass, err = s.Container.Secrets.GetProxyAtVersion(ctx, px.ID, ref, secretVersion)
-			if err != nil {
-				return providers.Account{}, err
-			}
-			defer zeroBytes(pass)
-		}
-		g, err := network.NewProxyGateway("replace-"+accountID, px, network.ProxyCredentials{Username: user, Password: string(pass)})
-		if err != nil {
-			return providers.Account{}, err
-		}
-		client = g.Client
-		closeFn = g.CloseIdleConnections
-	} else {
-		b, err := network.NewIsolatedDirectClient("replace-" + accountID)
-		if err != nil {
-			return providers.Account{}, err
-		}
-		client = b.Client
-		closeFn = b.CloseIdleConnections
+	c := s.Container
+	c.DB = s.DB
+	client, closeFn, err := c.CredentialValidationClient(ctx, accountID)
+	if err != nil {
+		return providers.Account{}, err
 	}
 	defer closeFn()
 	if s.Container.Providers == nil {
