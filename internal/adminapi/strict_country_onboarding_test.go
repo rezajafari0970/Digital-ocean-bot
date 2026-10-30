@@ -30,7 +30,7 @@ func TestStrictCountryOnboardingAtomicAndBindingPostgres(t *testing.T) {
 	body.NetworkMode = "proxy_required"
 	body.ProxyID = p
 	body.ProxyIDs = []string{p}
- body.ProxyCountries=[]string{"US","DE","FR"}
+	body.ProxyCountries = []string{"US", "DE", "FR"}
 	// Failure of the country write rolls back account, secret and automation too.
 	sqlMust(t, s.DB, `CREATE FUNCTION reject_country_fixture() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'country fixture'; END $$; CREATE TRIGGER reject_country_fixture BEFORE INSERT ON account_proxy_country_policies FOR EACH ROW EXECUTE FUNCTION reject_country_fixture()`)
 	if w = authorizationRequest(s, "owner", "POST", "/save", body); w.Code != 500 {
@@ -50,8 +50,10 @@ func TestStrictCountryOnboardingAtomicAndBindingPostgres(t *testing.T) {
 		t.Fatal("created account lost country", saved, err)
 	}
 	var ordered string
- if e:=s.DB.QueryRow(`SELECT countries::text FROM account_proxy_country_policies WHERE account_id=$1`,id).Scan(&ordered);e!=nil||ordered!=`["US", "DE", "FR"]`{t.Fatal("atomic priority order lost",ordered,e)}
- if w = settingsRequest(s, id, `{"settings_revision":1,"network_mode":"direct","proxy_ids":[],"proxy_id":""}`); w.Code != 409 || !strings.Contains(w.Body.String(), "proxy_country_requires_proxy") {
+	if e := s.DB.QueryRow(`SELECT countries::text FROM account_proxy_country_policies WHERE account_id=$1`, id).Scan(&ordered); e != nil || ordered != `["US", "DE", "FR"]` {
+		t.Fatal("atomic priority order lost", ordered, e)
+	}
+	if w = settingsRequest(s, id, `{"settings_revision":1,"network_mode":"direct","proxy_ids":[],"proxy_id":""}`); w.Code != 409 || !strings.Contains(w.Body.String(), "proxy_country_requires_proxy") {
 		t.Fatal("settings bypassed country", w.Code, w.Body.String())
 	}
 	if w = settingsRequest(s, id, `{"settings_revision":1,"network_mode":"direct","proxy_ids":[],"proxy_id":"","token":"never-dispatch"}`); w.Code != 409 || !strings.Contains(w.Body.String(), "credential_route_change_requires_save") {

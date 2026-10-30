@@ -39,3 +39,26 @@ unknown; the video does not establish a terminal provider result.
 The original development device is offline. Heavy tests must use independent CI,
 not the 4 GB production host. The retired Vultr console is not a safe networking
 or session-isolation implementation and must stay retired.
+
+## Development checkpoint
+
+Draft PR34: `feature/provider-browser-priorities-20261030`.
+Second candidate `8baa51753db8e900a2c56c3435ca4e911a46920c` passed source CI
+41027518593: complete Go tests/vet, existing real-browser UI tests, two actual
+systemd-isolated Chromium sessions with separate cookies/storage, 351 mandatory
+regression roots with zero skips, 20 recovery/lifecycle repetitions and a verified
+restore of schema 206. The first candidate had a CDP return-arity compile error;
+it was corrected before the successful second run.
+
+Subsequent work adds mobile touch input, a standalone browser-control UI test,
+country-derived browser locale/timezone, native WebSocket/input checks and
+additional authorization lifecycle fences. These changes require a new exact-head
+CI result before publication. No public branch promotion or runtime update has
+occurred. Build Activity latency and the three prior unknown Kamatera receipts
+remain separate observations, not closed by these feature tests.
+
+Design references: provider-registered HTTPS entrypoints; systemd.exec documents
+PrivateNetwork, DynamicUser, PrivateTmp and the restrictions used by the worker:
+https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html
+Chromium control APIs are pinned by go.mod and used through chromedp:
+https://chromedevtools.github.io/devtools-protocol/

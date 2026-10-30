@@ -2,6 +2,7 @@ package providerbrowser
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"math"
@@ -59,6 +60,7 @@ type Worker struct {
 	proxy         *http.Server
 	width, height int64
 	timezone      string
+	locale        string
 	isolated      bool
 }
 
@@ -94,11 +96,23 @@ func (w *Worker) start(a Action) error {
 		return errors.New("invalid viewport")
 	}
 	w.timezone = a.Timezone
+	if a.Locale == "" || len(a.Locale) > 24 || strings.ContainsAny(a.Locale, "\r\n, /\\") {
+		return errors.New("locale unavailable")
+	}
+	w.locale = a.Locale
 	root, e := os.MkdirTemp("", "provider-browser-")
 	if e != nil {
 		return e
 	}
 	w.profile = root
+	profile := filepath.Join(root, "profile")
+	if e = os.MkdirAll(filepath.Join(profile, "Default"), 0700); e != nil {
+		return e
+	}
+	prefs, _ := json.Marshal(map[string]any{"intl": map[string]string{"accept_languages": w.locale, "selected_languages": w.locale}})
+	if e = os.WriteFile(filepath.Join(profile, "Default", "Preferences"), prefs, 0600); e != nil {
+		return e
+	}
 	ln, e := net.Listen("tcp4", "127.0.0.1:0")
 	if e != nil {
 		return e
@@ -114,6 +128,7 @@ func (w *Worker) start(a Action) error {
 		chromedp.Flag("disable-background-networking", true), chromedp.Flag("disable-sync", true),
 		chromedp.Flag("disable-extensions", true), chromedp.Flag("disable-breakpad", true),
 		chromedp.Flag("proxy-bypass-list", "<-loopback>"), chromedp.Flag("host-resolver-rules", "MAP * ~NOTFOUND, EXCLUDE 127.0.0.1"),
+		chromedp.Flag("lang", w.locale),
 		chromedp.ProxyServer("http://"+ln.Addr().String()), chromedp.WindowSize(int(w.width), int(w.height)),
 		chromedp.Env("HOME="+root, "TZ="+w.timezone),
 	)
@@ -142,7 +157,7 @@ func (w *Worker) start(a Action) error {
 	return chromedp.Run(bctx, chromedp.ActionFunc(func(ctx context.Context) error { _, _, _, _, e := page.Navigate(a.URL).Do(ctx); return e }))
 }
 func (w *Worker) configure(ctx context.Context) error {
-	return chromedp.Run(ctx, emulation.SetDeviceMetricsOverride(w.width, w.height, 1, false), emulation.SetTimezoneOverride(w.timezone))
+	return chromedp.Run(ctx, emulation.SetDeviceMetricsOverride(w.width, w.height, 1, false), emulation.SetTimezoneOverride(w.timezone), emulation.SetLocaleOverride().WithLocale(strings.ReplaceAll(w.locale, "-", "_")))
 }
 func (w *Worker) forward(out http.ResponseWriter, r *http.Request) {
 	address := r.Host

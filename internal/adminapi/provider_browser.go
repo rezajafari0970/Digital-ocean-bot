@@ -14,13 +14,15 @@ import (
 	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/geoctx"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providerbrowser"
- "github.com/rezajafari0970/Digital-ocean-bot/internal/providers/ovh"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers/ovh"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/proxyselection"
 )
 
 type providerBrowserSession struct {
 	owner, login, provider, account string
+	authorization                   string
 	peer                            *providerbrowser.Peer
 	route                           *app.OnboardingRoute
 	cancel                          context.CancelFunc
@@ -83,15 +85,15 @@ func (s *Server) startProviderBrowser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var req struct {
-		Provider       string   `json:"provider"`
-		AccountID      string   `json:"account_id"`
- AuthorizationID string `json:"authorization_id"`
-		ProxyID        string   `json:"proxy_id"`
-		ProxyIDs       []string `json:"proxy_ids"`
-		ProxyCountry   string   `json:"proxy_country"`
-		ProxyCountries []string `json:"proxy_countries"`
-		Width          int64    `json:"width"`
-		Height         int64    `json:"height"`
+		Provider        string   `json:"provider"`
+		AccountID       string   `json:"account_id"`
+		AuthorizationID string   `json:"authorization_id"`
+		ProxyID         string   `json:"proxy_id"`
+		ProxyIDs        []string `json:"proxy_ids"`
+		ProxyCountry    string   `json:"proxy_country"`
+		ProxyCountries  []string `json:"proxy_countries"`
+		Width           int64    `json:"width"`
+		Height          int64    `json:"height"`
 	}
 	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 8192))
 	dec.DisallowUnknownFields()
@@ -125,23 +127,33 @@ func (s *Server) startProviderBrowser(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 400, map[string]string{"error": "invalid_browser_viewport"})
 		return
 	}
- startURL:=meta.WebsiteURL
- if req.AuthorizationID!=""{
-  flow,err:=s.loadAuthorization(r.Context(),p.UserID,req.AuthorizationID)
-  if err!=nil||req.AccountID!=""||flow.Provider!="ovh"||flow.Provider!=req.Provider||flow.State!="PENDING"||!sameAuthorizationPolicy(flow,ids,countries){writeJSON(w,409,map[string]string{"error":"authorization_browser_binding_changed"});return}
-  secret,err:=s.authorizationSecret(flow)
-  var scope struct{Endpoint string `json:"endpoint"`}
-  if err!=nil||json.Unmarshal([]byte(secret.Token),&scope)!=nil||!ovh.ValidAuthorizationURL(secret.ValidationURL,scope.Endpoint){writeJSON(w,409,map[string]string{"error":"authorization_browser_unavailable"});return}
-  startURL=secret.ValidationURL;ids=normalizeProxyPool(flow.RouteProxyID,nil);countries=[]string{flow.RouteCountry}
- }
- var token [24]byte
+	startURL := meta.WebsiteURL
+	if req.AuthorizationID != "" {
+		flow, err := s.loadAuthorization(r.Context(), p.UserID, req.AuthorizationID)
+		if err != nil || req.AccountID != "" || flow.Provider != "ovh" || flow.Provider != req.Provider || flow.State != "PENDING" || !sameAuthorizationPolicy(flow, ids, countries) {
+			writeJSON(w, 409, map[string]string{"error": "authorization_browser_binding_changed"})
+			return
+		}
+		secret, err := s.authorizationSecret(flow)
+		var scope struct {
+			Endpoint string `json:"endpoint"`
+		}
+		if err != nil || json.Unmarshal([]byte(secret.Token), &scope) != nil || !ovh.ValidAuthorizationURL(secret.ValidationURL, scope.Endpoint) {
+			writeJSON(w, 409, map[string]string{"error": "authorization_browser_unavailable"})
+			return
+		}
+		startURL = secret.ValidationURL
+		ids = normalizeProxyPool(flow.RouteProxyID, nil)
+		countries = []string{flow.RouteCountry}
+	}
+	var token [24]byte
 	if _, e = rand.Read(token[:]); e != nil {
 		writeJSON(w, 500, errorBody())
 		return
 	}
 	id := hex.EncodeToString(token[:])
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
-	b := &providerBrowserSession{owner: p.UserID, login: p.SessionID, provider: req.Provider, account: req.AccountID, cancel: cancel, expires: time.Now().Add(15 * time.Minute), lastUsed: time.Now()}
+	b := &providerBrowserSession{owner: p.UserID, login: p.SessionID, provider: req.Provider, account: req.AccountID, authorization: req.AuthorizationID, cancel: cancel, expires: time.Now().Add(15 * time.Minute), lastUsed: time.Now()}
 	s.BrowserMu.Lock()
 	if s.ProviderBrowsers == nil {
 		s.ProviderBrowsers = map[string]*providerBrowserSession{}
@@ -180,10 +192,16 @@ func (s *Server) startProviderBrowser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	b.peer = providerbrowser.NewPeer(ctx, conn)
-	b.peer.Dial = func(dialCtx context.Context,address string)(net.Conn,error){conn,err:=route.Dial(dialCtx,address);if errors.Is(err,app.ErrStaleAccountNetwork){cancel()};return conn,err}
+	b.peer.Dial = func(dialCtx context.Context, address string) (net.Conn, error) {
+		conn, err := route.Dial(dialCtx, address)
+		if errors.Is(err, app.ErrStaleAccountNetwork) {
+			cancel()
+		}
+		return conn, err
+	}
 	b.peer.Start()
 	startCtx, startCancel := context.WithTimeout(ctx, 25*time.Second)
-	frame, e := b.peer.Call(startCtx, providerbrowser.Action{Kind: "start", URL: startURL, Timezone: route.Timezone, Width: req.Width, Height: req.Height})
+	frame, e := b.peer.Call(startCtx, providerbrowser.Action{Kind: "start", URL: startURL, Timezone: route.Timezone, Locale: geoctx.LocaleForCountry(route.Country), Width: req.Width, Height: req.Height})
 	startCancel()
 	if e != nil || !frame.Isolated {
 		writeJSON(w, 503, map[string]string{"error": "browser_start_failed", "detail": "The isolated browser could not start. No direct connection is permitted."})
@@ -229,6 +247,13 @@ func (s *Server) watchProviderBrowser(ctx context.Context, id string, b *provide
 			if e == nil {
 				e = b.route.Check(checkCtx)
 			}
+			if e == nil && b.authorization != "" {
+				var active bool
+				e = s.DB.QueryRowContext(checkCtx, `SELECT EXISTS(SELECT 1 FROM provider_authorizations WHERE id=$1 AND owner_id=$2 AND state IN ('PENDING','READY','VERIFIED') AND expires_at>now())`, b.authorization, b.owner).Scan(&active)
+				if e == nil && !active {
+					e = errors.New("authorization ended")
+				}
+			}
 			if e == nil && b.account != "" {
 				var provider string
 				e = s.DB.QueryRowContext(checkCtx, `SELECT provider FROM accounts WHERE id=$1`, b.account).Scan(&provider)
@@ -251,7 +276,7 @@ func (s *Server) providerBrowserAction(w http.ResponseWriter, r *http.Request) {
 	var a providerbrowser.Action
 	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 16384))
 	dec.DisallowUnknownFields()
-	if dec.Decode(&a) != nil || dec.Decode(new(any)) != io.EOF || a.Kind == "start" || a.Timezone != "" {
+	if dec.Decode(&a) != nil || dec.Decode(new(any)) != io.EOF || a.Kind == "start" || a.Timezone != "" || a.Locale != "" {
 		writeJSON(w, 400, errorBody())
 		return
 	}

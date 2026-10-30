@@ -121,12 +121,18 @@ func TestCountryPolicyPersistenceFencingAndLegacyReset(t *testing.T) {
 	if err := db.QueryRow(`SELECT preferred_country_code,selected_target_country,last_health_ok FROM account_network_identities WHERE account_id=$1`, a).Scan(&learned, &target, &health); err != nil || learned != "it" || target != nil || health {
 		t.Fatal("AUTO reset lost learned preference", learned, target, health, err)
 	}
- if w:=countrySave(s,a,`{"revision":2,"countries":["US","DE","FR"]}`);w.Code!=200{t.Fatal("three countries rejected",w.Code,w.Body.String())}
- var saved []byte
- if e:=db.QueryRow(`SELECT countries FROM account_proxy_country_policies WHERE account_id=$1`,a).Scan(&saved);e!=nil{t.Fatal(e)}
- var ordered []string
- if json.Unmarshal(saved,&ordered)!=nil || strings.Join(ordered,",")!="US,DE,FR"{t.Fatal("priority order lost",string(saved))}
- for _, body := range []string{`{"revision":2}`, `{"revision":2,"countries":["US","TR","DE","FR"]}`, `{"revision":2,"countries":["US","US"]}`, `{"revision":2,"countries":["ZZ"]}`, `{"revision":2,"countries":["TR"],"unknown_field":true}`} {
+	if w := countrySave(s, a, `{"revision":2,"countries":["US","DE","FR"]}`); w.Code != 200 {
+		t.Fatal("three countries rejected", w.Code, w.Body.String())
+	}
+	var saved []byte
+	if e := db.QueryRow(`SELECT countries FROM account_proxy_country_policies WHERE account_id=$1`, a).Scan(&saved); e != nil {
+		t.Fatal(e)
+	}
+	var ordered []string
+	if json.Unmarshal(saved, &ordered) != nil || strings.Join(ordered, ",") != "US,DE,FR" {
+		t.Fatal("priority order lost", string(saved))
+	}
+	for _, body := range []string{`{"revision":2}`, `{"revision":2,"countries":["US","TR","DE","FR"]}`, `{"revision":2,"countries":["US","US"]}`, `{"revision":2,"countries":["ZZ"]}`, `{"revision":2,"countries":["TR"],"unknown_field":true}`} {
 		if w := countrySave(s, a, body); w.Code != 400 {
 			t.Fatal("invalid intent accepted", body, w.Code)
 		}

@@ -158,6 +158,10 @@ func (s *Server) startProviderAuthorization(w http.ResponseWriter, r *http.Reque
 	}
 	req.ProxyCountry = req.ProxyCountries[0]
 	req.ProxyIDs = normalizeProxyPool(req.ProxyID, req.ProxyIDs)
+	if len(req.ProxyIDs) > 3 {
+		writeJSON(w, 400, map[string]string{"error": "too_many_proxy_priorities"})
+		return
+	}
 	unlock, ok := s.authorizationLock(w, r, req.ID)
 	if !ok {
 		return

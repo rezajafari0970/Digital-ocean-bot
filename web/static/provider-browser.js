@@ -35,7 +35,10 @@
   dialog.querySelectorAll('[data-key]').forEach(b=>b.onclick=()=>action({kind:'key',key:b.dataset.key}).catch(fail));
   dialog.querySelectorAll('[data-scroll]').forEach(b=>b.onclick=()=>action({kind:'scroll',x:screen.width/2,y:screen.height/2,delta:Number(b.dataset.scroll)}).catch(fail));
   const pos=e=>{const r=canvas.getBoundingClientRect();return {x:Math.max(0,Math.min(screen.width-1,(e.clientX-r.left)*screen.width/r.width)),y:Math.max(0,Math.min(screen.height-1,(e.clientY-r.top)*screen.height/r.height))}};
-  canvas.onclick=e=>{canvas.focus();action({kind:'tap',...pos(e)}).catch(fail)};
+  let gesture=null;
+  canvas.onpointerdown=e=>{e.preventDefault();canvas.focus();gesture={id:e.pointerId,...pos(e)};canvas.setPointerCapture(e.pointerId)};
+  canvas.onpointerup=e=>{e.preventDefault();if(!gesture||gesture.id!==e.pointerId)return;const start=gesture;gesture=null;const end=pos(e),delta=start.y-end.y;if(Math.abs(delta)>12)action({kind:'scroll',...end,delta:Math.max(-1000,Math.min(1000,delta))}).catch(fail);else action({kind:'tap',...end}).catch(fail)};
+  canvas.onpointercancel=()=>{gesture=null};
   canvas.addEventListener('wheel',e=>{e.preventDefault();if(pending<2)action({kind:'scroll',...pos(e),delta:Math.max(-1000,Math.min(1000,e.deltaY))}).catch(fail)},{passive:false});
   canvas.onkeydown=e=>{const supported=['Enter','Tab','Backspace','Delete','Escape','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End'];if(supported.includes(e.key)){e.preventDefault();action({kind:'key',key:e.key}).catch(fail)}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='a'){e.preventDefault();action({kind:'key',key:'SelectAll'}).catch(fail)}else if(e.key.length===1&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();action({kind:'text',text:e.key}).catch(fail)}};
   try{
@@ -56,7 +59,7 @@
      start.disabled=true;status.textContent='Verifying proxy country and starting an isolated browser…';
      const data=await api('/api/v1/provider-browser/sessions',{method:'POST',signal:controller.signal,body:JSON.stringify({provider,account_id:accountID,authorization_id:authorizationID,proxy_id:ids[0],proxy_ids:[...new Set(ids.filter(Boolean))],proxy_countries:policy,width:Math.max(360,Math.min(1200,window.innerWidth-44)),height:800})});
      id=data.id;if(closed){await api('/api/v1/provider-browser/sessions/'+id,{method:'DELETE'});return}
-     q('[data-route]').textContent='Verified country: '+data.country+' · Exit IP: '+data.exit_ip+' · Isolated session';setup.hidden=true;q('[data-browser]').hidden=false;await paint(data.frame);poll();
+     q('[data-route]').textContent='Verified country: '+data.country+' · Proxy: '+(proxies.find(p=>p.id===data.proxy_id)?.name||'verified')+' · Exit IP: '+data.exit_ip+' · Isolated session';setup.hidden=true;q('[data-browser]').hidden=false;await paint(data.frame);poll();
     }catch(e){fail(e);start.disabled=false}
    };
   }catch(e){fail(e)}

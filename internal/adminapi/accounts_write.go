@@ -63,7 +63,10 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("account create decoded provider=%s name=%q proxies=%d regions=%d sizes=%d images=%d token_present=%t", x.Provider, x.Name, len(x.ProxyIDs), len(x.Regions), len(x.Sizes), len(x.Images), x.Token != "")
 	x.ProxyIDs = normalizeProxyPool(x.ProxyID, x.ProxyIDs)
- if len(x.ProxyIDs)>3{writeJSON(w,400,map[string]string{"error":"too_many_proxy_priorities"});return}
+	if len(x.ProxyIDs) > 3 {
+		writeJSON(w, 400, map[string]string{"error": "too_many_proxy_priorities"})
+		return
+	}
 	if x.NetworkMode == "proxy_required" && len(x.ProxyIDs) > 0 {
 		x.ProxyID = x.ProxyIDs[0]
 	}

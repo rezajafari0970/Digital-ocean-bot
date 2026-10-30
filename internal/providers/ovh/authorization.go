@@ -33,7 +33,7 @@ func authorizationRules(project string) []accessRule {
 	}
 	return rules
 }
-func ValidAuthorizationURL(raw,endpoint string)bool{return validAuthorizationURL(raw,endpoint)}
+func ValidAuthorizationURL(raw, endpoint string) bool { return validAuthorizationURL(raw, endpoint) }
 func validAuthorizationURL(raw, endpoint string) bool {
 	if len(raw) > 4096 {
 		return false

@@ -211,6 +211,11 @@ const {spawn}=require('node:child_process'),assert=require('node:assert/strict')
   await save('vultr');
   assert.deepEqual(saves.at(-1).proxy_countries,['DE','US'],'country committed with account');
   console.log('PASS country defaults AUTO and preview/save cannot cross a changed country');
+  await open('vultr');
+  await evaluate('document.querySelector("[name=proxy_id]").value="fixture-proxy";ProxyCountry.set(document.querySelector("#modalForm"),["US","US","AUTO"]);document.querySelector("#discoverAccount").click()');
+  await wait('document.querySelector("#modalError").textContent.includes("different countries")');
+  await evaluate('document.querySelector("#modalCancel").click()');
+
 
   await open('vultr');await validate();await ready();
   await evaluate('document.querySelector("[name=token]").value="fixture-replaced-token";document.querySelector("#modalSubmit").click()');

@@ -4,8 +4,8 @@
 package providerbrowser
 
 import (
+	"bytes"
 	"context"
- "bytes"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
@@ -32,6 +32,7 @@ type Action struct {
 	Width    int64   `json:"width,omitempty"`
 	Height   int64   `json:"height,omitempty"`
 	Timezone string  `json:"timezone,omitempty"`
+	Locale   string  `json:"locale,omitempty"`
 }
 type Tab struct {
 	ID    string `json:"id"`
@@ -75,23 +76,23 @@ func (s *stream) close() {
 }
 
 type Peer struct {
-	conn    io.ReadWriteCloser
-	ctx     context.Context
-	cancel  context.CancelFunc
-	sendMu  sync.Mutex
-	mu      sync.Mutex
-	streams map[string]*stream
-	calls   map[string]chan message
-	serial  atomic.Uint64
-	Dial    func(context.Context, string) (net.Conn, error)
-	Handle  func(context.Context, Action) (State, error)
-	actions chan message
- actionsDone chan struct{}
+	conn        io.ReadWriteCloser
+	ctx         context.Context
+	cancel      context.CancelFunc
+	sendMu      sync.Mutex
+	mu          sync.Mutex
+	streams     map[string]*stream
+	calls       map[string]chan message
+	serial      atomic.Uint64
+	Dial        func(context.Context, string) (net.Conn, error)
+	Handle      func(context.Context, Action) (State, error)
+	actions     chan message
+	actionsDone chan struct{}
 }
 
 func NewPeer(ctx context.Context, conn io.ReadWriteCloser) *Peer {
 	ctx, cancel := context.WithCancel(ctx)
-	p := &Peer{conn: conn, ctx: ctx, cancel: cancel, streams: map[string]*stream{}, calls: map[string]chan message{}, actions: make(chan message, 4),actionsDone:make(chan struct{})}
+	p := &Peer{conn: conn, ctx: ctx, cancel: cancel, streams: map[string]*stream{}, calls: map[string]chan message{}, actions: make(chan message, 4), actionsDone: make(chan struct{})}
 	return p
 }
 func (p *Peer) Start()                { go p.read(); go p.handle(); go func() { <-p.ctx.Done(); p.Close() }() }
@@ -122,8 +123,8 @@ func (p *Peer) send(m message) error {
 		_ = c.SetWriteDeadline(time.Now().Add(10 * time.Second))
 		defer c.SetWriteDeadline(time.Time{})
 	}
-	if _, err = io.Copy(p.conn,bytes.NewReader(h[:])); err == nil {
-		_, err = io.Copy(p.conn,bytes.NewReader(raw))
+	if _, err = io.Copy(p.conn, bytes.NewReader(h[:])); err == nil {
+		_, err = io.Copy(p.conn, bytes.NewReader(raw))
 	}
 	if err != nil {
 		p.cancel()
@@ -355,9 +356,9 @@ func (p *Peer) Call(ctx context.Context, a Action) (State, error) {
 		return State{}, errors.New("browser closed")
 	}
 }
-func(p *Peer) Wait(){<-p.actionsDone}
+func (p *Peer) Wait() { <-p.actionsDone }
 func (p *Peer) handle() {
- defer close(p.actionsDone)
+	defer close(p.actionsDone)
 	for {
 		select {
 		case m := <-p.actions:
