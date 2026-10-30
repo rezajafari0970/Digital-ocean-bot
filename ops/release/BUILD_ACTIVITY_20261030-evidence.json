@@ -1,0 +1,105 @@
+{
+  "at_utc": "2026-10-30T20:43:57Z",
+  "source_tested_commit": "b500ef5f44fc0e61279dc6c4c7d81d5bb1b31d71",
+  "source_tree": "56d786229be154d3cba5bbde825f1ef06ec44824",
+  "source_pr": 35,
+  "source_ci": {
+    "run": 41124609102,
+    "job": 124299770757,
+    "status": "PASS",
+    "required_roots": 353,
+    "required_passed": 353,
+    "skipped": 0,
+    "recovery_lifecycle_repetitions": 20,
+    "restore_schema": 206,
+    "encrypted_identity_preserved": true,
+    "unknown_intent_preserved": true
+  },
+  "public_commit": "1081be7edc22bb0cd50ccfc93852aa1650f73406",
+  "public_tree": "3a0c7194bf9e670ff9e5f4dcd0ed231761466d8b",
+  "public_ci": {
+    "run": 41124939606,
+    "test_job": 124300681234,
+    "install_job": 124300681131,
+    "status": "PASS",
+    "fresh_install": "PASS",
+    "repeat_install_preserves_identity": "PASS"
+  },
+  "query_comparison": {
+    "read_only": true,
+    "same_snapshot_difference_rows": 0,
+    "history_rows": 1575,
+    "visible_rows": 100,
+    "old_execution_ms": [
+      3231.62,
+      1987.0
+    ],
+    "new_execution_ms": [
+      146.11,
+      32.799
+    ],
+    "old_operation_table_loops": 756,
+    "new_operation_table_loops": 4,
+    "end_to_end_latency_claim": false
+  },
+  "export_manifest_sha256": "0a4e2dcc5629008a353ee323aceaee2fedb7fbf150631d00fec2f38e47878a57",
+  "secret_scan": {
+    "both_live_configurations": "PASS",
+    "gitleaks": "PASS",
+    "gitleaks_version": "8.30.1",
+    "config": "tools/public-release/gitleaks.toml",
+    "values_logged": false
+  },
+  "live_outputs": {
+    "raw_routes_passed": 8,
+    "viewers_passed": 4,
+    "withheld": 0
+  },
+  "rollout": {
+    "status": "BLOCKED_BEFORE_CHANGE",
+    "reason": "insufficient_retention_workspace",
+    "old_runtime_both_instances": "67f91d2886e0b2b6dec6754700066a35eb2fccae",
+    "schema": "000205_authorization_proxy_country",
+    "free_bytes": 5737271296,
+    "database_bytes": 3559192255,
+    "required_free_bytes": 11214447677,
+    "active_services": 6,
+    "service_restarts": 0,
+    "readiness_checks_passed": 10,
+    "deployment_pending": false,
+    "provider_browser_live_acceptance": "PENDING_INSTALL"
+  },
+  "kamatera": {
+    "unknown_creates": 3,
+    "attempts_each": 1,
+    "action_or_resource_receipts": 0,
+    "replayed": false
+  },
+  "original_host": {
+    "online": true,
+    "application_services_running": false,
+    "quarantine_preserved": true
+  },
+  "promotion": {
+    "status": "PASS",
+    "run": 41125845769,
+    "operational_commit": "331b983cac970aac0f7bcf14aecdca5b2a701d36",
+    "main_and_stable": "1081be7edc22bb0cd50ccfc93852aa1650f73406",
+    "atomic": true,
+    "refs_read_back": true
+  },
+  "private_receipt_sha256": {
+    "resume-preflight.json": "88a05e5d98f8d0b4a4c3588a79db953d1fdd0aef1b4ab825d89470db5c2e7b4b",
+    "resume-cache-inventory.json": "918c12e5bd6a7b81d1221bd70c9601f579523031f7df1a6d5fbef375cfb9fa1b",
+    "resume-output-check.json": "28c9cd0538566ef573bf6f687d797d500db626cfe2ac68193460ad7b67eee262",
+    "resume-readonly-diagnostics.json": "5b31edb82216f396dbadb0e2b39bfdfe1dbe059f1d9a9fd9eb4552d2fcbab974",
+    "build-activity-comparison.json": "8bec6ebce0d19e163edc67c79f964e97fab8ca625c0915b8ba567e3384c69b73"
+  },
+  "source_merge_commit": "f5dc4b4391d2d025ed3b123839049e3f05ff6e3b",
+  "native_browser": {
+    "https_and_websocket_requests": 4,
+    "direct_host_requests": 0,
+    "rejected_destinations": 2,
+    "cookie_storage_isolation": true
+  }
+}

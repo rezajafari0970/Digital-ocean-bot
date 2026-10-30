@@ -1,4 +1,4 @@
-> Latest accepted continuation: [Deletion inventory validation, dual-instance rollout and remaining cleanup](../../docs/DELETION_INVENTORY_20261026.md). Older release entries below retain their original dates.
+> Latest continuation: [Build Activity page cost, release verification and blocked runtime rollout](../../docs/BUILD_ACTIVITY_CONTINUATION_20261030.md). Older release entries below retain their original dates.
 
 # Independent release verification
 
