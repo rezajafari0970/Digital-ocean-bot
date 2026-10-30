@@ -42,8 +42,9 @@ def main():
  # verification without creating a cloud resource or contacting a provider.
  with socket.socket(socket.AF_UNIX,socket.SOCK_STREAM) as connection:
   connection.settimeout(20);connection.connect('/run/datacenter-provider-browser.sock')
-  raw=json.dumps({'kind':'action','id':'smoke','action':{'kind':'frame'}}).encode()
-  connection.sendall(struct.pack('>I',len(raw))+raw)
+  def send(message):
+   raw=json.dumps(message).encode();connection.sendall(struct.pack('>I',len(raw))+raw)
+  send({'kind':'action','id':'smoke','action':{'kind':'start','url':'https://install.fixture.invalid/','width':390,'height':800,'locale':'en-US','timezone':'UTC'}})
   def receive(n):
    result=b''
    while len(result)<n:
@@ -51,8 +52,17 @@ def main():
     assert part,'Isolated browser worker exited before replying'
     result+=part
    return result
-  size=struct.unpack('>I',receive(4))[0];assert 0<size<=4*1024*1024
-  answer=json.loads(receive(size));assert answer.get('error')=='not started',answer
+  # Deny every attempted tunnel. Chromium must still produce an isolated
+  # browser frame; neither the guest nor this fixture supplies Internet egress.
+  for _ in range(100):
+   size=struct.unpack('>I',receive(4))[0];assert 0<size<=4*1024*1024
+   answer=json.loads(receive(size))
+   if answer['kind']=='dial':send({'kind':'opened','id':answer['id'],'error':'fixture destination denied'});continue
+   if answer['kind']=='closed':continue
+   assert answer['kind']=='result' and answer['id']=='smoke' and not answer.get('error'),answer
+   assert answer['state']['isolated'] and answer['state']['width']==390 and answer['state'].get('image')
+   break
+  else:raise AssertionError('Installed isolated browser did not return a frame')
  subprocess.run(['python3',source+'/deploy/verify-panel.py','--bootstrap',source+'/deploy/bootstrap.py','--etc','/etc/digital-ocean-bot','--static-root',source+'/web/static'],check=True)
  for unit in ['digital-ocean-bot-api','digital-ocean-bot-worker','digital-ocean-bot-worker-panels']:
   subprocess.run(['systemctl','is-active','--quiet',unit],check=True);subprocess.run(['systemctl','is-enabled','--quiet',unit],check=True)
