@@ -7,7 +7,7 @@ permissions:
 jobs:
   fleet:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 40
     env:
       GOMAXPROCS: '2'
       GOMEMLIMIT: 1536MiB
@@ -59,6 +59,8 @@ jobs:
           go test -v -count=3 -p 1 -timeout 5m -run '^TestAccountEditBrowser$' ./internal/adminapi
           go test -v -count=1 -p 1 -timeout 5m -run '^TestNewCloudProviderBrowser$' ./internal/adminapi
           DOB_TEST_AUTH_POPUP_BLOCKED=1 go test -v -count=1 -timeout 5m -run '^TestNewCloudProviderBrowser$' ./internal/adminapi
+      - name: Native isolated provider browser and cookie separation
+        run: python3 ops/release/provider-browser-sandbox.py
       - name: Canonical database, native transport and race gate
         run: python3 ops/release/transport-regression-gate.py "$GITHUB_WORKSPACE"
       - name: Disposable backup restore and transaction interruption

@@ -2,7 +2,7 @@
 (() => {
  'use strict';
  let active=null;
- async function open({api,provider,accountID='',proxyIDs=[],countries=['AUTO'],countryOptions,proxies}){
+ async function open({api,provider,accountID='',authorizationID='',proxyIDs=[],countries=['AUTO'],countryOptions,proxies}){
   if(active){active.focus();return}
   const dialog=document.createElement('dialog');dialog.className='providerBrowser';dialog.setAttribute('aria-label','Isolated provider browser');active=dialog;
   dialog.innerHTML='<header><h2>Provider browser</h2><button type="button" data-close aria-label="Close isolated browser">×</button></header><p data-status role="status">Loading available proxies…</p><form data-setup></form><section data-browser hidden><p data-route></p><div class="browserToolbar"><button type="button" data-nav="back" aria-label="Back">←</button><button type="button" data-nav="forward" aria-label="Forward">→</button><button type="button" data-nav="reload">Reload</button><button type="button" data-nav="newtab">New tab</button><select data-tabs aria-label="Browser tabs"></select></div><form data-address><input name="url" type="url" aria-label="Website address" required autocomplete="off" spellcheck="false"><button>Go</button></form><canvas tabindex="0" aria-label="Remote website; tap to interact"></canvas><form data-type><input name="text" type="password" aria-label="Text to type in the remote browser" autocomplete="off" placeholder="Type or paste text for the selected field"><button>Type text</button></form><div class="browserToolbar"><button type="button" data-key="Tab">Tab</button><button type="button" data-key="Enter">Enter</button><button type="button" data-key="Backspace">⌫</button><button type="button" data-key="SelectAll">Select all</button><button type="button" data-scroll="-400">Scroll up</button><button type="button" data-scroll="400">Scroll down</button></div></section><p class="muted">Cookies and site storage belong only to this session and are deleted when it closes. Session limit: 15 minutes; idle limit: 2 minutes. File uploads and downloads are unavailable.</p>';
@@ -47,13 +47,14 @@
     for(const p of proxies.filter(x=>x.status==='healthy'))select.append(new Option(p.name,p.id));select.value=proxyIDs[i]||'';label.append(select);setup.append(label);
    }
    const fields=document.createElement('div');fields.innerHTML=ProxyCountry.field(countryOptions,countries);setup.append(fields);
+   if(authorizationID)setup.querySelectorAll('select').forEach(x=>{x.inert=true;x.setAttribute('aria-disabled','true')});
    const start=document.createElement('button');start.textContent='Open provider website with proxy';setup.append(start);status.textContent='Choose the proxy and country priorities.';
    setup.onsubmit=async e=>{
     e.preventDefault();if(start.disabled)return;
     try{
      const ids=[0,1,2].map(i=>setup.elements['browser_proxy'+i].value),policy=ProxyCountry.read(setup);ProxyCountry.validate(policy,ids[0],ids.slice(1));if(!ids[0])throw Error('Select a proxy. This browser never uses a direct connection.');
      start.disabled=true;status.textContent='Verifying proxy country and starting an isolated browser…';
-     const data=await api('/api/v1/provider-browser/sessions',{method:'POST',signal:controller.signal,body:JSON.stringify({provider,account_id:accountID,proxy_id:ids[0],proxy_ids:[...new Set(ids.filter(Boolean))],proxy_countries:policy,width:Math.max(360,Math.min(1200,window.innerWidth-44)),height:800})});
+     const data=await api('/api/v1/provider-browser/sessions',{method:'POST',signal:controller.signal,body:JSON.stringify({provider,account_id:accountID,authorization_id:authorizationID,proxy_id:ids[0],proxy_ids:[...new Set(ids.filter(Boolean))],proxy_countries:policy,width:Math.max(360,Math.min(1200,window.innerWidth-44)),height:800})});
      id=data.id;if(closed){await api('/api/v1/provider-browser/sessions/'+id,{method:'DELETE'});return}
      q('[data-route]').textContent='Verified country: '+data.country+' · Exit IP: '+data.exit_ip+' · Isolated session';setup.hidden=true;q('[data-browser]').hidden=false;await paint(data.frame);poll();
     }catch(e){fail(e);start.disabled=false}

@@ -43,6 +43,7 @@
    function lock(active){manual.disabled=active;box.querySelectorAll('input').forEach(x=>{x.readOnly=active;if(active)x.required=false;else{x.required=!(meta.credential_fields.find(f=>f.key===x.dataset.providerCredential)?.optional)}});[...proxies,...countryFields].filter(Boolean).forEach(x=>{x.inert=active;x.setAttribute('aria-disabled',String(active))});mode()}
    function mode(){const auto=!manual.checked,active=auto&&!!id;ck.closest('label').hidden=auto;ck.required=!auto&&!id;box.hidden=active;credentialHeading.hidden=active;manual.closest('label').hidden=active;ui.querySelector('[data-auth-help]').hidden=!auto||active;button.hidden=active&&['DISPATCHED','PENDING'].includes(state);button.textContent=auto&&!id?'Connect automatically to OVH':'Reload provider options'}
    function reserveApprovalWindow(){
+    if(proxies[0].value)return;
     try{approvalWindow=window.open('about:blank','_blank');if(!approvalWindow)return;approvalWindow.opener=null;const d=approvalWindow.document;d.title='Connecting to OVH';const m=d.createElement('meta');m.name='referrer';m.content='no-referrer';d.head.append(m);d.body.textContent='Preparing your OVH approval page. Keep the panel open; it will continue automatically after approval.'}catch{closeBlankApprovalWindow()}
    }
    function closeBlankApprovalWindow(){try{if(approvalWindow&&!approvalWindow.closed&&approvalWindow.location.href==='about:blank')approvalWindow.close()}catch{}approvalWindow=null}
@@ -60,7 +61,11 @@
     state=x.state;if(['PENDING','READY','VERIFIED'].includes(state))clearSecrets();route=x.proxy_id||'';routeCountries=x.proxy_countries||[x.proxy_country||'AUTO'];routeProxies=x.proxy_ids||[route].filter(Boolean);ProxyCountry.set(form,routeCountries);proxies.forEach((e,i)=>e.value=routeProxies[i]||'');link.hidden=true;link.removeAttribute('href');reset.hidden=false;mode();
     const labels={DISPATCHED:'Step 1 of 3: preparing secure OVH access…',PENDING:'Step 2 of 3: approve access once on OVH, then return here. The next steps continue automatically.',READY:'Step 3 of 3: access approved. Loading projects, capacity and server options…',VERIFIED:'OVH access is verified. Checking current projects and server options…',FAILED:'OVH connection failed. '+(x.diagnostic||'Check the application keys and permissions.'),UNKNOWN:'OVH may have received the request. It will not be sent again automatically. Check your OVH API credentials before starting a new request.',EXPIRED:'This connection request expired. Start a new request.',CANCELLED:'Connection request cancelled.',USED:'This connection has already been saved as an account.'};
     status.textContent=labels[state]||'Checking connection…';if(['FAILED','UNKNOWN'].includes(state)){if(x.detail)status.textContent+=' '+x.detail;status.textContent+=' Reference: '+id+(x.diagnostic?' · '+x.diagnostic:'')}reset.textContent=terminal.has(state)?'Clear this connection request':'Cancel this connection request';
-    if(state==='PENDING'&&validApprovalURL(x.validation_url)){link.href=x.validation_url;link.hidden=false;openPreparedApproval(x.validation_url)}
+    if(state==='PENDING'&&validApprovalURL(x.validation_url)){
+     link.hidden=false;
+     if(routeProxies.length){closeBlankApprovalWindow();link.textContent='Approve OVH in isolated proxy browser';link.setAttribute('role','button');link.tabIndex=0;link.onclick=e=>{e.preventDefault();window.openProviderApproval({authorizationID:id,proxyIDs:routeProxies,countries:routeCountries}).catch(e=>status.textContent=e.message)};link.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();link.click()}}}
+     else{link.textContent='Open OVH and approve access';link.removeAttribute('role');link.onclick=null;link.onkeydown=null;link.href=x.validation_url;openPreparedApproval(x.validation_url)}
+    }
     if(terminal.has(state)||['READY','VERIFIED'].includes(state))closeBlankApprovalWindow();
     if(['READY','VERIFIED'].includes(state)&&!readyNotified){readyNotified=true;queueMicrotask(()=>{if(!closed)onReady()})}
     schedule();

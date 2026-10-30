@@ -15,6 +15,7 @@ import (
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providerbrowser"
+ "github.com/rezajafari0970/Digital-ocean-bot/internal/providers/ovh"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/proxyselection"
 )
 
@@ -84,6 +85,7 @@ func (s *Server) startProviderBrowser(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Provider       string   `json:"provider"`
 		AccountID      string   `json:"account_id"`
+ AuthorizationID string `json:"authorization_id"`
 		ProxyID        string   `json:"proxy_id"`
 		ProxyIDs       []string `json:"proxy_ids"`
 		ProxyCountry   string   `json:"proxy_country"`
@@ -123,7 +125,16 @@ func (s *Server) startProviderBrowser(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 400, map[string]string{"error": "invalid_browser_viewport"})
 		return
 	}
-	var token [24]byte
+ startURL:=meta.WebsiteURL
+ if req.AuthorizationID!=""{
+  flow,err:=s.loadAuthorization(r.Context(),p.UserID,req.AuthorizationID)
+  if err!=nil||req.AccountID!=""||flow.Provider!="ovh"||flow.Provider!=req.Provider||flow.State!="PENDING"||!sameAuthorizationPolicy(flow,ids,countries){writeJSON(w,409,map[string]string{"error":"authorization_browser_binding_changed"});return}
+  secret,err:=s.authorizationSecret(flow)
+  var scope struct{Endpoint string `json:"endpoint"`}
+  if err!=nil||json.Unmarshal([]byte(secret.Token),&scope)!=nil||!ovh.ValidAuthorizationURL(secret.ValidationURL,scope.Endpoint){writeJSON(w,409,map[string]string{"error":"authorization_browser_unavailable"});return}
+  startURL=secret.ValidationURL;ids=normalizeProxyPool(flow.RouteProxyID,nil);countries=[]string{flow.RouteCountry}
+ }
+ var token [24]byte
 	if _, e = rand.Read(token[:]); e != nil {
 		writeJSON(w, 500, errorBody())
 		return
@@ -169,10 +180,10 @@ func (s *Server) startProviderBrowser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	b.peer = providerbrowser.NewPeer(ctx, conn)
-	b.peer.Dial = route.Dial
+	b.peer.Dial = func(dialCtx context.Context,address string)(net.Conn,error){conn,err:=route.Dial(dialCtx,address);if errors.Is(err,app.ErrStaleAccountNetwork){cancel()};return conn,err}
 	b.peer.Start()
 	startCtx, startCancel := context.WithTimeout(ctx, 25*time.Second)
-	frame, e := b.peer.Call(startCtx, providerbrowser.Action{Kind: "start", URL: meta.WebsiteURL, Timezone: route.Timezone, Width: req.Width, Height: req.Height})
+	frame, e := b.peer.Call(startCtx, providerbrowser.Action{Kind: "start", URL: startURL, Timezone: route.Timezone, Width: req.Width, Height: req.Height})
 	startCancel()
 	if e != nil || !frame.Isolated {
 		writeJSON(w, 503, map[string]string{"error": "browser_start_failed", "detail": "The isolated browser could not start. No direct connection is permitted."})

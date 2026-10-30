@@ -5,6 +5,7 @@ package providerbrowser
 
 import (
 	"context"
+ "bytes"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
@@ -85,11 +86,12 @@ type Peer struct {
 	Dial    func(context.Context, string) (net.Conn, error)
 	Handle  func(context.Context, Action) (State, error)
 	actions chan message
+ actionsDone chan struct{}
 }
 
 func NewPeer(ctx context.Context, conn io.ReadWriteCloser) *Peer {
 	ctx, cancel := context.WithCancel(ctx)
-	p := &Peer{conn: conn, ctx: ctx, cancel: cancel, streams: map[string]*stream{}, calls: map[string]chan message{}, actions: make(chan message, 4)}
+	p := &Peer{conn: conn, ctx: ctx, cancel: cancel, streams: map[string]*stream{}, calls: map[string]chan message{}, actions: make(chan message, 4),actionsDone:make(chan struct{})}
 	return p
 }
 func (p *Peer) Start()                { go p.read(); go p.handle(); go func() { <-p.ctx.Done(); p.Close() }() }
@@ -120,8 +122,8 @@ func (p *Peer) send(m message) error {
 		_ = c.SetWriteDeadline(time.Now().Add(10 * time.Second))
 		defer c.SetWriteDeadline(time.Time{})
 	}
-	if _, err = p.conn.Write(h[:]); err == nil {
-		_, err = p.conn.Write(raw)
+	if _, err = io.Copy(p.conn,bytes.NewReader(h[:])); err == nil {
+		_, err = io.Copy(p.conn,bytes.NewReader(raw))
 	}
 	if err != nil {
 		p.cancel()
@@ -353,7 +355,9 @@ func (p *Peer) Call(ctx context.Context, a Action) (State, error) {
 		return State{}, errors.New("browser closed")
 	}
 }
+func(p *Peer) Wait(){<-p.actionsDone}
 func (p *Peer) handle() {
+ defer close(p.actionsDone)
 	for {
 		select {
 		case m := <-p.actions:

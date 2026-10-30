@@ -796,3 +796,5 @@ function makeDiagnosticTablesResponsive(root){
 }
 
 window.openProviderBrowser=async id=>{try{await Promise.all(['ProxyCountry','ProviderBrowser'].map(ensureAccountModule));const [accounts,policy]=await Promise.all([api('/api/v1/accounts'),api('/api/v1/accounts/'+id+'/proxy-country-policy')]);const a=accounts.find(x=>x.id===id);if(!a)throw Error('Account is unavailable.');await ProviderBrowser.open({api,provider:a.provider,accountID:id,proxyIDs:a.proxy_ids?.length?a.proxy_ids:[a.proxy_id].filter(Boolean),countries:policy.policy.countries,countryOptions:policy.country_options})}catch(e){toast(e.message,'error')}};
+
+window.openProviderApproval=async options=>{await Promise.all(['ProxyCountry','ProviderBrowser'].map(ensureAccountModule));await ProviderBrowser.open({api,provider:'ovh',...options})};

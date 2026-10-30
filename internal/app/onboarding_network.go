@@ -170,8 +170,8 @@ func (c Container) onboardingClient(ctx context.Context, proxyID, country string
 		}
 		route.Dial = func(dialCtx context.Context, address string) (net.Conn, error) {
 			if err := check(dialCtx); err != nil {
-				return nil, err
-			}
+                return nil, errors.Join(ErrStaleAccountNetwork,err)
+            }
 			conn, err := gateway.DialPublicContext(dialCtx, address)
 			if err != nil {
 				return nil, err

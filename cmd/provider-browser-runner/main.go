@@ -27,4 +27,5 @@ func main() {
 	p.Handle = w.Handle
 	p.Start()
 	<-p.Done()
+ p.Wait()
 }

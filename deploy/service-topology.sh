@@ -85,7 +85,7 @@ dob_stage_runtime() {
  DOB_STAGE=$(mktemp -d "$(dirname "$APP")/.dob-release.XXXXXXXX")
  trap dob_cleanup_stage EXIT
  install -d -m 0755 "$DOB_STAGE/bin" "$DOB_STAGE/web/static"
- local binary command arch api_sha worker_sha guardian_amd64_sha guardian_arm64_sha
+ local binary command arch api_sha worker_sha browser_sha guardian_amd64_sha guardian_arm64_sha
  for binary in digital-ocean-bot-api digital-ocean-bot-worker install-bootstrap vultr-browser-session vultr-browser-manager vultr-input-bridge provider-browser-runner; do
   command=$binary
   case "$binary" in digital-ocean-bot-api) command=api ;; digital-ocean-bot-worker) command=worker ;; esac
@@ -101,9 +101,10 @@ dob_stage_runtime() {
  cp -a "$SRC/web/static/." "$DOB_STAGE/web/static/"
  api_sha=$(sha256sum "$DOB_STAGE/bin/digital-ocean-bot-api" | awk '{print $1}')
  worker_sha=$(sha256sum "$DOB_STAGE/bin/digital-ocean-bot-worker" | awk '{print $1}')
+ browser_sha=$(sha256sum "$DOB_STAGE/bin/provider-browser-runner" | awk '{print $1}')
  guardian_amd64_sha=$(sha256sum "$DOB_STAGE/bin/server-guardian-linux-amd64" | awk '{print $1}')
  guardian_arm64_sha=$(sha256sum "$DOB_STAGE/bin/server-guardian-linux-arm64" | awk '{print $1}')
- printf '{"residential_admission_schema":1,"commit":"%s","build_time":"%s","api_sha256":"%s","worker_sha256":"%s","guardian_sha256":{"amd64":"%s","arm64":"%s"}}\n' "$BUILD_COMMIT" "$BUILD_TIME" "$api_sha" "$worker_sha" "$guardian_amd64_sha" "$guardian_arm64_sha" > "$DOB_STAGE/build-manifest.json"
+ printf '{"residential_admission_schema":1,"commit":"%s","build_time":"%s","api_sha256":"%s","worker_sha256":"%s","browser_runner_sha256":"%s","guardian_sha256":{"amd64":"%s","arm64":"%s"}}\n' "$BUILD_COMMIT" "$BUILD_TIME" "$api_sha" "$worker_sha" "$browser_sha" "$guardian_amd64_sha" "$guardian_arm64_sha" > "$DOB_STAGE/build-manifest.json"
  dob_verify_staged_runtime
 }
 # Both install and upgrade must reject an incomplete release before stopping readers.
@@ -114,7 +115,7 @@ root=pathlib.Path(sys.argv[1]);manifest=json.loads((root/'build-manifest.json').
 for name in ['digital-ocean-bot-api','digital-ocean-bot-worker','install-bootstrap','vultr-browser-session','vultr-browser-manager','vultr-input-bridge','provider-browser-runner','server-guardian-linux-amd64','server-guardian-linux-arm64']:
  p=root/'bin'/name
  if not (p.is_file() and not p.is_symlink() and p.stat().st_size>0):raise SystemExit('required artifact missing: '+name)
-for name,key in [('digital-ocean-bot-api','api_sha256'),('digital-ocean-bot-worker','worker_sha256')]:
+for name,key in [('digital-ocean-bot-api','api_sha256'),('digital-ocean-bot-worker','worker_sha256'),('provider-browser-runner','browser_runner_sha256')]:
  if hashlib.sha256((root/'bin'/name).read_bytes()).hexdigest()!=manifest[key]:raise SystemExit('runtime hash mismatch: '+name)
 for arch,machine in [('amd64',62),('arm64',183)]:
  raw=(root/'bin'/('server-guardian-linux-'+arch)).read_bytes()

@@ -139,7 +139,7 @@ func (w *Worker) start(a Action) error {
 		return e
 	}
 	w.tabs[chromedp.FromContext(bctx).Target.TargetID] = bctx
-	return chromedp.Run(bctx, chromedp.ActionFunc(func(ctx context.Context) error { _, _, _, e := page.Navigate(a.URL).Do(ctx); return e }))
+	return chromedp.Run(bctx, chromedp.ActionFunc(func(ctx context.Context) error { _, _, _, _, e := page.Navigate(a.URL).Do(ctx); return e }))
 }
 func (w *Worker) configure(ctx context.Context) error {
 	return chromedp.Run(ctx, emulation.SetDeviceMetricsOverride(w.width, w.height, 1, false), emulation.SetTimezoneOverride(w.timezone))
@@ -220,7 +220,7 @@ func (w *Worker) Handle(ctx context.Context, a Action) (State, error) {
 			if !ValidURL(a.URL) {
 				return State{}, errors.New("invalid URL")
 			}
-			actions = append(actions, chromedp.ActionFunc(func(c context.Context) error { _, _, _, e := page.Navigate(a.URL).Do(c); return e }))
+			actions = append(actions, chromedp.ActionFunc(func(c context.Context) error { _, _, _, _, e := page.Navigate(a.URL).Do(c); return e }))
 		case "reload":
 			actions = append(actions, page.Reload())
 		case "back", "forward":
