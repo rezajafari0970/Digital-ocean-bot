@@ -30,11 +30,18 @@ unknown; the video does not establish a terminal provider result.
 
 ## Stage status
 
-- Video and current-source review: complete.
-- Country priority implementation: complete, exact-head regression gate required.
-- Provider browser implementation: complete, final native/browser verification in progress.
-- Isolated regression/network/browser tests: initial full pass; expanded locale/WebSocket checks in progress.
-- Source/public CI, rollout and live acceptance: pending.
+| Stage | Status |
+| --- | --- |
+| Video/source review | Complete; 70 one-second frames reviewed |
+| Three AUTO-default country priorities | Implemented; preview, authorization and save share policy |
+| Isolated provider browser | Implemented for all seven registered providers |
+| Native browser/mobile controls | Passed in independent CI |
+| Final source regression gate | Passed: 41032403736, source 93ab72f803386287de3458bff984a09335c93721 |
+| Public test and Ubuntu install/reinstall | Passed: 41032489569, candidate 68893142fff30c5567afdc7c3233ee9da0004721 |
+| Exact export live-secret scans and gitleaks | Passed against both installations, no secret values logged |
+| Atomic main/stable publication | Passed: 41033585970; public revision 68893142fff30c5567afdc7c3233ee9da0004721 |
+| Runtime rollout | Blocked before any change: insufficient disk reserve |
+| Live provider-site acceptance | Pending runtime installation |
 
 The original development device is offline. Heavy tests must use independent CI,
 not the 4 GB production host. The retired Vultr console is not a safe networking
@@ -80,3 +87,45 @@ Live rollout preflight currently blocks on disk reserve: database 3,328,063,167
 bytes, required free 10,521,060,413 bytes, observed free about 7.67 GB. No runtime
 swap or schema migration has started. Do not lower the native retention guard or
 delete unrelated application data, backup retention or incident evidence.
+
+## Final candidate and continuation
+
+Source PR: https://github.com/rezajafari0970/Digital-ocean-bot/pull/34
+Public candidate: 68893142fff30c5567afdc7c3233ee9da0004721.
+Install and repeat-install both passed on an independent Ubuntu 24.04 guest.
+The installed socket-activated DynamicUser runner launched actual Chromium,
+returned an isolated browser image with every attempted egress tunnel denied,
+and the retained administrator/environment/key fingerprints remained unchanged.
+The installation smoke uses the real wire error contract; internal worker errors
+are deliberately redacted by that protocol.
+
+At 2026-10-30 09:19 UTC both live instances still served 67f91d2886e0b2b6dec6754700066a35eb2fccae.
+All six runtime services were active with matching executable hashes and zero
+restarts; all ten readiness checks passed. No browser runtime package, service
+unit, schema migration or runtime swap was applied to the live host.
+
+Before deployment, add storage or reclaim explicitly reviewed reproducible data;
+keep the three-times-database-plus-512-MiB production reserve, backup retention
+and original-host quarantine. About 6 GB additional free capacity provides room
+for the present deficit plus browser/build/backup work, but remeasure immediately
+before rollout because the database and native reserve can grow.
+
+Resume with fresh independent instance baselines, then bounded default-instance
+update (which installs the shared browser runtime/socket), followed by bounded
+production update. Verify schema 206, executable/static hashes, saved settings,
+output identities, all readiness checks and actual provider-browser routing.
+An existing session never changes country silently; failed route proof closes it.
+No billable provider create should be replayed to test this feature.
+
+The browser supplies navigation, tabs, text input and mobile scrolling. Uploads
+and downloads are unavailable. Sessions are disposable and last at most 15 minutes;
+the two-minute idle limit applies to absence of control-channel activity. Native
+fixtures verify isolation, not every third-party site's login or anti-bot behavior.
+
+Final source CI 41032403736 passed all 351 mandatory roots with zero skips, the
+expanded native browser gate, mobile controls and schema-206 restore. PR34 merged
+as fc49e99ebe8a37553e6b8b948b9da3b3e4ef4d82.
+
+Atomic promotion run 41033585970 passed. Both public main/stable refs were re-read
+and matched candidate 68893142fff30c5567afdc7c3233ee9da0004721; its exported file
+manifest matches the tested immutable source export. Live rollout remains blocked.

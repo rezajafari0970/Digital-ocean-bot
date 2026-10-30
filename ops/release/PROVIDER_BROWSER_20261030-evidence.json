@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-30",
+  "source_tested_commit": "93ab72f803386287de3458bff984a09335c93721",
+  "source_merge_commit": "fc49e99ebe8a37553e6b8b948b9da3b3e4ef4d82",
+  "source_ci": 41032403736,
+  "public_commit": "68893142fff30c5567afdc7c3233ee9da0004721",
+  "public_ci": 41032489569,
+  "source_required_passed": 351,
+  "source_required_skipped": 0,
+  "restore_schema": "000206_authorization_country_priorities",
+  "native_browser": {
+    "https_and_websocket_requests": 4,
+    "direct_host_requests": 0,
+    "rejected_unapproved_destinations": 2,
+    "cookie_storage_isolation": true,
+    "native_input": true,
+    "locale_timezone": true,
+    "mobile_controls": true,
+    "installed_chromium_deny_all_fixture": true
+  },
+  "fresh_install": "PASS",
+  "repeat_install_preserves_identity": "PASS",
+  "export_manifest_sha256_canonical": "2b5b018d975de1626973be4a55935bf7f164802f092ef0d99b12f11fcf16977c",
+  "secret_scan": {
+    "both_live_configurations": "PASS",
+    "gitleaks_version": "8.30.1",
+    "gitleaks": "PASS",
+    "values_logged": false
+  },
+  "rollout": {
+    "status": "BLOCKED_BEFORE_CHANGE",
+    "reason": "insufficient_retention_workspace",
+    "old_runtime_both_instances": "67f91d2886e0b2b6dec6754700066a35eb2fccae",
+    "database_bytes_at_preflight": 3328063167,
+    "required_free_bytes_at_preflight": 10521060413,
+    "observed_free_bytes": 7656615936,
+    "active_runtime_services": 6,
+    "matching_executable_hashes": 6,
+    "passed_readiness_checks": 10,
+    "live_provider_browser_acceptance": "PENDING_INSTALL"
+  },
+  "remaining": [
+    "Provision sufficient deployment storage; remeasure reserve before rollout.",
+    "Three historical unknown provider creates remain reserved; do not replay.",
+    "Video Build Activity loading latency remains an observation outside this feature acceptance."
+  ],
+  "promotion": {
+    "status": "PASS",
+    "run": 41033585970,
+    "main_and_stable": "68893142fff30c5567afdc7c3233ee9da0004721",
+    "atomic": true
+  }
+}
