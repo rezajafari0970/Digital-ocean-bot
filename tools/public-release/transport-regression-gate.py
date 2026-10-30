@@ -264,6 +264,7 @@ REQUIRED['internal/network'] += ('TestBrowserDestinationPublicOnly',)
 REQUIRED['internal/adminapi'] += ('TestProviderBrowserOwnershipAndNoDirect',)
 REQUIRED['internal/providerbrowser'] = ('TestBrowserTunnelIsolationAndClose','TestBrowserProtocolRejectsOversizeAndCommands')
 REQUIRED['internal/adminapi'] += ('TestStrictCountryOnboardingAtomicAndBindingPostgres',)
+REQUIRED['internal/adminapi'] += ('TestBuildActivitySummaryGlobalTerminalAndSecretSafety', 'TestBuildActivityDiagnosticsBoundedToVisiblePage')
 REQUIRED['internal/panels/export'] = REQUIRED.get('internal/panels/export', ()) + ('TestNativeDriverPublicationContract', 'TestTrojanHTTPPublicationRejectsInvalidTransport')
 
 def main(repo):

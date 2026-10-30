@@ -1,11 +1,72 @@
 package adminapi
 
 import (
+	"context"
 	"encoding/json"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
+
+func TestBuildActivityDiagnosticsBoundedToVisiblePage(t *testing.T) {
+	db := adminTestDB(t)
+	a, _, _ := seedPanel(t, db, "http://fixture.invalid")
+	sqlMust(t, db, `WITH profiles AS (
+ INSERT INTO deployment_profiles(id,account_id,name,config)
+ SELECT gen_random_uuid(),$1,'history-'||i,'{}' FROM generate_series(1,1200)i RETURNING id
+) INSERT INTO deployments(id,account_id,profile_id,state,current_step)
+ SELECT gen_random_uuid(),$1,id,'FAILED','create' FROM profiles`, a)
+	sqlMust(t, db, `INSERT INTO operations(id,account_id,kind,idempotency_key,state,error_code,error_message)
+ SELECT gen_random_uuid(),account_id,'CREATE_DROPLET','deploy:'||id::text||':create',
+ 'failed','invalid_request','private-secret-fixture' FROM deployments WHERE account_id=$1`, a)
+	sqlMust(t, db, `ANALYZE deployments`)
+	sqlMust(t, db, `ANALYZE operations`)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	var raw []byte
+	if err := db.QueryRowContext(ctx, `EXPLAIN (ANALYZE, FORMAT JSON) `+buildActivitySQL).Scan(&raw); err != nil {
+		t.Fatal(err)
+	}
+	type planNode struct {
+		Relation string            `json:"Relation Name"`
+		Loops    float64           `json:"Actual Loops"`
+		Plans    []json.RawMessage `json:"Plans"`
+	}
+	var plans []struct{ Plan json.RawMessage }
+	if err := json.Unmarshal(raw, &plans); err != nil || len(plans) != 1 {
+		t.Fatal("invalid query plan", err)
+	}
+	loops := float64(0)
+	var visit func(json.RawMessage)
+	visit = func(raw json.RawMessage) {
+		var node planNode
+		if err := json.Unmarshal(raw, &node); err != nil {
+			t.Fatal(err)
+		}
+		if node.Relation == "operations" {
+			loops += node.Loops
+		}
+		for _, child := range node.Plans {
+			visit(child)
+		}
+	}
+	visit(plans[0].Plan)
+	if loops < 1 || loops > 100 {
+		t.Fatalf("operation diagnostics exceed the visible 100-row page: %v table scans", loops)
+	}
+	w := httptest.NewRecorder()
+	(&Server{DB: db}).buildActivity(w, httptest.NewRequest("GET", "/", nil).WithContext(ctx))
+	var rows []map[string]any
+	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &rows) != nil || len(rows) != 100 || strings.Contains(w.Body.String(), "private-secret-fixture") {
+		t.Fatal("bounded page or secret boundary failed", w.Code, len(rows))
+	}
+	for _, row := range rows {
+		if row["operation_error"] != "operation: invalid_request" {
+			t.Fatal("visible diagnostic lost", row["operation_error"])
+		}
+	}
+}
 
 func TestBuildActivitySummaryGlobalTerminalAndSecretSafety(t *testing.T) {
 	db := adminTestDB(t)

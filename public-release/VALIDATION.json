@@ -2,9 +2,9 @@
   "schema": 2,
   "status": "release_requirements_and_limits",
   "date": "2026-10-30",
-  "feature": "Three-country onboarding priorities and isolated provider browser",
+  "feature": "Three-country onboarding, isolated provider browser and bounded build activity diagnostics",
   "publication_gates": {
-    "cloudflare_transport_fleet_no_skip": "351 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
+    "cloudflare_transport_fleet_no_skip": "353 named tests with isolated PostgreSQL, pinned native core and race detector on an independent runner",
     "exact_candidate_ubuntu_24_amd64_install": "required before stable promotion; disposable Ubuntu 24.04 systemd guest on a GitHub-hosted machine that passes the unchanged kernel-memory guard",
     "full_go_and_vet_unprivileged": "required before push",
     "live_secret_scan_and_gitleaks": "required before push",
@@ -40,7 +40,8 @@
     "settings_durability": "Mandatory draft revisions; omitted fields and unavailable saved choices retained; conflicting edits rejected without discarding the draft; whole saved account state compared in PostgreSQL/browser fixtures",
     "strict_country_onboarding": "Three AUTO-default slots; ordered explicit countries before preview and atomic account creation; frozen authorization route and full-policy binding; native CONNECT/TLS drift rejection; encrypted proxy proof with a one-connection SQL pool",
     "native_output_publication": "All public driver URI variants including Trojan TCP HTTP and Shadowsocks SIP002 HTTP; invalid independent rows withheld without bypassing scope, ownership, policy, expiry or revision checks; real raw HTTP output verified after deployment",
-    "provider_browser": "Actual systemd-isolated Chromium; disposable cookie/storage profiles; guarded TCP bridge, no direct route, native HTTPS/WebSocket/input, owner/login/lifecycle fencing and real mobile controls"
+    "provider_browser": "Actual systemd-isolated Chromium; disposable cookie/storage profiles; guarded TCP bridge, no direct route, native HTTPS/WebSocket/input, owner/login/lifecycle fencing and real mobile controls",
+    "build_activity_page_cost": "One database snapshot preserves complete active/waiting totals while resolving operation diagnostics only for the latest 100 builds; 1200-row PostgreSQL plan regression, secret redaction and legacy array compatibility"
   },
   "notes": [
     "Existing single-region AWS credentials retain their original identity and region boundaries.",
