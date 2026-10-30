@@ -8,7 +8,7 @@ const {spawn}=require('node:child_process');
  const server=http.createServer(async(req,res)=>{
   const u=new URL(req.url,'http://localhost');requests.push(u.pathname);
   const json=x=>{res.setHeader('Content-Type','application/json');res.end(JSON.stringify(x))};
-  if(u.pathname==='/'){res.setHeader('Content-Type','text/html');res.end('<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/static/app.css"><link rel="stylesheet" href="/static/provider-browser.css"></head><body><script src="/static/proxy-country.js"></script><script src="/static/provider-browser.js"></script></body></html>');return}
+  if(u.pathname==='/'){res.setHeader('Content-Type','text/html; charset=utf-8');res.end('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/static/app.css"><link rel="stylesheet" href="/static/provider-browser.css"></head><body><script src="/static/proxy-country.js"></script><script src="/static/provider-browser.js"></script></body></html>');return}
   if(u.pathname.startsWith('/static/')){const name=path.basename(u.pathname),file=path.join(process.cwd(),'web/static',name);if(!fs.existsSync(file)){res.writeHead(404).end();return}res.setHeader('Content-Type',name.endsWith('.js')?'text/javascript':'text/css');res.end(fs.readFileSync(file));return}
   if(u.pathname==='/api/v1/proxies'){json([{id:'one',name:'First proxy',status:'healthy'},{id:'two',name:'Second proxy',status:'healthy'}]);return}
   if(u.pathname==='/api/v1/proxy-drivers'){json({country_options:[{code:'US',label:'United States'},{code:'DE',label:'Germany'},{code:'FR',label:'France'}]});return}

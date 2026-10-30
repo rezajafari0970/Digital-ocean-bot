@@ -329,3 +329,26 @@ Existing routing, exclusions, security rules and account isolation remain in for
 Account and proxy editors preserve omitted settings and saved choices. Concurrent
 or outdated drafts return a conflict and keep the entered values for review. Refresh
 an editor loaded before the versioned-save update before attempting a save.
+
+### Three country priorities and provider websites
+
+New account creation includes three country priority slots, each initially AUTO.
+If explicit countries are selected, they are tried in order across the assigned
+proxy pool. AUTO in an unused slot does not add an arbitrary-country fallback.
+Unknown network evidence blocks descent to the next country. The same policy is
+bound to preview, provider authorization and the saved account.
+
+Use **Open provider website with proxy** in account creation or on an account card.
+Select a proxy and country priorities before opening the registered provider site.
+The panel displays a real remote Chromium browser with navigation, tabs, text input
+and mobile scrolling. Each opening has a fresh profile; provider cookies and site
+storage are never shared with the panel browser or another session.
+
+The browser runs in a separate systemd network namespace and can reach external
+sites only through the application's guarded proxy bridge. Missing isolation,
+missing proxy proof or changed exit identity stops the session. DNS resolution
+uses the same proxy path. The displayed country/IP comes from live verification;
+provider behavior between observations cannot be guaranteed. Sessions expire after
+15 minutes or two idle minutes. File uploads/downloads are unavailable. The runtime
+currently requires amd64 Linux with the installed systemd sandbox; unsupported
+hosts never fall back to opening the site directly.

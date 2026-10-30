@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Verify a disposable GitHub-hosted installation, never production."""
-import argparse,hashlib,json,os,pathlib,secrets,subprocess,time,urllib.request,urllib.error
+import argparse,hashlib,json,os,pathlib,secrets,socket,struct,subprocess,time,urllib.request,urllib.error
 BASE='http://127.0.0.1:18080'
 def request(path,payload=None,token='',grant=''):
  headers={'Content-Type':'application/json','Authorization':'Bearer '+token,'X-Bootstrap-Token':grant}
@@ -34,6 +34,25 @@ def main():
  status,ready=request('/readyz');assert status==200 and len(ready['checks'])==5 and all(x['ok']for x in ready['checks'])
  version=json.loads(pathlib.Path('/opt/digital-ocean-bot/build-manifest.json').read_text());assert version['commit']==a.revision
  assert request('/version')[1]['commit']==a.revision
+ runner=pathlib.Path('/opt/digital-ocean-bot/bin/provider-browser-runner')
+ assert hashlib.sha256(runner.read_bytes()).hexdigest()==version['browser_runner_sha256']
+ for state in ['is-active','is-enabled']:
+  subprocess.run(['systemctl',state,'--quiet','datacenter-provider-browser.socket'],check=True)
+ # Exercise the installed DynamicUser service and its mandatory namespace
+ # verification without creating a cloud resource or contacting a provider.
+ with socket.socket(socket.AF_UNIX,socket.SOCK_STREAM) as connection:
+  connection.settimeout(20);connection.connect('/run/datacenter-provider-browser.sock')
+  raw=json.dumps({'kind':'action','id':'smoke','action':{'kind':'frame'}}).encode()
+  connection.sendall(struct.pack('>I',len(raw))+raw)
+  def receive(n):
+   result=b''
+   while len(result)<n:
+    part=connection.recv(n-len(result))
+    assert part,'Isolated browser worker exited before replying'
+    result+=part
+   return result
+  size=struct.unpack('>I',receive(4))[0];assert 0<size<=4*1024*1024
+  answer=json.loads(receive(size));assert answer.get('error')=='not started',answer
  subprocess.run(['python3',source+'/deploy/verify-panel.py','--bootstrap',source+'/deploy/bootstrap.py','--etc','/etc/digital-ocean-bot','--static-root',source+'/web/static'],check=True)
  for unit in ['digital-ocean-bot-api','digital-ocean-bot-worker','digital-ocean-bot-worker-panels']:
   subprocess.run(['systemctl','is-active','--quiet',unit],check=True);subprocess.run(['systemctl','is-enabled','--quiet',unit],check=True)

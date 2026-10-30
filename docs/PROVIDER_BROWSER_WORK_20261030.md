@@ -31,9 +31,9 @@ unknown; the video does not establish a terminal provider result.
 ## Stage status
 
 - Video and current-source review: complete.
-- Country priority implementation: in progress.
-- Provider browser implementation: in progress.
-- Isolated regression/network/browser tests: pending.
+- Country priority implementation: complete, exact-head regression gate required.
+- Provider browser implementation: complete, final native/browser verification in progress.
+- Isolated regression/network/browser tests: initial full pass; expanded locale/WebSocket checks in progress.
 - Source/public CI, rollout and live acceptance: pending.
 
 The original development device is offline. Heavy tests must use independent CI,
@@ -62,3 +62,9 @@ PrivateNetwork, DynamicUser, PrivateTmp and the restrictions used by the worker:
 https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html
 Chromium control APIs are pinned by go.mod and used through chromedp:
 https://chromedevtools.github.io/devtools-protocol/
+
+Third candidate e9aaba86 passed mobile UI and source checks but failed the expanded
+native locale/WebSocket assertion. Fourth candidate explicitly binds the headless
+browser Accept-Language/navigator language, records actual fixture state on failure,
+and verifies the installed socket-activated sandbox during install/reinstall.
+Rollback now preserves browser socket enablement and closes old browser workers.

@@ -125,6 +125,7 @@ fetch('https://unapproved.fixture/').catch(()=>{});fetch(%q).catch(()=>{});try{c
 	second, _ := open("https://fixture.invalid/")
 	frame := func(p *Peer, want string) State {
 		deadline := time.Now().Add(15 * time.Second)
+		var last State
 		for time.Now().Before(deadline) {
 			s, e := p.Call(ctx, Action{Kind: "frame"})
 			if e != nil {
@@ -136,9 +137,10 @@ fetch('https://unapproved.fixture/').catch(()=>{});fetch(%q).catch(()=>{});try{c
 				}
 				return s
 			}
+			last = s
 			time.Sleep(100 * time.Millisecond)
 		}
-		t.Fatal("fixture did not render", want)
+		t.Fatalf("fixture did not render: want=%q actual=%q url=%q requests=%d sockets=%d blocked=%d", want, last.Title, last.URL, requests.Load(), sockets.Load(), blocked.Load())
 		return State{}
 	}
 	frame(first, "identity=first|first|de-DE|Europe/Berlin|ws:ok")

@@ -157,7 +157,16 @@ func (w *Worker) start(a Action) error {
 	return chromedp.Run(bctx, chromedp.ActionFunc(func(ctx context.Context) error { _, _, _, _, e := page.Navigate(a.URL).Do(ctx); return e }))
 }
 func (w *Worker) configure(ctx context.Context) error {
-	return chromedp.Run(ctx, emulation.SetDeviceMetricsOverride(w.width, w.height, 1, false), emulation.SetTimezoneOverride(w.timezone), emulation.SetLocaleOverride().WithLocale(strings.ReplaceAll(w.locale, "-", "_")))
+	return chromedp.Run(ctx, emulation.SetDeviceMetricsOverride(w.width, w.height, 1, false), emulation.SetTimezoneOverride(w.timezone), emulation.SetLocaleOverride().WithLocale(strings.ReplaceAll(w.locale, "-", "_")), chromedp.ActionFunc(func(ctx context.Context) error {
+		// Headless Shell does not consistently consume the profile's language
+		// preferences. Bind both navigator.language and Accept-Language before
+		// navigation, while retaining the installed browser's real user agent.
+		_, _, _, userAgent, _, err := browser.GetVersion().Do(cdp.WithExecutor(ctx, chromedp.FromContext(ctx).Browser))
+		if err != nil {
+			return err
+		}
+		return emulation.SetUserAgentOverride(userAgent).WithAcceptLanguage(w.locale).Do(ctx)
+	}))
 }
 func (w *Worker) forward(out http.ResponseWriter, r *http.Request) {
 	address := r.Host

@@ -42,6 +42,9 @@ dob_acquire_deploy_lock() {
 }
 dob_stop_runtime_readers() {
  local unit load active pid
+ if [ "$(systemctl show datacenter-provider-browser.socket -p LoadState --value)" = loaded ]; then
+  systemctl stop datacenter-provider-browser.socket 'datacenter-provider-browser@*.service' || return
+ fi
  for unit in datacenter-bot-integrity.timer datacenter-bot-integrity.service datacenter-bot-host-memory.timer datacenter-bot-host-memory.service; do
   if [ "$(systemctl show "$unit" -p LoadState --value)" = loaded ]; then systemctl stop "$unit" || return; fi
  done
@@ -192,7 +195,7 @@ dob_backup_runtime() {
  done
  : > "$DOB_BACKUP/active"
  : > "$DOB_BACKUP/enabled"
- for unit in "${SERVICES[@]}" digital-ocean-bot-vultr-browser-manager datacenter-bot-update.socket datacenter-bot-integrity.timer datacenter-bot-host-memory.timer; do
+ for unit in "${SERVICES[@]}" digital-ocean-bot-vultr-browser-manager datacenter-provider-browser.socket datacenter-bot-update.socket datacenter-bot-integrity.timer datacenter-bot-host-memory.timer; do
   if systemctl is-active --quiet "$unit"; then echo "$unit" >> "$DOB_BACKUP/active"; fi
   if systemctl is-enabled --quiet "$unit"; then echo "$unit" >> "$DOB_BACKUP/enabled"; fi
  done
@@ -230,7 +233,7 @@ dob_restore_enablement_before_assets() {
  if [ "$(systemctl show datacenter-bot-update.socket -p LoadState --value)" = loaded ]; then
   systemctl stop datacenter-bot-update.socket || return
  fi
- for unit in "${SERVICES[@]}" datacenter-bot-update.socket datacenter-bot-integrity.timer datacenter-bot-host-memory.timer; do
+ for unit in "${SERVICES[@]}" datacenter-provider-browser.socket datacenter-bot-update.socket datacenter-bot-integrity.timer datacenter-bot-host-memory.timer; do
   if ! grep -Fxq "$unit" "$DOB_BACKUP/enabled"; then
    load=$(systemctl show "$unit" -p LoadState --value) || return
    case "$load" in
