@@ -13,15 +13,26 @@ import (
 const activeBuildPredicate = `d.state IN ('PLANNED','RESERVED','CREATING','WAITING_RESOURCE','PROVISIONING','WAITING_INSTALLER','INSTALL_COMPLETE','IMPORTING_DATABASE','DATABASE_COMPLETE','CONFIGURING_PANEL','REGISTERING_CLIENTS','REGISTERING_TRAFFIC')
  AND NOT EXISTS(SELECT 1 FROM droplets gone WHERE gone.account_id=d.account_id AND gone.state='DELETED' AND (gone.id=d.droplet_id OR (d.droplet_id IS NULL AND NULLIF(d.provider_id,'')=gone.provider_resource_id)))`
 
-const buildActivitySQL = `SELECT d.id::text,a.name,d.state,d.current_step,d.attempt,COALESCE(d.last_error,''),d.created_at,d.updated_at,
- COALESCE((SELECT de.message FROM deployment_events de WHERE de.deployment_id=d.id ORDER BY de.created_at DESC,de.id DESC LIMIT 1),''),
- (` + activeBuildPredicate + `) active,
- count(*) FILTER(WHERE ` + activeBuildPredicate + `) OVER(),
- count(*) FILTER(WHERE d.state='WAITING_INSTALLER' AND (` + activeBuildPredicate + `)) OVER(),
- COALESCE(op.error_code,''),COALESCE(op.error_message,''), EXISTS(SELECT 1 FROM droplets gone WHERE gone.account_id=d.account_id AND gone.state='DELETED' AND (gone.id=d.droplet_id OR (d.droplet_id IS NULL AND NULLIF(d.provider_id,'')=gone.provider_resource_id)))
+// Count the complete history before paging, but resolve expensive per-build
+// diagnostics only for the 100 visible records. One statement keeps the totals
+// and page in the same database snapshot without retaining or caching secrets.
+const buildActivitySQL = `WITH activity AS MATERIALIZED (
+ SELECT d.id,d.account_id,d.droplet_id,d.provider_id,d.state,d.current_step,d.attempt,d.last_error,d.created_at,d.updated_at,a.name,
+ (` + activeBuildPredicate + `) active
  FROM deployments d JOIN accounts a ON a.id=d.account_id
+), totals AS (
+ SELECT count(*) FILTER(WHERE active) active_total,
+ count(*) FILTER(WHERE active AND state='WAITING_INSTALLER') waiting_total FROM activity
+), recent AS MATERIALIZED (
+ SELECT * FROM activity ORDER BY updated_at DESC,id DESC LIMIT 100
+)
+SELECT d.id::text,d.name,d.state,d.current_step,d.attempt,COALESCE(d.last_error,''),d.created_at,d.updated_at,
+ COALESCE((SELECT de.message FROM deployment_events de WHERE de.deployment_id=d.id ORDER BY de.created_at DESC,de.id DESC LIMIT 1),''),
+ d.active,totals.active_total,totals.waiting_total,
+ COALESCE(op.error_code,''),COALESCE(op.error_message,''), EXISTS(SELECT 1 FROM droplets gone WHERE gone.account_id=d.account_id AND gone.state='DELETED' AND (gone.id=d.droplet_id OR (d.droplet_id IS NULL AND NULLIF(d.provider_id,'')=gone.provider_resource_id)))
+ FROM recent d CROSS JOIN totals
  LEFT JOIN LATERAL(SELECT o.error_code,o.error_message FROM operations o WHERE d.droplet_id IS NULL AND COALESCE(d.provider_id,'')='' AND d.state NOT IN ('READY','PANEL_COMPLETE') AND o.account_id=d.account_id AND o.kind='CREATE_DROPLET' AND o.state<>'succeeded' AND (o.idempotency_key='deploy:'||d.id::text||':create' OR o.idempotency_key LIKE 'deploy:'||d.id::text||':create:region:%') ORDER BY o.updated_at DESC,o.id DESC LIMIT 1) op ON true
- ORDER BY d.updated_at DESC,d.id DESC LIMIT 100`
+ ORDER BY d.updated_at DESC,d.id DESC`
 
 func (s *Server) buildActivity(w http.ResponseWriter, r *http.Request) {
 	rows, err := s.DB.QueryContext(r.Context(), buildActivitySQL)
