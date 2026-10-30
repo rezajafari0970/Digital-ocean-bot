@@ -18,7 +18,7 @@ type Factory struct{}
 
 func (Factory) Name() string { return "aws" }
 func (Factory) Metadata() providers.Metadata {
-	return providers.Metadata{Name: "aws", DisplayName: "Amazon AWS EC2", CredentialLabel: "AWS credentials", CredentialFields: []providers.CredentialField{
+	return providers.Metadata{WebsiteURL: "https://console.aws.amazon.com/", Name: "aws", DisplayName: "Amazon AWS EC2", CredentialLabel: "AWS credentials", CredentialFields: []providers.CredentialField{
 		{Key: "access_key_id", Label: "Access key ID", Secret: true}, {Key: "secret_access_key", Label: "Secret access key", Secret: true}, {Key: "session_token", Label: "Session token (temporary credentials)", Secret: true, Optional: true},
 		{Key: "region", Label: "Region override", Optional: true, Advanced: true}, {Key: "subnet_id", Label: "Public subnet override", Optional: true, Advanced: true}, {Key: "security_group_ids", Label: "Existing security group IDs (comma-separated)", Optional: true, List: true, Advanced: true}},
 		CredentialHelp: "Enter the access key pair. Enabled regions and a public subnet are discovered automatically. Review the selected network before saving. Temporary credentials also require their session token. No server is created during validation.", Status: "ready", Defaults: cloudutil.Defaults()}

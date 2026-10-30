@@ -19,10 +19,17 @@ python3 "$SRC/deploy/disk-preflight.py" build
 echo '[3/7] Installing system packages and verified Go toolchain'
 export DEBIAN_FRONTEND=noninteractive
 apt-get -o DPkg::Lock::Timeout=180 update
-apt-get -o DPkg::Lock::Timeout=180 install -y --no-install-recommends ca-certificates curl git python3 postgresql postgresql-client sudo openssh-client util-linux procps iproute2 sqlite3 xz-utils
+AUDIO_PACKAGE=libasound2; ATK_PACKAGE=libatk-bridge2.0-0; CUPS_PACKAGE=libcups2
+if apt-cache show libasound2t64 >/dev/null 2>&1; then AUDIO_PACKAGE=libasound2t64; fi
+if apt-cache show libatk-bridge2.0-0t64 >/dev/null 2>&1; then ATK_PACKAGE=libatk-bridge2.0-0t64; fi
+if apt-cache show libcups2t64 >/dev/null 2>&1; then CUPS_PACKAGE=libcups2t64; fi
+# Include the browser's own shared libraries: development/CI hosts already have
+# many of these, while a fresh minimal Ubuntu installation does not.
+apt-get -o DPkg::Lock::Timeout=180 install -y --no-install-recommends ca-certificates curl git python3 postgresql postgresql-client sudo openssh-client util-linux procps iproute2 sqlite3 xz-utils $AUDIO_PACKAGE $ATK_PACKAGE $CUPS_PACKAGE libnss3 libnspr4 libgbm1 libdrm2 libx11-6 libxcb1 libxcomposite1 libxdamage1 libxext6 libxfixes3 libxrandr2 libxkbcommon0 libpango-1.0-0 libcairo2 libdbus-1-3 fonts-liberation
 systemctl enable --now postgresql
 source "$SRC/deploy/toolchain.sh"
 dob_install_toolchain
+python3 "$SRC/deploy/provider-browser-runtime.py"
 BUILD_COMMIT=$(git -C "$SRC" rev-parse HEAD)
 BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 LDFLAGS="-s -w -X github.com/rezajafari0970/Digital-ocean-bot/internal/buildinfo.Commit=$BUILD_COMMIT -X github.com/rezajafari0970/Digital-ocean-bot/internal/buildinfo.BuildTime=$BUILD_TIME"

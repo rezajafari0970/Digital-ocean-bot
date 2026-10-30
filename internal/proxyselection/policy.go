@@ -11,6 +11,40 @@ import (
 
 const Auto = "AUTO"
 
+// Priorities is the three-slot onboarding contract. AUTO slots are placeholders
+// when an explicit country is selected; they never grant an implicit fallback.
+// The scalar remains supported for older clients, but cannot contradict a list.
+func Priorities(scalar string, slots []string) ([]string, error) {
+	if slots == nil {
+		c, err := Country(scalar)
+		return []string{c}, err
+	}
+	if len(slots) > 3 {
+		return nil, errors.New("at most three country priorities")
+	}
+	explicit := []string{}
+	for _, slot := range slots {
+		c, err := Country(slot)
+		if err != nil {
+			return nil, err
+		}
+		if c != Auto {
+			explicit = append(explicit, c)
+		}
+	}
+	result, err := Normalize(explicit)
+	if err != nil {
+		return nil, err
+	}
+	if strings.TrimSpace(scalar) != "" {
+		c, e := Country(scalar)
+		if e != nil || c != result[0] {
+			return nil, errors.New("conflicting country fields")
+		}
+	}
+	return result, nil
+}
+
 // Country is the strict onboarding choice: AUTO or exactly one country.
 func Country(raw string) (string, error) {
 	if strings.TrimSpace(raw) == "" {

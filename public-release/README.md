@@ -313,11 +313,13 @@ VLESS TCP بدون TLS و VLESS REALITY هر دو پشتیبانی می‌شون
 ### Independent country priorities
 
 Each account can save its own ordered list under **Country priorities**, for
-example **US → TR → AUTO**. The selector checks eligible providers in the first
+example **US → TR → DE**. The selector checks eligible providers in the first
 country before descending, retains a healthy serving identity while checking for
 recovery, and verifies country and account isolation before publishing a new route.
-AUTO retains the existing selection behavior and must be the final choice. Accounts
-without an explicit list keep their existing AUTO policy.
+All three slots default to AUTO. With explicit countries selected, remaining AUTO
+slots are unused and do not authorize a different-country fallback. Accounts
+without an explicit list keep their existing AUTO policy; legacy saved lists remain
+authoritative until edited.
 
 The core uses registered drivers with declared country, sticky-session, fixed-egress
 and dedicated-port capabilities. No particular provider is required. All ISO country
@@ -329,3 +331,26 @@ Existing routing, exclusions, security rules and account isolation remain in for
 Account and proxy editors preserve omitted settings and saved choices. Concurrent
 or outdated drafts return a conflict and keep the entered values for review. Refresh
 an editor loaded before the versioned-save update before attempting a save.
+
+### Three country priorities and provider websites
+
+New account creation includes three country priority slots, each initially AUTO.
+If explicit countries are selected, they are tried in order across the assigned
+proxy pool. AUTO in an unused slot does not add an arbitrary-country fallback.
+Unknown network evidence blocks descent to the next country. The same policy is
+bound to preview, provider authorization and the saved account.
+
+Use **Open provider website with proxy** in account creation or on an account card.
+Select a proxy and country priorities before opening the registered provider site.
+The panel displays a real remote Chromium browser with navigation, tabs, text input
+and mobile scrolling. Each opening has a fresh profile; provider cookies and site
+storage are never shared with the panel browser or another session.
+
+The browser runs in a separate systemd network namespace and can reach external
+sites only through the application's guarded proxy bridge. Missing isolation,
+missing proxy proof or changed exit identity stops the session. DNS resolution
+uses the same proxy path. The displayed country/IP comes from live verification;
+provider behavior between observations cannot be guaranteed. Sessions expire after
+15 minutes or two idle minutes. File uploads/downloads are unavailable. The runtime
+currently requires amd64 Linux with the installed systemd sandbox; unsupported
+hosts never fall back to opening the site directly.

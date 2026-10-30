@@ -201,16 +201,21 @@ const {spawn}=require('node:child_process'),assert=require('node:assert/strict')
   assert.equal(await evaluate('document.querySelector("[name=proxy_country]").value'),'AUTO');
   await evaluate('document.querySelector("[name=proxy_id]").value="fixture-proxy";document.querySelector("[name=proxy_country]").value="US"');
   await validate();await ready();
-  assert.equal(previews.at(-1).proxy_country,'US','country selected before provider validation');
+  assert.deepEqual(previews.at(-1).proxy_countries,['US'],'country selected before provider validation');
   const beforeCountrySave=saves.length;
-  await evaluate('document.querySelector("[name=proxy_country]").value="DE";document.querySelector("#modalSubmit").click()');
+  await evaluate('document.querySelector("[name=proxy_country]").value="DE";document.querySelector("[name=proxy_country2]").value="US";document.querySelector("#modalSubmit").click()');
   assert.equal(saves.length,beforeCountrySave,'silent country change requires new proof');
   assert.equal(await evaluate('cache.accountPreview===null&&document.querySelector("#modalSubmit").disabled'),true);
   await validate();await ready();
-  assert.equal(previews.at(-1).proxy_country,'DE');
+  assert.deepEqual(previews.at(-1).proxy_countries,['DE','US']);
   await save('vultr');
-  assert.equal(saves.at(-1).proxy_country,'DE','country committed with account');
+  assert.deepEqual(saves.at(-1).proxy_countries,['DE','US'],'country committed with account');
   console.log('PASS country defaults AUTO and preview/save cannot cross a changed country');
+  await open('vultr');
+  await evaluate('document.querySelector("[name=proxy_id]").value="fixture-proxy";ProxyCountry.set(document.querySelector("#modalForm"),["US","US","AUTO"]);document.querySelector("#discoverAccount").click()');
+  await wait('document.querySelector("#modalError").textContent.includes("different countries")');
+  await evaluate('document.querySelector("#modalCancel").click()');
+
 
   await open('vultr');await validate();await ready();
   await evaluate('document.querySelector("[name=token]").value="fixture-replaced-token";document.querySelector("#modalSubmit").click()');

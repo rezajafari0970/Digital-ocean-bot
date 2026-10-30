@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"errors"
+	"net"
 	"net/http"
 	"strings"
 	"sync"
@@ -22,12 +23,13 @@ func (c Container) OnboardingClient(ctx context.Context, proxyID, country string
 	})
 }
 
-func (c Container) onboardingClient(ctx context.Context, proxyID, country string, gatewayFor countryGatewayFactory) (*http.Client, func(), string, error) {
+func (c Container) onboardingClient(ctx context.Context, proxyID, country string, gatewayFor countryGatewayFactory, capture ...*OnboardingRoute) (*http.Client, func(), string, error) {
+	strict := len(capture) > 0 && capture[0].StrictIdentity
 	country, err := proxyselection.Country(country)
 	if err != nil {
 		return nil, nil, "", errors.New("invalid_proxy_country")
 	}
-	if country != proxyselection.Auto && proxyID == "" {
+	if (country != proxyselection.Auto || strict) && proxyID == "" {
 		return nil, nil, "", errors.New("proxy_country_requires_proxy")
 	}
 	session, err := countrySession()
@@ -40,6 +42,11 @@ func (c Container) onboardingClient(ctx context.Context, proxyID, country string
 		b, err := network.NewIsolatedDirectClient(identity)
 		if err != nil {
 			return nil, nil, "", err
+		}
+		if len(capture) > 0 {
+			capture[0].Client = b.Client
+			capture[0].Close = b.CloseIdleConnections
+			capture[0].Country = proxyselection.Auto
 		}
 		return b.Client, b.CloseIdleConnections, "", nil
 	}
@@ -61,11 +68,14 @@ func (c Container) onboardingClient(ctx context.Context, proxyID, country string
 	}
 	var p countryProxy
 	err = tx.QueryRowContext(ctx, `SELECT id::text,type,host,port,COALESCE(username,''),adapter,COALESCE(secret_ref,''),status FROM proxies WHERE id=$1 FOR SHARE`, proxyID).Scan(&p.ID, &p.Type, &p.Host, &p.Port, &p.Username, &p.Adapter, &p.SecretRef, &p.Status)
-	if err != nil || p.Status != "healthy" {
-		return nil, nil, "", errors.New("proxy_not_healthy")
+	if err != nil {
+		return nil, nil, "", err
+	}
+	if p.Status != "healthy" {
+		return nil, nil, "", unusableOnboarding("proxy_not_healthy")
 	}
 	if !ProxyAdapterRegistered(p.Adapter) {
-		return nil, nil, "", errors.New("proxy_driver_unavailable")
+		return nil, nil, "", unusableOnboarding("proxy_driver_unavailable")
 	}
 	if p.SecretRef != "" {
 		err = tx.QueryRowContext(ctx, `SELECT xmin::text||':'||updated_at::text FROM secrets WHERE proxy_id=$1 AND id=$2 FOR SHARE`, p.ID, p.SecretRef).Scan(&p.SecretVersion)
@@ -74,19 +84,21 @@ func (c Container) onboardingClient(ctx context.Context, proxyID, country string
 		}
 	}
 	cap := ProxyAdapterCapabilities(p.Adapter)
-	if country != proxyselection.Auto && !cap.StickySession && !cap.FixedEgress {
-		return nil, nil, "", errors.New("proxy_country_stable_driver_required")
+	if (country != proxyselection.Auto || strict) && !cap.StickySession && !cap.FixedEgress {
+		return nil, nil, "", unusableOnboarding("proxy_country_stable_driver_required")
 	}
 	v := countryCandidate{ProxyID: p.ID, Session: session, Port: p.Port}
 	snapshot := countrySnapshot{Config: countryConfig{Account: identity}, Stage: proxyselection.Auto}
-	if country != proxyselection.Auto {
-		v.Target = country
+	if country != proxyselection.Auto || strict {
+		if country != proxyselection.Auto {
+			v.Target = country
+		}
 		var evaluation proxyselection.Evaluation
 		v, evaluation = c.verifyCountryCandidateUsing(ctx, snapshot, p, v, gatewayFor, tx, func(ctx context.Context, id, ref, version string) ([]byte, error) {
 			return c.Secrets.GetProxyAtVersionTx(ctx, tx, id, ref, version)
 		})
 		if evaluation.Health != proxyselection.Usable {
-			return nil, nil, "", errors.New("proxy_country_unverified: " + evaluation.Reason)
+			return nil, nil, "", &onboardingSelectionError{evaluation}
 		}
 	}
 	var password []byte
@@ -118,7 +130,7 @@ func (c Container) onboardingClient(ctx context.Context, proxyID, country string
 		if err := tx.QueryRowContext(checkCtx, `SELECT 1`).Scan(&alive); err != nil {
 			return ErrStaleAccountNetwork
 		}
-		if v.Target == "" {
+		if v.Target == "" && !strict {
 			return nil
 		}
 		// Reobserve through a fresh connection before each provider dispatch.
@@ -130,7 +142,7 @@ func (c Container) onboardingClient(ctx context.Context, proxyID, country string
 			return ErrProxyObservationUnavailable
 		}
 		geo, err := observeStickyCandidate(probeCtx, probe)
-		if err != nil || geo.IP != v.Geo.IP || !strings.EqualFold(geo.CountryCode, v.Target) {
+		if err != nil || geo.IP != v.Geo.IP || !strings.EqualFold(geo.CountryCode, v.Geo.CountryCode) {
 			return ErrProxyObservationUnavailable
 		}
 		var collision bool
@@ -144,6 +156,41 @@ func (c Container) onboardingClient(ctx context.Context, proxyID, country string
 	}
 	client := *gateway.Client
 	client.Transport = accountNetworkGuardTransport{Base: gateway.Client.Transport, Check: check, NativeWriteTrace: true}
+	if len(capture) > 0 {
+		route := capture[0]
+		route.Client = &client
+		route.Close = closeFn
+		route.Check = check
+		route.ProxyID = p.ID
+		route.Country = country
+		route.IP = v.Geo.IP
+		route.Timezone = v.Geo.Timezone
+		if strict {
+			route.Country = strings.ToUpper(v.Geo.CountryCode)
+		}
+		route.Dial = func(dialCtx context.Context, address string) (net.Conn, error) {
+			if err := check(dialCtx); err != nil {
+				return nil, errors.Join(ErrStaleAccountNetwork, err)
+			}
+			conn, err := gateway.DialPublicContext(dialCtx, address)
+			if err != nil {
+				return nil, err
+			}
+			if closed.Load() || ctx.Err() != nil {
+				conn.Close()
+				return nil, ErrStaleAccountNetwork
+			}
+			return conn, nil
+		}
+		if strict {
+			for i := 0; i < 2; i++ {
+				if err := check(ctx); err != nil {
+					closeFn()
+					return nil, nil, "", err
+				}
+			}
+		}
+	}
 	owned = true
 	return &client, closeFn, v.Geo.IP, nil
 }

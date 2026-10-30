@@ -33,6 +33,8 @@ type Server struct {
 	OutputRefreshAfter string
 	BrowserMu          sync.Mutex
 	BrowserTickets     map[string]time.Time
+	ProviderBrowsers   map[string]*providerBrowserSession
+	BrowserStarting    int
 }
 
 func New(db *sql.DB, c app.Container) *Server {
@@ -72,6 +74,9 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("GET /api/v1/auth/me", s.require(s.authMe, false))
 	m.HandleFunc("POST /api/v1/auth/password", s.require(s.changePassword, false))
 	m.HandleFunc("POST /api/v1/auth/logout", s.require(s.logout, false))
+	m.HandleFunc("POST /api/v1/provider-browser/sessions", s.require(s.startProviderBrowser, true))
+	m.HandleFunc("POST /api/v1/provider-browser/sessions/{id}/action", s.require(s.providerBrowserAction, true))
+	m.HandleFunc("DELETE /api/v1/provider-browser/sessions/{id}", s.require(s.stopProviderBrowser, true))
 	m.HandleFunc("POST /api/v1/accounts", s.require(s.createAccount, true))
 	m.HandleFunc("POST /api/v1/accounts/preview", s.require(s.accountPreview, true))
 	m.HandleFunc("POST /api/v1/providers/{provider}/authorizations", s.require(s.startProviderAuthorization, true))

@@ -1,0 +1,40 @@
+[Unit]
+Description=Disposable isolated provider browser
+
+[Service]
+Type=simple
+DynamicUser=yes
+StandardInput=socket
+StandardOutput=socket
+StandardError=null
+ExecStart=/opt/digital-ocean-bot/bin/provider-browser-runner
+PrivateNetwork=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectProc=invisible
+ProcSubset=pid
+TemporaryFileSystem=/etc:ro /var:ro /run:ro /opt:ro
+BindReadOnlyPaths=/opt/digital-ocean-bot/bin/provider-browser-runner /etc/ssl/certs /etc/fonts
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_NETLINK
+RestrictNamespaces=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+SystemCallArchitectures=native
+UMask=0077
+RuntimeMaxSec=15min
+TimeoutStopSec=5s
+KillMode=control-group
+MemoryHigh=384M
+MemoryMax=512M
+TasksMax=128
+CPUQuota=75%
+OOMPolicy=kill

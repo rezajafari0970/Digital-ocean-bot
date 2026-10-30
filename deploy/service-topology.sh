@@ -13,7 +13,8 @@ DOB_UNIT_ASSETS=(
 )
 DOB_UPDATE_UNITS=(datacenter-bot-update.socket datacenter-bot-update@.service datacenter-bot-update.service datacenter-bot-restart-api.service)
 DOB_HEALTH_UNITS=(datacenter-bot-integrity.service datacenter-bot-integrity.timer datacenter-bot-host-memory.service datacenter-bot-host-memory.timer)
-DOB_UNIT_ASSETS+=("${DOB_UPDATE_UNITS[@]}" "${DOB_HEALTH_UNITS[@]}")
+DOB_BROWSER_UNITS=(datacenter-provider-browser.socket datacenter-provider-browser@.service)
+DOB_UNIT_ASSETS+=("${DOB_BROWSER_UNITS[@]}" "${DOB_UPDATE_UNITS[@]}" "${DOB_HEALTH_UNITS[@]}")
 DOB_CONTROL_FILES=(/usr/local/bin/datacenter-bot /usr/local/lib/datacenter-bot/install.sh /usr/local/lib/datacenter-bot/source)
 
 dob_preflight_service_topology() {
@@ -41,6 +42,9 @@ dob_acquire_deploy_lock() {
 }
 dob_stop_runtime_readers() {
  local unit load active pid
+ if [ "$(systemctl show datacenter-provider-browser.socket -p LoadState --value)" = loaded ]; then
+  systemctl stop datacenter-provider-browser.socket 'datacenter-provider-browser@*.service' || return
+ fi
  for unit in datacenter-bot-integrity.timer datacenter-bot-integrity.service datacenter-bot-host-memory.timer datacenter-bot-host-memory.service; do
   if [ "$(systemctl show "$unit" -p LoadState --value)" = loaded ]; then systemctl stop "$unit" || return; fi
  done
@@ -67,14 +71,14 @@ dob_verify_exact_exec() {
 }
 dob_install_service_topology() {
  local unit
- for unit in "${DOB_UNIT_ASSETS[@]:0:4}" "${DOB_UPDATE_UNITS[@]}" "${DOB_HEALTH_UNITS[@]}"; do
+ for unit in "${DOB_UNIT_ASSETS[@]:0:4}" "${DOB_BROWSER_UNITS[@]}" "${DOB_UPDATE_UNITS[@]}" "${DOB_HEALTH_UNITS[@]}"; do
    install -m 0644 "$SRC/deploy/$unit" "$DOB_UNIT_DIR/$unit"
  done
  install -d -m 0755 "$DOB_UNIT_DIR/digital-ocean-bot-api.service.d" "$DOB_UNIT_DIR/digital-ocean-bot-worker.service.d"
  install -m 0644 "$SRC/deploy/api-split-workers.conf" "$DOB_UNIT_DIR/digital-ocean-bot-api.service.d/60-worker-isolation.conf"
  install -m 0644 "$SRC/deploy/worker-control.conf" "$DOB_UNIT_DIR/digital-ocean-bot-worker.service.d/60-worker-isolation.conf"
  systemctl daemon-reload
- systemctl enable --now datacenter-bot-update.socket
+ systemctl enable --now datacenter-bot-update.socket datacenter-provider-browser.socket
 }
 # Prepare every artifact outside live paths before stopping services.
 dob_cleanup_stage() {
@@ -84,8 +88,8 @@ dob_stage_runtime() {
  DOB_STAGE=$(mktemp -d "$(dirname "$APP")/.dob-release.XXXXXXXX")
  trap dob_cleanup_stage EXIT
  install -d -m 0755 "$DOB_STAGE/bin" "$DOB_STAGE/web/static"
- local binary command arch api_sha worker_sha guardian_amd64_sha guardian_arm64_sha
- for binary in digital-ocean-bot-api digital-ocean-bot-worker install-bootstrap vultr-browser-session vultr-browser-manager vultr-input-bridge; do
+ local binary command arch api_sha worker_sha browser_sha guardian_amd64_sha guardian_arm64_sha
+ for binary in digital-ocean-bot-api digital-ocean-bot-worker install-bootstrap vultr-browser-session vultr-browser-manager vultr-input-bridge provider-browser-runner; do
   command=$binary
   case "$binary" in digital-ocean-bot-api) command=api ;; digital-ocean-bot-worker) command=worker ;; esac
   (cd "$SRC" && go build -trimpath -ldflags="$LDFLAGS" -o "$DOB_STAGE/bin/$binary" "./cmd/$command")
@@ -100,9 +104,10 @@ dob_stage_runtime() {
  cp -a "$SRC/web/static/." "$DOB_STAGE/web/static/"
  api_sha=$(sha256sum "$DOB_STAGE/bin/digital-ocean-bot-api" | awk '{print $1}')
  worker_sha=$(sha256sum "$DOB_STAGE/bin/digital-ocean-bot-worker" | awk '{print $1}')
+ browser_sha=$(sha256sum "$DOB_STAGE/bin/provider-browser-runner" | awk '{print $1}')
  guardian_amd64_sha=$(sha256sum "$DOB_STAGE/bin/server-guardian-linux-amd64" | awk '{print $1}')
  guardian_arm64_sha=$(sha256sum "$DOB_STAGE/bin/server-guardian-linux-arm64" | awk '{print $1}')
- printf '{"residential_admission_schema":1,"commit":"%s","build_time":"%s","api_sha256":"%s","worker_sha256":"%s","guardian_sha256":{"amd64":"%s","arm64":"%s"}}\n' "$BUILD_COMMIT" "$BUILD_TIME" "$api_sha" "$worker_sha" "$guardian_amd64_sha" "$guardian_arm64_sha" > "$DOB_STAGE/build-manifest.json"
+ printf '{"residential_admission_schema":1,"commit":"%s","build_time":"%s","api_sha256":"%s","worker_sha256":"%s","browser_runner_sha256":"%s","guardian_sha256":{"amd64":"%s","arm64":"%s"}}\n' "$BUILD_COMMIT" "$BUILD_TIME" "$api_sha" "$worker_sha" "$browser_sha" "$guardian_amd64_sha" "$guardian_arm64_sha" > "$DOB_STAGE/build-manifest.json"
  dob_verify_staged_runtime
 }
 # Both install and upgrade must reject an incomplete release before stopping readers.
@@ -110,10 +115,10 @@ dob_verify_staged_runtime() {
  python3 - "$DOB_STAGE" <<'PY'
 import hashlib,json,pathlib,struct,sys
 root=pathlib.Path(sys.argv[1]);manifest=json.loads((root/'build-manifest.json').read_text())
-for name in ['digital-ocean-bot-api','digital-ocean-bot-worker','install-bootstrap','vultr-browser-session','vultr-browser-manager','vultr-input-bridge','server-guardian-linux-amd64','server-guardian-linux-arm64']:
+for name in ['digital-ocean-bot-api','digital-ocean-bot-worker','install-bootstrap','vultr-browser-session','vultr-browser-manager','vultr-input-bridge','provider-browser-runner','server-guardian-linux-amd64','server-guardian-linux-arm64']:
  p=root/'bin'/name
  if not (p.is_file() and not p.is_symlink() and p.stat().st_size>0):raise SystemExit('required artifact missing: '+name)
-for name,key in [('digital-ocean-bot-api','api_sha256'),('digital-ocean-bot-worker','worker_sha256')]:
+for name,key in [('digital-ocean-bot-api','api_sha256'),('digital-ocean-bot-worker','worker_sha256'),('provider-browser-runner','browser_runner_sha256')]:
  if hashlib.sha256((root/'bin'/name).read_bytes()).hexdigest()!=manifest[key]:raise SystemExit('runtime hash mismatch: '+name)
 for arch,machine in [('amd64',62),('arm64',183)]:
  raw=(root/'bin'/('server-guardian-linux-'+arch)).read_bytes()
@@ -133,6 +138,7 @@ dob_prepare_stage_permissions() {
  chown -R root:digitaloceanbot "$DOB_STAGE" || return
  chmod 0750 "$DOB_STAGE" "$DOB_STAGE/bin" "$DOB_STAGE/migrations" || return
  chmod 0750 "$DOB_STAGE/bin/"* || return
+ chmod 0755 "$DOB_STAGE/bin/provider-browser-runner" || return
  chmod 0640 "$DOB_STAGE/migrations/"*.sql || return
  find "$DOB_STAGE/web" -type d -exec chmod 0750 {} + || return
  find "$DOB_STAGE/web" -type f -exec chmod 0640 {} + || return
@@ -189,7 +195,7 @@ dob_backup_runtime() {
  done
  : > "$DOB_BACKUP/active"
  : > "$DOB_BACKUP/enabled"
- for unit in "${SERVICES[@]}" digital-ocean-bot-vultr-browser-manager datacenter-bot-update.socket datacenter-bot-integrity.timer datacenter-bot-host-memory.timer; do
+ for unit in "${SERVICES[@]}" digital-ocean-bot-vultr-browser-manager datacenter-provider-browser.socket datacenter-bot-update.socket datacenter-bot-integrity.timer datacenter-bot-host-memory.timer; do
   if systemctl is-active --quiet "$unit"; then echo "$unit" >> "$DOB_BACKUP/active"; fi
   if systemctl is-enabled --quiet "$unit"; then echo "$unit" >> "$DOB_BACKUP/enabled"; fi
  done
@@ -227,7 +233,7 @@ dob_restore_enablement_before_assets() {
  if [ "$(systemctl show datacenter-bot-update.socket -p LoadState --value)" = loaded ]; then
   systemctl stop datacenter-bot-update.socket || return
  fi
- for unit in "${SERVICES[@]}" datacenter-bot-update.socket datacenter-bot-integrity.timer datacenter-bot-host-memory.timer; do
+ for unit in "${SERVICES[@]}" datacenter-provider-browser.socket datacenter-bot-update.socket datacenter-bot-integrity.timer datacenter-bot-host-memory.timer; do
   if ! grep -Fxq "$unit" "$DOB_BACKUP/enabled"; then
    load=$(systemctl show "$unit" -p LoadState --value) || return
    case "$load" in
