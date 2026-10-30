@@ -25,7 +25,7 @@ class Permissions(unittest.TestCase):
         self.stage = self.root / "stage"
         for name in ("bin", "migrations", "web/static/nested"):
             (self.stage / name).mkdir(parents=True, mode=0o700, exist_ok=True)
-        for name in ("bin/test", "migrations/1.sql", "web/static/index.html", "web/static/nested/test.js"):
+        for name in ("bin/test", "bin/provider-browser-runner", "migrations/1.sql", "web/static/index.html", "web/static/nested/test.js"):
             p = self.stage / name
             p.write_text("fixture")
             p.chmod(0o600)
@@ -50,6 +50,8 @@ class Permissions(unittest.TestCase):
         self.assertNotEqual(denied.returncode, 0)
         result = self.prepare()
         self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual((self.stage / "bin/provider-browser-runner").stat().st_mode & 0o777, 0o755)
+        self.assertEqual((self.stage / "bin/test").stat().st_mode & 0o777, 0o750)
         for p in [self.stage / "web", *list((self.stage / "web").rglob("*"))]:
             self.assertEqual(p.stat().st_mode & 0o777, 0o750 if p.is_dir() else 0o640)
             self.assertEqual(p.stat().st_uid, 0)

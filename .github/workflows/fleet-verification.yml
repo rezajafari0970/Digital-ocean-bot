@@ -46,6 +46,8 @@ jobs:
           python3 tools/bounded_openai_review_test.py
           python3 deploy/bootstrap_test.py
           python3 deploy/project_update_test.py
+          sudo useradd --system digitaloceanbot
+          sudo python3 deploy/static_permissions_test.py
           python3 tools/public-release/transport-regression-gate_test.py
           node web/tests/config-transport.cjs
           node web/tests/config-delete.cjs

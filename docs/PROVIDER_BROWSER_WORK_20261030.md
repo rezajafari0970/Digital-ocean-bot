@@ -68,3 +68,15 @@ native locale/WebSocket assertion. Fourth candidate explicitly binds the headles
 browser Accept-Language/navigator language, records actual fixture state on failure,
 and verifies the installed socket-activated sandbox during install/reinstall.
 Rollback now preserves browser socket enablement and closes old browser workers.
+
+Fourth candidate 3260fe93 passed the expanded native sandbox: HTTPS, two WebSocket
+tunnels, input, locale/timezone, separate cookie/storage identities, two rejected
+destinations and zero direct host requests. All 351 roots and schema-206 restore
+passed again. The next public install identified missing Chromium libraries on
+minimal Ubuntu and an outdated permissions-test fixture; both are corrected and
+the root permissions checks are now also required by source CI.
+
+Live rollout preflight currently blocks on disk reserve: database 3,328,063,167
+bytes, required free 10,521,060,413 bytes, observed free about 7.67 GB. No runtime
+swap or schema migration has started. Do not lower the native retention guard or
+delete unrelated application data, backup retention or incident evidence.
