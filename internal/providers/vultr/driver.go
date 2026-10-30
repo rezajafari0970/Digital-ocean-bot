@@ -14,7 +14,7 @@ type Factory struct{}
 
 func (Factory) Name() string { return "vultr" }
 func (Factory) Metadata() providers.Metadata {
-	return providers.Metadata{Name: "vultr", DisplayName: "Vultr", CredentialLabel: "API key", CredentialHelp: "Enable API access and allow the selected connection source IP in Vultr. HTTP 401 can require checking the key and source-IP access rules.", Status: "ready", Defaults: providers.Defaults{Images: providers.ImagePolicy{Family: "ubuntu", Versions: []string{"26.04", "24.04", "22.04"}}, LifetimeMinMinutes: 90, LifetimeMaxMinutes: 120, DesiredServers: 5, BuildSpacingMinMinutes: 1, BuildSpacingMaxMinutes: 3, MaxConcurrent: 1, FallbackAnyRegion: true}}
+	return providers.Metadata{WebsiteURL: "https://my.vultr.com/", Name: "vultr", DisplayName: "Vultr", CredentialLabel: "API key", CredentialHelp: "Enable API access and allow the selected connection source IP in Vultr. HTTP 401 can require checking the key and source-IP access rules.", Status: "ready", Defaults: providers.Defaults{Images: providers.ImagePolicy{Family: "ubuntu", Versions: []string{"26.04", "24.04", "22.04"}}, LifetimeMinMinutes: 90, LifetimeMaxMinutes: 120, DesiredServers: 5, BuildSpacingMinMinutes: 1, BuildSpacingMaxMinutes: 3, MaxConcurrent: 1, FallbackAnyRegion: true}}
 }
 func (Factory) Open(ctx context.Context, req providers.OpenRequest) (providers.Driver, error) {
 	if strings.TrimSpace(req.AccountID) == "" || req.HTTPClient == nil || req.Credentials == nil {

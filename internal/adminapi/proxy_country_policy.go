@@ -53,13 +53,9 @@ func (s *Server) saveProxyCountryPolicy(w http.ResponseWriter, r *http.Request) 
 		writeJSON(w, 400, map[string]string{"error": "invalid_country_policy_request"})
 		return
 	}
-	countries, err := proxyselection.Normalize(*request.Countries)
+	countries, err := proxyselection.Priorities("", *request.Countries)
 	if err != nil {
 		writeJSON(w, 400, map[string]string{"error": "invalid_country_priorities", "detail": err.Error()})
-		return
-	}
-	if len(countries) != 1 {
-		writeJSON(w, 400, map[string]string{"error": "single_proxy_country_required", "detail": "Choose AUTO or one country. An explicit country cannot fall back to another country or AUTO."})
 		return
 	}
 	account, idErr := network.CanonicalAccountID(r.PathValue("id"))

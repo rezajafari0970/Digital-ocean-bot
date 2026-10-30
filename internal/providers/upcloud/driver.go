@@ -20,7 +20,7 @@ type Factory struct{}
 
 func (Factory) Name() string { return "upcloud" }
 func (Factory) Metadata() providers.Metadata {
-	return providers.Metadata{Name: "upcloud", DisplayName: "UpCloud", CredentialLabel: "API token (ucat_…)", Status: "ready", Defaults: providers.Defaults{
+	return providers.Metadata{WebsiteURL: "https://hub.upcloud.com/", Name: "upcloud", DisplayName: "UpCloud", CredentialLabel: "API token (ucat_…)", Status: "ready", Defaults: providers.Defaults{
 		Images: providers.ImagePolicy{Family: "ubuntu", Versions: []string{"26.04", "24.04", "22.04"}}, LifetimeMinMinutes: 90, LifetimeMaxMinutes: 120, DesiredServers: 5, BuildSpacingMinMinutes: 1, BuildSpacingMaxMinutes: 3, MaxConcurrent: 1, FallbackAnyRegion: true}}
 }
 func (Factory) Open(ctx context.Context, r providers.OpenRequest) (providers.Driver, error) {

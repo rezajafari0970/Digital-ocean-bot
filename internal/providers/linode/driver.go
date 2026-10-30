@@ -15,7 +15,7 @@ type Factory struct{}
 
 func (Factory) Name() string { return "linode" }
 func (Factory) Metadata() providers.Metadata {
-	return providers.Metadata{Name: "linode", DisplayName: "Linode", CredentialLabel: "Personal Access Token", Status: "ready", Defaults: providers.Defaults{
+	return providers.Metadata{WebsiteURL: "https://cloud.linode.com/", Name: "linode", DisplayName: "Linode", CredentialLabel: "Personal Access Token", Status: "ready", Defaults: providers.Defaults{
 		Images: providers.ImagePolicy{Family: "ubuntu", Versions: []string{"26.04", "24.04", "22.04"}}, LifetimeMinMinutes: 90, LifetimeMaxMinutes: 120, DesiredServers: 5,
 		BuildSpacingMinMinutes: 1, BuildSpacingMaxMinutes: 3, MaxConcurrent: 1, FallbackAnyRegion: true}}
 }

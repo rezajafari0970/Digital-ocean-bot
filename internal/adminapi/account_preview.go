@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/proxyselection"
 	"net/http"
 	"sort"
 	"strings"
@@ -18,6 +19,8 @@ type previewAccount struct {
 	Provider        string            `json:"provider"`
 	Token           string            `json:"token"`
 	ProxyCountry    string            `json:"proxy_country"`
+	ProxyCountries  []string          `json:"proxy_countries"`
+	ProxyIDs        []string          `json:"proxy_ids"`
 	ProxyID         string            `json:"proxy_id"`
 }
 type previewCredential struct{ token []byte }
@@ -48,6 +51,13 @@ func (s *Server) runAccountPreview(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 400, map[string]string{"error": "token_required"})
 		return
 	}
+	var routeErr error
+	x.ProxyCountries, routeErr = proxyselection.Priorities(x.ProxyCountry, x.ProxyCountries)
+	if routeErr != nil {
+		writeJSON(w, 400, map[string]string{"error": "invalid_country_priorities"})
+		return
+	}
+	x.ProxyIDs = normalizeProxyPool(x.ProxyID, x.ProxyIDs)
 	if x.Provider == "" {
 		x.Provider = "digitalocean"
 	}
@@ -68,8 +78,8 @@ func (s *Server) runAccountPreview(w http.ResponseWriter, r *http.Request) {
 		}
 		defer unlock()
 		var e error
-		flow, flowSecret, e = s.authorizationCredential(r.Context(), x.AuthorizationID, x.Provider, x.ProxyID, false, x.ProxyCountry)
-		if e != nil {
+		flow, flowSecret, e = s.authorizationCredential(r.Context(), x.AuthorizationID, x.Provider, x.ProxyID, false, x.ProxyCountries...)
+		if e != nil || !sameAuthorizationPolicy(flow, x.ProxyIDs, x.ProxyCountries) {
 			writeJSON(w, 409, map[string]string{"error": "authorization_not_ready"})
 			return
 		}
@@ -88,7 +98,12 @@ func (s *Server) runAccountPreview(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	previewStage(r.Context(), "connection")
-	client, closeFn, observed, ok := s.previewClient(w, r, x.ProxyID, x.ProxyCountry, true)
+	routeIDs, routeCountries := x.ProxyIDs, x.ProxyCountries
+	if x.AuthorizationID != "" {
+		routeIDs = normalizeProxyPool(flow.RouteProxyID, nil)
+		routeCountries = []string{flow.RouteCountry}
+	}
+	client, closeFn, observed, ok := s.previewPriorities(w, r, routeIDs, routeCountries, true)
 	if !ok {
 		return
 	}

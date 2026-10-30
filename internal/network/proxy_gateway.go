@@ -25,6 +25,7 @@ type Gateway struct {
 	Client      *http.Client
 	pooled      bool
 	resolver    *proxyAResolver
+	publicDial  literalProxyDial
 }
 
 func NewProxyGateway(accountID string, p Proxy, creds ProxyCredentials) (*Gateway, error) {
@@ -140,7 +141,38 @@ func newProxyGatewayForPurpose(accountID string, p Proxy, creds ProxyCredentials
 		Transport: trafficTransport{base: MetadataTransport{Base: PrivacyTransport{Base: tr}}, scope: scope},
 		Timeout:   30 * time.Second,
 	}
-	return &Gateway{AccountID: accountID, Proxy: p, Credentials: creds, Transport: tr, Client: client, resolver: resolver}, nil
+	return &Gateway{AccountID: accountID, Proxy: p, Credentials: creds, Transport: tr, Client: client, resolver: resolver, publicDial: dialLiteral}, nil
+}
+
+// DialPublicContext is for untrusted browser destinations. DNS goes through the
+// same proxy, and the resolved literal is checked before CONNECT (no rebinding).
+func (g *Gateway) DialPublicContext(ctx context.Context, address string) (net.Conn, error) {
+	host, port, err := net.SplitHostPort(address)
+	if err != nil || (port != "443" && port != "80") || g == nil || g.resolver == nil || g.publicDial == nil {
+		return nil, ErrProxyConfigInvalid
+	}
+	ip, err := g.resolver.Resolve(ctx, host)
+	if err != nil {
+		return nil, err
+	}
+	if !publicBrowserIP(net.ParseIP(ip)) {
+		return nil, ErrProxyConfigInvalid
+	}
+	return g.publicDial(ctx, net.JoinHostPort(ip, port))
+}
+
+func publicBrowserIP(ip net.IP) bool {
+	if ip == nil || ip.To4() == nil || !ip.IsGlobalUnicast() || ip.IsPrivate() || ip.IsLoopback() || ip.IsLinkLocalUnicast() {
+		return false
+	}
+	// Also exclude shared, documentation, benchmark, protocol and reserved space.
+	for _, cidr := range []string{"0.0.0.0/8", "100.64.0.0/10", "192.0.0.0/24", "192.0.2.0/24", "198.18.0.0/15", "198.51.100.0/24", "203.0.113.0/24", "240.0.0.0/4"} {
+		_, block, _ := net.ParseCIDR(cidr)
+		if block.Contains(ip) {
+			return false
+		}
+	}
+	return true
 }
 
 func (g *Gateway) Validate(accountID string) error {

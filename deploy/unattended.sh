@@ -19,10 +19,14 @@ python3 "$SRC/deploy/disk-preflight.py" build
 echo '[3/7] Installing system packages and verified Go toolchain'
 export DEBIAN_FRONTEND=noninteractive
 apt-get -o DPkg::Lock::Timeout=180 update
-apt-get -o DPkg::Lock::Timeout=180 install -y --no-install-recommends ca-certificates curl git python3 postgresql postgresql-client sudo openssh-client util-linux procps iproute2 sqlite3 xz-utils
+AUDIO_PACKAGE=libasound2; ATK_PACKAGE=libatk-bridge2.0-0
+if apt-cache show libasound2t64 >/dev/null 2>&1; then AUDIO_PACKAGE=libasound2t64; fi
+if apt-cache show libatk-bridge2.0-0t64 >/dev/null 2>&1; then ATK_PACKAGE=libatk-bridge2.0-0t64; fi
+apt-get -o DPkg::Lock::Timeout=180 install -y --no-install-recommends ca-certificates curl git python3 postgresql postgresql-client sudo openssh-client util-linux procps iproute2 sqlite3 xz-utils $AUDIO_PACKAGE $ATK_PACKAGE libxdamage1 libnss3 libgbm1 fonts-liberation
 systemctl enable --now postgresql
 source "$SRC/deploy/toolchain.sh"
 dob_install_toolchain
+python3 "$SRC/deploy/provider-browser-runtime.py"
 BUILD_COMMIT=$(git -C "$SRC" rev-parse HEAD)
 BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 LDFLAGS="-s -w -X github.com/rezajafari0970/Digital-ocean-bot/internal/buildinfo.Commit=$BUILD_COMMIT -X github.com/rezajafari0970/Digital-ocean-bot/internal/buildinfo.BuildTime=$BUILD_TIME"

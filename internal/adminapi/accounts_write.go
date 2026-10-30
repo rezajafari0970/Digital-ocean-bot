@@ -23,6 +23,7 @@ type accountWrite struct {
 	Regions                []string `json:"regions"`
 	NetworkMode            string   `json:"network_mode"`
 	ProxyCountry           string   `json:"proxy_country"`
+	ProxyCountries         []string `json:"proxy_countries"`
 	ProxyID                string   `json:"proxy_id"`
 	ProxyIDs               []string `json:"proxy_ids"`
 	IntervalSeconds        int      `json:"interval_seconds"`
@@ -55,8 +56,8 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var countryErr error
-	x.ProxyCountry, countryErr = proxyselection.Country(x.ProxyCountry)
-	if countryErr != nil || (x.ProxyCountry != proxyselection.Auto && x.NetworkMode != "proxy_required") {
+	x.ProxyCountries, countryErr = proxyselection.Priorities(x.ProxyCountry, x.ProxyCountries)
+	if countryErr != nil || (!proxyselection.Legacy(x.ProxyCountries) && x.NetworkMode != "proxy_required") {
 		writeJSON(w, 400, map[string]string{"error": "invalid_proxy_country_route"})
 		return
 	}
@@ -79,12 +80,12 @@ func (s *Server) createAccount(w http.ResponseWriter, r *http.Request) {
 		}
 		defer unlock()
 		previous, e := s.loadAuthorization(r.Context(), p.UserID, x.AuthorizationID)
-		if e == nil && previous.State == "USED" && previous.AccountID != "" && previous.Provider == x.Provider && previous.ExternalID == x.ExternalID && previous.ProxyID == x.ProxyID && previous.ProxyCountry == x.ProxyCountry {
+		if e == nil && previous.State == "USED" && previous.AccountID != "" && previous.Provider == x.Provider && previous.ExternalID == x.ExternalID && previous.ProxyID == x.ProxyID && sameAuthorizationPolicy(previous, x.ProxyIDs, x.ProxyCountries) {
 			writeJSON(w, 200, map[string]string{"id": previous.AccountID})
 			return
 		}
-		flow, data, e := s.authorizationCredential(r.Context(), x.AuthorizationID, x.Provider, x.ProxyID, true, x.ProxyCountry)
-		if e != nil || flow.ExternalID != x.ExternalID {
+		flow, data, e := s.authorizationCredential(r.Context(), x.AuthorizationID, x.Provider, x.ProxyID, true, x.ProxyCountries...)
+		if e != nil || flow.ExternalID != x.ExternalID || !sameAuthorizationPolicy(flow, x.ProxyIDs, x.ProxyCountries) {
 			writeJSON(w, 409, map[string]string{"error": "authorization_preview_required"})
 			return
 		}
@@ -205,7 +206,7 @@ RETURNING id::text`, x.Provider, x.Name, x.ExternalID, x.Email, x.Region, x.Inte
 		}
 	}
 	// Commit the country constraint with the account, before any worker can see it.
-	if _, err = tx.ExecContext(r.Context(), `INSERT INTO account_proxy_country_policies(account_id,countries) VALUES($1,$2::jsonb)`, id, mustJSON([]string{x.ProxyCountry})); err != nil {
+	if _, err = tx.ExecContext(r.Context(), `INSERT INTO account_proxy_country_policies(account_id,countries) VALUES($1,$2::jsonb)`, id, mustJSON(x.ProxyCountries)); err != nil {
 		writeJSON(w, 500, errorBody())
 		return
 	}

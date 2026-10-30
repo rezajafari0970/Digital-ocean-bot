@@ -46,6 +46,7 @@ func (s *Server) logout(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 401, map[string]string{"error": "unauthorized"})
 		return
 	}
+	s.closeProviderBrowsers(p.SessionID)
 	_ = s.Auth.Store.DeleteSession(r.Context(), p.SessionID)
 	w.WriteHeader(http.StatusNoContent)
 }

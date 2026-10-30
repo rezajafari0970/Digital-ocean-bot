@@ -29,6 +29,7 @@ type CredentialField struct {
 }
 
 type Metadata struct {
+	WebsiteURL             string            `json:"website_url,omitempty"`
 	AutomaticAuthorization bool              `json:"automatic_authorization,omitempty"`
 	CredentialFields       []CredentialField `json:"credential_fields,omitempty"`
 	CredentialHelp         string            `json:"credential_help,omitempty"`

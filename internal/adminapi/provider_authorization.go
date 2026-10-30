@@ -12,6 +12,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"slices"
 	"time"
 
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providers"
@@ -31,14 +32,23 @@ type authorizationRecord struct {
 	ID, Owner, Provider, ProxyID, ProxyCountry, Hash, State, ExternalID, AccountID, LastError string
 	ExpiresAt, UpdatedAt                                                                      time.Time
 	Cipher                                                                                    secrets.AuthorizationCipher
+	ProxyCountries, ProxyIDs                                                                  []string
+	RouteProxyID, RouteCountry                                                                string
 }
 
 func (s *Server) loadAuthorization(ctx context.Context, owner, id string) (authorizationRecord, error) {
 	var x authorizationRecord
+	var countries, proxies []byte
 	if owner == "" || !authorizationIDPattern.MatchString(id) {
 		return x, sql.ErrNoRows
 	}
-	e := s.DB.QueryRowContext(ctx, `SELECT id::text,owner_id,provider,proxy_id,proxy_country,request_hash,state,external_id,COALESCE(account_id::text,''),last_error,expires_at,updated_at,ciphertext,nonce,COALESCE(key_version,0) FROM provider_authorizations WHERE id=$1 AND owner_id=$2`, id, owner).Scan(&x.ID, &x.Owner, &x.Provider, &x.ProxyID, &x.ProxyCountry, &x.Hash, &x.State, &x.ExternalID, &x.AccountID, &x.LastError, &x.ExpiresAt, &x.UpdatedAt, &x.Cipher.Ciphertext, &x.Cipher.Nonce, &x.Cipher.KeyVersion)
+	e := s.DB.QueryRowContext(ctx, `SELECT id::text,owner_id,provider,proxy_id,proxy_country,request_hash,state,external_id,COALESCE(account_id::text,''),last_error,expires_at,updated_at,ciphertext,nonce,COALESCE(key_version,0),COALESCE(proxy_countries,jsonb_build_array(proxy_country)),COALESCE(proxy_ids,CASE WHEN proxy_id='' THEN '[]'::jsonb ELSE jsonb_build_array(proxy_id) END),COALESCE(route_proxy_id,proxy_id),COALESCE(route_country,proxy_country) FROM provider_authorizations WHERE id=$1 AND owner_id=$2`, id, owner).Scan(&x.ID, &x.Owner, &x.Provider, &x.ProxyID, &x.ProxyCountry, &x.Hash, &x.State, &x.ExternalID, &x.AccountID, &x.LastError, &x.ExpiresAt, &x.UpdatedAt, &x.Cipher.Ciphertext, &x.Cipher.Nonce, &x.Cipher.KeyVersion, &countries, &proxies, &x.RouteProxyID, &x.RouteCountry)
+	if e == nil {
+		e = json.Unmarshal(countries, &x.ProxyCountries)
+	}
+	if e == nil {
+		e = json.Unmarshal(proxies, &x.ProxyIDs)
+	}
 	return x, e
 }
 func (s *Server) authorizationSecret(x authorizationRecord) (authorizationSecret, error) {
@@ -84,7 +94,7 @@ func (s *Server) authorizationResponse(w http.ResponseWriter, r *http.Request, i
 	if !x.ExpiresAt.After(time.Now()) && x.State != "USED" {
 		x.State = "EXPIRED"
 	}
-	out := map[string]any{"id": x.ID, "provider": x.Provider, "proxy_id": x.ProxyID, "proxy_country": x.ProxyCountry, "state": x.State, "expires_at": x.ExpiresAt, "retry_after_seconds": 5, "diagnostic": x.LastError}
+	out := map[string]any{"id": x.ID, "provider": x.Provider, "proxy_id": x.ProxyID, "proxy_country": x.ProxyCountry, "proxy_countries": x.ProxyCountries, "proxy_ids": x.ProxyIDs, "active_country": x.RouteCountry, "state": x.State, "expires_at": x.ExpiresAt, "retry_after_seconds": 5, "diagnostic": x.LastError}
 	if x.LastError != "" && x.Provider == "ovh" {
 		out["detail"] = ovh.Diagnostic(&providers.Error{Code: x.LastError}).Guidance
 	}
@@ -126,10 +136,12 @@ func (s *Server) startProviderAuthorization(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	var req struct {
-		ID           string `json:"id"`
-		Token        string `json:"token"`
-		ProxyID      string `json:"proxy_id"`
-		ProxyCountry string `json:"proxy_country"`
+		ID             string   `json:"id"`
+		Token          string   `json:"token"`
+		ProxyID        string   `json:"proxy_id"`
+		ProxyCountry   string   `json:"proxy_country"`
+		ProxyCountries []string `json:"proxy_countries"`
+		ProxyIDs       []string `json:"proxy_ids"`
 	}
 	r.Body = http.MaxBytesReader(w, r.Body, 32768)
 	dec := json.NewDecoder(r.Body)
@@ -139,11 +151,13 @@ func (s *Server) startProviderAuthorization(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	var countryErr error
-	req.ProxyCountry, countryErr = proxyselection.Country(req.ProxyCountry)
-	if countryErr != nil || (req.ProxyCountry != proxyselection.Auto && req.ProxyID == "") {
+	req.ProxyCountries, countryErr = proxyselection.Priorities(req.ProxyCountry, req.ProxyCountries)
+	if countryErr != nil || (!proxyselection.Legacy(req.ProxyCountries) && req.ProxyID == "") {
 		writeJSON(w, 400, map[string]string{"error": "invalid_proxy_country_route"})
 		return
 	}
+	req.ProxyCountry = req.ProxyCountries[0]
+	req.ProxyIDs = normalizeProxyPool(req.ProxyID, req.ProxyIDs)
 	unlock, ok := s.authorizationLock(w, r, req.ID)
 	if !ok {
 		return
@@ -153,6 +167,9 @@ func (s *Server) startProviderAuthorization(w http.ResponseWriter, r *http.Reque
 	hashInput := provider + "\x00" + req.ProxyID + "\x00" + req.Token
 	if req.ProxyCountry != proxyselection.Auto {
 		hashInput += "\x00country:" + req.ProxyCountry
+	}
+	if len(req.ProxyCountries) > 1 || len(req.ProxyIDs) > 1 {
+		hashInput += "\x00priorities:" + mustJSON(req.ProxyCountries) + "\x00proxies:" + mustJSON(req.ProxyIDs)
 	}
 	sum := sha256.Sum256([]byte(hashInput))
 	fingerprint := hex.EncodeToString(sum[:])
@@ -176,7 +193,7 @@ func (s *Server) startProviderAuthorization(w http.ResponseWriter, r *http.Reque
 		writeJSON(w, 429, map[string]string{"error": "authorization_rate_limited", "detail": "Too many connection requests. Resume the current request or wait ten minutes."})
 		return
 	}
-	result, e := tx.ExecContext(r.Context(), `INSERT INTO provider_authorizations(id,owner_id,provider,proxy_id,request_hash,state,proxy_country) VALUES($1,$2,$3,$4,$5,'DISPATCHED',$6) ON CONFLICT(id) DO NOTHING`, req.ID, p.UserID, provider, req.ProxyID, fingerprint, req.ProxyCountry)
+	result, e := tx.ExecContext(r.Context(), `INSERT INTO provider_authorizations(id,owner_id,provider,proxy_id,request_hash,state,proxy_country,proxy_countries,proxy_ids) VALUES($1,$2,$3,$4,$5,'DISPATCHED',$6,$7::jsonb,$8::jsonb) ON CONFLICT(id) DO NOTHING`, req.ID, p.UserID, provider, req.ProxyID, fingerprint, req.ProxyCountry, mustJSON(req.ProxyCountries), mustJSON(req.ProxyIDs))
 	if e != nil {
 		writeJSON(w, 500, errorBody())
 		return
@@ -198,12 +215,20 @@ func (s *Server) startProviderAuthorization(w http.ResponseWriter, r *http.Reque
 	ctx, cancel := context.WithTimeout(context.WithoutCancel(r.Context()), 25*time.Second)
 	defer cancel()
 	rr := r.WithContext(ctx)
-	client, closeFn, _, ok := s.previewClient(w, rr, req.ProxyID, req.ProxyCountry, false)
-	if !ok {
+	container := s.Container
+	container.DB = s.DB
+	route, routeErr := container.OnboardingPriorities(ctx, req.ProxyIDs, req.ProxyCountries, false)
+	if routeErr != nil {
+		writeJSON(w, 409, map[string]string{"error": "preview_route_unavailable", "detail": routeErr.Error()})
 		_, _ = s.DB.ExecContext(ctx, `UPDATE provider_authorizations SET state='FAILED',last_error='CONNECTION_NOT_READY',updated_at=now() WHERE id=$1 AND state='DISPATCHED'`, req.ID)
 		return
 	}
+	client, closeFn := route.Client, route.Close
 	defer closeFn()
+	if _, e = s.DB.ExecContext(ctx, `UPDATE provider_authorizations SET route_proxy_id=$2,route_country=$3 WHERE id=$1 AND state='DISPATCHED'`, req.ID, route.ProxyID, route.Country); e != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
 	raw := []byte(req.Token)
 	defer zeroBytes(raw)
 	grant, e := a.StartAuthorization(ctx, providers.OpenRequest{AccountID: "authorization", HTTPClient: client, Credentials: previewCredential{raw}})
@@ -275,7 +300,7 @@ func (s *Server) providerAuthorizationStatus(w http.ResponseWriter, r *http.Requ
 		writeJSON(w, 500, errorBody())
 		return
 	}
-	client, closeFn, _, ok := s.previewClient(w, r, x.ProxyID, x.ProxyCountry, false)
+	client, closeFn, _, ok := s.previewClient(w, r, x.RouteProxyID, x.RouteCountry, false)
 	if !ok {
 		return
 	}
@@ -328,17 +353,13 @@ func (s *Server) cancelProviderAuthorization(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(204)
 }
 func (s *Server) authorizationCredential(ctx context.Context, id, provider, proxyID string, verified bool, countries ...string) (authorizationRecord, authorizationSecret, error) {
-	country := proxyselection.Auto
-	if len(countries) > 0 {
-		var err error
-		country, err = proxyselection.Country(countries[0])
-		if err != nil {
-			return authorizationRecord{}, authorizationSecret{}, err
-		}
+	policy, err := proxyselection.Priorities("", countries)
+	if err != nil {
+		return authorizationRecord{}, authorizationSecret{}, err
 	}
 	p, _ := principal(ctx)
 	x, e := s.loadAuthorization(ctx, p.UserID, id)
-	if e != nil || x.Provider != provider || x.ProxyID != proxyID || x.ProxyCountry != country || !x.ExpiresAt.After(time.Now()) ||
+	if e != nil || x.Provider != provider || x.ProxyID != proxyID || !slices.Equal(x.ProxyCountries, policy) || !x.ExpiresAt.After(time.Now()) ||
 		(verified && x.State != "VERIFIED") || (!verified && x.State != "READY" && x.State != "VERIFIED") {
 		return x, authorizationSecret{}, errors.New("authorization not ready for this account and connection")
 	}
@@ -350,6 +371,10 @@ func (s *Server) authorizationCredential(ctx context.Context, id, provider, prox
 		}
 	}
 	return x, data, e
+}
+
+func sameAuthorizationPolicy(x authorizationRecord, proxies, countries []string) bool {
+	return slices.Equal(x.ProxyIDs, proxies) && slices.Equal(x.ProxyCountries, countries)
 }
 
 // Cleanup is local only: it never revokes an account credential or retries a

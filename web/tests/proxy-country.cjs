@@ -10,4 +10,10 @@ assert.doesNotMatch(country.field([{code:'US',label:'<script>bad</script>'}]),/<
 const kamatera=require('../static/kamatera-catalog.js');
 assert.equal(kamatera.optionLabel({ID:'1B-1024-20'}),'1B · 1 GB · 20 GB SSD');
 assert.notEqual(kamatera.optionLabel({ID:'1B-1024-20'}),kamatera.optionLabel({ID:'1T-1024-20'}));
-console.log('Single-country defaults, fail-closed form, verification status and compact native plans PASS');
+assert.equal((country.field([]).match(/value="AUTO" selected/g)||[]).length,3);
+assert.deepEqual(country.normalize(['AUTO','DE','US']),['DE','US']);
+assert.deepEqual(country.normalize(['US','AUTO','AUTO']),['US']);
+assert.deepEqual(country.normalize(['AUTO','AUTO','AUTO']),['AUTO']);
+assert.throws(()=>country.normalize(['US','us']),/different countries/);
+assert.match(country.status({countries:['US','DE'],identity_verified:true,revision:2,applied_revision:2,active_stage:'DE',active_country:'DE'}),/^Country verified/);
+console.log('Three priority defaults, no implicit AUTO fallback, verification status and compact native plans PASS');
