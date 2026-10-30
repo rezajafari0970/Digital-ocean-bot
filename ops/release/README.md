@@ -1,4 +1,4 @@
-> Latest continuation: [Build Activity page cost, release verification and blocked runtime rollout](../../docs/BUILD_ACTIVITY_CONTINUATION_20261030.md). Older release entries below retain their original dates.
+> Latest continuation: [Authorized storage cleanup and final verification pending](../../docs/STORAGE_CLEANUP_20261031.md). [Verified release and rollout instructions](../../docs/BUILD_ACTIVITY_CONTINUATION_20261030.md). Older entries below retain their dates.
 
 # Independent release verification
 

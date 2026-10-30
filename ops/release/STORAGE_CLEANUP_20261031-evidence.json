@@ -1,0 +1,56 @@
+{
+  "date_local": "2026-10-31",
+  "timezone": "Asia/Tehran",
+  "status": "MAIN_CLEANUP_CONFIRMED_FINAL_RECEIPT_UNAVAILABLE",
+  "connection_limit": "Remote Desktop Commander monthly usage exhausted; no retry or reconnect attempted",
+  "baseline_at_utc": "2026-10-30T21:38:27Z",
+  "last_health_at_utc": "2026-10-30T21:56:08Z",
+  "free_before_bytes": 5717532672,
+  "last_confirmed_free_bytes": 31675441152,
+  "confirmed_net_free_increase_bytes": 25957908480,
+  "confirmed_removals": {
+    "closed_log_files": 60,
+    "logs_journal_and_download_cache_recovered_bytes": 650903552,
+    "old_download_files": 8933,
+    "old_download_allocated_bytes": 20987174912,
+    "rejected_temporary_json_files": 226587,
+    "rejected_allocated_bytes": 935739392,
+    "old_message_archive_files_at_last_progress": 659559,
+    "old_message_allocated_bytes_at_last_progress": 2728091648,
+    "old_install_backups": 77,
+    "old_daily_backups": 4,
+    "unused_august_installer_staging": true,
+    "legacy_backup_and_staging_allocated_bytes": 477573120
+  },
+  "retention": {
+    "archive_days": 7,
+    "configured_history_scan_hours": 24,
+    "latest_verified_install_backups": 3,
+    "latest_verified_default_daily_backups": 3,
+    "production_daily_backups_preserved": 3,
+    "both_encrypted_restic_repositories_preserved": true,
+    "original_host_incident_recovery_preserved": true
+  },
+  "remaining_background_work": {
+    "process_pid": 4007138,
+    "planned_old_message_files": 1183216,
+    "last_confirmed_deleted_message_files": 659559,
+    "final_result_path": "/root/dob-storage-cleanup-20261031/phase3-results.json",
+    "progress_path": "/root/dob-storage-cleanup-20261031/phase3.log",
+    "completion_observed": false
+  },
+  "last_health": {
+    "default_revision": "67f91d2886e0b2b6dec6754700066a35eb2fccae",
+    "production_revision": "67f91d2886e0b2b6dec6754700066a35eb2fccae",
+    "both_ready": true,
+    "passed_readiness_checks": 10,
+    "collector_running_processes": 8,
+    "vault_port": 18443,
+    "vault_active": true,
+    "vault_pid": 1176,
+    "vault_restarts": 0,
+    "vault_https_unauthenticated_status": 401
+  },
+  "runtime_updated": false,
+  "next_step": "After remote access is available, read the existing phase3 result and verify protected file hashes and live services before any further deletion or deployment. Do not replay the cleanup scripts."
+}
