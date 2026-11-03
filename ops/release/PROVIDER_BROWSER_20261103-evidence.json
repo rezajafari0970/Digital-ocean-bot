@@ -1,0 +1,51 @@
+{
+  "date": "2026-11-03",
+  "runtime_revision": "1081be7edc22bb0cd50ccfc93852aa1650f73406",
+  "source_ci": 41124609102,
+  "public_ci": 41124939606,
+  "default": {
+    "deployed": true,
+    "schema": 206,
+    "ready_checks": 5,
+    "preservation_checks": 18,
+    "assets_verified": 22,
+    "installed_isolated_browser_frame": true,
+    "fixture_all_tunnels_denied": true
+  },
+  "production": {
+    "first_attempt": "migration deadline exceeded; transaction rolled back",
+    "rollback_verified_at": "2026-11-03T11:41:53.582749+00:00",
+    "rollback_revision": "67f91d2886e0b2b6dec6754700066a35eb2fccae",
+    "rollback_schema": 205,
+    "rollback_ready_checks": 5,
+    "environment_key_instance_identity_preserved": true,
+    "native_sealed_backup_and_archive_verified": true,
+    "retry": "running",
+    "retry_operator_pid": 1598866,
+    "retry_receipts": "/root/dob-provider-browser-20261103/production-retry"
+  },
+  "operator_fixes": {
+    "updater_sha256": "20fc53991d8ab5f5f8275df6788555cfb90fde140d043d84da570e9da9676070",
+    "fresh_backup_sha256": "ea7eb1c0bb5b3e8fe8c0999b3604afe3e90eda092b895536a1c551724ec4a653",
+    "migration_pgoptions": "-c default_toast_compression=lz4",
+    "dump_compression": "zstd:1",
+    "readiness_seconds": 900,
+    "migration_deadline_seconds_unchanged": 900,
+    "transaction_tests_passed": 4,
+    "sample_rows": 100,
+    "sample_identical_bidirectional_except_all": true,
+    "sample_pglz_copy_ms": 1105.382,
+    "sample_lz4_copy_ms": 294.196,
+    "zstd_format_parse_verified": true
+  },
+  "protected_vault": {
+    "port": 18443,
+    "active": true,
+    "pid": 1176,
+    "restarts": 0
+  },
+  "live_provider_site_acceptance": "pending",
+  "final_output_verification": "pending",
+  "new_openai_api_requests": 0,
+  "cloud_create_test_requests": 0
+}

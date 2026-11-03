@@ -5,6 +5,7 @@ Uses the same short-lived operator fixture as cmd/admin-acceptance. Existing
 administrators, accounts, proxy policies and credentials are never changed.
 Run only after the verified release is installed. All evidence stays root-only.
 """
+import argparse
 import base64
 import datetime
 import hashlib
@@ -26,6 +27,12 @@ EXPECTED = '1081be7edc22bb0cd50ccfc93852aa1650f73406'
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--country', help='Explicit country for disposable test sessions only; saved account policy is unchanged')
+    args = parser.parse_args()
+    if args.country:
+        args.country = args.country.upper()
+        assert len(args.country) == 2 and args.country.isascii() and args.country.isalpha()
     os.umask(0o077)
     helpers = runpy.run_path('/opt/dob-production/support/bootstrap.py')
     env = helpers['database_environment'](helpers['read_environment'](Path('/etc/dob-production/env')))
@@ -107,8 +114,11 @@ def main():
         countries = [c for c in policy.get('countries', []) if c != 'AUTO'][:3]
         if not countries:
             countries = [(policy.get('active_country') or '').upper() or 'US']
+        if args.country:
+            countries = [args.country]
         result.update(provider=account['provider'], requested_countries=countries,
-                      country_selection='saved explicit priorities, otherwise current observed country or US for this disposable session')
+                      country_selection=('explicit operator test selection; saved account policy unchanged' if args.country else
+                                         'saved explicit priorities, otherwise current observed country or US for this disposable session'))
         payload = {'provider': account['provider'], 'account_id': account['id'], 'proxy_id': ids[0],
                    'proxy_ids': ids, 'proxy_countries': countries, 'width': 390, 'height': 800}
         code, rejected = request('POST', '/api/v1/provider-browser/sessions', payload, authorized=False)
@@ -137,6 +147,16 @@ def main():
                 return
             record['frame'] = frame_summary(frame, number)
             save()
+        # Refresh both after startup so the retained frames include asynchronous
+        # page loading. A returned frame alone does not establish provider login.
+        time.sleep(5)
+        for number, session in enumerate(sessions, 1):
+            code, frame = request('POST', '/api/v1/provider-browser/sessions/' + session + '/action', {'kind': 'frame'})
+            if code != 200:
+                result['blocked'] = {'stage': 'final_frame_' + str(number), 'status': code, 'error': frame.get('error')}
+                return
+            result['sessions'][number - 1]['frame'] = frame_summary(frame, number)
+            save()
         result['distinct_sessions'] = len(set(sessions)) == 2
         units = subprocess.check_output(['systemctl', 'list-units', '--type=service', '--plain', '--no-legend',
                                          'datacenter-provider-browser@*'], text=True).splitlines()
@@ -148,8 +168,10 @@ def main():
                 process = Path('/proc') / str(pid)
                 namespaces.append({'network': os.readlink(process / 'ns/net'),
                                    'mount': os.readlink(process / 'ns/mnt'), 'nonroot': process.stat().st_uid != 0})
-        result['live_namespace_isolation'] = (len(namespaces) == 2 and all(x['nonroot'] for x in namespaces)
-            and len({x['network'] for x in namespaces}) == 2 and len({x['mount'] for x in namespaces}) == 2
+        result['active_browser_workers'] = len(namespaces)
+        result['live_namespace_isolation'] = (len(namespaces) >= 2 and all(x['nonroot'] for x in namespaces)
+            and len({x['network'] for x in namespaces}) == len(namespaces)
+            and len({x['mount'] for x in namespaces}) == len(namespaces)
             and all(x['network'] != os.readlink('/proc/1/ns/net') for x in namespaces))
         assert result['live_namespace_isolation'], 'separate nonroot network and mount namespaces required'
         result['status'] = 'two isolated live sessions opened through verified selected-country routes'

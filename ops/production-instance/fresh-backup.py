@@ -38,7 +38,9 @@ def main():
      raise RuntimeError("backup_disk_space_low")
     pending=Path(tempfile.mkdtemp(prefix=".pending-",dir=ROOT))
     with (pending/"database.dump").open("wb") as out:
-     subprocess.run(["pg_dump","--format=custom","--no-owner"],env=env,stdout=out,stderr=subprocess.DEVNULL,check=True,timeout=1800)
+     # PostgreSQL 18's zstd archive avoids spending the backup window on gzip
+     # compression of large provider snapshots; full restore parsing still gates sealing.
+     subprocess.run(["pg_dump","--format=custom","--compress=zstd:1","--no-owner"],env=env,stdout=out,stderr=subprocess.DEVNULL,check=True,timeout=1800)
     subprocess.run(["pg_restore","--file=/dev/null",str(pending/"database.dump")],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,check=True,timeout=1800)
     shutil.copytree(ETC,pending/"configuration",symlinks=True,ignore=shutil.ignore_patterns("deployment.pending"))
     latest=helper["seal"](pending,ROOT/datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ"))

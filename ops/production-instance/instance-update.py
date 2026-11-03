@@ -66,7 +66,9 @@ def api(path):
     with urllib.request.urlopen("http://127.0.0.1:28080" + path, timeout=5) as f:
         return json.load(f)
 
-def ready(expected, seconds=300):
+def ready(expected, seconds=900):
+    # Runtime units wait for the integrity/verified-backup startup dependency.
+    # Its ordinary work can exceed five minutes on a multi-GB database.
     end = time.monotonic() + seconds
     while time.monotonic() < end:
         try:
@@ -125,7 +127,9 @@ def migrate():
     h = runpy.run_path(str(ROOT / "support/bootstrap.py"))
     env = dict(os.environ, **h["read_environment"](ETC / "env"))
     env.pop("DOB_FRESH_INSTALL", None)
-    env.pop("PGOPTIONS", None)
+    # Session-only compression for the retention guard's temporary row copies.
+    # Keep the full comparison and existing migration deadline.
+    env["PGOPTIONS"] = "-c default_toast_compression=lz4"
     with (STATE / "migration.log").open("w") as log:
         p = subprocess.Popen(["/usr/sbin/runuser", "-u", "digitaloceanbot", "--",
                               str(ROOT / "bin/install-bootstrap")], cwd=ROOT, env=env,
