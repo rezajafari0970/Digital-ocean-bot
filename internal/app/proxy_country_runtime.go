@@ -34,6 +34,7 @@ type countryConfig struct {
 	Pool                    []countryProxy
 }
 type countryCandidate struct {
+	ephemeral                bool // In-memory onboarding mode; never persisted as account state.
 	ProxyID, Session, Target string
 	Port                     int
 	Geo                      stickyGeo
@@ -232,6 +233,9 @@ func (c Container) verifyCountryCandidateUsing(ctx context.Context, s countrySna
 			target = s.LearnedCountry
 		}
 		user = proxySessionUsername(p.Adapter, p.Username, target, v.Session, target != "" && cap.CountryTargeting)
+		if v.ephemeral {
+			user = proxyEphemeralSessionUsername(p.Adapter, p.Username, target, v.Session, target != "" && cap.CountryTargeting)
+		}
 	}
 	proxy := network.Proxy{ID: p.ID, Type: network.ProxyType(p.Type), Host: p.Host, Port: v.Port, Status: network.StatusHealthy}
 	probeCtx, cancel := context.WithTimeout(ctx, 7*time.Second)

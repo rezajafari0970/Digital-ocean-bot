@@ -24,6 +24,13 @@ type ProxyProviderAdapter interface {
 	Username(ProxySessionRequest) string
 }
 
+// EphemeralProxyProviderAdapter supplies an independent session on the configured
+// endpoint without allocating or reusing an existing account's dedicated port.
+// Drivers without a separate grammar keep their ordinary Username contract.
+type EphemeralProxyProviderAdapter interface {
+	EphemeralUsername(ProxySessionRequest) string
+}
+
 type genericProxyAdapter struct{}
 
 func (genericProxyAdapter) Name() string                          { return "generic" }
@@ -50,6 +57,14 @@ func (suffixSessionAdapter) Capabilities() ProxyCapabilities {
 	return ProxyCapabilities{CountryTargeting: true, StickySession: true, SessionTTL: true, DedicatedPort: true}
 }
 func (suffixSessionAdapter) Username(r ProxySessionRequest) string {
+	return suffixSessionUsername(r, "sid")
+}
+func (suffixSessionAdapter) EphemeralUsername(r ProxySessionRequest) string {
+	// DataImpulse's rotating HTTP/SOCKS endpoints use sessid, not sid.
+	// Existing dedicated-port account identities retain their original grammar.
+	return suffixSessionUsername(r, "sessid")
+}
+func suffixSessionUsername(r ProxySessionRequest, parameter string) string {
 	base := r.BaseUsername
 	if i := strings.Index(base, "__"); i >= 0 {
 		base = base[:i]
@@ -59,7 +74,7 @@ func (suffixSessionAdapter) Username(r ProxySessionRequest) string {
 		p = append(p, "cr."+strings.ToLower(r.CountryCode))
 	}
 	if r.SessionID != "" {
-		p = append(p, "sid."+r.SessionID, "sessttl.120")
+		p = append(p, parameter+"."+r.SessionID, "sessttl.120")
 	}
 	if len(p) == 0 {
 		return base
@@ -129,6 +144,15 @@ func proxySessionUsername(adapter, base, country, session string, targeted bool)
 // ProxySessionUsername exposes the canonical adapter rewrite for preview/validation paths.
 func ProxySessionUsername(adapter, base, country, session string, targeted bool) string {
 	return proxySessionUsername(adapter, base, country, session, targeted)
+}
+
+func proxyEphemeralSessionUsername(adapter, base, country, session string, targeted bool) string {
+	driver := proxyAdapterByName(adapter)
+	r := ProxySessionRequest{BaseUsername: base, CountryCode: country, SessionID: session, TargetCountry: targeted && driver.Capabilities().CountryTargeting}
+	if ephemeral, ok := driver.(EphemeralProxyProviderAdapter); ok {
+		return ephemeral.EphemeralUsername(r)
+	}
+	return driver.Username(r)
 }
 
 func ProxyAdapterCapabilities(adapter string) ProxyCapabilities {

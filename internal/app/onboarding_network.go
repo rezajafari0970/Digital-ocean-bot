@@ -87,7 +87,7 @@ func (c Container) onboardingClient(ctx context.Context, proxyID, country string
 	if (country != proxyselection.Auto || strict) && !cap.StickySession && !cap.FixedEgress {
 		return nil, nil, "", unusableOnboarding("proxy_country_stable_driver_required")
 	}
-	v := countryCandidate{ProxyID: p.ID, Session: session, Port: p.Port}
+	v := countryCandidate{ProxyID: p.ID, Session: session, Port: p.Port, ephemeral: true}
 	snapshot := countrySnapshot{Config: countryConfig{Account: identity}, Stage: proxyselection.Auto}
 	if country != proxyselection.Auto || strict {
 		if country != proxyselection.Auto {
@@ -111,7 +111,7 @@ func (c Container) onboardingClient(ctx context.Context, proxyID, country string
 	}
 	user := p.Username
 	if cap.StickySession {
-		user = ProxySessionUsername(p.Adapter, user, v.Target, v.Session, v.Target != "" && cap.CountryTargeting)
+		user = proxyEphemeralSessionUsername(p.Adapter, user, v.Target, v.Session, v.Target != "" && cap.CountryTargeting)
 	}
 	proxy := network.Proxy{ID: p.ID, Type: network.ProxyType(p.Type), Host: p.Host, Port: v.Port, Status: network.StatusHealthy}
 	credentials := network.ProxyCredentials{Username: user, Password: string(password)}
