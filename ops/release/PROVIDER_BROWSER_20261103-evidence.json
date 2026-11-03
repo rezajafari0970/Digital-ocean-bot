@@ -20,9 +20,30 @@
     "rollback_ready_checks": 5,
     "environment_key_instance_identity_preserved": true,
     "native_sealed_backup_and_archive_verified": true,
-    "retry": "running",
+    "retry": "deployed and verified",
     "retry_operator_pid": 1598866,
-    "retry_receipts": "/root/dob-provider-browser-20261103/production-retry"
+    "retry_receipts": "/root/dob-provider-browser-20261103/production-retry",
+    "retry_native_backup": {
+      "sealed_source": "20261103T115545.082183Z",
+      "archive_verified_at": "2026-11-03T11:56:29Z",
+      "new_zstd_dump": true
+    },
+    "migration_completed_by": "2026-11-03T12:08:12Z",
+    "retry_memory": {
+      "cancel_requested": false,
+      "peak_backend_rss": 958959616,
+      "lowest_mem_available": 1123315712
+    },
+    "final_acceptance_pid": 1681256,
+    "deployed": true,
+    "schema": 206,
+    "ready_checks": 5,
+    "preservation_checks": 18,
+    "assets_verified": 22,
+    "unchanged_profile_identities": 2265,
+    "unchanged_trojan_identities": 10,
+    "startup_backup_source": "20261103T121132.389707Z",
+    "startup_archive_verified_at": "2026-11-03T12:11:54Z"
   },
   "operator_fixes": {
     "updater_sha256": "20fc53991d8ab5f5f8275df6788555cfb90fde140d043d84da570e9da9676070",
@@ -44,8 +65,22 @@
     "pid": 1176,
     "restarts": 0
   },
-  "live_provider_site_acceptance": "pending",
+  "live_provider_site_acceptance": {
+    "state": "blocked pending ephemeral-session driver correction",
+    "requested_country": "IT",
+    "provider": "vultr",
+    "error": "browser_route_unverified",
+    "temporary_operator_removed": true,
+    "saved_account_policy_changed": false
+  },
   "final_output_verification": "pending",
   "new_openai_api_requests": 0,
-  "cloud_create_test_requests": 0
+  "cloud_create_test_requests": 0,
+  "ephemeral_session_diagnosis": {
+    "configured_port": 824,
+    "country": "IT",
+    "sid_three_connections_stable": false,
+    "sessid_three_connections_stable": true,
+    "saved_configuration_changed": false
+  }
 }

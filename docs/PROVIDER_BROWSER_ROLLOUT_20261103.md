@@ -25,9 +25,9 @@ it does not reimplement the feature or replay uncertain provider creates.
 | Default deployment | Complete at 10:59 UTC; revision 1081be7, schema 206, five readiness checks passed |
 | Installed browser sandbox | Passed on the live host; actual Chromium returned an isolated 390 × 800 frame while all tunnel attempts were denied |
 | First production attempt | Migration reached its 15-minute deadline; schema 205 and prior runtime restored and verified |
-| Production retry | Running with faster temporary compression and reviewed unchanged candidate |
-| Actual provider-site acceptance | Pending deployment |
-| Final output/preservation verification | Pending deployment |
+| Production retry | Complete; schema 206, five readiness checks and all 18 preservation checks passed at 12:12 UTC |
+| Actual provider-site acceptance | Correctly blocked unstable configured DataImpulse route; ephemeral-session grammar fix in validation |
+| Final output/preservation verification | Preservation passed; global outputs and four viewers passed; initial account fixtures had only expired servers |
 
 The November 3 initial production readiness result was
 `database_backup_unavailable`. Journal evidence identifies a 1,800-second pg_dump
@@ -41,8 +41,8 @@ Private current receipts and copied pinned rollout helpers are under
 `/root/dob-provider-browser-20261103` on `limited-lime.ptr.network`. The immutable
 public checkout remains `/root/dob-build-activity-20261030/public-verified`.
 The old controller remains quarantined. The backup vault on port 18443 remains
-protected at PID 1176 with zero restarts. Only the default instance has been
-updated so far. Its three active executables match their release hashes, with
+protected at PID 1176 with zero restarts. The default instance is fully ready. Production has committed schema 206 and all three services are ready on the
+new runtime, with matching executable hashes and zero restarts. The default instance's three active executables match their release hashes, with
 zero restarts, and all 18 preservation checks passed. The bounded builder's
 actual kernel controls were verified: 1 GiB maximum memory, 768 MiB memory high
 and 100% CPU quota. The production backup continued within available resources.
@@ -67,8 +67,9 @@ receipts are in `production-retry/`; read `update-result.json` and `update.log`
 before resuming, and never launch a duplicate updater. The reviewed candidate is
 the first attempt's unchanged failed-runtime directory, with exact source,
 support, executable, browser runner and all 22 asset hashes verified before reuse.
-The read-only health monitor is PID 1454887, with `health-latest.json` and
-`health-history.jsonl` in the same private directory.
+The current retry monitor writes `health-retry-latest.json`,
+`health-retry-history.jsonl`, and `retry-migration-memory.json` in the same
+private directory. Inspect receipt timestamps rather than an older monitor PID.
 
 ## Deployment performance correction
 
@@ -86,8 +87,19 @@ EXCEPT ALL. Temporary-copy time was 1105.382 ms with pglz and 294.196 ms with lz
 temporary sizes were 7,970,816 and 4,284,416 bytes. These are a scoped sample, not
 a whole-database speed guarantee. A real schema_migrations custom archive using
 Zstandard was parsed successfully by installed pg_restore. All four operator
-transaction/rollback tests passed. Full native backup/migration verification on
-the retry remains authoritative.
+transaction/rollback tests passed. The full native retry backup succeeded: sealed source
+`20261103T115545.082183Z`, with its matching encrypted archive complete at
+11:56:29 UTC. This was an actual new Zstandard dump, not reuse of an earlier
+archive. Migration began at 11:56:30 and completed its temporary capture by
+12:03; the mandatory full comparisons passed by 12:08:12, when the native startup
+integrity service began. Schema 206 is committed. Its process environment was
+checked for the exact session-only LZ4 setting. The resource monitor requested no
+cancellation: peak backend RSS 958,959,616 bytes, minimum available host memory
+1,123,315,712 bytes. The new-schema startup backup sealed source `20261103T121132.389707Z` and
+matching encrypted archive completed at 12:11:54 UTC. All five readiness checks
+and all 18 preservation checks passed at 12:12:14. All 2,265 pre-existing profile
+identities and ten Trojan identities were unchanged; normal work added two
+profile identities. All 22 production HTTP assets and panel HTML matched.
 
 PostgreSQL references:
 - https://www.postgresql.org/docs/18/runtime-config-client.html
@@ -105,3 +117,34 @@ Browser limits remain explicit: disposable sessions, 15-minute lifetime, two
 minutes without control-channel activity, and no uploads/downloads. Explicit
 country priorities never acquire an arbitrary AUTO fallback; uncertain route
 proof blocks launch or closes an existing session.
+
+The bounded final acceptance continuation is PID 1681256. It waits for this
+retry's successful result, then checks preservation, served assets, output routes,
+two disposable Vultr browser sessions using explicit Italy, and final health.
+Receipts are `finish-acceptance.json` and `final-*.log`. Do not launch duplicate
+tests while it is running. The saved account country policy is unchanged.
+
+## Real-provider regression found after deployment
+
+The first live Italy/Vultr session failed closed with `browser_route_unverified`.
+Its temporary administrator was removed and no browser session was opened.
+The sole configured proxy uses the suffix-session driver and SOCKS port 824.
+A bounded, proxied live comparison confirmed Italy on both variants, but three
+independent connections with `sid` had three different IPs, while `sessid` kept
+the same IP across all three. No saved proxy/account configuration was changed.
+The official driver reference specifies `sessid` for this endpoint:
+https://docs.dataimpulse.com/proxies/parameters/session-id
+
+The correction adds an optional ephemeral-session driver contract. Onboarding
+proofs and subsequent provider/browser connections use its `sessid` grammar;
+existing dedicated-port account identities keep their prior grammar. Native
+tunnel regression now requires the appropriate grammar in both modes, including
+proof, provider dispatch and country-drift rejection. Full CI and public
+installation checks are required before promoting this correction.
+
+The first output sample selected the newest existing account capabilities, both
+for DigitalOcean accounts with no unexpired servers or output rows. Their empty
+HTTP 200/no-store responses were correct. Global DIRECT/RESIDENTIAL routes each
+returned 37 valid URI lines and all four public viewer shells passed. The
+positive account sample is being selected from existing live capabilities; no
+share token, server or output record is being created for the test.

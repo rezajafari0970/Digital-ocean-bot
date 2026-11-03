@@ -29,7 +29,9 @@ EXPECTED = '1081be7edc22bb0cd50ccfc93852aa1650f73406'
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--country', help='Explicit country for disposable test sessions only; saved account policy is unchanged')
+    parser.add_argument('--revision', default=EXPECTED, help='Exact installed public release required for acceptance')
     args = parser.parse_args()
+    assert len(args.revision) == 40 and all(c in '0123456789abcdef' for c in args.revision)
     if args.country:
         args.country = args.country.upper()
         assert len(args.country) == 2 and args.country.isascii() and args.country.isalpha()
@@ -77,7 +79,7 @@ def main():
                 'origin': parsed.scheme + '://' + parsed.netloc, 'title': frame.get('title', '')[:160],
                 'width': frame.get('width'), 'height': frame.get('height')}
 
-    assert request('GET', '/version', authorized=False)[1]['commit'] == EXPECTED
+    assert request('GET', '/version', authorized=False)[1]['commit'] == args.revision
     assert request('GET', '/readyz', authorized=False)[1]['status'] == 'ready'
     save()
     try:

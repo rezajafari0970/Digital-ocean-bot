@@ -33,7 +33,7 @@ func TestCountryCandidateNativeTunnelAndReconnectPostgres(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	var rotating, wrongCountry, observerOutage, rejectAuth, fixedMode, missingCountry atomic.Bool
+	var rotating, wrongCountry, observerOutage, rejectAuth, fixedMode, missingCountry, ephemeralMode atomic.Bool
 	var connects, geoCalls, ipCalls atomic.Int32
 	var providerCalls atomic.Int32
 	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -79,7 +79,11 @@ func TestCountryCandidateNativeTunnelAndReconnectPostgres(t *testing.T) {
 		auth := r.Clone(r.Context())
 		auth.Header.Set("Authorization", r.Header.Get("Proxy-Authorization"))
 		user, _, ok := auth.BasicAuth()
-		if !ok || (!fixedMode.Load() && !strings.Contains(user, "cr.us;sid.")) || (fixedMode.Load() && user != "base") {
+		grammar := "cr.us;sid."
+		if ephemeralMode.Load() {
+			grammar = "cr.us;sessid."
+		}
+		if !ok || (!fixedMode.Load() && !strings.Contains(user, grammar)) || (fixedMode.Load() && user != "base") {
 			http.Error(w, "wrong driver grammar", 407)
 			return
 		}
@@ -195,6 +199,10 @@ func TestCountryCandidateNativeTunnelAndReconnectPostgres(t *testing.T) {
 		t.Fatal("auth rejection not isolated to provider", result)
 	}
 	rejectAuth.Store(false)
+	// The ephemeral route must use the real rotating-endpoint session parameter
+	// during every proof and provider connection, while account routes above keep
+	// their existing dedicated-port identity grammar.
+	ephemeralMode.Store(true)
 	store, err := secrets.NewStore(secrets.SQLRepository{DB: db}, make([]byte, 32), 1)
 	if err != nil {
 		t.Fatal(err)
