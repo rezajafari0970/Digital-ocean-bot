@@ -1,50 +1,8 @@
 {
   "date": "2026-11-03",
-  "runtime_revision": "1081be7edc22bb0cd50ccfc93852aa1650f73406",
-  "source_ci": 41124609102,
-  "public_ci": 41124939606,
-  "default": {
-    "deployed": true,
-    "schema": 206,
-    "ready_checks": 5,
-    "preservation_checks": 18,
-    "assets_verified": 22,
-    "installed_isolated_browser_frame": true,
-    "fixture_all_tunnels_denied": true
-  },
-  "production": {
-    "first_attempt": "migration deadline exceeded; transaction rolled back",
-    "rollback_verified_at": "2026-11-03T11:41:53.582749+00:00",
-    "rollback_revision": "67f91d2886e0b2b6dec6754700066a35eb2fccae",
-    "rollback_schema": 205,
-    "rollback_ready_checks": 5,
-    "environment_key_instance_identity_preserved": true,
-    "native_sealed_backup_and_archive_verified": true,
-    "retry": "deployed and verified",
-    "retry_operator_pid": 1598866,
-    "retry_receipts": "/root/dob-provider-browser-20261103/production-retry",
-    "retry_native_backup": {
-      "sealed_source": "20261103T115545.082183Z",
-      "archive_verified_at": "2026-11-03T11:56:29Z",
-      "new_zstd_dump": true
-    },
-    "migration_completed_by": "2026-11-03T12:08:12Z",
-    "retry_memory": {
-      "cancel_requested": false,
-      "peak_backend_rss": 958959616,
-      "lowest_mem_available": 1123315712
-    },
-    "final_acceptance_pid": 1681256,
-    "deployed": true,
-    "schema": 206,
-    "ready_checks": 5,
-    "preservation_checks": 18,
-    "assets_verified": 22,
-    "unchanged_profile_identities": 2265,
-    "unchanged_trojan_identities": 10,
-    "startup_backup_source": "20261103T121132.389707Z",
-    "startup_archive_verified_at": "2026-11-03T12:11:54Z"
-  },
+  "runtime_revision": "9b2c75efe8399c4aade0bbcc55eb3858f5c5a3b6",
+  "source_ci": 41634988073,
+  "public_ci": 41635633385,
   "operator_fixes": {
     "updater_sha256": "20fc53991d8ab5f5f8275df6788555cfb90fde140d043d84da570e9da9676070",
     "fresh_backup_sha256": "ea7eb1c0bb5b3e8fe8c0999b3604afe3e90eda092b895536a1c551724ec4a653",
@@ -63,17 +21,21 @@
     "port": 18443,
     "active": true,
     "pid": 1176,
-    "restarts": 0
+    "restarts": 0,
+    "unauthenticated_https_status": 401
   },
-  "live_provider_site_acceptance": {
-    "state": "blocked pending ephemeral-session driver correction",
-    "requested_country": "IT",
-    "provider": "vultr",
-    "error": "browser_route_unverified",
-    "temporary_operator_removed": true,
-    "saved_account_policy_changed": false
+  "final_output_verification": {
+    "status": "passed",
+    "raw_routes": 8,
+    "public_viewers": 4,
+    "global_uri_lines": 40,
+    "account_uri_lines": 20,
+    "withheld": 0,
+    "initial_empty_accounts_had_no_unexpired_servers_or_outputs": true,
+    "at": "2026-11-03T12:52:00.017407+00:00",
+    "existing_capabilities_only": true,
+    "no_store": true
   },
-  "final_output_verification": "pending",
   "new_openai_api_requests": 0,
   "cloud_create_test_requests": 0,
   "ephemeral_session_diagnosis": {
@@ -82,5 +44,155 @@
     "sid_three_connections_stable": false,
     "sessid_three_connections_stable": true,
     "saved_configuration_changed": false
+  },
+  "ephemeral_fix": {
+    "source_sha": "c6d7f756dcb5a6d2e3e037d1c152d9878cbf60cd",
+    "source_pr": 36,
+    "source_ci": 41634988073,
+    "public_candidate": "9b2c75efe8399c4aade0bbcc55eb3858f5c5a3b6",
+    "public_ci": 41635633385,
+    "export_files": 1869,
+    "export_exact_bytes_and_modes": true,
+    "manifest_sha256": "5fdbb695c1fb78bd708dd3fd6d31c0e21c00698ab5b50d393ab7b184e9ec4096",
+    "live_secret_scans_passed": 2,
+    "gitleaks_passed": true,
+    "state": "promoted, deployed and accepted on both live instances",
+    "source_merge": "b60688c2b0ea90083c409af82285cc2fc31a7913",
+    "source_ci_passed": true,
+    "source_required_passed": 353,
+    "source_required_skipped": 0,
+    "public_ci_passed": true,
+    "atomic_promotion": 41636644910,
+    "both_stable_refs_verified": true,
+    "rollout_pid": 1764896,
+    "rollout_steps_passed": 11,
+    "rollout_completed_at": "2026-11-03T12:52:22.935798+00:00",
+    "native_cookie_storage_separation_passed": true,
+    "native_direct_connection_count": 0
+  },
+  "original_deployment": {
+    "default": {
+      "deployed": true,
+      "schema": 206,
+      "ready_checks": 5,
+      "preservation_checks": 18,
+      "assets_verified": 22,
+      "installed_isolated_browser_frame": true,
+      "fixture_all_tunnels_denied": true
+    },
+    "production": {
+      "first_attempt": "migration deadline exceeded; transaction rolled back",
+      "rollback_verified_at": "2026-11-03T11:41:53.582749+00:00",
+      "rollback_revision": "67f91d2886e0b2b6dec6754700066a35eb2fccae",
+      "rollback_schema": 205,
+      "rollback_ready_checks": 5,
+      "environment_key_instance_identity_preserved": true,
+      "native_sealed_backup_and_archive_verified": true,
+      "retry": "deployed and verified",
+      "retry_operator_pid": 1598866,
+      "retry_receipts": "/root/dob-provider-browser-20261103/production-retry",
+      "retry_native_backup": {
+        "sealed_source": "20261103T115545.082183Z",
+        "archive_verified_at": "2026-11-03T11:56:29Z",
+        "new_zstd_dump": true
+      },
+      "migration_completed_by": "2026-11-03T12:08:12Z",
+      "retry_memory": {
+        "cancel_requested": false,
+        "peak_backend_rss": 958959616,
+        "lowest_mem_available": 1123315712
+      },
+      "final_acceptance_pid": 1681256,
+      "deployed": true,
+      "schema": 206,
+      "ready_checks": 5,
+      "preservation_checks": 18,
+      "assets_verified": 22,
+      "unchanged_profile_identities": 2265,
+      "unchanged_trojan_identities": 10,
+      "startup_backup_source": "20261103T121132.389707Z",
+      "startup_archive_verified_at": "2026-11-03T12:11:54Z"
+    },
+    "live_provider_site_acceptance": {
+      "state": "blocked pending ephemeral-session driver correction",
+      "requested_country": "IT",
+      "provider": "vultr",
+      "error": "browser_route_unverified",
+      "temporary_operator_removed": true,
+      "saved_account_policy_changed": false
+    },
+    "runtime_revision": "1081be7edc22bb0cd50ccfc93852aa1650f73406",
+    "source_ci": 41124609102,
+    "public_ci": 41124939606
+  },
+  "completed_at": "2026-11-03T12:52:22.935798+00:00",
+  "state": "deployed and verified; real provider page shows third-party security challenge",
+  "default": {
+    "deployed": true,
+    "verified_at": "2026-11-03T12:34:48.204586+00:00",
+    "schema": 206,
+    "ready_checks": 5,
+    "preservation_checks": 18,
+    "assets_verified": 22,
+    "active_services": 3,
+    "executable_hash_matches": 3,
+    "automatic_restarts": 0,
+    "unchanged_profile_identities": 0,
+    "unchanged_trojan_identities": 0,
+    "unexpected_identity_changes": 0
+  },
+  "production": {
+    "deployed": true,
+    "verified_at": "2026-11-03T12:51:57.757081+00:00",
+    "schema": 206,
+    "ready_checks": 5,
+    "preservation_checks": 18,
+    "assets_verified": 22,
+    "active_services": 3,
+    "executable_hash_matches": 3,
+    "automatic_restarts": 0,
+    "unchanged_profile_identities": 2267,
+    "unchanged_trojan_identities": 10,
+    "unexpected_identity_changes": 0,
+    "native_sealed_backup_source": "20261103T125022.272049Z",
+    "native_archive_verified_at": "2026-11-03T12:51:40Z",
+    "deployment_pending": false
+  },
+  "live_provider_site_acceptance": {
+    "at": "2026-11-03T12:52:00.192874+00:00",
+    "state": "selected-country site access and isolated rendering passed",
+    "provider": "vultr",
+    "origin": "https://my.vultr.com",
+    "requested_country": "IT",
+    "verified_country_per_session": [
+      "IT",
+      "IT"
+    ],
+    "distinct_sessions": 2,
+    "live_namespace_isolation": true,
+    "nonroot_browser_workers": 2,
+    "frames_visually_inspected": 2,
+    "visible_page": "Cloudflare security verification in Italian",
+    "provider_login_verified": false,
+    "challenge_bypassed": false,
+    "unauthenticated_rejected": true,
+    "missing_proxy_rejected": true,
+    "sessions_closed": true,
+    "temporary_operator_removed": true,
+    "saved_account_policy_changed": false,
+    "registered_provider_entrypoints": 7,
+    "frame_sha256": [
+      "c1d25959c9ed51b6ace37e643ef6b63b723fef976cb5ea21a1b4a82a22968963",
+      "82121bbb8b2d295f381fd2f8ce7322d3e59aa085eccd349c265d8d527a60856f"
+    ]
+  },
+  "final_health": {
+    "at": "2026-11-03T12:52:22.227956+00:00",
+    "ready_checks": 10,
+    "matching_executable_hashes": 6,
+    "free_bytes": 25614512128,
+    "production_deployment_pending": false,
+    "browser_fixture_removed": true,
+    "temporary_monitor_stopped": true
   }
 }

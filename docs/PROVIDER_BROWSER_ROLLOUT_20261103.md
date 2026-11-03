@@ -1,150 +1,158 @@
 # Provider browser rollout — 2026-11-03
 
-User scope: three AUTO-default country priorities during account creation and
-an isolated, selected-country provider browser, available from both the account
-wizard and each existing account. This continues the already verified release;
-it does not reimplement the feature or replay uncertain provider creates.
+User scope: three AUTO-default country priorities during account creation and an
+isolated provider browser through the selected countries, available from the
+account wizard and each account. No cloud resource was created for testing, no
+saved country policy was changed, and uncertain Kamatera creates were not replayed.
 
-## Verified release
+## Current status
 
-- Public stable revision: `1081be7edc22bb0cd50ccfc93852aa1650f73406`.
-- Source CI: `41124609102`; independent public install/test: `41124939606`.
-- Atomic promotion: `41125845769`. Fresh stable ref matches on November 3.
-- Native CI covered HTTPS/WebSockets/input, distinct cookie/storage profiles,
-  rejected destinations and zero direct-host requests. This is fixture evidence,
-  not a guarantee that every external site's authentication accepts the browser.
-
-## Current stages
-
-| Stage | Status |
+| Stage | Evidence |
 | --- | --- |
-| Recover prior cleanup receipt | Complete; phase 3 reported complete and protected configuration unchanged |
-| Fresh disk check | 25,871,650,816 bytes available; production reserve 15,128,642,621 bytes |
-| Default baseline | Captured; old revision 67f91d2, schema 205, ready |
-| Production backup prerequisite | Recovered; native sealed backup and encrypted archive verified |
-| Default deployment | Complete at 10:59 UTC; revision 1081be7, schema 206, five readiness checks passed |
-| Installed browser sandbox | Passed on the live host; actual Chromium returned an isolated 390 × 800 frame while all tunnel attempts were denied |
-| First production attempt | Migration reached its 15-minute deadline; schema 205 and prior runtime restored and verified |
-| Production retry | Complete; schema 206, five readiness checks and all 18 preservation checks passed at 12:12 UTC |
-| Actual provider-site acceptance | Correctly blocked unstable configured DataImpulse route; ephemeral-session grammar fix in validation |
-| Final output/preservation verification | Preservation passed; global outputs and four viewers passed; initial account fixtures had only expired servers |
+| Authorized storage cleanup | Complete; final receipt reconciled in STORAGE_CLEANUP_20261031.md |
+| Final deployment | Both live instances run 9b2c75e at schema 206; default verified 12:34:48 UTC, production 12:51:57 UTC |
+| Preservation | All 18 checks passed per instance; exact running executables and 22 served assets matched |
+| Production identities | All 2,267 profile identities and ten Trojan identities in the correction baseline unchanged |
+| Output routes | Eight raw routes and four viewers passed; positive samples returned 40 global and 20 account URI lines per class |
+| Actual provider browser | Two isolated Italy/Vultr sessions opened; both rendered the real site's Cloudflare security challenge; authenticated login was not tested |
+| Correction source CI | PR36 merged as b60688c; run 41634988073 passed all 353 mandatory roots, zero skips |
+| Independent correction installation | Candidate 9b2c75e / run 41635633385 passed test, fresh installation and repeat installation |
+| Correction deployment and live acceptance | Atomic promotion 41636644910 passed; all 11 rollout/acceptance steps completed successfully by 12:52:22 UTC |
+| Protected backup vault | Port 18443 active at unchanged PID 1176, zero restarts; unauthenticated HTTPS correctly returns 401 |
 
-The November 3 initial production readiness result was
-`database_backup_unavailable`. Journal evidence identifies a 1,800-second pg_dump
-timeout at 06:34 UTC. The database integrity inspection itself passed, with no
-checksum failure or recovery-required signal. The existing native integrity and
-fresh-backup service was restarted at 10:46 UTC; the fresh inspection passed at
-10:47 UTC and the new dump was progressing without blockers. No health receipt
-was fabricated, no guard was bypassed, and existing sealed backups were retained.
+## Live proxy regression and correction
 
-Private current receipts and copied pinned rollout helpers are under
-`/root/dob-provider-browser-20261103` on `limited-lime.ptr.network`. The immutable
-public checkout remains `/root/dob-build-activity-20261030/public-verified`.
-The old controller remains quarantined. The backup vault on port 18443 remains
-protected at PID 1176 with zero restarts. The default instance is fully ready. Production has committed schema 206 and all three services are ready on the
-new runtime, with matching executable hashes and zero restarts. The default instance's three active executables match their release hashes, with
-zero restarts, and all 18 preservation checks passed. The bounded builder's
-actual kernel controls were verified: 1 GiB maximum memory, 768 MiB memory high
-and 100% CPU quota. The production backup continued within available resources.
-All 22 expected static assets, including both dynamically loaded country/browser
-modules, and the configured panel HTML match the exact published release over
-the real default-instance HTTP listener.
+The first actual Italy/Vultr browser launch returned `browser_route_unverified`.
+The temporary administrator was removed; no website session or direct fallback
+was opened. The sole configured proxy uses the suffix-session driver and SOCKS
+port 824. Three independent proxied observations with `sid` produced three
+separate IPs, while the documented `sessid` parameter retained one Italy IP on
+all three connections. Saved proxy/account configuration stayed unchanged.
 
-The first guarded continuation (PID 1478821) has stopped. Its migration timed out
-at 11:31:18 UTC while comparing provider snapshots; the transaction rolled back.
-The independent resource monitor requested no cancellation: peak backend RSS
-960,901,120 bytes, minimum available host memory 1,077,927,936 bytes. Startup of
-the restored runtime waited for its native integrity/backup dependency and
-outlasted the former five-minute readiness deadline. Once that dependency
-completed, all five readiness checks and exact executable hashes passed again.
-At 11:41:53, the already-completed rollback was finalized under the installer
-locks after verifying schema 205, original environment/key/instance identity,
-the sealed backup, matching encrypted archive and native runtime readiness.
-No additional restart was needed to reconcile the pending marker.
+The correction adds an optional ephemeral-session driver contract. Onboarding
+proofs and all subsequent provider/browser connections use its `sessid` grammar.
+Existing dedicated-port account identities retain their original grammar. The
+native CONNECT/TLS regression requires the appropriate grammar in both modes,
+including proof, provider dispatch and country-drift rejection. The driver unit
+regression also covers AUTO, existing suffix replacement, and fixed/generic
+adapters. The guards still reject missing or changed country/IP evidence.
 
-The retry is already running (operator PID 1598866). Its fresh baseline and
-receipts are in `production-retry/`; read `update-result.json` and `update.log`
-before resuming, and never launch a duplicate updater. The reviewed candidate is
-the first attempt's unchanged failed-runtime directory, with exact source,
-support, executable, browser runner and all 22 asset hashes verified before reuse.
-The current retry monitor writes `health-retry-latest.json`,
-`health-retry-history.jsonl`, and `retry-migration-memory.json` in the same
-private directory. Inspect receipt timestamps rather than an older monitor PID.
+Primary driver reference: https://docs.dataimpulse.com/proxies/parameters/session-id
 
-## Deployment performance correction
+- Source PR: https://github.com/rezajafari0970/Digital-ocean-bot/pull/36
+- Exact source: `c6d7f756dcb5a6d2e3e037d1c152d9878cbf60cd`.
+- Exact public candidate: `9b2c75efe8399c4aade0bbcc55eb3858f5c5a3b6`.
+- Export: 1,869 files; all bytes and executable modes match the immutable source export.
+- FILES.json SHA256: `5fdbb695c1fb78bd708dd3fd6d31c0e21c00698ab5b50d393ab7b184e9ec4096`.
+- Both live-secret scans and configured gitleaks passed the exact candidate.
+- Public main/stable were atomically promoted to `9b2c75efe8399c4aade0bbcc55eb3858f5c5a3b6` by run 41636644910 after both exact-commit CI gates passed; both refs were re-read.
 
-The application release remains unchanged. The production operator scripts now
-use session-only `default_toast_compression=lz4` for migration's temporary row
-copies, Zstandard level 1 for new custom-format backups, and a bounded 15-minute
-readiness wait that includes the native startup dependency. The migration still
-has its original 15-minute deadline and performs every full data comparison.
-No global PostgreSQL setting, retained data, backup validity requirement or disk
-reserve was weakened. Existing source copies of the operator scripts matched the
-installed originals before the reviewed changes were applied atomically.
+Private correction receipts, clean source/export/public checkouts and reviewed
+bounded rollout helpers are under
+`/root/dob-provider-browser-20261103/ephemeral-fix` on `limited-lime.ptr.network`.
+The completed `rollout-and-accept.py` verified that both public refs matched the
+exact candidate. It captured fresh independent baselines, updated default then
+production with existing installer guards, verified preservation/assets, checked
+outputs, opened two Italy/Vultr browser sessions, and checked final health.
+`continuation.json` records `passed`; no further updater should be started for
+this rollout.
 
-A 100-row recent-data sample produced identical rows in both directions with
-EXCEPT ALL. Temporary-copy time was 1105.382 ms with pglz and 294.196 ms with lz4;
-temporary sizes were 7,970,816 and 4,284,416 bytes. These are a scoped sample, not
-a whole-database speed guarantee. A real schema_migrations custom archive using
-Zstandard was parsed successfully by installed pg_restore. All four operator
-transaction/rollback tests passed. The full native retry backup succeeded: sealed source
-`20261103T115545.082183Z`, with its matching encrypted archive complete at
-11:56:29 UTC. This was an actual new Zstandard dump, not reuse of an earlier
-archive. Migration began at 11:56:30 and completed its temporary capture by
-12:03; the mandatory full comparisons passed by 12:08:12, when the native startup
-integrity service began. Schema 206 is committed. Its process environment was
-checked for the exact session-only LZ4 setting. The resource monitor requested no
-cancellation: peak backend RSS 958,959,616 bytes, minimum available host memory
-1,123,315,712 bytes. The new-schema startup backup sealed source `20261103T121132.389707Z` and
-matching encrypted archive completed at 12:11:54 UTC. All five readiness checks
-and all 18 preservation checks passed at 12:12:14. All 2,265 pre-existing profile
-identities and ten Trojan identities were unchanged; normal work added two
-profile identities. All 22 production HTTP assets and panel HTML matched.
+## Final live acceptance
+
+The correction default update completed at 12:34:46 UTC and production at
+12:51:53 UTC. The native production backup completed a full custom-format parse,
+sealed source `20261103T125022.272049Z`, and passed encrypted archive integrity
+checks at 12:51:40. Both instances retained all 18 policy/secret/identity checks,
+all 22 served assets matched the approved export, and all six running executable
+hashes matched their release manifests. Production retained all 2,267 profile and
+ten Trojan identities from its fresh correction baseline with zero changes.
+
+At 12:52:22 UTC, both instances passed all five readiness checks, all six services
+were active with zero automatic restarts, no deployment was pending, and
+25,614,512,128 bytes were free on the root filesystem. The protected port-18443
+vault remained at PID 1176 with zero restarts and returned the expected
+unauthenticated HTTPS 401. Temporary test sessions and the temporary operator
+were removed. The task's temporary monitor was stopped after acceptance.
+
+The actual-site acceptance opened two separate 390 × 800 Vultr sessions through
+verified Italian proxy routes. Both used nonroot browser workers with distinct
+network and mount namespaces. Unauthenticated start and missing-proxy requests
+were rejected. Seven registered provider entrypoints were present. Saved account
+country policy and credentials were unchanged; no cloud resource was created.
+
+Both retained frames were visually inspected: they show the real
+`https://my.vultr.com` Cloudflare security-verification page in Italian, with no
+blank frame or browser error. This verifies selected-country access and real-site
+rendering; it does not claim CAPTCHA completion or an authenticated provider
+login. No challenge was bypassed. Native CI separately verified cookie/storage
+separation and zero direct connections under its transport fixtures.
+
+The final output sample passed eight raw routes and four public viewers over
+loopback and the public HTTPS gateway. Positive samples contained 40 global and
+20 account URI lines per route class, with no withheld entries or control-panel
+HTML and with `Cache-Control: no-store`.
+
+To use the feature, open Accounts → New, set the three country priorities (all
+default to AUTO), choose an assigned proxy, and open the provider browser from
+the wizard. Existing accounts expose the same provider-browser action. Explicit
+countries are tried in priority order; if none can be verified, the browser
+refuses to open instead of connecting directly or using an arbitrary country.
+
+## Completed original deployment and recovery
+
+The default instance completed installation at 10:59 UTC. Its actual installed
+Chromium returned an isolated 390 × 800 frame while all tunnel attempts were
+denied. Source CI 41124609102, public CI 41124939606 and atomic promotion
+41125845769 had already verified the original feature release independently.
+
+Production initially reported `database_backup_unavailable` because its 06:00
+pg_dump exceeded 1,800 seconds. Native database integrity itself passed. A new
+sealed backup and encrypted archive were obtained before the first swap.
+The first migration hit its original 15-minute deadline during the full retained
+provider-snapshot comparison. The transaction rolled back to schema 205 and the
+old runtime. The resource monitor requested no cancellation. Startup of the
+restored runtime waited for its integrity/backup dependency and exceeded the old
+five-minute readiness wait. At 11:41:53 UTC, the already-completed rollback was
+reconciled under installer locks only after exact runtime, configuration/key,
+instance identity, sealed backup/archive and all five readiness checks passed.
+
+The reviewed production operator correction uses session-only
+`default_toast_compression=lz4` for temporary migration row copies, Zstandard
+level 1 for new custom-format backups, and a bounded 15-minute readiness wait
+including native startup work. Migration still has its original 15-minute
+limit and every retained-row/column/sequence comparison. No global PostgreSQL
+configuration, retained data, backup validity requirement or disk guard changed.
+Four transaction/rollback tests passed. A 100-row bidirectional EXCEPT ALL sample
+was identical: pglz copy 1105.382 ms versus LZ4 294.196 ms; this is not a general
+whole-database performance guarantee.
+
+The retry's full new Zstandard backup sealed source `20261103T115545.082183Z`;
+its archive completed at 11:56:29 UTC. Migration began at 11:56:30 and passed all
+retention checks by 12:08:12; schema 206 committed. Peak backend RSS was
+958,959,616 bytes and minimum available host memory 1,123,315,712 bytes, with no
+cancellation. The post-migration backup sealed source `20261103T121132.389707Z`
+and matching archive completed at 12:11:54. All five readiness checks and 18
+preservation checks passed at 12:12:14. Six services had matching executable
+hashes and zero restarts; no pending deployment remained.
 
 PostgreSQL references:
 - https://www.postgresql.org/docs/18/runtime-config-client.html
 - https://www.postgresql.org/docs/18/app-pgdump.html
 
-`ops/release/provider-browser-live-20261103.py` is the bounded operational
-acceptance helper. It follows the existing temporary administrator fixture in
-`cmd/admin-acceptance`, never changes existing users/accounts/proxies, and removes
-its fixture in a finally block. It verifies two real provider-browser sessions
-and their separate nonroot network/mount namespaces, saving only root-private
-frames and a redacted receipt. It does not create paid resources or claim an
-ordinary-user login test. Native CI remains the cookie/storage proof.
+## Output sampling and browser limits
 
-Browser limits remain explicit: disposable sessions, 15-minute lifetime, two
-minutes without control-channel activity, and no uploads/downloads. Explicit
-country priorities never acquire an arbitrary AUTO fallback; uncertain route
-proof blocks launch or closes an existing session.
+The first output check selected the newest account capabilities, both belonging
+to DigitalOcean accounts whose servers and output rows had expired. Their empty
+HTTP 200/no-store output was correct. The corrected operational sample retained
+those observations and selected existing capabilities with actual publishable
+rows; eight raw routes and four viewers passed with no withheld entries,
+redirects or control-panel HTML. No share token or output record was created.
 
-The bounded final acceptance continuation is PID 1681256. It waits for this
-retry's successful result, then checks preservation, served assets, output routes,
-two disposable Vultr browser sessions using explicit Italy, and final health.
-Receipts are `finish-acceptance.json` and `final-*.log`. Do not launch duplicate
-tests while it is running. The saved account country policy is unchanged.
-
-## Real-provider regression found after deployment
-
-The first live Italy/Vultr session failed closed with `browser_route_unverified`.
-Its temporary administrator was removed and no browser session was opened.
-The sole configured proxy uses the suffix-session driver and SOCKS port 824.
-A bounded, proxied live comparison confirmed Italy on both variants, but three
-independent connections with `sid` had three different IPs, while `sessid` kept
-the same IP across all three. No saved proxy/account configuration was changed.
-The official driver reference specifies `sessid` for this endpoint:
-https://docs.dataimpulse.com/proxies/parameters/session-id
-
-The correction adds an optional ephemeral-session driver contract. Onboarding
-proofs and subsequent provider/browser connections use its `sessid` grammar;
-existing dedicated-port account identities keep their prior grammar. Native
-tunnel regression now requires the appropriate grammar in both modes, including
-proof, provider dispatch and country-drift rejection. Full CI and public
-installation checks are required before promoting this correction.
-
-The first output sample selected the newest existing account capabilities, both
-for DigitalOcean accounts with no unexpired servers or output rows. Their empty
-HTTP 200/no-store responses were correct. Global DIRECT/RESIDENTIAL routes each
-returned 37 valid URI lines and all four public viewer shells passed. The
-positive account sample is being selected from existing live capabilities; no
-share token, server or output record is being created for the test.
+Each browser session has its own disposable cookie/storage profile and nonroot
+network/mount namespace. Native CI covers HTTPS, WebSockets, input, cookie
+separation and blocked direct routes. Real provider-site acceptance is recorded
+separately and must not be inferred from an isolated blank frame. Sessions last
+at most 15 minutes, expire after two minutes without control activity, and do not
+support uploads/downloads. Country priorities are tried across the assigned
+eligible proxies; AUTO slots beside explicit countries never add arbitrary
+fallback. These checks do not guarantee every third-party login or CAPTCHA flow.
