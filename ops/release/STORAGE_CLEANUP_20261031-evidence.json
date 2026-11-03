@@ -1,8 +1,7 @@
 {
   "date_local": "2026-10-31",
   "timezone": "Asia/Tehran",
-  "status": "MAIN_CLEANUP_CONFIRMED_FINAL_RECEIPT_UNAVAILABLE",
-  "connection_limit": "Remote Desktop Commander monthly usage exhausted; no retry or reconnect attempted",
+  "status": "CLEANUP_COMPLETE_FINAL_RECEIPT_VERIFIED",
   "baseline_at_utc": "2026-10-30T21:38:27Z",
   "last_health_at_utc": "2026-10-30T21:56:08Z",
   "free_before_bytes": 5717532672,
@@ -20,7 +19,9 @@
     "old_install_backups": 77,
     "old_daily_backups": 4,
     "unused_august_installer_staging": true,
-    "legacy_backup_and_staging_allocated_bytes": 477573120
+    "legacy_backup_and_staging_allocated_bytes": 477573120,
+    "old_message_archive_files_final": 1183216,
+    "old_message_allocated_bytes_final": 4893351936
   },
   "retention": {
     "archive_days": 7,
@@ -37,7 +38,8 @@
     "last_confirmed_deleted_message_files": 659559,
     "final_result_path": "/root/dob-storage-cleanup-20261031/phase3-results.json",
     "progress_path": "/root/dob-storage-cleanup-20261031/phase3.log",
-    "completion_observed": false
+    "completion_observed": true,
+    "final_deleted_message_files": 1183216
   },
   "last_health": {
     "default_revision": "67f91d2886e0b2b6dec6754700066a35eb2fccae",
@@ -52,5 +54,10 @@
     "vault_https_unauthenticated_status": 401
   },
   "runtime_updated": false,
-  "next_step": "After remote access is available, read the existing phase3 result and verify protected file hashes and live services before any further deletion or deployment. Do not replay the cleanup scripts."
+  "next_step": "Cleanup complete. Do not rerun deletion scripts. Follow docs/PROVIDER_BROWSER_ROLLOUT_20261103.md for the live feature rollout.",
+  "historical_connection_limit": "Remote Desktop Commander monthly usage exhausted; no retry or reconnect attempted",
+  "final_receipt_verified_on": "2026-11-03",
+  "final_free_bytes": 33585975296,
+  "final_net_free_increase_bytes": 27868442624,
+  "protected_configuration_unchanged": true
 }

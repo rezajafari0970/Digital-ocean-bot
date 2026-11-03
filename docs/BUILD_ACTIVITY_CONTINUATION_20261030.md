@@ -1,4 +1,4 @@
-> Storage follow-up (2026-10-31 Tehran): [authorized cleanup](STORAGE_CLEANUP_20261031.md) raised observed free space to 31.68 GB. The final background-cleanup receipt awaits remote-tool quota availability; read it before continuing. The older disk figures below are historical.
+> Latest continuation: [November 3 live rollout](PROVIDER_BROWSER_ROLLOUT_20261103.md). The final [authorized cleanup](STORAGE_CLEANUP_20261031.md) receipt is verified: 33.59 GB free at completion. The older disk figures and rollout blocker below are historical.
 
 # Continuation — 2026-10-30
 

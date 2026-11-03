@@ -1,4 +1,4 @@
-> Latest continuation: [Authorized storage cleanup and final verification pending](../../docs/STORAGE_CLEANUP_20261031.md). [Verified release and rollout instructions](../../docs/BUILD_ACTIVITY_CONTINUATION_20261030.md). Older entries below retain their dates.
+> Latest continuation: [November 3 live rollout](../../docs/PROVIDER_BROWSER_ROLLOUT_20261103.md). [Authorized cleanup is complete](../../docs/STORAGE_CLEANUP_20261031.md). [Verified release and rollout instructions](../../docs/BUILD_ACTIVITY_CONTINUATION_20261030.md). Older entries below retain their dates.
 
 # Independent release verification
 

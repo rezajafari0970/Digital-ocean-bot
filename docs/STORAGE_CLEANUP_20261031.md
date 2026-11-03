@@ -1,5 +1,13 @@
 # Storage cleanup — 2026-10-31 (Tehran)
 
+Final receipt recovered and verified on 2026-11-03: cleanup completed, all
+1,183,216 selected old message-cache files were removed, and protected
+configuration hashes were unchanged. Final free space at completion was
+33,585,975,296 bytes, a net increase of 27,868,442,624 bytes from the initial
+baseline. The historical access limitation below is resolved; do not rerun the
+cleanup. Current deployment progress is recorded in
+[the November 3 rollout](PROVIDER_BROWSER_ROLLOUT_20261103.md).
+
 The user explicitly authorized removal of unnecessary logs, hidden files, unused
 large folders, scripts, old snapshots and backups while preserving this project
 and the project listening on port 18443. That port was verified as the active
@@ -30,7 +38,7 @@ Completed removals:
   a commented provenance line. The three embedded links were unlinked without
   following them; runtime source, executables and Nginx configuration were retained.
 
-## Final archive cleanup is not yet confirmed
+## Historical archive progress before the final receipt
 
 A reviewed manifest selected 1,183,216 message-cache files older than seven days.
 The collector's configured history window is 24 hours; the latest seven days,
@@ -41,8 +49,9 @@ modification time and open descriptors before unlinking. No symlink is followed.
 
 The already-started remote process runs independently of the connector. Desktop
 Commander then reported its monthly usage limit and instructed no retry/reconnect.
-Its final receipt and final configuration-hash verification could not be read.
-Do not claim the last phase finished, and do not restart its deletion scripts.
+At that time its final receipt and configuration-hash verification could not be
+read. Both were recovered on November 3, as recorded above. Do not restart the
+completed deletion scripts.
 
 Private evidence on the live host:
 
@@ -62,12 +71,11 @@ No runtime update, database migration or application restart was performed.
 
 ## Resume
 
-When remote access is available, read the existing final archive receipt first;
-confirm `complete`, protected configuration hashes, free space and service health.
-The last observed capacity exceeds the prior deployment reserve, but remeasure the
-native reserve before deployment. Continue from the verified public release
-1081be7edc22bb0cd50ccfc93852aa1650f73406 and its prepared bounded rollout helpers;
-live runtime installation and provider-site acceptance are still pending.
+The final receipt has been read and verified. Continue from the current
+[November 3 rollout](PROVIDER_BROWSER_ROLLOUT_20261103.md); the default instance
+has since been updated to the verified public release. Remeasure the native
+reserve before further deployments and read the existing continuation receipt
+before starting any updater.
 
 The cleanup is one-time. Automatic expiry of these old attachment/message caches
 was not added or changed. Application code/configuration was preserved.
