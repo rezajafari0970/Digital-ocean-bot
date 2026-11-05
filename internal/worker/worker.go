@@ -136,7 +136,7 @@ func (w Worker) round(ctx context.Context, active func(string) bool, submit func
 	}
 	reconcileErr := reconcileRecoveryCheckpoints(scanCtx, w.Store.DB, active, "recovery", w.checkpointCursor)
 	if reconcileErr != nil && !errors.Is(reconcileErr, ErrRecoveryCheckpointPending) {
-		return reconcileErr
+		return fmt.Errorf("recovery checkpoint scan: %w", reconcileErr)
 	}
 	if err := w.Failures.ClearResolvedChecked(scanCtx); err != nil {
 		// Pruning terminal diagnostics is not admission. Every candidate still
@@ -145,7 +145,7 @@ func (w Worker) round(ctx context.Context, active func(string) bool, submit func
 	}
 	ops, err := w.Store.Operations(scanCtx, w.Batch)
 	if err != nil {
-		return err
+		return errors.Join(reconcileErr, fmt.Errorf("recovery operation scan: %w", err))
 	}
 	for _, x := range ops {
 		x := x
@@ -166,7 +166,7 @@ func (w Worker) round(ctx context.Context, active func(string) bool, submit func
 	offeredDeployments := make(map[string]bool)
 	deployments, err := w.Store.Deployments(scanCtx, w.Batch)
 	if err != nil {
-		return err
+		return errors.Join(reconcileErr, fmt.Errorf("recovery deployment scan: %w", err))
 	}
 	for _, x := range deployments {
 		x := x
@@ -190,7 +190,7 @@ func (w Worker) round(ctx context.Context, active func(string) bool, submit func
 	for page := 0; page < 8; page++ {
 		deferred, err := w.Store.DeferredDeploymentPage(scanCtx, 100, after)
 		if err != nil {
-			return errors.Join(reconcileErr, err)
+			return errors.Join(reconcileErr, fmt.Errorf("recovery deferred deployment scan: %w", err))
 		}
 		if len(deferred) == 0 {
 			if len(cursor) > 0 {

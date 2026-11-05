@@ -88,3 +88,4 @@ header{gap:12px;flex-wrap:wrap}header>div{display:flex;flex-wrap:wrap;align-item
 }
 
 .countryPriorityRow{display:flex;align-items:end;gap:12px;margin:12px 0}.countryPriorityRow label{flex:1;min-width:0}.countryPriorityRow .rowActions{flex-shrink:0;padding-bottom:4px}@media(max-width:500px){.countryPriorityRow{display:block}.countryPriorityRow .rowActions{display:flex;justify-content:flex-end;margin-top:6px}}
+.accountIssues{border-color:#c16642}.accountIssue{overflow-wrap:anywhere;padding:10px 0}.accountIssue+.accountIssue{border-top:1px solid var(--border,#334155)}.accountIssue p{margin:8px 0}.accountIssue small{color:var(--muted,#94a3b8)}

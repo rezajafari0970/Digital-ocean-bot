@@ -114,6 +114,10 @@ REQUIRED['internal/app'] = REQUIRED.get('internal/app', ()) + ('TestAWSTerminati
 REQUIRED['internal/adminapi'] = REQUIRED.get('internal/adminapi', ()) + ('TestNewCloudInventoryOwnershipAndIncompleteSnapshot', 'TestNewCloudCapacityAndDashboardCount', 'TestNewCloudAbsenceEvidenceSurvivesRestart')
 
 
+REQUIRED['internal/adminapi'] += ('TestAccountDiagnosticDetail', 'TestAccountIssuesAllProviderParityPostgres', 'TestAccountIssuesJavaScript', 'TestAccountIssuesBrowser', 'TestAccountRefreshRuntimeFailureAndPreflightIssuesPostgres')
+
+REQUIRED['internal/worker'] = REQUIRED.get('internal/worker', ()) + ('TestResolvedFailurePruningPreservesUnfinishedEvidence',)
+
 # Automatic onboarding and account network resource recovery.
 REQUIRED['internal/providers'] += ('TestDiscoveryRegistryEnforcesReadOnlyAndSecretBoundary',)
 REQUIRED['internal/providers/aws'] += ('TestAWSAutomaticDiscoveryReadOnlyAndPinned', 'TestAWSPublicNetworkRejectsBlockedAndPartialReads', 'TestAWSManagedNetworkUnknownOutcomeAndOwnership', 'TestAWSManagedNetworkConcurrentIntent', 'TestAWSNetworkDeletionTargetStrict')
@@ -291,7 +295,7 @@ def main(repo):
         with log.open('w') as output:
             run([pg / 'initdb', '-D', data, '-U', 'dob_gate', '--auth-local=trust', '--auth-host=reject', '--no-instructions'], stdout=output, stderr=subprocess.STDOUT)
             with (data / 'postgresql.conf').open('a') as conf:
-                conf.write("\nlisten_addresses = ''\nunix_socket_directories = '" + str(socket) + "'\nunix_socket_permissions = 0700\nport = 55435\nmax_connections = 50\n")
+                conf.write("\nlisten_addresses = ''\nunix_socket_directories = '" + str(socket) + "'\nunix_socket_permissions = 0700\nport = 55435\nmax_connections = 50\nlog_min_duration_statement = 250\nlog_lock_waits = on\ndeadlock_timeout = '100ms'\n")
             run([pg / 'pg_ctl', '-D', data, '-l', work / 'postgres.log', '-w', 'start'], stdout=output, stderr=subprocess.STDOUT)
             actual = run([pg / 'psql', '-XAt', '-c', "SELECT current_setting('data_directory') || '|' || current_setting('listen_addresses')"], capture_output=True, text=True).stdout.strip()
             if actual != str(data) + '|':
@@ -336,6 +340,8 @@ def main(repo):
         if repeat.stderr:
             print(repeat.stderr, file=sys.stderr, end='', flush=True)
         if repeat.returncode:
+            # Only synthetic, isolated recovery fixture statements exist here.
+            print((work / 'postgres.log').read_text()[-16000:], file=sys.stderr, flush=True)
             raise RuntimeError('repeated recovery/lifecycle isolation regression failed')
         verify_events(repeat.stdout.splitlines(), {'internal/worker': ('TestRecoveryReaperDoesNotTouchLifecycleLane',)})
         repeat_events = [json.loads(line) for line in repeat.stdout.splitlines() if line.strip()]

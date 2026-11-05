@@ -18,7 +18,7 @@ func (s *Server) accountPreflight(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	var enabled bool
 	var regionsRaw, sizesRaw []byte
-	var image, mode, proxyStatus, accountStatus string
+	var image, mode, proxyStatus, accountStatus, accountMessage string
 	var interval, batch, maxConcurrent, lifetime, desired int
 	err := s.DB.QueryRowContext(r.Context(), `SELECT a.enabled,a.preferred_regions,a.preferred_sizes,COALESCE(a.preferred_image,''),a.auto_interval_seconds,a.auto_batch_size,a.auto_max_concurrent,a.server_lifetime_seconds,a.desired_server_count,COALESCE(n.mode,''),COALESCE(p.status,'') FROM accounts a LEFT JOIN network_profiles n ON n.account_id=a.id LEFT JOIN proxies p ON p.id=n.proxy_id WHERE a.id=$1`, id).Scan(&enabled, &regionsRaw, &sizesRaw, &image, &interval, &batch, &maxConcurrent, &lifetime, &desired, &mode, &proxyStatus)
 	if err != nil {
@@ -55,6 +55,7 @@ func (s *Server) accountPreflight(w http.ResponseWriter, r *http.Request) {
 			account, identityErr = ar.Account(r.Context())
 		}
 		accountStatus = account.Status
+		accountMessage = account.StatusMessage
 		if identityErr == nil && account.Status == "locked" {
 			identityErr = &providers.Error{Class: providers.ErrorAccountLocked, StatusCode: 200, Code: "ACCOUNT_LOCKED", Operation: "account", Message: account.StatusMessage}
 		}
@@ -71,17 +72,21 @@ func (s *Server) accountPreflight(w http.ResponseWriter, r *http.Request) {
 	checks["provider_identity"] = err == nil
 	providerError := ""
 	if err != nil {
-		providerError = err.Error()
+		providerError = accountDiagnosticDetail(err.Error(), "Provider check failed")
+	}
+	if err == nil && !checks["provider_account_active"] {
+		providerError = accountDiagnosticDetail(accountMessage, "Provider account status: "+accountStatus)
 	}
 	if accountStatus == "trial_restricted" && !checks["provider_account_active"] {
 		providerError = capacity.CreateBlockReason("TRIAL_FIREWALL")
 	}
 	block, blockErr := capacity.ReadCreateBlock(r.Context(), s.DB, id)
 	checks["create_permission"] = blockErr == nil && block == nil
+	createError := ""
 	if block != nil {
-		providerError = capacity.CreateBlockReason(block.Code)
+		createError = capacity.CreateBlockReason(block.Code)
 	} else if blockErr != nil {
-		providerError = "Create permission could not be checked"
+		createError = "Create permission could not be checked"
 	}
 	ready := true
 	for _, ok := range checks {
@@ -116,5 +121,9 @@ func (s *Server) accountPreflight(w http.ResponseWriter, r *http.Request) {
 	if !ready {
 		code = 409
 	}
-	writeJSON(w, code, map[string]any{"ready": ready, "status": status, "checks": checks, "provider_error": providerError})
+	response := map[string]any{"ready": ready, "status": status, "state": providerState, "checks": checks, "provider_error": providerError, "create_error": createError}
+	if !ready {
+		response["error"] = "account_preflight_failed"
+	}
+	writeJSON(w, code, response)
 }

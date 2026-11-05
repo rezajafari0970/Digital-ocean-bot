@@ -54,6 +54,7 @@ jobs:
           DOB_RUN_BROWSER_TEST=0 go test ./...
           go vet ./...
           node --check web/static/app.js
+          node web/tests/database-health.cjs
           node web/tests/account-module-recovery.cjs
           node web/tests/kamatera-catalog.cjs
           DOB_BROWSER_SCREENSHOT_LOG=1 node web/tests/provider-browser.cjs
