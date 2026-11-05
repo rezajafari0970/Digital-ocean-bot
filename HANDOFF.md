@@ -1,3 +1,7 @@
+## Latest verified continuation — 2026-11-06 Tehran
+
+Read [cleanup statistics and provider diagnostics](docs/CLEANUP_DIAGNOSTICS_RELEASE_20261106.md) first. Both runtime instances and public main/stable are 8d28fee2d356cb15a587dabb6a003a8a18863aaa, schema 206. All 365 required regressions, independent install/update, preservation and live acceptance checks passed. Cleanup accounts no longer contribute to active statistics; bulk local removal and durable provider error history are available. No live bulk purge was executed. Recheck provider-side blockers and unknown create receipts without replaying creates or starting quarantined services. Earlier entries are historical.
+
 ## Latest verified continuation — 2026-10-29 Tehran
 
 Start with [strict country and output release](docs/STRICT_COUNTRY_OUTPUT_RELEASE_20261029.md). Both installations run `67f91d2886e0b2b6dec6754700066a35eb2fccae`, schema 205, verified at 2026-10-28 23:20 UTC. Source PR33 and independent CI passed 345 mandatory roots with zero skips; Ubuntu install/reinstall, restore drill and atomic publication passed. Eighteen preservation checks per installation, six running binary hashes, ten readiness checks, eight real raw output requests and four viewers passed. The observed global outputs contained 90 Direct and 90 Residential URIs, with no malformed row withheld.

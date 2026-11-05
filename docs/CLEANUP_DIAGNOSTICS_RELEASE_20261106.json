@@ -1,0 +1,46 @@
+{
+  "at": "2026-11-05T23:39:11.995138+00:00",
+  "commit": "8d28fee2d356cb15a587dabb6a003a8a18863aaa",
+  "active_accounts": 3,
+  "cleanup_accounts": 6,
+  "live_bulk_purge_executed": false,
+  "source_sha": "a0228c43d2322dc07b0fa72fab509016a4883fcc",
+  "source_ci": 42128311851,
+  "public_ci": 42128634651,
+  "promotion_ci": 42129174773,
+  "required_passed": 365,
+  "required_skipped": 0,
+  "instances": {
+    "default": {
+      "readiness_checks": 5,
+      "preservation_checks": 18,
+      "binary_hashes_verified": 3
+    },
+    "production": {
+      "readiness_checks": 5,
+      "preservation_checks": 18,
+      "binary_hashes_verified": 3
+    }
+  },
+  "browser": {
+    "accounts": 9,
+    "active": 3,
+    "cleanup": 6,
+    "issues": 12,
+    "unknownCreates": 2,
+    "bulkCancelPreservedAccounts": true,
+    "viewportWidths": [
+      320,
+      390,
+      800,
+      801,
+      1024,
+      1365
+    ],
+    "productionCSP": true,
+    "mobile": true,
+    "desktop": true,
+    "reload": true,
+    "readOnly": true
+  }
+}
