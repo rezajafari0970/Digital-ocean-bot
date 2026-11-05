@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/capacity"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/redact"
 )
@@ -28,10 +29,34 @@ func accountDiagnosticDetail(detail, fallback string) string {
 	if strings.HasPrefix(detail, "{") || strings.HasPrefix(detail, "[") {
 		// Worker receipts are structured; never render their arbitrary metadata.
 		var receipt struct {
-			ProviderError string `json:"provider_error"`
+			ProviderError string                      `json:"provider_error"`
+			Diagnostic    app.ProviderFailureEvidence `json:"diagnostic"`
 		}
 		if json.Unmarshal([]byte(detail), &receipt) == nil {
 			detail = receipt.ProviderError
+			d := receipt.Diagnostic
+			parts := []string{}
+			if d.HTTPStatus >= 100 && d.HTTPStatus <= 599 {
+				parts = append(parts, fmt.Sprintf("HTTP %d", d.HTTPStatus))
+			}
+			if d.Code != "" {
+				parts = append(parts, "code: "+d.Code)
+			}
+			if d.Operation != "" {
+				parts = append(parts, "operation: "+d.Operation)
+			}
+			if d.Class != "" {
+				parts = append(parts, "class: "+d.Class)
+			}
+			if d.RetryAfterSeconds > 0 {
+				parts = append(parts, fmt.Sprintf("retry after: %d seconds", d.RetryAfterSeconds))
+			}
+			if len(parts) > 0 {
+				detail += " | " + strings.Join(parts, " · ")
+			}
+			if d.Guidance != "" {
+				detail += " | " + d.Guidance
+			}
 		} else {
 			detail = ""
 		}

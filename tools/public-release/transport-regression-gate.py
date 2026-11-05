@@ -382,6 +382,9 @@ REQUIRED["internal/panels/sanaei"] += ("TestRuntimeFailedOpenReleasesIdentitySta
 REQUIRED["internal/providers/vultr"] += ("TestSSHDeletionInventoryRejectsMissingIdentity",)
 REQUIRED["internal/app"] += ("TestAccountSSHDeletionRequiresValidAbsenceEvidence", "TestDeletionRecoveryValidatesInventoryBeforeAdoption")
 
+REQUIRED['internal/adminapi'] += ('TestCleanupAccountsExcludedFromEveryActiveStatistic','TestExplicitLocalPurgeSupportsSettledCleanupWithoutProviderRestriction','TestCleanupBulkJavaScript','TestBulkCleanupBrowser')
+REQUIRED['internal/app'] += ('TestProviderFailureReceiptPreservesSevenProviderContexts','TestProviderFailureHistoryIsAtomicAndDeduplicated')
+
 if __name__ == '__main__':
     try:
         if len(sys.argv) != 2:

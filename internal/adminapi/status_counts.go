@@ -39,7 +39,7 @@ WITH provider_inventory AS (
  FROM accounts a LEFT JOIN provider_inventory pi ON pi.account_id=a.id
  LEFT JOIN secrets credential ON credential.account_id=a.id AND credential.id=a.secret_ref
  LEFT JOIN account_network_identities ani ON ani.account_id=a.id
- WHERE a.deleted_at IS NULL OR a.runtime_status='DELETE_PENDING'
+ WHERE a.deleted_at IS NULL AND a.deletion_requested_at IS NULL AND a.runtime_status NOT IN ('DELETE_PENDING','DELETED')
 ), live_accounts AS (
  SELECT *,CASE
  WHEN reason='PENDING_DELETION' THEN 'pending'
@@ -85,7 +85,7 @@ WITH provider_inventory AS (
  LEFT JOIN server_protection_nodes pn ON pn.panel_id=p.id
  LEFT JOIN LATERAL(SELECT state,finished_at FROM panel_inventory_syncs s WHERE s.panel_id=p.id AND s.finished_at IS NOT NULL ORDER BY finished_at DESC,s.id DESC LIMIT 1)latest ON true
  WHERE p.droplet_id=dr.id ORDER BY p.created_at DESC,p.id DESC LIMIT 1)p ON true
- WHERE dr.state<>'DELETED'
+ WHERE dr.state<>'DELETED' AND a.deleted_at IS NULL AND a.deletion_requested_at IS NULL AND a.runtime_status NOT IN ('DELETE_PENDING','DELETED')
 ), live_servers AS (
  SELECT *,CASE reason WHEN 'HEALTHY' THEN 'active' WHEN 'PENDING_DELETION' THEN 'pending'
  WHEN 'DEPLOYMENT_FAILED' THEN 'broken' WHEN 'PANEL_DEGRADED' THEN 'degraded' ELSE 'inactive' END health FROM server_evidence
@@ -124,7 +124,7 @@ SELECT json_build_object(
  'server_health',COALESCE((SELECT json_agg(row_to_json(detail)) FROM(
  SELECT id,account_name,provider,provider_state,provider_error_state,provider_resource_id,lifecycle_state,health,reason,provider_observed_at,next_provider_refresh_at,last_sync_at,last_sync_state,route_state,route_verified_at,admission_blocked,xui_failed,protection_failed
  FROM live_servers WHERE health<>'active' ORDER BY account_name,id LIMIT 100)detail),'[]'::json),
- 'active_deployments',(SELECT count(*) FROM deployments d WHERE ` + activeBuildPredicate + `),
+ 'active_deployments',(SELECT count(*) FROM deployments d JOIN accounts a ON a.id=d.account_id WHERE a.deleted_at IS NULL AND a.deletion_requested_at IS NULL AND a.runtime_status NOT IN ('DELETE_PENDING','DELETED') AND ` + activeBuildPredicate + `),
  'live_workers',(SELECT count(*) FROM worker_heartbeats WHERE last_seen_at>now()-interval '30 seconds'),
  'observed_at',now()
 )`

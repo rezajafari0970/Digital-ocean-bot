@@ -427,7 +427,7 @@ func (s *Server) accountDeletionProgress(ctx context.Context, id string) any {
 	if phase == "VERIFYING" && strings.Contains(detail, "waiting for in-flight") {
 		detail = "Safety wait completed. Final provider verification is scheduled."
 	}
-	blocked := providerState == "LOCKED" || providerState == "TOKEN_INVALID" || providerState == "PERMISSION_DENIED" || providerState == "BILLING_BLOCKED"
+	blocked := app.LocalAccountPurgeAllowed(providerState)
 	if strings.HasPrefix(detail, "Deletion blocked:") {
 		phase = "BLOCKED"
 	}

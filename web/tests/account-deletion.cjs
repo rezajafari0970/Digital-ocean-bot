@@ -27,6 +27,28 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   const id=process.env.DOB_DELETE_ID,other=process.env.DOB_OTHER_ID;
   await call('Page.navigate',{url:base+'/admin/#accounts'});
   async function waitFor(expression){const end=Date.now()+15000;while(Date.now()<end){if(await evaluate(expression))return;await new Promise(r=>setTimeout(r,100))}throw Error('UI assertion timeout: '+expression+' BODY: '+await evaluate('document.body.innerText.slice(0,5000)'))}
+  if(process.env.DOB_BULK_CLEANUP){
+   await waitFor('document.querySelectorAll(".accountCard,.accountCleanupCard").length===3');
+   await evaluate('document.querySelector("#accountCleanup").open=true;window.confirm=()=>false;window.bulkButton=()=>document.querySelector("[data-action=purge-all-cleanup]")');
+   assert.ok(await evaluate('document.querySelector("#accountCleanup").innerText.includes("cleanup authorization detail")'));
+   await evaluate('bulkButton().click()');await waitFor('!accountCleanupBulkBusy');
+   assert.equal(await evaluate('cache.accounts.length'),3);
+   for(const width of [390,1365]){
+    await call('Emulation.setDeviceMetricsOverride',{width,height:900,deviceScaleFactor:1,mobile:width<500});
+    await evaluate('bulkButton().scrollIntoView({block:"center"})');
+    assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth+1'),true);
+    const shot=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(root,'bulk-cleanup-'+width+'.png'),Buffer.from(shot.data,'base64'));
+   }
+   await evaluate('window.confirm=()=>true;window.originalFetch=fetch;window.purgeCalls=0;window.fetch=(url,opts)=>{if(url.endsWith("/purge"))purgeCalls++;return originalFetch(url,opts)};bulkButton().click();bulkButton().click()');
+   await waitFor('!accountCleanupBulkBusy&&cache.accounts?.length===1');
+   assert.equal(await evaluate('window.purgeCalls'),2);
+   assert.equal(await evaluate('cache.accounts[0].id'),other);
+   assert.ok(await evaluate('document.querySelector("#toast").textContent.includes("Removed: 2")'));
+   await call('Page.reload');await waitFor('typeof cache!=="undefined"&&cache.accounts?.length===1');
+   assert.equal(await evaluate('document.querySelector("#accountCleanup")'),null);
+   console.log('BULK_CLEANUP_REAL_API_CANCEL_DUPLICATE_ACTIVE_PRESERVATION_RELOAD_MOBILE_DESKTOP PASS');
+   return;
+  }
   await waitFor('document.querySelectorAll(".accountCard,.accountCleanupCard").length===2');
   if(process.env.DOB_PURGE_ID){
    const purgeID=process.env.DOB_PURGE_ID;
