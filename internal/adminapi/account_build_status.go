@@ -12,6 +12,7 @@ import (
 )
 
 type accountBuildState struct {
+	Issues                                              []accountIssue
 	TrialCompatible                                     bool
 	TrialProxyCandidates                                int
 	TrialRelay                                          *trialRelayStatus
@@ -30,7 +31,7 @@ type accountBuildState struct {
 func (s *Server) accountBuildState(ctx context.Context, id string) (accountBuildState, error) {
 	var x accountBuildState
 	var runtimeStatus, stateDetail, errorState, errorDetail, provider, accountStatus, accountMessage string
-	var observedAt, snapshotAt sql.NullTime
+	var observedAt, snapshotAt, stateAt, errorAt sql.NullTime
 	var retainedLock bool
 	var desired, managed, preCreate, ops, refreshSeconds int
 	var raw []byte
@@ -38,8 +39,8 @@ func (s *Server) accountBuildState(ctx context.Context, id string) (accountBuild
  (SELECT count(*) FROM droplets WHERE account_id=a.id AND state<>'DELETED'),
  (SELECT count(*) FROM deployments WHERE account_id=a.id AND state NOT IN ('READY','FAILED','INSTALL_FAILED','INSTALL_ROLLED_BACK','PANEL_COMPLETE') AND droplet_id IS NULL),
  (SELECT count(*) FROM operations WHERE account_id=a.id AND kind='CREATE_DROPLET' AND COALESCE(resource_id,'')='' AND state IN ('planned','running','verifying','unknown')),
- ps.canonical->'Capacity',ps.created_at,a.provider,COALESCE(ps.canonical->'Account'->>'Status',''),left(COALESCE(ps.canonical->'Account'->>'StatusMessage',''),513),a.provider_inventory_interval_seconds,a.upcloud_trial_compatible,CASE WHEN a.upcloud_trial_compatible THEN (SELECT count(*) FROM residential_proxies WHERE enabled AND port IN (80,443,8080)) ELSE 0 END,COALESCE(lower(ps.canonical->'Account'->>'Status')='locked' AND (credential.updated_at IS NULL OR credential.updated_at<=ps.created_at) AND (a.provider_account_observed_at IS NULL OR a.provider_account_observed_at<=ps.created_at),false)
- FROM accounts a LEFT JOIN LATERAL(SELECT canonical,created_at FROM provider_snapshots WHERE account_id=a.id AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1) ps ON true LEFT JOIN secrets credential ON credential.account_id=a.id AND credential.id=a.secret_ref WHERE a.id=$1`, id).Scan(&x.Enabled, &x.State, &stateDetail, &errorState, &errorDetail, &runtimeStatus, &observedAt, &desired, &managed, &preCreate, &ops, &raw, &snapshotAt, &provider, &accountStatus, &accountMessage, &refreshSeconds, &x.TrialCompatible, &x.TrialProxyCandidates, &retainedLock)
+ ps.canonical->'Capacity',ps.created_at,a.provider,COALESCE(ps.canonical->'Account'->>'Status',''),left(COALESCE(ps.canonical->'Account'->>'StatusMessage',''),513),a.provider_inventory_interval_seconds,a.upcloud_trial_compatible,CASE WHEN a.upcloud_trial_compatible THEN (SELECT count(*) FROM residential_proxies WHERE enabled AND port IN (80,443,8080)) ELSE 0 END,COALESCE(lower(ps.canonical->'Account'->>'Status')='locked' AND (credential.updated_at IS NULL OR credential.updated_at<=ps.created_at) AND (a.provider_account_observed_at IS NULL OR a.provider_account_observed_at<=ps.created_at),false),a.provider_state_at,a.provider_error_at
+ FROM accounts a LEFT JOIN LATERAL(SELECT canonical,created_at FROM provider_snapshots WHERE account_id=a.id AND canonical IS NOT NULL ORDER BY created_at DESC LIMIT 1) ps ON true LEFT JOIN secrets credential ON credential.account_id=a.id AND credential.id=a.secret_ref WHERE a.id=$1`, id).Scan(&x.Enabled, &x.State, &stateDetail, &errorState, &errorDetail, &runtimeStatus, &observedAt, &desired, &managed, &preCreate, &ops, &raw, &snapshotAt, &provider, &accountStatus, &accountMessage, &refreshSeconds, &x.TrialCompatible, &x.TrialProxyCandidates, &retainedLock, &stateAt, &errorAt)
 	if err != nil {
 		return x, err
 	}
@@ -87,6 +88,7 @@ func (s *Server) accountBuildState(ctx context.Context, id string) (accountBuild
 		x.CapacityFreshness = "scheduled"
 	}
 	x.State = strings.ToUpper(x.State)
+	recordedState := x.State
 	x.Block, err = capacity.ReadCreateBlock(ctx, s.DB, id)
 	if err != nil {
 		return x, err
@@ -101,7 +103,9 @@ func (s *Server) accountBuildState(ctx context.Context, id string) (accountBuild
 	case x.State == "LOCKED" || x.State == "TOKEN_INVALID" || x.State == "PERMISSION_DENIED" || x.State == "BILLING_BLOCKED":
 		x.Reason = strings.ReplaceAll(x.State, "_", " ")
 		if e, ok := meta["provider_error"].(string); ok && e != "" {
-			x.Reason += ": " + e
+			x.Reason += ": " + accountDiagnosticDetail(e, "")
+		} else if stateDetail != "" {
+			x.Reason += ": " + accountDiagnosticDetail(stateDetail, x.Reason)
 		}
 	case retainedLock:
 		x.State = "LOCKED"
@@ -131,7 +135,7 @@ func (s *Server) accountBuildState(ctx context.Context, id string) (accountBuild
 			x.Reason = stateDetail
 		}
 	case errorState != "":
-		x.Reason = errorState + ": " + errorDetail
+		x.Reason = errorState + ": " + accountDiagnosticDetail(errorDetail, errorState)
 	case x.ProviderFreshness != "fresh":
 		x.Reason = "Provider state is " + x.ProviderFreshness
 	case x.CapacityFreshness != "fresh":
@@ -182,6 +186,9 @@ func (s *Server) accountBuildState(ctx context.Context, id string) (accountBuild
 		}
 		x.Buildable = &n
 	}
+	x.Reason = accountDiagnosticDetail(x.Reason, "Provider state unavailable")
+	x.SchedulerReason = accountDiagnosticDetail(x.SchedulerReason, x.Reason)
+	x.addAccountIssues(recordedState, stateDetail, errorState, errorDetail, stateAt, errorAt, unresolved)
 	return x, nil
 }
 

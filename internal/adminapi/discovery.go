@@ -49,19 +49,18 @@ func (s *Server) accountDiscovery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	runtime, err := s.Container.Runtime(r.Context(), id)
-	if err != nil {
-		writeJSON(w, 409, map[string]string{"error": "account_not_ready", "detail": err.Error()})
-		return
-	}
-	obs, err := s.Container.ObserveProvider(r.Context(), runtime)
-	if runtime.Gateway != nil {
-		runtime.Gateway.CloseIdleConnections()
+	var obs providers.Observation
+	if err == nil {
+		obs, err = s.Container.ObserveProvider(r.Context(), runtime)
+		if runtime.Gateway != nil {
+			runtime.Gateway.CloseIdleConnections()
+		}
 	}
 	if err != nil {
 		var mode string
 		_ = s.DB.QueryRowContext(r.Context(), `SELECT COALESCE(mode,'') FROM network_profiles WHERE account_id=$1`, id).Scan(&mode)
 		state := app.ClassifyAccountProviderError(err, mode == "proxy_required")
-		published, persistErr := s.Container.RecordProviderObservation(r.Context(), attempt, state, err, err.Error())
+		published, persistErr := s.Container.RecordProviderObservation(r.Context(), attempt, state, err, accountDiagnosticDetail(err.Error(), state))
 		if persistErr != nil {
 			writeJSON(w, 500, map[string]string{"error": "observation_store_failed"})
 			return
@@ -70,7 +69,7 @@ func (s *Server) accountDiscovery(w http.ResponseWriter, r *http.Request) {
 			writeJSON(w, 409, map[string]string{"error": "observation_superseded"})
 			return
 		}
-		writeJSON(w, 502, map[string]string{"error": "provider_discovery_failed", "state": state, "detail": err.Error()})
+		writeJSON(w, 502, map[string]string{"error": "provider_discovery_failed", "state": state, "detail": accountDiagnosticDetail(err.Error(), state)})
 		return
 	}
 	if runtime.Config.Provider == "upcloud" {

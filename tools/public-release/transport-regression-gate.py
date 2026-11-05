@@ -114,6 +114,8 @@ REQUIRED['internal/app'] = REQUIRED.get('internal/app', ()) + ('TestAWSTerminati
 REQUIRED['internal/adminapi'] = REQUIRED.get('internal/adminapi', ()) + ('TestNewCloudInventoryOwnershipAndIncompleteSnapshot', 'TestNewCloudCapacityAndDashboardCount', 'TestNewCloudAbsenceEvidenceSurvivesRestart')
 
 
+REQUIRED['internal/adminapi'] += ('TestAccountDiagnosticDetail', 'TestAccountIssuesAllProviderParityPostgres', 'TestAccountIssuesJavaScript', 'TestAccountIssuesBrowser', 'TestAccountRefreshRuntimeFailureAndPreflightIssuesPostgres')
+
 # Automatic onboarding and account network resource recovery.
 REQUIRED['internal/providers'] += ('TestDiscoveryRegistryEnforcesReadOnlyAndSecretBoundary',)
 REQUIRED['internal/providers/aws'] += ('TestAWSAutomaticDiscoveryReadOnlyAndPinned', 'TestAWSPublicNetworkRejectsBlockedAndPartialReads', 'TestAWSManagedNetworkUnknownOutcomeAndOwnership', 'TestAWSManagedNetworkConcurrentIntent', 'TestAWSNetworkDeletionTargetStrict')
