@@ -210,6 +210,7 @@ const providerDefaults={};const pages=[['dashboard','Dashboard'],['accounts','Ac
  return '<section class="card section accountIssues" aria-label="Account issues"><h3>Account issues</h3>'+issues.map(issue=>'<div class="accountIssue"><strong>'+esc(({provider:'Provider restriction',observation:'Unresolved observation error',creation:'Creation needs attention'})[issue.kind]||'Account issue')+' · '+esc(String(issue.code||'UNKNOWN').replaceAll('_',' '))+'</strong><p>'+esc(issue.detail||'Details unavailable')+'</p>'+(issue.observed_at?'<small>Recorded: '+esc(formatDate(issue.observed_at))+'</small>':'')+(issue.kind==='observation'?'<p class="muted">This recorded failure remains until a complete provider refresh succeeds. A healthy proxy check alone does not clear it.</p>':'')+'</div>').join('')+'</section>';
 }
 function accountFailureMessage(body, fallback){
+ if(String(body?.error||'').startsWith('database_')||['accounts_query_failed','accounts_scan_failed'].includes(body?.error))return fallback;
  const parts=[];
  if(typeof body?.detail==='string'&&body.detail.trim())parts.push(body.detail.trim());
  if(typeof body?.provider_error==='string'&&body.provider_error.trim())parts.push(body.provider_error.trim());

@@ -29,8 +29,9 @@ test('recovery notice explains cached data and does not expose database internal
 test('API preserves machine-readable recovery code without retrying a mutation',async()=>{
  const api=source.slice(source.indexOf('async function api('),source.indexOf('async function enterPanel('));
  let calls=0;
- const ctx={FormData,DOMException,token:'fixture',headers:()=>({}),fetch:async()=>{calls++;return {ok:false,status:503,text:async()=>JSON.stringify({error:'database_recovery_required'})}}};
+ const ctx={FormData,DOMException,token:'fixture',headers:()=>({}),fetch:async()=>{calls++;return {ok:false,status:503,text:async()=>JSON.stringify({error:'database_recovery_required',detail:'private SQL'})}}};
+ vm.runInNewContext(functionSource('accountFailureMessage','async function refreshAccountView'),ctx);
  vm.runInNewContext(api,ctx);
- await assert.rejects(ctx.api('/api/v1/accounts',{method:'POST'}),e=>e.code==='database_recovery_required'&&e.status===503);
+ await assert.rejects(ctx.api('/api/v1/accounts',{method:'POST'}),e=>e.code==='database_recovery_required'&&e.status===503&&/verified repair/.test(e.message)&&!e.message.includes('private SQL'));
  assert.equal(calls,1);
 });
