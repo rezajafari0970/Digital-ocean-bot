@@ -83,3 +83,24 @@ Post-release continuation: `POSTRELEASE-OBSERVATION-20261025.md` records three i
 Latest completed release: `FLEET-DNS-CAPACITY-20261025.md` records live release `5dc2c25678698dbbe9ac1cfee7d18701c19213e7`, 187 passing mandatory checks, capacity forecasting and the remaining AWS/DNS/gateway blockers.
 
 For future operator updates, invoke `ops/release/run-bounded-update.sh /usr/local/sbin/dob-production update` or `ops/release/run-bounded-update.sh /usr/local/bin/datacenter-bot update` from the root-owned source checkout. The launcher was verified against actual kernel cgroup limits. Direct invocation from a remote-command service does not provide a dedicated build limit. Preserve the existing baseline, exact-revision, ownership and backup checks around either command.
+
+## Account diagnostics and recovery — 2026-11-05
+
+See [the account audit](../../docs/ACCOUNT_DIAGNOSTICS_20261105.md) and
+`ACCOUNT_DIAGNOSTICS_20261105-evidence.json` for the exact source, public release,
+independent CI, guarded rollout, live account results and external blockers.
+The canonical gate now requires 359 roots with zero skips. Source PR 37
+includes shared list/detail diagnostics for all seven providers and the
+terminal-evidence pruning fix found by repeated recovery validation.
+The pinned operational workflow is
+`promote-verified-account-diagnostics-20261105.yml`; do not rerun it for a future release.
+
+PR 38 fixes the populated account dashboard overflow discovered during live
+acceptance. Final public revision `a3ca806e984aaf0c24aad0e89befe9b31738d03a`
+passed the same complete independent gate, fresh install and reinstall, then
+all guarded rollout stages on both instances. Genuine served pages passed six
+physical viewport widths under normal production CSP. The pinned final promotion
+is `promote-verified-account-layout-20261105.yml`; it is also historical evidence,
+not a reusable latest-release publisher. Provider locks, rejected credentials and
+four unknown creates remain explicit external blockers; AWS and UpCloud have no
+saved live accounts. Port 18443 and all listener ownership checks were preserved.

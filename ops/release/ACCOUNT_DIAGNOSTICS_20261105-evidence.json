@@ -1,0 +1,783 @@
+{
+  "date": "2026-11-05",
+  "source_revision": "7f46a0a7bc4b5f8ce9cd5f3a62e83589cb1579bd",
+  "source_tree": "a1759564db600a37d1f576c108633dfa34234011",
+  "source_pr": 38,
+  "source_merge": "451047a4a68e4da05a40656e42defd69e914bbd6",
+  "public_previous": "e2e6ba722760d28e4b7dd10625d7d1331ebe32b8",
+  "public_revision": "a3ca806e984aaf0c24aad0e89befe9b31738d03a",
+  "public_tree": "3c3f2819a72c0adeae8b69cdce7fd9916a74edf1",
+  "manifest_entries": 1874,
+  "manifest_bytes_sha256": "955258a343a703c7919ea6d884695fecde6d83bf2ac913cbf47eff1f3340c891",
+  "scanners": {
+    "default": 0,
+    "production": 0,
+    "gitleaks": 0
+  },
+  "source_ci": {
+    "run": 42104523666,
+    "job": 127515715480,
+    "conclusion": "success",
+    "required_roots": 359,
+    "skipped": 0,
+    "recovery_repetitions": 20,
+    "backup_restore_migrations": 206,
+    "populated_account_viewports": [
+      320,
+      390,
+      800,
+      801,
+      1024,
+      1365
+    ]
+  },
+  "public_ci": {
+    "run": 42104678564,
+    "test_job": 127516251098,
+    "install_job": 127516251882,
+    "conclusion": "success",
+    "fresh_install": true,
+    "reinstall": true,
+    "ordinary_login_verified": true,
+    "identity_preserved": true
+  },
+  "promotion": {
+    "run": 42106259828,
+    "job": 127521773509,
+    "operational_commit": "a5bb39e4445ffa73f20bb4aa8606bf11433bc523",
+    "conclusion": "success",
+    "atomic_main_stable": true,
+    "old_head_leases": true
+  },
+  "initial_diagnostics_release": {
+    "date": "2026-11-05",
+    "source_revision": "2e07f09639342222b49e8271e0d561b6bef772f6",
+    "source_tree": "e0959cd1535dcc6ebcd1056244433f2a510758da",
+    "source_pr": 37,
+    "source_merge": "4fcc079235d55a6815e1f0f687d1e5be0873c069",
+    "public_previous": "9b2c75efe8399c4aade0bbcc55eb3858f5c5a3b6",
+    "public_revision": "e2e6ba722760d28e4b7dd10625d7d1331ebe32b8",
+    "public_tree": "8edfc49fb928152eec4af2f08d0abb91b416e124",
+    "manifest_entries": 1874,
+    "manifest_bytes_sha256": "45fdec50ca88d24fa32ad7e68f3501c34e3d7b2e3535d49dfe2d6d14f27e574e",
+    "scanners": {
+      "default": 0,
+      "production": 0,
+      "gitleaks": 0
+    },
+    "source_ci": {
+      "run": 42099293564,
+      "job": 127497530836,
+      "conclusion": "success",
+      "required_roots": 359,
+      "skipped": 0,
+      "recovery_repetitions": 20,
+      "backup_restore_migrations": 206,
+      "actual_browser_seven_providers": true
+    },
+    "public_ci": {
+      "run": 42099634706,
+      "test_job": 127498716794,
+      "install_job": 127498716425,
+      "conclusion": "success",
+      "fresh_install": true,
+      "reinstall": true,
+      "ordinary_login_verified": true,
+      "identity_preserved": true
+    },
+    "promotion": {
+      "run": 42100787285,
+      "job": 127502699934,
+      "operational_commit": "8faea5c7942f1546edf3219b4f0dea1bbfd3ee06",
+      "conclusion": "success",
+      "atomic_main_stable": true,
+      "old_head_leases": true
+    },
+    "failed_prior_source_runs": [
+      {
+        "run": 42094675377,
+        "reason": "first cold recovery iteration hit existing ten-second deadline"
+      },
+      {
+        "run": 42095945874,
+        "reason": "PostgreSQL cancellation identified expensive ClearResolvedChecked pruning"
+      },
+      {
+        "run": 42097028044,
+        "reason": "359 roots passed; final isolated Node harness omitted new shared helper"
+      }
+    ],
+    "pruning": {
+      "old_fixture_cost": 119844.47,
+      "new_fixture_cost": 17123.78,
+      "jit_selected": false,
+      "nonempty_semantic_regression": true,
+      "live_selector_equivalence": {
+        "old_rows": 0,
+        "new_rows": 0,
+        "except_all_differences": 0,
+        "limitation": "empty live selection; plan only, no production DELETE"
+      }
+    },
+    "audit_cloud_creates": 0,
+    "audit_openai_generations": 0,
+    "live_provider_limitations": {
+      "digitalocean": "3 provider-locked accounts",
+      "vultr": "1 authentication rejection",
+      "linode": "2 accepted; 1 authentication rejection",
+      "kamatera": "accepted; 3 unresolved historical creates dispatched once",
+      "ovh": "accepted; 1 unresolved historical create dispatched once",
+      "aws": "no saved account; synthetic/native driver coverage only",
+      "upcloud": "no saved account; synthetic/native driver coverage only"
+    }
+  },
+  "live_layout_finding": {
+    "deployed_revision": "e2e6ba722760d28e4b7dd10625d7d1331ebe32b8",
+    "physical_mobile_width": 390,
+    "initial_mobile_document_width": 417,
+    "physical_desktop_width": 1365,
+    "initial_desktop_document_width": 1646,
+    "correction": [
+      "main min-width:0",
+      "capacity values overflow-wrap:anywhere"
+    ],
+    "preview_only_before_release": true,
+    "final_acceptance_requires_normal_CSP": true
+  },
+  "audit_cloud_creates": 0,
+  "audit_openai_generations": 0,
+  "live_acceptance": {
+    "at": "2026-11-05T20:54:47.570348+00:00",
+    "health": {
+      "at": "2026-11-05T20:54:47.169354+00:00",
+      "commit": "a3ca806e984aaf0c24aad0e89befe9b31738d03a",
+      "instances": {
+        "default": {
+          "ready_checks": 5,
+          "services": [
+            {
+              "unit": "digital-ocean-bot-api",
+              "active": true,
+              "restarts": 0
+            },
+            {
+              "unit": "digital-ocean-bot-worker",
+              "active": true,
+              "restarts": 0
+            },
+            {
+              "unit": "digital-ocean-bot-worker-panels",
+              "active": true,
+              "restarts": 0
+            }
+          ],
+          "preservation_checks": 18,
+          "assets": 25,
+          "no_pending": true
+        },
+        "production": {
+          "ready_checks": 5,
+          "services": [
+            {
+              "unit": "dob-production-api",
+              "active": true,
+              "restarts": 0
+            },
+            {
+              "unit": "dob-production-worker",
+              "active": true,
+              "restarts": 0
+            },
+            {
+              "unit": "dob-production-worker-panels",
+              "active": true,
+              "restarts": 0
+            }
+          ],
+          "preservation_checks": 18,
+          "assets": 25,
+          "no_pending": true
+        }
+      },
+      "protected_vault": {
+        "port": 18443,
+        "same_pid": true,
+        "restarts": 0,
+        "unauthenticated_http": 401
+      },
+      "unknown_creates": {
+        "count": 4,
+        "attempts_unchanged": true,
+        "still_unknown": true
+      },
+      "temporary_operator_removed": true,
+      "live_ui": {
+        "accounts": 9,
+        "issues": 12,
+        "unknownCreates": 2,
+        "viewportWidths": [
+          320,
+          390,
+          800,
+          801,
+          1024,
+          1365
+        ],
+        "productionCSP": true,
+        "mobile": true,
+        "desktop": true,
+        "reload": true,
+        "readOnly": true
+      },
+      "account_api": {
+        "accounts": 9,
+        "list_and_dashboards_http": 200,
+        "issue_count": 12,
+        "list_detail_parity": true
+      },
+      "preflight": {
+        "checked": 9,
+        "ready": 4,
+        "failed_checks_visible": true
+      },
+      "output": {
+        "DIRECT": {
+          "output_lines": 80,
+          "all_uri_lines": true,
+          "no_store": true
+        },
+        "RESIDENTIAL": {
+          "output_lines": 80,
+          "all_uri_lines": true,
+          "no_store": true
+        }
+      },
+      "new_failed_system_units": 0,
+      "free_bytes": 22442213376
+    },
+    "providers": {
+      "digitalocean": {
+        "accounts": 3,
+        "states": {
+          "LOCKED": 3
+        },
+        "issue_codes": {
+          "LOCKED": 3,
+          "PROXY_ERROR": 3
+        },
+        "preflight_http": {
+          "409": 3
+        },
+        "identity_success": 0,
+        "preflight_checks": [
+          {
+            "create_permission": true,
+            "enabled": true,
+            "image": true,
+            "lifetime": true,
+            "network": true,
+            "plan": true,
+            "provider_account_active": false,
+            "provider_identity": false,
+            "regions": true,
+            "schedule": true
+          },
+          {
+            "create_permission": true,
+            "enabled": true,
+            "image": true,
+            "lifetime": true,
+            "network": true,
+            "plan": true,
+            "provider_account_active": false,
+            "provider_identity": false,
+            "regions": true,
+            "schedule": true
+          },
+          {
+            "create_permission": true,
+            "enabled": true,
+            "image": true,
+            "lifetime": true,
+            "network": true,
+            "plan": true,
+            "provider_account_active": false,
+            "provider_identity": false,
+            "regions": true,
+            "schedule": true
+          }
+        ]
+      },
+      "kamatera": {
+        "accounts": 1,
+        "states": {
+          "ACTIVE": 1
+        },
+        "issue_codes": {
+          "CREATE_OUTCOME_UNKNOWN": 1
+        },
+        "preflight_http": {
+          "200": 1
+        },
+        "identity_success": 1,
+        "preflight_checks": [
+          {
+            "create_permission": true,
+            "enabled": true,
+            "image": true,
+            "lifetime": true,
+            "network": true,
+            "plan": true,
+            "provider_account_active": true,
+            "provider_identity": true,
+            "regions": true,
+            "schedule": true
+          }
+        ]
+      },
+      "linode": {
+        "accounts": 3,
+        "states": {
+          "TOKEN_INVALID": 1,
+          "ACTIVE": 2
+        },
+        "issue_codes": {
+          "TOKEN_INVALID": 1,
+          "PROXY_ERROR": 1
+        },
+        "preflight_http": {
+          "200": 2,
+          "409": 1
+        },
+        "identity_success": 2,
+        "preflight_checks": [
+          {
+            "create_permission": true,
+            "enabled": true,
+            "image": true,
+            "lifetime": true,
+            "network": true,
+            "plan": true,
+            "provider_account_active": false,
+            "provider_identity": false,
+            "regions": true,
+            "schedule": true
+          },
+          {
+            "create_permission": true,
+            "enabled": true,
+            "image": true,
+            "lifetime": true,
+            "network": true,
+            "plan": true,
+            "provider_account_active": true,
+            "provider_identity": true,
+            "regions": true,
+            "schedule": true
+          },
+          {
+            "create_permission": true,
+            "enabled": true,
+            "image": true,
+            "lifetime": true,
+            "network": true,
+            "plan": true,
+            "provider_account_active": true,
+            "provider_identity": true,
+            "regions": true,
+            "schedule": true
+          }
+        ]
+      },
+      "ovh": {
+        "accounts": 1,
+        "states": {
+          "ACTIVE": 1
+        },
+        "issue_codes": {
+          "CREATE_OUTCOME_UNKNOWN": 1
+        },
+        "preflight_http": {
+          "200": 1
+        },
+        "identity_success": 1,
+        "preflight_checks": [
+          {
+            "create_permission": true,
+            "enabled": true,
+            "image": true,
+            "lifetime": true,
+            "network": true,
+            "plan": true,
+            "provider_account_active": true,
+            "provider_identity": true,
+            "regions": true,
+            "schedule": true
+          }
+        ]
+      },
+      "vultr": {
+        "accounts": 1,
+        "states": {
+          "TOKEN_INVALID": 1
+        },
+        "issue_codes": {
+          "TOKEN_INVALID": 1,
+          "PROXY_ERROR": 1
+        },
+        "preflight_http": {
+          "409": 1
+        },
+        "identity_success": 0,
+        "preflight_checks": [
+          {
+            "create_permission": true,
+            "enabled": true,
+            "image": true,
+            "lifetime": true,
+            "network": true,
+            "plan": true,
+            "provider_account_active": false,
+            "provider_identity": false,
+            "regions": true,
+            "schedule": true
+          }
+        ]
+      }
+    },
+    "system": [
+      {
+        "endpoint": "/api/v1/system",
+        "http": 200,
+        "keys": [
+          "digitalocean_accounts",
+          "vultr_accounts",
+          "upcloud_accounts",
+          "aws_accounts",
+          "ovh_accounts",
+          "kamatera_accounts",
+          "linode_accounts",
+          "enabled_accounts",
+          "healthy_accounts",
+          "capacity_full_accounts",
+          "broken_accounts",
+          "degraded_accounts",
+          "account_health_total",
+          "account_health_truncated",
+          "account_health",
+          "limited_accounts",
+          "unknown_accounts",
+          "pending_deletion_accounts",
+          "active_servers",
+          "inactive_servers",
+          "unverified_servers",
+          "broken_servers",
+          "degraded_servers",
+          "pending_deletion_servers",
+          "total_servers",
+          "provisioning_servers",
+          "provider_stale_servers",
+          "panel_attention_servers",
+          "server_health",
+          "active_deployments",
+          "live_workers",
+          "observed_at"
+        ],
+        "rows": null,
+        "digitalocean_accounts": 3,
+        "vultr_accounts": 1,
+        "upcloud_accounts": 0,
+        "aws_accounts": 0,
+        "ovh_accounts": 1,
+        "kamatera_accounts": 1,
+        "linode_accounts": 3,
+        "enabled_accounts": 9,
+        "healthy_accounts": 4,
+        "capacity_full_accounts": 0,
+        "broken_accounts": 5,
+        "degraded_accounts": 0,
+        "account_health_total": 9,
+        "account_health_truncated": false,
+        "account_health_count": 9,
+        "limited_accounts": 0,
+        "unknown_accounts": 0,
+        "pending_deletion_accounts": 0,
+        "active_servers": 20,
+        "inactive_servers": 0,
+        "unverified_servers": 0,
+        "broken_servers": 0,
+        "degraded_servers": 0,
+        "pending_deletion_servers": 43,
+        "total_servers": 63,
+        "provisioning_servers": 0,
+        "provider_stale_servers": 0,
+        "panel_attention_servers": 0,
+        "server_health_count": 43,
+        "active_deployments": 4,
+        "live_workers": 2
+      },
+      {
+        "endpoint": "/api/v1/build-activity?summary=1",
+        "http": 200,
+        "keys": [
+          "active_builds",
+          "observed_at",
+          "records",
+          "waiting_builds"
+        ],
+        "rows": null,
+        "active_builds": 4,
+        "records_count": 100,
+        "waiting_builds": 0
+      },
+      {
+        "endpoint": "/api/v1/provision-errors?summary=1",
+        "http": 200,
+        "keys": [
+          "records",
+          "historical_families",
+          "current_failed_runs",
+          "observed_at"
+        ],
+        "rows": null,
+        "records_count": 46,
+        "historical_families": 46,
+        "current_failed_runs": 0
+      },
+      {
+        "endpoint": "/api/v1/server-protection",
+        "http": 200,
+        "keys": [
+          "control",
+          "inherits_future",
+          "sample_interval_ms",
+          "telemetry_fresh_seconds",
+          "capabilities",
+          "panels"
+        ],
+        "rows": null,
+        "inherits_future": false,
+        "sample_interval_ms": 250,
+        "telemetry_fresh_seconds": 60,
+        "panels_count": 63
+      },
+      {
+        "endpoint": "/api/v1/output?class=DIRECT",
+        "http": 200,
+        "keys": [
+          "output_lines",
+          "all_uri_lines",
+          "no_store",
+          "content_type"
+        ],
+        "rows": null,
+        "output_lines": 80,
+        "all_uri_lines": true,
+        "no_store": true
+      },
+      {
+        "endpoint": "/api/v1/output?class=RESIDENTIAL",
+        "http": 200,
+        "keys": [
+          "output_lines",
+          "all_uri_lines",
+          "no_store",
+          "content_type"
+        ],
+        "rows": null,
+        "output_lines": 80,
+        "all_uri_lines": true,
+        "no_store": true
+      }
+    ],
+    "steps": [
+      {
+        "stage": "default-baseline",
+        "exit": 0,
+        "at": "2026-11-05T20:45:33.921568+00:00"
+      },
+      {
+        "stage": "default-update",
+        "exit": 0,
+        "at": "2026-11-05T20:46:31.255158+00:00"
+      },
+      {
+        "stage": "default-preservation",
+        "exit": 0,
+        "at": "2026-11-05T20:46:33.975611+00:00"
+      },
+      {
+        "stage": "default-assets",
+        "exit": 0,
+        "at": "2026-11-05T20:46:34.295593+00:00"
+      },
+      {
+        "stage": "production-baseline",
+        "exit": 0,
+        "at": "2026-11-05T20:46:38.797175+00:00"
+      },
+      {
+        "stage": "production-update",
+        "exit": 0,
+        "at": "2026-11-05T20:50:37.508839+00:00"
+      },
+      {
+        "stage": "production-preservation",
+        "exit": 0,
+        "at": "2026-11-05T20:50:39.662442+00:00"
+      },
+      {
+        "stage": "production-assets",
+        "exit": 0,
+        "at": "2026-11-05T20:50:40.030705+00:00"
+      },
+      {
+        "stage": "preflight-final",
+        "exit": 0,
+        "at": "2026-11-05T20:50:48.449418+00:00"
+      },
+      {
+        "stage": "api-final",
+        "exit": 0,
+        "at": "2026-11-05T20:50:51.135936+00:00"
+      },
+      {
+        "stage": "system-api-final",
+        "exit": 0,
+        "at": "2026-11-05T20:50:52.809688+00:00"
+      },
+      {
+        "stage": "live-ui-acceptance",
+        "exit": 0,
+        "at": "2026-11-05T20:50:59.593511+00:00"
+      },
+      {
+        "stage": "final-health",
+        "exit": 0,
+        "at": "2026-11-05T20:51:00.469883+00:00"
+      }
+    ],
+    "preservation": {
+      "default": {
+        "profile_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        },
+        "trojan_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        }
+      },
+      "production": {
+        "profile_ownership": {
+          "common": 2401,
+          "unchanged": 2401,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        },
+        "trojan_ownership": {
+          "common": 10,
+          "unchanged": 10,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        }
+      }
+    },
+    "monitor": {
+      "stopped_cleanly_after_final_health_check": true,
+      "samples": 19,
+      "min_free_bytes": 20069888000,
+      "min_mem_available_bytes": 1051185152,
+      "vault_unchanged": true,
+      "nonready_samples": {
+        "default": 0,
+        "production": 2
+      }
+    },
+    "build_limits": {
+      "default": [
+        {
+          "ActiveState": "active",
+          "MemoryCurrent": "742887424",
+          "MemoryPeak": "801140736",
+          "CPUQuotaPerSecUSec": "1s",
+          "MemoryHigh": "805306368",
+          "MemoryMax": "1073741824"
+        }
+      ],
+      "production": [
+        {
+          "ActiveState": "active",
+          "MemoryCurrent": "396263424",
+          "MemoryPeak": "419504128",
+          "CPUQuotaPerSecUSec": "1s",
+          "MemoryHigh": "805306368",
+          "MemoryMax": "1073741824"
+        }
+      ]
+    },
+    "historical_failed_jobs": [
+      {
+        "unit": "dob-cdn-production-update-20261025.service",
+        "TriggeredBy": "",
+        "ActiveState": "failed",
+        "SubState": "failed",
+        "UnitFileState": "transient",
+        "Transient": "yes",
+        "MainPID": "0",
+        "ExecMainExitTimestamp": "Sat 2026-10-24 23:05:05 UTC",
+        "ExecMainStatus": "1"
+      },
+      {
+        "unit": "dob-fleet-focused-20261024.service",
+        "TriggeredBy": "",
+        "ActiveState": "failed",
+        "SubState": "failed",
+        "UnitFileState": "transient",
+        "Transient": "yes",
+        "MainPID": "0",
+        "ExecMainExitTimestamp": "Sat 2026-10-24 10:40:21 UTC",
+        "ExecMainStatus": "1"
+      },
+      {
+        "unit": "dob-kamatera-pricing-live-r1.service",
+        "TriggeredBy": "",
+        "ActiveState": "failed",
+        "SubState": "failed",
+        "UnitFileState": "transient",
+        "Transient": "yes",
+        "MainPID": "0",
+        "ExecMainExitTimestamp": "Mon 2026-10-26 23:14:32 UTC",
+        "ExecMainStatus": "1"
+      }
+    ],
+    "screenshot_visual_review": {
+      "widths": [
+        390,
+        1365
+      ],
+      "installed_css": true,
+      "normal_production_csp": true
+    }
+  }
+}
