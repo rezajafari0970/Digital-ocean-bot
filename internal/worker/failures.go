@@ -215,15 +215,24 @@ func (s FailureStore) ClearChecked(ctx context.Context, kind, itemID string) err
 	return err
 }
 
+const clearResolvedFailuresSQL = `DELETE FROM worker_item_failures f USING (
+ SELECT 'deployment'::text kind,d.id::text item_id FROM deployments d
+ WHERE d.state IN ('READY','FAILED','INSTALL_COMPLETE','INSTALL_FAILED','INSTALL_ROLLED_BACK')
+ OR (d.state='WAITING_INSTALLER' AND d.profile_snapshot->'installer_ref' IS NULL
+  AND NOT EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation))
+ UNION ALL SELECT 'operation',o.id::text FROM operations o WHERE o.state IN ('succeeded','failed')
+ UNION ALL SELECT 'lifecycle',d.id::text FROM droplets d WHERE d.state='DELETED'
+) resolved WHERE f.kind=resolved.kind AND f.item_id=resolved.item_id`
+
 func (s FailureStore) ClearResolved(ctx context.Context) { _ = s.ClearResolvedChecked(ctx) }
 func (s FailureStore) ClearResolvedChecked(ctx context.Context) error {
 	if s.DB == nil {
 		return nil
 	}
-	_, err := s.DB.ExecContext(ctx, `DELETE FROM worker_item_failures f WHERE
- (f.kind='deployment' AND EXISTS(SELECT 1 FROM deployments d WHERE d.id::text=f.item_id AND (d.state IN ('READY','FAILED','INSTALL_COMPLETE','INSTALL_FAILED','INSTALL_ROLLED_BACK') OR (d.state='WAITING_INSTALLER' AND d.profile_snapshot->'installer_ref' IS NULL AND NOT EXISTS(SELECT 1 FROM deployment_installer_selections s WHERE s.deployment_id=d.id AND s.generation=d.installer_generation)))))
- OR (f.kind='operation' AND EXISTS(SELECT 1 FROM operations o WHERE o.id::text=f.item_id AND o.state IN ('succeeded','failed')))
- OR (f.kind='lifecycle' AND EXISTS(SELECT 1 FROM droplets d WHERE d.id::text=f.item_id AND d.state='DELETED'))`)
+	// Join terminal evidence once instead of correlated OR subplans for every
+	// failure. On a cold database the former plan could spend the entire
+	// recovery deadline compiling those subplans, even with an empty ledger.
+	_, err := s.DB.ExecContext(ctx, clearResolvedFailuresSQL)
 	return err
 }
 

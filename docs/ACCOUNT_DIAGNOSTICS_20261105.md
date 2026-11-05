@@ -62,3 +62,32 @@ from the local workspace, so actual browser acceptance must run in independent C
 Mandatory regressions cover seven-provider list/detail parity, secret boundaries,
 ambiguous-create immutability, runtime failures, simultaneous preflight failures,
 failed-response detail, navigation fencing and real mobile/desktop rendering.
+
+## Recovery deadline correction found by full validation
+
+Source runs 42094675377 and 42095945874 failed the existing repeated recovery
+isolation gate on the first iteration. Independent PostgreSQL logging in the
+second run identified cancellation of `ClearResolvedChecked`'s correlated
+three-branch DELETE, not a provider request. The subsequent operation scan
+reported the already-expired context. The remaining 19 repetitions passed, so
+neither a retry nor increased deadline is accepted as a correction.
+
+Terminal evidence now joins the failure ledger once through UNION ALL branches.
+The terminal/installer-selection predicates are unchanged. A dedicated regression
+checks terminal and ongoing operations, ambiguous creates, live and deleted
+servers, selected and legacy installers, and missing identities; retained errors
+and retry timestamps must survive. The cold fixture also rejects JIT selection.
+Error propagation now retains pruning failures alongside the stage that observes
+the deadline. Both independent run failures remain part of the evidence.
+
+A bounded, plan-only comparison on session-local temporary tables was rolled
+back without executing either DELETE. Production data was compared with both
+candidate selectors under one read-only snapshot; both selected zero rows and
+EXCEPT ALL differences were zero. This empty live selection is limited evidence;
+the nonempty semantic matrix is required in CI.
+
+Fresh live Preflight checks confirmed all nine enabled accounts through their
+assigned proxy routes. Both raw output classes returned 80 valid URI lines and
+no-store. System counts were 20 active servers, 43 pending deletion/expiry, four
+active builds and zero current failed provisioning runs. Historical diagnostic
+families (46) are retained history, not 46 current installation failures.

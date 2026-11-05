@@ -145,7 +145,7 @@ func (w Worker) round(ctx context.Context, active func(string) bool, submit func
 	}
 	ops, err := w.Store.Operations(scanCtx, w.Batch)
 	if err != nil {
-		return fmt.Errorf("recovery operation scan: %w", err)
+		return errors.Join(reconcileErr, fmt.Errorf("recovery operation scan: %w", err))
 	}
 	for _, x := range ops {
 		x := x
@@ -166,7 +166,7 @@ func (w Worker) round(ctx context.Context, active func(string) bool, submit func
 	offeredDeployments := make(map[string]bool)
 	deployments, err := w.Store.Deployments(scanCtx, w.Batch)
 	if err != nil {
-		return fmt.Errorf("recovery deployment scan: %w", err)
+		return errors.Join(reconcileErr, fmt.Errorf("recovery deployment scan: %w", err))
 	}
 	for _, x := range deployments {
 		x := x
