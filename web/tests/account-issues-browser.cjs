@@ -32,7 +32,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   for(const provider of ['digitalocean','vultr','linode','aws','kamatera','upcloud','ovh']){
    assert.equal(await evaluate(`(()=>{const row=cache.accounts.find(x=>x.provider===${JSON.stringify(provider)});const card=document.querySelector('[data-account-id="'+row.id+'"]');return ['Provider lock remains visible','Independent route error remains visible','CREATE OUTCOME UNKNOWN'].every(t=>card.innerText.includes(t))})()`),true);
   }
-  assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'),true);
+  assert.equal(await evaluate('document.documentElement.scrollWidth<=390+1'),true);
   await evaluate('window.issueID='+JSON.stringify(id)+';window.issueMessages=[];window.originalToast=toast;toast=(m,k)=>{issueMessages.push(m);originalToast(m,k)}');
   await evaluate('accountPreflight(issueID)');
   assert.equal(await evaluate('issueMessages.some(x=>x.includes("Preflight provider rejection")&&x.includes("provider identity"))'),true);
@@ -42,10 +42,16 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spa
   await evaluate('accountRefresh(issueID)');
   await waitFor('document.querySelector(".accountIssues")?.innerText.includes("Fresh credential rejection is visible")');
   assert.equal(await evaluate('issueMessages.some(x=>x.includes("Refresh failed:")&&x.includes("Fresh credential rejection is visible"))'),true);
-  for(const width of [390,1365]){
-   await call('Emulation.setDeviceMetricsOverride',{width,height:844,deviceScaleFactor:1,mobile:width===390});
+  assert.equal(await evaluate('document.querySelectorAll(".dropletTable tbody tr").length'),10);
+  assert.equal(await evaluate('[...document.querySelectorAll(".stat b")].some(e=>e.textContent==="PROVEN_LOWER_BOUND")'),true);
+  for(const width of [320,390,800,801,1024,1365]){
+   await call('Emulation.setDeviceMetricsOverride',{width,height:844,deviceScaleFactor:1,mobile:width<=800});
    await evaluate('scrollTo(0,0);document.querySelector("#toast").hidden=true');
-   assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'),true);
+   assert.equal(await evaluate('document.documentElement.scrollWidth<='+width+'+1 && innerWidth<='+width+'+1'),true,'dashboard must fit physical viewport '+width);
+   assert.equal(await evaluate('[...document.querySelectorAll(".stat b")].every(e=>e.scrollWidth<=e.clientWidth+1)'),true,'capacity labels stay inside cards');
+   if(width===801){
+    assert.equal(await evaluate('(()=>{const e=document.querySelector(".dropletTable");return e.scrollWidth>e.clientWidth&&getComputedStyle(e).overflowX==="auto"})()'),true,'wide server table scrolls inside its wrapper');
+   }
    const shot=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(root,'account-issues-'+width+'.png'),Buffer.from(shot.data,'base64'));
   }
   await call('Page.reload');
