@@ -47,7 +47,7 @@ func (c Container) ProcessAccountDeletions(ctx context.Context) error {
 		if e := c.DB.QueryRowContext(persist, "SELECT provider_state FROM accounts WHERE id=$1", id).Scan(&state); e == nil {
 			switch state {
 			case "TOKEN_INVALID":
-				detail = "Deletion blocked: provider token is invalid. Update the API credential to verify and delete remaining servers."
+				detail = "Deletion blocked: the last provider check rejected authentication. Review credentials, API access and source-IP restrictions to verify and delete remaining servers."
 			case "LOCKED":
 				detail = "Deletion blocked: provider account is locked. Restore provider access before remaining servers can be verified."
 			case "PERMISSION_DENIED":

@@ -75,6 +75,11 @@ func (c Container) RecordProviderObservation(ctx context.Context, a ProviderAtte
 	if err != nil || !valid {
 		return false, err
 	}
+	var provider string
+	if err = tx.QueryRowContext(ctx, "SELECT provider FROM accounts WHERE id=$1", a.AccountID).Scan(&provider); err != nil {
+		return false, err
+	}
+	detail = providerFailureReceipt(provider, cause, state, detail)
 	var pe *providers.Error
 	contacted := errors.As(cause, &pe) && pe.StatusCode > 0
 	var result sql.Result
@@ -92,6 +97,12 @@ func (c Container) RecordProviderObservation(ctx context.Context, a ProviderAtte
 	}
 	n, err := result.RowsAffected()
 	if err != nil || n == 0 {
+		return false, err
+	}
+	if _, err = tx.ExecContext(ctx, `INSERT INTO audit_events(account_id,actor,action,resource_type,resource_id,result,message,metadata)
+ SELECT $1::uuid,'provider-observer','provider.observation.failed','account',$1::uuid::text,$2,'Provider observation failed',$3::jsonb
+ WHERE NOT EXISTS(SELECT 1 FROM audit_events WHERE id=(SELECT id FROM audit_events WHERE account_id=$1 AND action='provider.observation.failed' ORDER BY created_at DESC,id DESC LIMIT 1)
+ AND metadata=$3::jsonb AND created_at>now()-interval '6 hours')`, a.AccountID, state, detail); err != nil {
 		return false, err
 	}
 	if err = publishProviderCadence(ctx, tx, a); err != nil {

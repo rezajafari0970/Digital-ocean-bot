@@ -77,9 +77,13 @@ func openAccountPurge(ctx context.Context, db *sql.DB, id, expectedState string,
 	return tx, nil
 }
 
+// LocalAccountPurgeAllowed reports only the provider-state part of eligibility.
+// Disabled state, settled deletion, exact scope and native fences are also required.
+func LocalAccountPurgeAllowed(state string) bool { return localPurgeAllowed(state) }
+
 func localPurgeAllowed(state string) bool {
 	switch state {
-	case "LOCKED", "TOKEN_INVALID", "PERMISSION_DENIED", "BILLING_BLOCKED":
+	case "ACTIVE", "LOCKED", "TOKEN_INVALID", "PERMISSION_DENIED", "BILLING_BLOCKED", "RATE_LIMITED", "TRANSPORT_ERROR", "PROXY_ERROR", "UNKNOWN", "DISABLED":
 		return true
 	}
 	return false

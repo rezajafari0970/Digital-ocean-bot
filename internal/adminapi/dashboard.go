@@ -40,6 +40,12 @@ func (s *Server) accountDashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	d := accountDashboard{Account: map[string]any{"id": id, "name": name, "provider": provider, "enabled": enabled, "email": email, "external_id": externalID, "runtime_status": runtimeStatus, "provider_state": build.State, "provider_reason": build.Reason, "issues": build.Issues, "can_create": build.SchedulerCanBuild, "provider_can_create": build.ProviderCanCreate, "scheduler_can_build": build.SchedulerCanBuild, "scheduler_reason": build.SchedulerReason, "create_block": build.Block, "upcloud_trial_compatible": build.TrialCompatible, "trial_proxy_candidates": build.TrialProxyCandidates, "trial_relay": build.TrialRelay}, Capacity: map[string]any{}, Resources: map[string]any{}, Network: map[string]any{}, Runtime: map[string]any{}, Deployments: map[string]any{}}
+	history, historyErr := s.accountFailureHistory(r.Context(), id)
+	if historyErr != nil {
+		writeJSON(w, 500, errorBody())
+		return
+	}
+	d.Account["diagnostic_history"] = history
 	d.Billing = s.accountBilling(r.Context(), id)
 	// Counts and rows share the canonical provider inventory. Legacy resource
 	// aliases differ by provider and may contain both droplet and server rows.
