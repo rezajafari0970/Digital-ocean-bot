@@ -1,3 +1,7 @@
+## Latest verified continuation — provider browser rendering, 2026-11-06
+
+Read [the current browser release](docs/PROVIDER_BROWSER_QUALITY_RELEASE_20261106.md) first. Public main/stable and both runtimes are 84aa4e4474060ac82061b83d783a70d8d6b8bb6d, schema206. Full Chrome, high-DPI PNG, Desktop/mobile, complete asset transfer, native Client Hints, a bounded shared memory budget and nonblocking proxy-health persistence are deployed. Exact source373-root/native/race/restore and public install/reinstall gates passed. Live rendering results and limits are recorded per provider. No physical Android, provider login or universal security-challenge guarantee. Preserve the original-cluster quarantine and do not replay deployment intents/unknown creates. Earlier entries are historical.
+
 ## Latest verified continuation — 2026-11-06 Tehran
 
 Read [cleanup statistics and provider diagnostics](docs/CLEANUP_DIAGNOSTICS_RELEASE_20261106.md) first. Both runtime instances and public main/stable are 8d28fee2d356cb15a587dabb6a003a8a18863aaa, schema 206. All 365 required regressions, independent install/update, preservation and live acceptance checks passed. Cleanup accounts no longer contribute to active statistics; bulk local removal and durable provider error history are available. No live bulk purge was executed. Recheck provider-side blockers and unknown create receipts without replaying creates or starting quarantined services. Earlier entries are historical.

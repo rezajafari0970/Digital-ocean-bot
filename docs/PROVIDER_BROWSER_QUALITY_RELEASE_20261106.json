@@ -1,0 +1,195 @@
+{
+  "source": "47a561e0df2e8076191bf4f8486b48669a047a87",
+  "merge": "c615da67058ae8a01a901ea80870e01ab29f3bc2",
+  "public": "84aa4e4474060ac82061b83d783a70d8d6b8bb6d",
+  "sourceRun": 42160898598,
+  "publicRun": 42161056214,
+  "promotionRun": 42161923359,
+  "promotionAttempt": 2,
+  "promotionFirstAttemptFailure": "GitHub hosted runner anonymous API rate limit; no refs changed",
+  "accepted_at": "2026-11-06T04:36:13.968513+00:00",
+  "schema": 206,
+  "both_instances": true,
+  "preservation_checks_per_instance": 18,
+  "readiness_checks_per_instance": 5,
+  "running_binary_hashes": 6,
+  "browser_runner_hash_match": true,
+  "combined_browser_memory_bytes": 1342177280,
+  "live_browser": {
+    "cloudMutations": 0,
+    "localProviderRequests": 0,
+    "provider": "linode",
+    "newTab": true,
+    "noOpener": true,
+    "highDPI": {
+      "width": 1170,
+      "logicalWidth": 390,
+      "format": "png",
+      "scale": 3
+    },
+    "country": "IT",
+    "verifiedProxy": true,
+    "address": "https://login.linode.com/login",
+    "title": "Welcome! - Linode \u00b7 Proxy",
+    "noCredentialInURL": true,
+    "reloadSameSession": true,
+    "parentCanClose": true,
+    "desktopModeOnPhone": true,
+    "mobileDesktopResize": true,
+    "ended": true,
+    "providerPages": [
+      {
+        "provider": "vultr",
+        "country": "IT",
+        "startStatus": 201,
+        "frameStatus": 200,
+        "imageBytes": 136164,
+        "nonemptyContent": true,
+        "title": "Log In to your Vultr Account - Vultr.com",
+        "origin": "https://console.vultr.com",
+        "format": "png",
+        "challenge": false
+      },
+      {
+        "provider": "digitalocean",
+        "country": "IT",
+        "startStatus": 201,
+        "frameStatus": 200,
+        "imageBytes": 335842,
+        "nonemptyContent": true,
+        "title": "Log in to your account | DigitalOcean",
+        "origin": "https://cloud.digitalocean.com",
+        "format": "png",
+        "challenge": false
+      },
+      {
+        "provider": "linode",
+        "country": "IT",
+        "startStatus": 201,
+        "frameStatus": 200,
+        "imageBytes": 75898,
+        "nonemptyContent": true,
+        "title": "Welcome! - Linode",
+        "origin": "https://login.linode.com",
+        "format": "png",
+        "challenge": false
+      },
+      {
+        "provider": "upcloud",
+        "country": "IT",
+        "startStatus": 201,
+        "frameStatus": 200,
+        "imageBytes": 366078,
+        "nonemptyContent": true,
+        "title": "UpCloud \u2013 Login",
+        "origin": "https://hub.upcloud.com",
+        "format": "png",
+        "challenge": false
+      },
+      {
+        "provider": "aws",
+        "country": "IT",
+        "startStatus": 201,
+        "frameStatus": 200,
+        "imageBytes": 233081,
+        "nonemptyContent": true,
+        "title": "Amazon Web Services Sign-In",
+        "origin": "https://eu-north-1.signin.aws.amazon.com",
+        "format": "png",
+        "challenge": false
+      },
+      {
+        "provider": "kamatera",
+        "country": "IT",
+        "startStatus": 201,
+        "frameStatus": 200,
+        "imageBytes": 46912,
+        "nonemptyContent": true,
+        "title": "Kamatera Cloud Platform - Login",
+        "origin": "https://console.kamatera.com",
+        "format": "png",
+        "challenge": false
+      },
+      {
+        "provider": "ovh",
+        "country": "IT",
+        "startStatus": 201,
+        "frameStatus": 200,
+        "imageBytes": 271714,
+        "nonemptyContent": true,
+        "title": "Cloud Computing e hosting web | OVHcloud Italia",
+        "origin": "https://www.ovhcloud.com",
+        "format": "png",
+        "challenge": false
+      }
+    ],
+    "workerBefore": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-11-06T04:31:59.761773546Z"
+    },
+    "workerAfter": {
+      "status": "ready",
+      "checks": [
+        {
+          "name": "database",
+          "ok": true
+        },
+        {
+          "name": "worker_progress",
+          "ok": true
+        },
+        {
+          "name": "panel_worker_progress",
+          "ok": true
+        },
+        {
+          "name": "lifecycle_account_lanes",
+          "ok": true
+        },
+        {
+          "name": "client_mutation_progress",
+          "ok": true
+        }
+      ],
+      "at": "2026-11-06T04:34:22.747752569Z"
+    }
+  },
+  "visual_review": {
+    "method": "Assistant inspected actual PNG captures from the deployed isolated browser. Anonymous page rendering only; no account login or CAPTCHA completion.",
+    "providers": {
+      "vultr": "Login form and provider cookie-consent dialog rendered; text, controls and background visible.",
+      "digitalocean": "Login card, background illustration and cookie-preferences dialog rendered; no visible loading or browser error.",
+      "linode": "Akamai/Linode login form and cookie dialog rendered; mobile and desktop wrapper captures also inspected.",
+      "upcloud": "Complete username/password form, background artwork and cookie banner rendered; no visible hCaptcha error.",
+      "aws": "IAM sign-in fields, sign-in options and promotional artwork rendered.",
+      "kamatera": "Email/password form, social sign-in controls and logo rendered.",
+      "ovh": "Italian OVHcloud homepage, navigation, hero artwork and cookie-consent dialog rendered; no missing-image placeholder visible."
+    },
+    "wrapper": "Independent tab, high-DPI PNG, Desktop on mobile, mobile/desktop resize and session reload checked; actual Linode wrapper captures visually inspected."
+  },
+  "physical_android_test": false,
+  "provider_login_test": false,
+  "evidence_root": "/root/dob-browser-transfer-20261106"
+}
