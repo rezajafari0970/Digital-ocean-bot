@@ -47,7 +47,32 @@ func (f sshIdentityFactory) Name() string { return f.d.provider }
 func (f sshIdentityFactory) Metadata() providers.Metadata {
 	return providers.Metadata{Name: f.d.provider}
 }
+
+// Inline keys are a compute capability. The SSH fixture never performs compute,
+// but its inline variant must satisfy the same driver contract as real providers.
+type inlineSSHIdentityDriver struct{ *sshIdentityDriver }
+
+var _ providers.ComputeDriver = (*inlineSSHIdentityDriver)(nil)
+
+func (*inlineSSHIdentityDriver) CreateServer(context.Context, providers.CreateServerRequest) (providers.CreateServerResult, error) {
+	return providers.CreateServerResult{}, errors.New("unexpected compute call in SSH identity fixture")
+}
+func (*inlineSSHIdentityDriver) GetServer(context.Context, string) (providers.Server, error) {
+	return providers.Server{}, errors.New("unexpected compute call in SSH identity fixture")
+}
+func (*inlineSSHIdentityDriver) ListServers(context.Context) ([]providers.Server, error) {
+	return nil, errors.New("unexpected compute call in SSH identity fixture")
+}
+func (*inlineSSHIdentityDriver) DeleteServer(context.Context, string) error {
+	return errors.New("unexpected compute call in SSH identity fixture")
+}
+func (*inlineSSHIdentityDriver) FindServerByIdentity(context.Context, string) ([]providers.Server, error) {
+	return nil, errors.New("unexpected compute call in SSH identity fixture")
+}
 func (f sshIdentityFactory) Open(context.Context, providers.OpenRequest) (providers.Driver, error) {
+	if f.d.inline {
+		return &inlineSSHIdentityDriver{f.d}, nil
+	}
 	return f.d, nil
 }
 
