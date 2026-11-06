@@ -1,3 +1,7 @@
+## Current native provider browser release — 2026-11-06
+
+Read [the native browser release](NATIVE_BROWSER_RELEASE_20261106.md) and HANDOFF.md first. Native Chrome was explicitly selected by the user. Runtime identities, original-video defects, real gateway compatibility, all accepted gates and remaining phone/login limitations are recorded there. Earlier remote-renderer acceptance does not prove native Android parity.
+
 ## Current provider browser interaction release — 2026-11-06
 
 Read [the verified input release](PROVIDER_BROWSER_INPUT_RELEASE_20261106.md) and HANDOFF.md first. Both runtime identities, native input regressions, live acceptance and remaining coverage limits are recorded there. Earlier generated indexes are historical.

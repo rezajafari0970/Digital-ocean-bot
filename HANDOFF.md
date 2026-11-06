@@ -1,3 +1,7 @@
+## Latest verified continuation — native provider browsing, 2026-11-06
+
+Read [the native browser release](docs/NATIVE_BROWSER_RELEASE_20261106.md) first. Both runtimes and public main/stable are d1c4a95df21a1fb10ada7ed2286cfab3cfbf6d20, schema206. The default provider action now sets up a temporary V2RayNG connection and opens the original site in native Chrome. Source377-root/native/race/restore and public install/reinstall passed; both updates, preservation and public native transport/DNS/revocation checks completed. The recorded phone video invalidated any assumption of full remote-browser parity. Physical Android login and CAPTCHA acceptance remain unverified. Do not replay deployment intents, unknown cloud creates or start quarantined original services. Earlier entries are historical.
+
 ## Latest verified continuation — provider browser input, 2026-11-06
 
 Read [the interaction release](docs/PROVIDER_BROWSER_INPUT_RELEASE_20261106.md) first. Both runtimes and public main/stable are fa006e38b711c5645620cda9ec874b804eff62fb, schema206. Native taps, retained editing controls, clipboard, Persian, keyboard resize and field transitions are deployed and tested through the actual isolated worker; installed-site checks are recorded. Source373-root/native/race/restore and public install/reinstall passed. Both updates and preservation/gateway checks completed. Do not replay deployment intents or unknown cloud creates. Physical Android and provider-login coverage remain open. Earlier entries are historical.
