@@ -33,8 +33,10 @@ UMask=0077
 RuntimeMaxSec=15min
 TimeoutStopSec=5s
 KillMode=control-group
-MemoryHigh=384M
-MemoryMax=512M
+# Full Chrome needs headroom for cold executable pages and high-DPI rendering.
+# The socket permits at most two instances (combined hard limit 1280 MiB).
+MemoryHigh=512M
+MemoryMax=640M
 # Full Chrome plus the isolated display requires more threads than headless-shell.
 TasksMax=256
 CPUQuota=75%

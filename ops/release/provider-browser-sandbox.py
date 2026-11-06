@@ -23,6 +23,12 @@ def main():
             p=temp/name;p.write_text(text);sudo('install','-m','0644',str(p),'/etc/systemd/system/'+name)
         for path in ['/etc/dob-browser-host-fixture','/var/lib/dob-browser-host-fixture','/run/dob-browser-host-fixture']:
             sudo('touch',path)
+        # Exercise cold runtime pages: installer hash verification otherwise warms
+        # Chrome into the host page cache and conceals per-service memory pressure.
+        for runtime_file in pathlib.Path('/usr/local/lib/datacenter-bot/chrome').rglob('*'):
+            if runtime_file.is_file():
+                with runtime_file.open('rb') as stream:
+                    os.posix_fadvise(stream.fileno(),0,0,os.POSIX_FADV_DONTNEED)
         sudo('systemctl','daemon-reload');sudo('systemctl','start','datacenter-provider-browser.socket')
         try:
             env=os.environ.copy();env['DOB_RUN_PROVIDER_BROWSER_SANDBOX']='1'
