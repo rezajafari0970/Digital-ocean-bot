@@ -124,3 +124,47 @@ func TestHealthDiagnosticsPersistencePostgres(t *testing.T) {
 		t.Fatalf("missing row not reported: %v", err)
 	}
 }
+
+func TestHealthStoreConfigurationLockDoesNotBlockPostgres(t *testing.T) {
+	db := healthDiagnosticsDB(t)
+	var id, other string
+	for _, dest := range []*string{&id, &other} {
+		if err := db.QueryRow("INSERT INTO proxies(id,name,type,host,port,status) VALUES(gen_random_uuid(),gen_random_uuid()::text,'socks5','127.0.0.1',1,'healthy') RETURNING id::text").Scan(dest); err != nil {
+			t.Fatal(err)
+		}
+	}
+	tx, err := db.Begin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tx.Rollback()
+	var held string
+	if err = tx.QueryRow("SELECT id::text FROM proxies WHERE id=$1 FOR SHARE", id).Scan(&held); err != nil {
+		t.Fatal(err)
+	}
+	store := SQLHealthStore{DB: db}
+	state := HealthState{Status: StatusDown, LastCheckedAt: time.Now().UTC(), LastError: "PROXY_AUTH_FAILED"}
+	started := time.Now()
+	if err = store.Save(context.Background(), id, state); !errors.Is(err, ErrHealthStoreBusy) {
+		t.Fatalf("locked update must defer: %v", err)
+	}
+	if time.Since(started) > time.Second {
+		t.Fatal("health persistence waited for the browser configuration lock")
+	}
+	var status string
+	if err = db.QueryRow("SELECT status FROM proxies WHERE id=$1", id).Scan(&status); err != nil || status != "healthy" {
+		t.Fatalf("locked observation was changed: %s %v", status, err)
+	}
+	if err = store.Save(context.Background(), other, state); err != nil {
+		t.Fatalf("unrelated proxy blocked: %v", err)
+	}
+	if err = tx.Rollback(); err != nil {
+		t.Fatal(err)
+	}
+	if err = store.Save(context.Background(), id, state); err != nil {
+		t.Fatalf("retry after session close failed: %v", err)
+	}
+	if err = db.QueryRow("SELECT status FROM proxies WHERE id=$1", id).Scan(&status); err != nil || status != "down" {
+		t.Fatalf("released observation not persisted: %s %v", status, err)
+	}
+}
