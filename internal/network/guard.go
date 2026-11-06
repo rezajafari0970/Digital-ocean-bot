@@ -1,6 +1,9 @@
 package network
 
-import "errors"
+import (
+	"errors"
+	"strings"
+)
 
 var (
 	ErrProxyRequired    = errors.New("proxy required: direct route denied")
@@ -14,7 +17,7 @@ func ValidateRoute(profile Profile, proxy *Proxy) error {
 	if profile.Mode != RouteProxyRequired {
 		return ErrProxyRequired
 	}
-	if profile.ProxyID == nil || proxy == nil {
+	if profile.ProxyID == nil || proxy == nil || strings.TrimSpace(*profile.ProxyID) == "" || *profile.ProxyID != proxy.ID {
 		return ErrProxyUnavailable
 	}
 	if proxy.Status != StatusHealthy {

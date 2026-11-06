@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/resilience"
 	"sort"
 	"sync"
 	"time"
@@ -220,7 +221,7 @@ func Work(ctx context.Context, fn func(context.Context) error) error {
 		return err
 	}
 	defer done()
-	return fn(c)
+	return resilience.Guard(c, fn)
 }
 func reason(m *module, now time.Time) string {
 	if m.fault != "" {

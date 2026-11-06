@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/resilience"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/supervision"
 	"log"
+	"strings"
 	"sync"
 	"time"
 )
@@ -233,7 +235,7 @@ func (w Worker) round(ctx context.Context, active func(string) bool, submit func
 	return reconcileErr
 }
 
-// Interrupted completion is never an installer backoff-bypass authorization.
+// Interrupted completion and a contained panic never authorize installer backoff bypass.
 func (w Worker) recoveryDue(ctx context.Context, kind string, x RecoveryItem) (bool, error) {
 	due, err := w.Failures.DueChecked(ctx, kind, x.ID)
 	if err != nil || due || kind != "deployment" {
@@ -243,7 +245,7 @@ func (w Worker) recoveryDue(ctx context.Context, kind string, x RecoveryItem) (b
 	if err = w.Failures.DB.QueryRowContext(ctx, "SELECT last_error FROM worker_item_failures WHERE kind=$1 AND item_id=$2", kind, x.ID).Scan(&reason); err != nil {
 		return false, err
 	}
-	if reason == (recoveryInterrupted{}).Error() {
+	if reason == (recoveryInterrupted{}).Error() || strings.HasPrefix(reason, resilience.TaskPanicMarker+": ") {
 		return false, nil
 	}
 	b, ok := w.Handler.(BackoffBypasser)

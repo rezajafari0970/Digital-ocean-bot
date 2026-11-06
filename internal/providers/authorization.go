@@ -14,9 +14,10 @@ type AuthorizationFactory interface {
 }
 
 func (r *Registry) Authorizer(name string) (AuthorizationFactory, bool) {
-	r.mu.RLock()
-	f := r.factories[normalizeName(name)]
-	r.mu.RUnlock()
-	a, ok := f.(AuthorizationFactory)
+	f, registered := r.lookup(name)
+	if !registered {
+		return nil, false
+	}
+	a, ok := f.factory.(AuthorizationFactory)
 	return a, ok
 }

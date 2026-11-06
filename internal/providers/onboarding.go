@@ -39,13 +39,14 @@ func (t readOnlyDiscoveryTransport) RoundTrip(r *http.Request) (*http.Response, 
 	return t.base.RoundTrip(r)
 }
 func (r *Registry) Discover(ctx context.Context, name string, req OpenRequest, selection map[string]string) (Discovery, error) {
-	r.mu.RLock()
-	f := r.factories[normalizeName(name)]
-	r.mu.RUnlock()
-	if f == nil {
+	if err := ctx.Err(); err != nil {
+		return Discovery{}, err
+	}
+	f, registered := r.lookup(name)
+	if !registered {
 		return Discovery{}, errors.New("provider not registered")
 	}
-	d, ok := f.(OnboardingFactory)
+	d, ok := f.factory.(OnboardingFactory)
 	if !ok {
 		return Discovery{Complete: true, Credentials: req.Credentials}, nil
 	}

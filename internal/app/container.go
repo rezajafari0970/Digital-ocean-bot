@@ -190,6 +190,16 @@ func (c Container) openDriver(ctx context.Context, cfg AccountConfig, client *ht
 	if err != nil {
 		return nil, err
 	}
+	if client == nil || (cfg.Network.Mode == network.RouteProxyRequired && client.Transport == nil) {
+		return nil, ErrNetworkNotReady
+	}
+	needs, registered := r.Requirements(cfg.Provider)
+	if !registered {
+		return nil, fmt.Errorf("provider %q is not registered", cfg.Provider)
+	}
+	if needs != (providers.RuntimeRequirements{}) && c.DB == nil {
+		return nil, errors.New("provider runtime storage unavailable")
+	}
 	guarded := *client
 	base := client.Transport
 	if base == nil {
@@ -208,17 +218,24 @@ func (c Container) openDriver(ctx context.Context, cfg AccountConfig, client *ht
 		}
 	}
 	req := providers.OpenRequest{AccountID: cfg.ID, HTTPClient: client, Credentials: accountCredentialSource{store: c.Secrets, accountID: cfg.ID, ref: cfg.SecretRef, db: c.DB, expected: credentialIdentity}}
-	if cfg.Provider == "aws" || cfg.Provider == "ovh" || cfg.Provider == "kamatera" {
+	if needs.ExternalIdentity {
 		if err := c.DB.QueryRowContext(ctx, "SELECT COALESCE(external_id,'') FROM accounts WHERE id=$1", cfg.ID).Scan(&req.ExpectedExternalID); err != nil {
 			return nil, err
 		}
 		if req.ExpectedExternalID == "" {
 			return nil, errors.New("provider external identity is missing")
 		}
+	}
+	if needs.Resources {
 		req.Resources = providers.SQLAccountResources{DB: c.DB, AccountID: cfg.ID, Provider: cfg.Provider}
+	}
+	if needs.Absence {
 		req.Absence = providers.SQLAbsenceVerifier{DB: c.DB, AccountID: cfg.ID, Provider: cfg.Provider}
 	}
-	if cfg.Provider == "upcloud" {
+	if needs.Cleanup {
+		req.Cleanup = providers.SQLCleanupJournal{DB: c.DB}
+	}
+	if needs.Plans {
 		var raw []byte
 		if err := c.DB.QueryRowContext(ctx, "SELECT preferred_sizes FROM accounts WHERE id=$1", cfg.ID).Scan(&raw); err != nil {
 			return nil, err
@@ -226,7 +243,6 @@ func (c Container) openDriver(ctx context.Context, cfg AccountConfig, client *ht
 		if err := json.Unmarshal(raw, &req.PlanIDs); err != nil {
 			return nil, err
 		}
-		req.Cleanup = providers.SQLCleanupJournal{DB: c.DB}
 	}
 	return r.Open(ctx, cfg.Provider, req)
 }

@@ -6,6 +6,7 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/resilience"
 	"log"
 	"time"
 )
@@ -312,7 +313,7 @@ func runCheckpointedRecovery(ctx context.Context, db *sql.DB, kind string, x Rec
 			err = l.check(ctx)
 		}
 		if err == nil {
-			err = handler(ctx)
+			err = resilience.Guard(ctx, handler)
 		}
 		if err == nil && ctx.Err() != nil {
 			err = ctx.Err()

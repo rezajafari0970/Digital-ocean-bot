@@ -196,6 +196,16 @@ REQUIRED['internal/adminapi'] += ('TestAdminListsRejectPartialDatabaseResults',)
 
 REQUIRED['internal/network'] = REQUIRED.get('internal/network', ()) + ('TestHealthStoreConfigurationLockDoesNotBlockPostgres', 'TestHealthDiagnosticsPersistencePostgres')
 
+# Project audit: independent driver contracts, cancellation, task isolation and output ownership.
+REQUIRED['internal/network'] = REQUIRED.get('internal/network', ()) + ('TestAuditRouteRequiresAssignedProxyIdentity', 'TestAuditProxyHealthBoundsAndCompleteJSON', 'TestAuditCancelledHealthProbeDoesNotDispatch')
+REQUIRED['internal/providers'] = REQUIRED.get('internal/providers', ()) + ('TestAuditRegistryRejectsInvalidDriverContracts', 'TestAuditRegistryRegistrationAndMetadataIsolation', 'TestAuditRegistryCancelledOpenDoesNotCallPlugin')
+REQUIRED['internal/providers/builtin'] = REQUIRED.get('internal/providers/builtin', ()) + ('TestAuditBuiltinProviderContracts',)
+REQUIRED['internal/resilience'] = REQUIRED.get('internal/resilience', ()) + ('TestAuditTaskGuardPreservesOutcomesAndRedactsPanic', 'TestAuditRetrierRejectsCancelledDispatch')
+REQUIRED['internal/worker'] = REQUIRED.get('internal/worker', ()) + ('TestAuditBatchPanicDoesNotStopOtherItems', 'TestAuditModulePanicCancelsAndJoinsBeforeReturn', 'TestAuditRecoveryPanicPersistsBackoffWithoutReplayPostgres')
+REQUIRED['internal/app'] = REQUIRED.get('internal/app', ()) + ('TestAuditDriverRuntimeUsesPluginContract',)
+REQUIRED['internal/supervision'] = REQUIRED.get('internal/supervision', ()) + ('TestAuditSupervisedPanicReleasesTaskOwnership',)
+REQUIRED['internal/adminapi'] = REQUIRED.get('internal/adminapi', ()) + ('TestAuditOutputKeepsPluginOwnershipAndTypedClientsPostgres',)
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()

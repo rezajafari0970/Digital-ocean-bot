@@ -340,3 +340,8 @@ var _ providers.CatalogReader = (*Driver)(nil)
 var _ providers.InventoryReader = (*Driver)(nil)
 var _ providers.ObservationReader = (*Driver)(nil)
 var _ providers.FastObservationReader = (*Driver)(nil)
+
+// RuntimeRequirements keeps persisted-account dependencies with this driver.
+func (Factory) RuntimeRequirements() providers.RuntimeRequirements {
+	return providers.RuntimeRequirements{ExternalIdentity: true, Resources: true, Absence: true}
+}

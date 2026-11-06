@@ -18,6 +18,9 @@ func (r Retrier) Do(ctx context.Context, fn func() error) error {
 		p = DefaultPolicy()
 	}
 	for attempt := 1; attempt <= p.MaxAttempts; attempt++ {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		if r.Circuit != nil {
 			if err := r.Circuit.Allow(time.Now()); err != nil {
 				return err
