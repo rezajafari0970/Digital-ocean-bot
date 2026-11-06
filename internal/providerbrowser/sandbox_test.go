@@ -193,6 +193,26 @@ fetch('https://unapproved.fixture/').catch(()=>{});fetch(%q).catch(()=>{});try{c
 	if len(rendered.Editable) == 0 || rendered.Editable[0].Width <= 0 || rendered.Editable[0].Height <= 0 {
 		t.Fatal("editable geometry missing")
 	}
+
+	focused, e := first.Call(ctx, Action{Kind: "tap", X: 40, Y: 18})
+	if e != nil || focused.Focused == nil {
+		t.Fatal("native focused editing state unavailable", e)
+	}
+	f := focused.Focused
+	if _, e = first.Call(ctx, Action{Kind: "edit", Field: "wrong-node", Expected: f.Value, Text: "wrong"}); e == nil {
+		t.Fatal("foreign focused node edit accepted")
+	}
+	if _, e = first.Call(ctx, Action{Kind: "edit", Field: f.Token, Expected: "stale-value", Text: "wrong"}); e == nil {
+		t.Fatal("stale focused value edit accepted")
+	}
+	edited, e := first.Call(ctx, Action{Kind: "edit", Field: f.Token, Expected: f.Value, Text: "Hello فارسی 👋", SelectionStart: 2, SelectionEnd: 7})
+	if e != nil || edited.Focused == nil || edited.Focused.Value != "Hello فارسی 👋" || edited.Focused.Start != 2 || edited.Focused.End != 7 {
+		t.Fatal("native Unicode edit and selection failed", e)
+	}
+	if _, e = first.Call(ctx, Action{Kind: "edit", Field: f.Token, Expected: edited.Focused.Value, Text: f.Value, SelectionStart: 0, SelectionEnd: 0}); e != nil {
+		t.Fatal("restore native input fixture", e)
+	}
+
 	resized, e := first.Call(ctx, Action{Kind: "resize", Width: 800, Height: 360, ScaleFactor: 2})
 	if e != nil || resized.Width != 800 || resized.Height != 360 || !resized.Isolated {
 		t.Fatal("live viewport resize", resized.Width, resized.Height, e)

@@ -18,7 +18,8 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),asse
   await call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
   await call('Emulation.setTouchEmulationEnabled',{enabled:true,maxTouchPoints:5});
   await call('Page.addScriptToEvaluateOnNewDocument',{source:'sessionStorage.setItem("providerBrowser.token","input-fixture");sessionStorage.setItem("providerBrowser.launch",JSON.stringify({provider:"vultr",proxyIDs:["fixture"],countries:["DE"]}));'});
-  await call('Page.navigate',{url:base+'/static/provider-browser.html'});await wait('!document.querySelector("canvas").hidden&&document.title.includes("Native input fixture")');
+  await call('Page.navigate',{url:base+'/static/provider-browser.html'});await wait('document.querySelector("canvas")&&!document.querySelector("canvas").hidden&&document.title.includes("Native input fixture")');
+  assert.match(await ev('document.querySelector("meta[name=viewport]").content'),/interactive-widget=resizes-content/);
   async function tap(x,y){
    const p=await ev('(()=>{const c=document.querySelector("canvas"),r=c.getBoundingClientRect(),s=Math.min(r.width/Number(c.dataset.viewportWidth),r.height/Number(c.dataset.viewportHeight));return{x:r.x+'+x+'*s,y:r.y+'+y+'*s}})()');
    await call('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:p.x,y:p.y,id:1,radiusX:1,radiusY:1,force:1}]});
