@@ -13,7 +13,7 @@ DOB_UNIT_ASSETS=(
 )
 DOB_UPDATE_UNITS=(datacenter-bot-update.socket datacenter-bot-update@.service datacenter-bot-update.service datacenter-bot-restart-api.service)
 DOB_HEALTH_UNITS=(datacenter-bot-integrity.service datacenter-bot-integrity.timer datacenter-bot-host-memory.service datacenter-bot-host-memory.timer)
-DOB_BROWSER_UNITS=(datacenter-provider-browser.socket datacenter-provider-browser@.service)
+DOB_BROWSER_UNITS=(datacenter-provider-browser.slice datacenter-provider-browser.socket datacenter-provider-browser@.service)
 DOB_UNIT_ASSETS+=("${DOB_BROWSER_UNITS[@]}" "${DOB_UPDATE_UNITS[@]}" "${DOB_HEALTH_UNITS[@]}")
 DOB_CONTROL_FILES=(/usr/local/bin/datacenter-bot /usr/local/lib/datacenter-bot/install.sh /usr/local/lib/datacenter-bot/source)
 

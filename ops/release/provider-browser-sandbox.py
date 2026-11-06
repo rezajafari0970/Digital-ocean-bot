@@ -19,7 +19,7 @@ def main():
         service=(ROOT/'deploy/datacenter-provider-browser@.service').read_text().replace('ExecStart=/opt/digital-ocean-bot/bin/provider-browser-runner','ExecStart=/opt/digital-ocean-bot/bin/provider-browser-runner -test.run=^TestProviderBrowserWorkerProcess$').replace('StandardError=null','StandardError=journal')
         service+='\nEnvironment=DOB_TEST_BROWSER_WORKER=1\nPassEnvironment=DOB_TEST_BROWSER_SPKI\n'
         socket=(ROOT/'deploy/datacenter-provider-browser.socket').read_text().replace('SocketUser=root','SocketUser='+os.environ['USER']).replace('SocketGroup=digitaloceanbot','SocketGroup='+os.environ['USER'])
-        for name,text in [('datacenter-provider-browser@.service',service),('datacenter-provider-browser.socket',socket)]:
+        for name,text in [('datacenter-provider-browser.slice',(ROOT/'deploy/datacenter-provider-browser.slice').read_text()),('datacenter-provider-browser@.service',service),('datacenter-provider-browser.socket',socket)]:
             p=temp/name;p.write_text(text);sudo('install','-m','0644',str(p),'/etc/systemd/system/'+name)
         for path in ['/etc/dob-browser-host-fixture','/var/lib/dob-browser-host-fixture','/run/dob-browser-host-fixture']:
             sudo('touch',path)

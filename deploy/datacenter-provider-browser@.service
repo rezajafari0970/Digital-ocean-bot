@@ -3,6 +3,7 @@ Description=Disposable isolated provider browser
 
 [Service]
 Type=simple
+Slice=datacenter-provider-browser.slice
 DynamicUser=yes
 StandardInput=socket
 StandardOutput=socket
@@ -33,10 +34,10 @@ UMask=0077
 RuntimeMaxSec=15min
 TimeoutStopSec=5s
 KillMode=control-group
-# Full Chrome needs headroom for cold executable pages and high-DPI rendering.
-# The socket permits at most two instances (combined hard limit 1280 MiB).
-MemoryHigh=512M
-MemoryMax=640M
+# Allow real provider pages to retain their renderer working set.
+# The shared slice keeps the existing combined 1280 MiB hard budget.
+MemoryHigh=768M
+MemoryMax=896M
 # Full Chrome plus the isolated display requires more threads than headless-shell.
 TasksMax=256
 CPUQuota=75%
