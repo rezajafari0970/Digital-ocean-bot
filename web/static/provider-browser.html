@@ -12,7 +12,7 @@
  <div class="browserNavigation">
   <button data-nav="back" aria-label="Back" title="Back">←</button><button data-nav="forward" aria-label="Forward" title="Forward">→</button><button data-nav="reload" aria-label="Reload website" title="Reload website">↻</button>
   <span data-route class="routeBadge">Connecting…</span>
-  <button data-keyboard aria-label="Show keyboard" title="Keyboard">⌨</button><button data-menu aria-label="Browser options" aria-expanded="false">⋯</button>
+  <button data-desktop aria-label="Use desktop site" aria-pressed="false">Desktop</button><button data-keyboard aria-label="Show keyboard" title="Keyboard">⌨</button><button data-menu aria-label="Browser options" aria-expanded="false">⋯</button>
  </div>
  <form data-address><span class="proxyMark" title="Website is opened through the verified proxy">Proxy</span><input name="url" aria-label="Website address" autocomplete="off" spellcheck="false" inputmode="url" placeholder="Website address"><button aria-label="Go">→</button></form>
  <div data-tabbar hidden><select data-tabs aria-label="Website tabs"></select><button data-nav="newtab" aria-label="New website tab">＋</button></div>
@@ -20,13 +20,13 @@
 </header>
 <main data-viewport>
  <canvas tabindex="0" aria-label="Website; tap, type and scroll to interact" hidden></canvas>
- <section data-welcome class="browserWelcome"><h1 data-heading>Opening website</h1><p data-message>Checking the selected proxy and country…</p><form data-setup hidden></form><button data-retry hidden>Try again</button></section>
+ <section data-welcome class="browserWelcome"><h1 data-heading>Opening website</h1><p data-message>Checking the selected proxy and country…</p><div data-sessions hidden></div><form data-setup hidden></form><button data-retry hidden>Try again</button></section>
  <textarea data-ime aria-label="Type in the selected website field" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
 </main>
 <section data-options class="browserOptions" hidden>
  <h2>Connection</h2><p data-connection></p>
  <div class="optionButtons"><button data-nav="newtab">New website tab</button><button data-fullscreen>Full screen</button><button data-key="Tab">Next field</button><button data-key="Enter">Enter</button><button data-key="SelectAll">Select all</button></div>
- <p class="help">This page uses an isolated browser through your selected proxy. Cookies belong only to this session. Sessions last up to 15 minutes and expire after 2 minutes in the background. File uploads and downloads are unavailable.</p>
+ <p class="help">High definition display. Use Desktop for a wide website layout; pinch to zoom on a phone. This page uses an isolated Chrome browser through your selected proxy. Cookies belong only to this session. Sessions last up to 15 minutes and expire after 2 minutes in the background. File uploads and downloads are unavailable.</p>
  <button data-close class="danger">End session</button>
 </section>
 </body></html>

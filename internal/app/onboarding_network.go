@@ -154,6 +154,9 @@ func (c Container) onboardingClient(ctx context.Context, proxyID, country string
 		}
 		return nil
 	}
+	if strict {
+		check = coalesceBrowserRouteChecks(ctx, check)
+	}
 	client := *gateway.Client
 	client.Transport = accountNetworkGuardTransport{Base: gateway.Client.Transport, Check: check, NativeWriteTrace: true}
 	if len(capture) > 0 {

@@ -74,6 +74,7 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("GET /api/v1/auth/me", s.require(s.authMe, false))
 	m.HandleFunc("POST /api/v1/auth/password", s.require(s.changePassword, false))
 	m.HandleFunc("POST /api/v1/auth/logout", s.require(s.logout, false))
+	m.HandleFunc("GET /api/v1/provider-browser/sessions", s.require(s.listProviderBrowsers, true))
 	m.HandleFunc("POST /api/v1/provider-browser/sessions", s.require(s.startProviderBrowser, true))
 	m.HandleFunc("POST /api/v1/provider-browser/sessions/{id}/action", s.require(s.providerBrowserAction, true))
 	m.HandleFunc("DELETE /api/v1/provider-browser/sessions/{id}", s.require(s.stopProviderBrowser, true))

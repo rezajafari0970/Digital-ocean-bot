@@ -17,22 +17,28 @@ import (
 	"time"
 )
 
-const maxPacket = 4 << 20
+const maxPacket = 12 << 20
 const maxStreams = 32
 
 type Action struct {
-	Kind     string  `json:"kind"`
-	URL      string  `json:"url,omitempty"`
-	Text     string  `json:"text,omitempty"`
-	Key      string  `json:"key,omitempty"`
-	Target   string  `json:"target,omitempty"`
-	X        float64 `json:"x,omitempty"`
-	Y        float64 `json:"y,omitempty"`
-	Delta    float64 `json:"delta,omitempty"`
-	Width    int64   `json:"width,omitempty"`
-	Height   int64   `json:"height,omitempty"`
-	Timezone string  `json:"timezone,omitempty"`
-	Locale   string  `json:"locale,omitempty"`
+	ScaleFactor float64 `json:"scale_factor,omitempty"`
+	Mobile      bool    `json:"mobile,omitempty"`
+	Touch       bool    `json:"touch,omitempty"`
+	Phase       string  `json:"phase,omitempty"`
+	Buttons     int64   `json:"buttons,omitempty"`
+	FrameID     string  `json:"frame_id,omitempty"`
+	Kind        string  `json:"kind"`
+	URL         string  `json:"url,omitempty"`
+	Text        string  `json:"text,omitempty"`
+	Key         string  `json:"key,omitempty"`
+	Target      string  `json:"target,omitempty"`
+	X           float64 `json:"x,omitempty"`
+	Y           float64 `json:"y,omitempty"`
+	Delta       float64 `json:"delta,omitempty"`
+	Width       int64   `json:"width,omitempty"`
+	Height      int64   `json:"height,omitempty"`
+	Timezone    string  `json:"timezone,omitempty"`
+	Locale      string  `json:"locale,omitempty"`
 }
 type Tab struct {
 	ID    string `json:"id"`
@@ -49,19 +55,23 @@ type EditableRect struct {
 }
 
 func ValidViewport(width, height int64) bool {
-	return width >= 320 && width <= 1440 && height >= 240 && height <= 1200
+	return width >= 320 && width <= 1440 && height >= 240 && height <= 3200
 }
 
 type State struct {
-	Editable []EditableRect `json:"editable,omitempty"`
-	Image    []byte         `json:"image,omitempty"`
-	URL      string         `json:"url"`
-	Title    string         `json:"title"`
-	Target   string         `json:"target"`
-	Tabs     []Tab          `json:"tabs"`
-	Width    int64          `json:"width"`
-	Height   int64          `json:"height"`
-	Isolated bool           `json:"isolated"`
+	Format      string         `json:"format,omitempty"`
+	FrameID     string         `json:"frame_id,omitempty"`
+	ScaleFactor float64        `json:"scale_factor,omitempty"`
+	Mobile      bool           `json:"mobile,omitempty"`
+	Editable    []EditableRect `json:"editable,omitempty"`
+	Image       []byte         `json:"image,omitempty"`
+	URL         string         `json:"url"`
+	Title       string         `json:"title"`
+	Target      string         `json:"target"`
+	Tabs        []Tab          `json:"tabs"`
+	Width       int64          `json:"width"`
+	Height      int64          `json:"height"`
+	Isolated    bool           `json:"isolated"`
 }
 type message struct {
 	Kind    string  `json:"kind"`

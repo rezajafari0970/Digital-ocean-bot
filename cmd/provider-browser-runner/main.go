@@ -22,7 +22,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
 	defer cancel()
 	p := providerbrowser.NewPeer(ctx, conn)
-	w := providerbrowser.NewWorker(p, "/usr/local/lib/datacenter-bot/browser/chrome-headless-shell-linux64/chrome-headless-shell")
+	w := providerbrowser.NewWorker(p, "/usr/local/lib/datacenter-bot/provider-browser-chrome")
 	defer w.Close()
 	p.Handle = w.Handle
 	p.Start()
