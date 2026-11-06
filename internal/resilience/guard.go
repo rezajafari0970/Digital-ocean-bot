@@ -10,11 +10,16 @@ import (
 	"time"
 )
 
+// TaskPanicMarker is persisted; scheduler bypasses must respect its retry fence.
+const TaskPanicMarker = "TASK_PANIC_CONTAINED"
+
 var ErrTaskPanic = errors.New("task panic contained; remote outcome requires reconciliation")
 
 type taskPanic struct{ location string }
 
-func (p taskPanic) Error() string           { return fmt.Sprintf("%s: %s", ErrTaskPanic, p.location) }
+func (p taskPanic) Error() string {
+	return fmt.Sprintf("%s: %s: %s", TaskPanicMarker, ErrTaskPanic, p.location)
+}
 func (taskPanic) Unwrap() error             { return ErrTaskPanic }
 func (taskPanic) RetryDelay() time.Duration { return 30 * time.Second }
 

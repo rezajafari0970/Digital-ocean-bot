@@ -93,6 +93,9 @@ func TestAuditRecoveryPanicPersistsBackoffWithoutReplayPostgres(t *testing.T) {
 			if calls(p) != 1 {
 				t.Fatal("uncertain handler replayed without backoff")
 			}
+			if p.bypasses.Load() != 0 {
+				t.Fatal("panic backoff reached installer bypass")
+			}
 			if kind == "operation" {
 				var state string
 				if err := db.QueryRow("SELECT state FROM operations WHERE id=$1", recoveryID).Scan(&state); err != nil || state != "running" {
