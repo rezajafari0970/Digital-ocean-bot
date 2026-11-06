@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"encoding/pem"
@@ -290,7 +291,7 @@ func nativeNginxGateway(t *testing.T, backend *httptest.Server) string {
 func TestNativeBrowserGatewayHandshakeBoundary(t *testing.T) {
 	request := httptest.NewRequest("GET", "/", nil)
 	request.RemoteAddr = "127.0.0.1:2345"
-	request.Header.Set("Sec-WebSocket-Key", "dGhlIHNhbXBsZSBub25jZQ==")
+	request.Header.Set("Sec-WebSocket-Key", base64.StdEncoding.EncodeToString([]byte("native-fixture!!")))
 	request.Header.Set("Sec-WebSocket-Version", "13")
 	request.Header.Set("Connection", "close")
 	restored := nativeGatewayWebSocketRequest(request)
