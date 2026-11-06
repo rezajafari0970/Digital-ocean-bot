@@ -1,6 +1,7 @@
 package providerbrowser
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
@@ -8,6 +9,7 @@ import (
 	"fmt"
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
+	"image/jpeg"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -159,7 +161,26 @@ fetch('https://unapproved.fixture/').catch(()=>{});fetch(%q).catch(()=>{});try{c
 			t.Fatal("native input", e)
 		}
 	}
+	rendered := frame(first, "typed in isolated browser")
+	if len(rendered.Editable) == 0 || rendered.Editable[0].Width <= 0 || rendered.Editable[0].Height <= 0 {
+		t.Fatal("editable geometry missing")
+	}
+	resized, e := first.Call(ctx, Action{Kind: "resize", Width: 800, Height: 360})
+	if e != nil || resized.Width != 800 || resized.Height != 360 || !resized.Isolated {
+		t.Fatal("live viewport resize", resized.Width, resized.Height, e)
+	}
+	imageSize, e := jpeg.DecodeConfig(bytes.NewReader(resized.Image))
+	if e != nil || imageSize.Width != 800 || imageSize.Height != 360 {
+		t.Fatal("resized pixels do not match viewport", imageSize, e)
+	}
+	if _, e = first.Call(ctx, Action{Kind: "resize", Width: 800, Height: 0}); e == nil {
+		t.Fatal("invalid resize accepted")
+	}
+	if _, e = first.Call(ctx, Action{Kind: "resize", Width: 390, Height: 800}); e != nil {
+		t.Fatal(e)
+	}
 	frame(first, "typed in isolated browser")
+
 	if sockets.Load() != 2 {
 		t.Fatal("native WebSocket tunnels not active", sockets.Load())
 	}

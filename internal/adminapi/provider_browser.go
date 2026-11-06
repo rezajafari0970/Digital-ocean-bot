@@ -123,7 +123,7 @@ func (s *Server) startProviderBrowser(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 400, map[string]string{"error": "browser_proxy_required", "detail": "Select an eligible proxy and up to three country priorities."})
 		return
 	}
-	if req.Width < 360 || req.Width > 1440 || req.Height < 500 || req.Height > 1200 {
+	if !providerbrowser.ValidViewport(req.Width, req.Height) {
 		writeJSON(w, 400, map[string]string{"error": "invalid_browser_viewport"})
 		return
 	}

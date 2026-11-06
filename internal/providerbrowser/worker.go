@@ -92,7 +92,7 @@ func (w *Worker) start(a Action) error {
 		return errors.New("timezone unavailable")
 	}
 	w.width, w.height = a.Width, a.Height
-	if w.width < 360 || w.width > 1440 || w.height < 500 || w.height > 1200 {
+	if !ValidViewport(w.width, w.height) {
 		return errors.New("invalid viewport")
 	}
 	w.timezone = a.Timezone
@@ -240,6 +240,22 @@ func (w *Worker) Handle(ctx context.Context, a Action) (State, error) {
 		var actions []chromedp.Action
 		switch a.Kind {
 		case "frame":
+		case "resize":
+			if !ValidViewport(a.Width, a.Height) {
+				return State{}, errors.New("invalid viewport")
+			}
+			// Each open target adopts the same verified session viewport.
+			for _, tab := range w.tabs {
+				child, cancel := context.WithCancel(tab)
+				stop := context.AfterFunc(ctx, cancel)
+				e := chromedp.Run(child, emulation.SetDeviceMetricsOverride(a.Width, a.Height, 1, false))
+				stop()
+				cancel()
+				if e != nil {
+					return State{}, e
+				}
+			}
+			w.width, w.height = a.Width, a.Height
 		case "navigate":
 			if !ValidURL(a.URL) {
 				return State{}, errors.New("invalid URL")
@@ -351,6 +367,24 @@ func (w *Worker) frame(ctx context.Context) (State, error) {
 	if e != nil {
 		return State{}, e
 	}
+	// Fixed read-only geometry query; no user script, field value, cookie or DOM is returned.
+	// Cross-origin frames simply use the explicit keyboard control.
+	_ = w.run(ctx, chromedp.Evaluate(`(() => {
+      const out=[];
+      function scan(doc,ox,oy){
+       for(const el of doc.querySelectorAll('input,textarea,[contenteditable="true"],iframe')){
+        if(out.length>=64)break;
+        const r=el.getBoundingClientRect(),x=r.x+ox,y=r.y+oy;
+        if(r.width<=0||r.height<=0||x+r.width<0||y+r.height<0||x>innerWidth||y>innerHeight)continue;
+        if(el.tagName==='IFRAME'){try{if(el.contentDocument)scan(el.contentDocument,x,y)}catch{}continue}
+        if(el.disabled||el.readOnly)continue;
+        if(el.tagName==='INPUT'&&!['text','password','email','search','tel','url','number'].includes(el.type))continue;
+        const style=doc.defaultView.getComputedStyle(el);if(style.visibility==='hidden'||style.display==='none')continue;
+        out.push({x,y,width:r.width,height:r.height});
+       }
+      }
+      scan(document,0,0);return out;
+    })()`, &s.Editable))
 	s.Target = string(chromedp.FromContext(w.current).Target.TargetID)
 	ts, e := chromedp.Targets(w.base)
 	if e != nil {
