@@ -71,9 +71,19 @@
    }catch(e){message(e.message||'The edit could not be sent. Select the field again.');clear()}
    finally{sending=false;if(revision!==ack)schedule()}
   }
-  async function afterEdits(payload){
-   while(sending)await new Promise(r=>setTimeout(r,15));
-   await flush();return action(payload);
+  function afterEdits(payload){
+   // Snapshot and queue before a tap opens another local editor or resizes the keyboard.
+   clearTimeout(editTimer);
+   let edited=Promise.resolve();
+   if(editorOpen&&!waiting&&focus&&revision!==ack){
+    const field=focus.token,value=editor.value,start=editor.selectionStart,end=editor.selectionEnd,version=revision;
+    edited=action(()=>{
+     if(!remoteFocus||remoteFocus.token!==field)throw Error('The selected field changed. Select it again.');
+     return {kind:value===remoteFocus.value?'select':'edit',field,expected:remoteFocus.value,text:value,selection_start:start,selection_end:end};
+    }).then(()=>{if(focus?.token===field)ack=version});
+   }
+   const next=action(payload);
+   return Promise.all([edited,next]).then(([,frame])=>frame);
   }
   function key(e){
    if(composing||e.isComposing)return;
@@ -103,7 +113,8 @@
   canvas.addEventListener('copy',e=>{if(selection){e.preventDefault();e.clipboardData.setData('text/plain',selection)}});
   q('[data-keyboard]').onclick=()=>{
    if(!connected())return;
-   if(focus){editorOpen=true;waiting=true;seed(focus);return}
+   if(editorOpen&&focus){editor.hidden=false;editor.focus({preventScroll:true});return}
+   if(focus){editor.value='';editorOpen=true;waiting=true;seed(focus);return}
    const r=regions[0];
    if(r){const p={x:r.x+Math.min(10,r.width/2),y:r.y+r.height/2};prepare(r);action({kind:'tap',...p}).catch(e=>{clear();message(e.message)})}
    else message('Tap a text field first. Use Paste in the browser menu for a selected frame field.');

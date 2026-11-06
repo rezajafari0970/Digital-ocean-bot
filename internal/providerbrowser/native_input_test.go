@@ -82,6 +82,13 @@ func nativePageInput(t *testing.T, peer *Peer) {
 				json.NewEncoder(w).Encode(map[string]string{"error": "action failed"})
 				return
 			}
+			if a.Kind != "frame" {
+				if f := frame.Focused; f != nil {
+					t.Logf("native UI %s key=%s focus=true multiline=%t password=%t selection=%d:%d", a.Kind, a.Key, f.Multiline, f.Password, f.Start, f.End)
+				} else {
+					t.Logf("native UI %s key=%s focus=false", a.Kind, a.Key)
+				}
+			}
 			json.NewEncoder(w).Encode(frame)
 			return
 		}

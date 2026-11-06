@@ -14,7 +14,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),asse
   const {targetId}=await send('Target.createTarget',{url:'about:blank'}),{sessionId}=await send('Target.attachToTarget',{targetId,flatten:true}),call=(m,p)=>send(m,p,sessionId);
   await call('Page.enable');await call('Network.enable');
   const ev=async expression=>{const r=await call('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true,userGesture:true});if(r.exceptionDetails)throw Error(r.exceptionDetails.exception?.description||r.exceptionDetails.text);return r.result.value};
-  async function wait(expression){const end=Date.now()+18000;while(Date.now()<end){if(await ev(expression))return;await delay(100)}throw Error('Native input timeout: '+expression+'; status='+await ev('document.querySelector("[data-status]")?.textContent'))}
+  async function wait(expression){const end=Date.now()+18000;while(Date.now()<end){if(await ev(expression))return;await delay(100)}throw Error('Native input timeout: '+expression+'; state='+JSON.stringify(await ev('({title:document.title,status:document.querySelector("[data-status]")?.textContent,active:document.activeElement?.outerHTML.slice(0,300),singleHidden:document.querySelector("[data-ime]")?.hidden,multiHidden:document.querySelector("[data-ime-multiline]")?.hidden})')))}
   await call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
   await call('Emulation.setTouchEmulationEnabled',{enabled:true,maxTouchPoints:5});
   await call('Page.addScriptToEvaluateOnNewDocument',{source:'sessionStorage.setItem("providerBrowser.token","input-fixture");sessionStorage.setItem("providerBrowser.launch",JSON.stringify({provider:"vultr",proxyIDs:["fixture"],countries:["DE"]}));'});
@@ -42,8 +42,14 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),asse
   await ev('document.querySelector("[data-ime]").setSelectionRange(0,4)');
   await call('Input.insertText',{text:'Hello'});
   await wait('document.title.includes("input:Hello fixtureسلام fixture|trusted")');
+  await ev('document.querySelector("[data-keyboard]").click()');
+  assert.equal(await ev('document.querySelector("[data-ime]").value'),'Hello fixtureسلام fixture','Keyboard must not duplicate field content');
+  await key('End','End',35);
+  await call('Input.insertText',{text:'!'});
+  await delay(45); // First edit is in flight when the next character and tap arrive.
+  await call('Input.insertText',{text:'?'});
   await tap(190,310);
-  await wait('document.title.includes("commit:Hello fixtureسلام fixture")');
+  await wait('document.title.includes("commit:Hello fixtureسلام fixture!?")');
   await tap(120,160);
   await wait('document.querySelector("[data-ime]").type==="password"&&!document.querySelector("[data-ime]").hidden');
   await call('Input.insertText',{text:'fixture-only-password'});
