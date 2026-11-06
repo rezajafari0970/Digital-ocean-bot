@@ -1,3 +1,7 @@
+## Latest verified continuation — provider browser input, 2026-11-06
+
+Read [the interaction release](docs/PROVIDER_BROWSER_INPUT_RELEASE_20261106.md) first. Both runtimes and public main/stable are fa006e38b711c5645620cda9ec874b804eff62fb, schema206. Native taps, retained editing controls, clipboard, Persian, keyboard resize and field transitions are deployed and tested through the actual isolated worker; installed-site checks are recorded. Source373-root/native/race/restore and public install/reinstall passed. Both updates and preservation/gateway checks completed. Do not replay deployment intents or unknown cloud creates. Physical Android and provider-login coverage remain open. Earlier entries are historical.
+
 ## Latest verified continuation — provider browser rendering, 2026-11-06
 
 Read [the current browser release](docs/PROVIDER_BROWSER_QUALITY_RELEASE_20261106.md) first. Public main/stable and both runtimes are 84aa4e4474060ac82061b83d783a70d8d6b8bb6d, schema206. Full Chrome, high-DPI PNG, Desktop/mobile, complete asset transfer, native Client Hints, a bounded shared memory budget and nonblocking proxy-health persistence are deployed. Exact source373-root/native/race/restore and public install/reinstall gates passed. Live rendering results and limits are recorded per provider. No physical Android, provider login or universal security-challenge guarantee. Preserve the original-cluster quarantine and do not replay deployment intents/unknown creates. Earlier entries are historical.

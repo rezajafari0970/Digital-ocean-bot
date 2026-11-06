@@ -1,3 +1,7 @@
+## Current provider browser interaction release — 2026-11-06
+
+Read [the verified input release](PROVIDER_BROWSER_INPUT_RELEASE_20261106.md) and HANDOFF.md first. Both runtime identities, native input regressions, live acceptance and remaining coverage limits are recorded there. Earlier generated indexes are historical.
+
 ## Current provider browser release — 2026-11-06
 
 Read [the verified rendering release](PROVIDER_BROWSER_QUALITY_RELEASE_20261106.md) and HANDOFF.md first. Exact runtime hashes, tests, provider observations and boundaries are recorded there. Earlier generated indexes are historical.

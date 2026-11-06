@@ -1,0 +1,65 @@
+{
+  "source": "737b5bff3889d5facadb8d9950647860135b1769",
+  "public": "fa006e38b711c5645620cda9ec874b804eff62fb",
+  "sourceRun": 42243922475,
+  "publicRun": 42244163579,
+  "phase": "published-awaiting-runtime",
+  "merge": "f1df969351b12128dd072246cd52418c731915b4",
+  "sourcePassed": true,
+  "publicPassed": true,
+  "requiredPassed": 373,
+  "skipped": 0,
+  "promotionRun": 42245835942,
+  "promotionPassed": true,
+  "accepted_at": "2026-11-06T16:25:00.267222+00:00",
+  "schema": 206,
+  "both_instances": true,
+  "preservation_checks_per_instance": 18,
+  "readiness_checks_per_instance": 5,
+  "running_binary_hashes": 6,
+  "browser_runner_hash_match": true,
+  "assets_per_instance": 28,
+  "public_gateway_tls_verified": true,
+  "live_input": {
+    "checks": {
+      "touch_cookie_buttons": true,
+      "touch_focus": true,
+      "typing_reaches_real_provider": true,
+      "native_copy_paste": true,
+      "keyboard_resize_preserves_text": true,
+      "tab_password": true,
+      "shift_tab": true,
+      "touch_scroll": true,
+      "desktop_mode": true,
+      "desktop_touch_focus": true,
+      "session_end": true
+    },
+    "details": {
+      "scroll_geometry": {
+        "before": [
+          150,
+          230
+        ],
+        "after": [
+          -10
+        ]
+      }
+    },
+    "public_https": true,
+    "synthetic_input_only": true,
+    "physical_android": false,
+    "provider_login_submitted": false
+  },
+  "production_prepublication_drift": {
+    "evidence": "backup-drift-proof.json",
+    "sealed_prepublication_backup": "20261106T160411.921231Z",
+    "account_removals": 1,
+    "schedule_removals": 1,
+    "unassigned_listener_removals": 319,
+    "cloud_deletion_outcome": "not established by this evidence",
+    "cause": "already absent in native backup completed before runtime publication; original failed comparison retained"
+  },
+  "physical_android_test": false,
+  "provider_login_test": false,
+  "evidence_root": "/root/dob-browser-input-20261106"
+}
