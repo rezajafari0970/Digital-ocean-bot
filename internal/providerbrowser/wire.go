@@ -1,6 +1,6 @@
 // Package providerbrowser transports pixels, input and proxy tunnels over one
-// private Unix socket. Target documents, cookies and proxy secrets never reach
-// the panel's browser. The worker itself has no external network interface.
+// private Unix socket. Only pixels, focused editing state and selected text
+// reach the authenticated owner; cookies and proxy secrets remain isolated. The worker itself has no external network interface.
 package providerbrowser
 
 import (
@@ -22,24 +22,28 @@ const maxStreams = 32
 const streamWindow = 8
 
 type Action struct {
-	ScaleFactor float64 `json:"scale_factor,omitempty"`
-	Mobile      bool    `json:"mobile,omitempty"`
-	Touch       bool    `json:"touch,omitempty"`
-	Phase       string  `json:"phase,omitempty"`
-	Buttons     int64   `json:"buttons,omitempty"`
-	FrameID     string  `json:"frame_id,omitempty"`
-	Kind        string  `json:"kind"`
-	URL         string  `json:"url,omitempty"`
-	Text        string  `json:"text,omitempty"`
-	Key         string  `json:"key,omitempty"`
-	Target      string  `json:"target,omitempty"`
-	X           float64 `json:"x,omitempty"`
-	Y           float64 `json:"y,omitempty"`
-	Delta       float64 `json:"delta,omitempty"`
-	Width       int64   `json:"width,omitempty"`
-	Height      int64   `json:"height,omitempty"`
-	Timezone    string  `json:"timezone,omitempty"`
-	Locale      string  `json:"locale,omitempty"`
+	Field          string  `json:"field,omitempty"`
+	Expected       string  `json:"expected,omitempty"`
+	SelectionStart int64   `json:"selection_start,omitempty"`
+	SelectionEnd   int64   `json:"selection_end,omitempty"`
+	ScaleFactor    float64 `json:"scale_factor,omitempty"`
+	Mobile         bool    `json:"mobile,omitempty"`
+	Touch          bool    `json:"touch,omitempty"`
+	Phase          string  `json:"phase,omitempty"`
+	Buttons        int64   `json:"buttons,omitempty"`
+	FrameID        string  `json:"frame_id,omitempty"`
+	Kind           string  `json:"kind"`
+	URL            string  `json:"url,omitempty"`
+	Text           string  `json:"text,omitempty"`
+	Key            string  `json:"key,omitempty"`
+	Target         string  `json:"target,omitempty"`
+	X              float64 `json:"x,omitempty"`
+	Y              float64 `json:"y,omitempty"`
+	Delta          float64 `json:"delta,omitempty"`
+	Width          int64   `json:"width,omitempty"`
+	Height         int64   `json:"height,omitempty"`
+	Timezone       string  `json:"timezone,omitempty"`
+	Locale         string  `json:"locale,omitempty"`
 }
 type Tab struct {
 	ID    string `json:"id"`
@@ -60,6 +64,8 @@ func ValidViewport(width, height int64) bool {
 }
 
 type State struct {
+	Focused     *FocusedInput  `json:"focused,omitempty"`
+	Selection   string         `json:"selection,omitempty"`
 	Format      string         `json:"format,omitempty"`
 	FrameID     string         `json:"frame_id,omitempty"`
 	ScaleFactor float64        `json:"scale_factor,omitempty"`

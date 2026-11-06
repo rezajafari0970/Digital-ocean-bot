@@ -10,7 +10,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),http
  const entry=app.slice(app.indexOf('function reserveProviderPage()'));
  const draft=app.match(/\$\('#openDraftProviderBrowser'\)\.onclick=(async\(\)=>\{[\s\S]*?\});\$\('#discoverAccount'\)/)[1];
  let fixtureImage='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aN1cAAAAASUVORK5CYII=';
- const frame=(s)=>({isolated:true,format:'png',frame_id:'fixture-'+s.width+'-'+s.height,scale_factor:s.scale_factor||1,width:s.width,height:s.height,image:fixtureImage,url:'https://provider.fixture/login',title:'Provider fixture',target:'tab1',tabs:[{id:'tab1',title:'Provider fixture',url:'https://provider.fixture/login'}],editable:[{x:30,y:120,width:280,height:44}]});
+ const frame=(s)=>({isolated:true,format:'png',frame_id:'fixture-'+s.width+'-'+s.height,scale_factor:s.scale_factor||1,width:s.width,height:s.height,image:fixtureImage,url:'https://provider.fixture/login',title:'Provider fixture',target:'tab1',tabs:[{id:'tab1',title:'Provider fixture',url:'https://provider.fixture/login'}],editable:[{x:30,y:120,width:280,height:44}],focused:s.focused?{multiline:!!s.multiline,token:s.field,value:s.value||'',start:s.start||0,end:s.end||0,x:30,y:120,width:280,height:44,style:{fontSize:'16px',paddingLeft:'8px'}}:null});
  const server=http.createServer(async(req,res)=>{
   const u=new URL(req.url,'http://localhost');requests.push({path:u.pathname,method:req.method,authorization:req.headers.authorization});
   const json=(x,status=200)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(x))};
@@ -37,13 +37,13 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),http
   if(u.pathname.endsWith('/abandoned-owned')&&req.method==='DELETE'){assert(capacityBlocked);capacityBlocked=false;res.writeHead(204).end();return}
   if(u.pathname==='/api/v1/provider-browser/sessions'){
    if(capacityBlocked){json({error:'browser_capacity_full',detail:'Close an existing provider browser before opening another.'},429);return}
-   const s=JSON.parse(raw);opened.push(s);if(s.proxy_countries.includes('BO')){json({error:'browser_route_unverified',detail:'Selected country could not be verified.'},409);return}const id='owned-session-'+opened.length;sessions.set(id,s);
+   const s=JSON.parse(raw);opened.push(s);if(s.proxy_countries.includes('BO')){json({error:'browser_route_unverified',detail:'Selected country could not be verified.'},409);return}const id='owned-session-'+opened.length;s.field='field-'+id;sessions.set(id,s);
    json({id,proxy_id:s.proxy_id,country:'DE',exit_ip:'192.0.2.10',expires_at:new Date(Date.now()+900000).toISOString(),frame:frame(s)},201);return
   }
   const id=u.pathname.split('/')[5],s=sessions.get(id);
   if(!s){json({error:'browser_session_unavailable'},404);return}
   if(u.pathname.endsWith('/action')){
-   const a=JSON.parse(raw);actions.push({id,...a});if(a.kind==='resize'){s.width=a.width;s.height=a.height}json(frame(s));return
+   const a=JSON.parse(raw);actions.push({id,...a});if(a.kind==='resize'){s.width=a.width;s.height=a.height}if(a.kind==='tap'){s.focused=a.y>=120&&a.y<=164}if(a.kind==='key'&&a.key==='Tab'){s.field+='-area';s.multiline=true;s.focused=true;s.value='';s.start=s.end=0}if(a.kind==='edit'||a.kind==='select'){assert.equal(a.field,s.field);assert.equal(a.expected,s.value||'');if(a.kind==='edit')s.value=a.text;s.start=a.selection_start;s.end=a.selection_end}await new Promise(r=>setTimeout(r,120));json(frame(s));return
   }
   if(req.method==='DELETE'){closed.push(id);sessions.delete(id);res.writeHead(204).end();return}
   res.writeHead(404).end();
@@ -81,9 +81,26 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),http
   const rect=await child.evaluate('(()=>{const r=document.querySelector("canvas").getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height}})()');
   assert(rect.height>=680&&rect.width===390,'website does not fill mobile page');
   await child.evaluate('document.querySelector("[data-keyboard]").click()');
+  await child.wait('!document.querySelector("[data-ime]").hidden');
+  await new Promise(r=>setTimeout(r,200));
   await child.call('Input.insertText',{text:'سلام fixture'});
-  await child.wait('document.querySelector("[data-ime]").value==="\u200b"');
-  await new Promise(r=>setTimeout(r,100));assert(actions.some(a=>a.kind==='text'&&a.text==='سلام fixture'),'native text input was not forwarded');
+  await child.wait('document.querySelector("[data-ime]").value==="سلام fixture"');
+  await new Promise(r=>setTimeout(r,200));assert(actions.some(a=>a.kind==='edit'&&a.text==='سلام fixture'),'native text edit was not forwarded');
+  await child.evaluate('document.querySelector("[data-ime]").select()');
+  await child.call('Input.dispatchKeyEvent',{type:'keyDown',key:'c',code:'KeyC',windowsVirtualKeyCode:67,modifiers:2});
+  await child.call('Input.dispatchKeyEvent',{type:'keyUp',key:'c',code:'KeyC',windowsVirtualKeyCode:67,modifiers:2});
+  await child.call('Input.dispatchKeyEvent',{type:'keyDown',key:'End',code:'End',windowsVirtualKeyCode:35});
+  await child.call('Input.dispatchKeyEvent',{type:'keyUp',key:'End',code:'End',windowsVirtualKeyCode:35});
+  await child.call('Input.dispatchKeyEvent',{type:'keyDown',key:'v',code:'KeyV',windowsVirtualKeyCode:86,modifiers:2});
+  await child.call('Input.dispatchKeyEvent',{type:'keyUp',key:'v',code:'KeyV',windowsVirtualKeyCode:86,modifiers:2});
+  await child.wait('document.querySelector("[data-ime]").value==="سلام fixtureسلام fixture"');
+  await new Promise(r=>setTimeout(r,200));assert.equal(sessions.get('owned-session-1').value,'سلام fixtureسلام fixture','native clipboard paste did not reach provider');
+  await child.call('Input.insertText',{text:'!'});
+  await new Promise(r=>setTimeout(r,250));
+  await child.call('Input.dispatchKeyEvent',{type:'keyDown',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});
+  await child.call('Input.dispatchKeyEvent',{type:'keyUp',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});
+  await child.wait('document.activeElement===document.querySelector("[data-ime-multiline]")');
+  assert.equal(await child.evaluate('document.querySelector("[data-ime-multiline]").value'),'','previous field must not copy into next field');
   await child.evaluate('document.querySelector("canvas").dispatchEvent(new WheelEvent("wheel",{clientX:120,clientY:240,deltaY:320,bubbles:true,cancelable:true}))');
   await new Promise(r=>setTimeout(r,100));assert(actions.some(a=>a.kind==='scroll'&&a.delta===320));
   const mobile=(await child.call('Page.captureScreenshot',{format:'png'})).data;fs.writeFileSync(path.join(root,'provider-page-mobile.png'),Buffer.from(mobile,'base64'));
@@ -102,7 +119,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),http
   fs.writeFileSync(path.join(root,'provider-page-desktop.png'),Buffer.from((await child.call('Page.captureScreenshot',{format:'png'})).data,'base64'));
   await child.call('Input.dispatchMouseEvent',{type:'mousePressed',x:100,y:200,button:'left',clickCount:1});
   await child.call('Input.dispatchMouseEvent',{type:'mouseReleased',x:100,y:200,button:'left',clickCount:1});
-  await new Promise(r=>setTimeout(r,100));assert(actions.some(a=>a.kind==='pointer'&&a.phase==='down'));
+  await new Promise(r=>setTimeout(r,100));assert(actions.some(a=>a.kind==='tap'&&a.x===100),'ordinary click not sent atomically');
   const before=opened.length;await parent.evaluate('window.realOpen=window.open;window.open=()=>null;document.querySelector("#saved").click()');await parent.wait('document.querySelector("#toast").textContent.includes("Allow a new tab")');assert.equal(opened.length,before);await parent.evaluate('window.open=window.realOpen;document.querySelector("#saved").click()');
   let secondId;for(let i=0;i<100;i++){secondId=(await send('Target.getTargets')).targetInfos.find(x=>x.type==='page'&&x.targetId!==childId&&x.url===base+'/static/provider-browser.html')?.targetId;if(secondId)break;await new Promise(r=>setTimeout(r,50))}
   assert(secondId);const second=await attach(secondId);await second.wait('document.querySelector("canvas")&&!document.querySelector("canvas").hidden');assert.equal(opened[1].account_id,'account-one');assert.equal(opened.length,2);

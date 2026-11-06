@@ -252,6 +252,10 @@ func (w *Worker) Handle(ctx context.Context, a Action) (State, error) {
 		var actions []chromedp.Action
 		switch a.Kind {
 		case "frame":
+		case "edit", "select":
+			if e := w.edit(ctx, a); e != nil {
+				return State{}, e
+			}
 		case "resize":
 			scale, err := DisplayScale(a.Width, a.Height, a.ScaleFactor)
 			if err != nil {
@@ -327,7 +331,14 @@ func (w *Worker) Handle(ctx context.Context, a Action) (State, error) {
 			if !w.coordinates(a) {
 				return State{}, errors.New("invalid position")
 			}
-			actions = append(actions, chromedp.MouseClickXY(a.X, a.Y))
+			if a.Touch {
+				if !(w.mobile || w.touch) {
+					return State{}, errors.New("touch unavailable")
+				}
+				actions = append(actions, input.DispatchTouchEvent(input.TouchStart, []*input.TouchPoint{{X: a.X, Y: a.Y, ID: 1, RadiusX: 1, RadiusY: 1, Force: 1}}), input.DispatchTouchEvent(input.TouchEnd, nil))
+			} else {
+				actions = append(actions, chromedp.MouseClickXY(a.X, a.Y))
+			}
 		case "scroll":
 			if !w.coordinates(a) || math.IsNaN(a.Delta) || math.Abs(a.Delta) > 1500 {
 				return State{}, errors.New("invalid scroll")
@@ -339,12 +350,18 @@ func (w *Worker) Handle(ctx context.Context, a Action) (State, error) {
 			}
 			actions = append(actions, input.InsertText(a.Text))
 		case "key":
-			keys := map[string]string{"Enter": kb.Enter, "Tab": kb.Tab, "Backspace": kb.Backspace, "Delete": kb.Delete, "Escape": kb.Escape, "ArrowUp": kb.ArrowUp, "ArrowDown": kb.ArrowDown, "ArrowLeft": kb.ArrowLeft, "ArrowRight": kb.ArrowRight, "Home": kb.Home, "End": kb.End, "SelectAll": kb.Control + "a"}
+			keys := map[string]string{"Enter": kb.Enter, "Tab": kb.Tab, "ShiftTab": kb.Tab, "Backspace": kb.Backspace, "Delete": kb.Delete, "Escape": kb.Escape, "ArrowUp": kb.ArrowUp, "ArrowDown": kb.ArrowDown, "ArrowLeft": kb.ArrowLeft, "ArrowRight": kb.ArrowRight, "Home": kb.Home, "End": kb.End, "SelectAll": "a"}
 			key, ok := keys[a.Key]
 			if !ok {
 				return State{}, errors.New("unsupported key")
 			}
-			actions = append(actions, chromedp.KeyEvent(key))
+			if a.Key == "SelectAll" {
+				actions = append(actions, selectAllInput())
+			} else if a.Key == "ShiftTab" {
+				actions = append(actions, chromedp.KeyEvent(key, chromedp.KeyModifiers(input.ModifierShift)))
+			} else {
+				actions = append(actions, chromedp.KeyEvent(key))
+			}
 		case "tab":
 			list, e := chromedp.Targets(w.base)
 			if e != nil {
@@ -423,7 +440,7 @@ func (w *Worker) frame(ctx context.Context) (State, error) {
 	if e != nil {
 		return State{}, e
 	}
-	// Fixed read-only geometry query; no user script, field value, cookie or DOM is returned.
+	// Fixed geometry query plus focused editing state; no arbitrary script, cookie or DOM is returned.
 	// Cross-origin frames simply use the explicit keyboard control.
 	_ = w.run(ctx, chromedp.Evaluate(`(() => {
       const out=[];
@@ -436,11 +453,13 @@ func (w *Worker) frame(ctx context.Context) (State, error) {
         if(el.disabled||el.readOnly)continue;
         if(el.tagName==='INPUT'&&!['text','password','email','search','tel','url','number'].includes(el.type))continue;
         const style=doc.defaultView.getComputedStyle(el);if(style.visibility==='hidden'||style.display==='none')continue;
+        const hit=doc.elementFromPoint(Math.max(0,Math.min(doc.defaultView.innerWidth-1,r.x+r.width/2)),Math.max(0,Math.min(doc.defaultView.innerHeight-1,r.y+r.height/2)));if(hit!==el&&!el.contains(hit))continue;
         out.push({x,y,width:r.width,height:r.height});
        }
       }
       scan(document,0,0);return out;
     })()`, &s.Editable))
+	w.editingState(ctx, &s)
 	sum := sha256.Sum256(s.Image)
 	s.FrameID = hex.EncodeToString(sum[:])
 	s.Target = string(chromedp.FromContext(w.current).Target.TargetID)

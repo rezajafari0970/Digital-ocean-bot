@@ -36,7 +36,7 @@
  function displayLabel(){const desktop=displayMode==='desktop';q('[data-desktop]').textContent=desktop?'Mobile':'Desktop';q('[data-desktop]').setAttribute('aria-label',desktop?'Use mobile site':'Use desktop site');q('[data-desktop]').setAttribute('aria-pressed',String(desktop))}
  q('[data-desktop]').onclick=()=>{displayMode=displayMode==='desktop'?'auto':'desktop';sessionStorage.setItem('providerBrowser.display',displayMode);displayLabel();fit()};
  controls(false);displayLabel();
- async function paint(frame){
+ async function paint(frame,source){
   if(closed)return;
   if(frame.isolated!==true||!frame.width||!frame.height)throw Error('The proxy browser could not verify its isolation.');
   if(frame.image){
@@ -51,7 +51,7 @@
   q('[data-tabs]').replaceChildren(...(frame.tabs||[]).map(t=>{const o=new Option(t.title||t.url||'New tab',t.id);o.selected=t.id===frame.target;return o}));
   q('[data-tabbar]').hidden=(frame.tabs||[]).length<=1;
   document.title=(frame.title||'Website')+' · Proxy';
-  q('[data-welcome]').hidden=true;canvas.hidden=false;controls(true);message('');
+  q('[data-welcome]').hidden=true;canvas.hidden=false;controls(true);message('');input.update(frame,source);
  }
  function unavailable(e){
   if(closed)return;message(e.message||'The website connection was interrupted.');
@@ -64,7 +64,7 @@
  function action(payload){
   if(closed||!id)return Promise.resolve();
   const session=id;pending++;
-  const next=queue.then(async()=>{if(closed||id!==session)return;const frame=await api('/api/v1/provider-browser/sessions/'+session+'/action',{method:'POST',body:JSON.stringify(payload.kind==='frame'?{...payload,frame_id:frameID}:payload)});if(closed||id!==session)return;await paint(frame);return frame});
+  const next=queue.then(async()=>{if(closed||id!==session)return;const data=typeof payload==='function'?payload():payload;const frame=await api('/api/v1/provider-browser/sessions/'+session+'/action',{method:'POST',body:JSON.stringify(data.kind==='frame'?{...data,frame_id:frameID}:data)});if(closed||id!==session)return;await paint(frame,data);return frame});
   queue=next.catch(unavailable).finally(()=>pending--);return next;
  }
  function poll(){
@@ -72,6 +72,7 @@
   timer=setTimeout(async()=>{if(!pending&&!document.hidden)try{await action({kind:'frame'});pollFailures=0}catch(e){pollFailures++;unavailable(e)}poll()},pollFailures?2500:300);
  }
  function fit(){clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{
+  if(input.isGesturing()){fit();return}
   const size=dimensions(),key=JSON.stringify(size);
   if(id&&!closed&&key!==lastDisplay){lastDisplay=key;action({kind:'resize',...size}).catch(e=>{lastDisplay='';unavailable(e)})}
  },180)}
@@ -115,55 +116,21 @@
   generation++;startAbort?.abort();
   const session=id;clearTimeout(timer);
   if(session)try{await api('/api/v1/provider-browser/sessions/'+session,{method:'DELETE',keepalive:true})}catch(e){message('Could not close this session: '+e.message);poll();return}
-  id='';frameID='';lastDisplay='';forgetSession();ime.value='';ime.blur();canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);q('[data-options]').hidden=true;
+  id='';frameID='';lastDisplay='';forgetSession();input.reset();canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);q('[data-options]').hidden=true;
   welcome('Session closed','Cookies and website data for this session are removed.');setup.hidden=false;q('[data-route]').textContent='Disconnected';
  }
  q('[data-close]').onclick=end;
  q('[data-menu]').onclick=()=>{const open=q('[data-options]').hidden;q('[data-options]').hidden=!open;q('[data-menu]').setAttribute('aria-expanded',String(open))};
  q('[data-fullscreen]').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();q('[data-options]').hidden=true;fit()}catch{message('Full screen is unavailable in this browser.')}};
- function keyboard(){if(!id)return;ime.value='\u200b';ime.focus({preventScroll:true});ime.setSelectionRange(ime.value.length,ime.value.length)}
- q('[data-keyboard]').onclick=keyboard;
  q('[data-address]').onsubmit=e=>{e.preventDefault();let url=e.target.elements.url.value.trim();if(!/^[a-z][a-z0-9+.-]*:/i.test(url))url='https://'+url;try{const parsed=new URL(url);if(parsed.protocol!=='https:'||parsed.username||parsed.password||(parsed.port&&parsed.port!=='443'))throw Error();action({kind:'navigate',url:parsed.href}).catch(unavailable);e.target.elements.url.blur()}catch{message('Enter a valid HTTPS website address.')}};
  q('[data-tabs]').onchange=e=>action({kind:'tab',target:e.target.value}).catch(unavailable);
  document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{q('[data-options]').hidden=true;action({kind:b.dataset.nav}).then(fit).catch(unavailable)});
- document.querySelectorAll('[data-key]').forEach(b=>b.onclick=()=>action({kind:'key',key:b.dataset.key}).catch(unavailable));
+
  q('[data-retry]').onclick=start;
- const supported=['Enter','Tab','Backspace','Delete','Escape','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End'];
- function key(e){
-  if(composing||e.isComposing)return;
-  if(supported.includes(e.key)){e.preventDefault();action({kind:'key',key:e.key}).catch(unavailable)}
-  else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='a'){e.preventDefault();action({kind:'key',key:'SelectAll'}).catch(unavailable)}
-  else if(e.target===canvas&&e.key.length===1&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();action({kind:'text',text:e.key}).catch(unavailable)}
- }
- canvas.onkeydown=key;ime.onkeydown=key;
- function flush(e){if(composing||e?.isComposing)return;const text=ime.value.replace(/\u200b/g,'');ime.value='\u200b';if(text)action({kind:'text',text}).catch(unavailable)}
- ime.oncompositionstart=()=>{composing=true};ime.oncompositionend=e=>{composing=false;flush(e)};
- ime.oninput=flush;
- ime.addEventListener('beforeinput',e=>{if(composing||e.isComposing)return;if(e.inputType==='deleteContentBackward'||e.inputType==='deleteContentForward'){e.preventDefault();action({kind:'key',key:e.inputType==='deleteContentBackward'?'Backspace':'Delete'}).catch(unavailable)}else if(e.inputType==='insertLineBreak'){e.preventDefault();action({kind:'key',key:'Enter'}).catch(unavailable)}});
- const pos=e=>{const r=canvas.getBoundingClientRect(),scale=Math.min(r.width/screen.width,r.height/screen.height);return {x:Math.max(0,Math.min(screen.width-1,(e.clientX-r.left)/scale)),y:Math.max(0,Math.min(screen.height-1,(e.clientY-r.top)/scale))}};
- canvas.onpointerdown=e=>{
-  if(!id||gesture)return;e.preventDefault();const p=pos(e),touch=e.pointerType==='touch';
-  const typing=editable.some(r=>p.x>=r.x&&p.y>=r.y&&p.x<=r.x+r.width&&p.y<=r.y+r.height);
-  if(typing)keyboard();else{ime.blur();canvas.focus({preventScroll:true})}
-  gesture={id:e.pointerId,touch,last:p,time:0};canvas.setPointerCapture(e.pointerId);
-  action(touch?{kind:'touch',phase:'start',...p}:{kind:'pointer',phase:'down',buttons:1,...p}).catch(unavailable);
- };
- let hoverTime=0;
- canvas.onpointermove=e=>{
-  if(!id)return;const p=pos(e);
-  if(!gesture){if(e.pointerType==='mouse'&&pending<2&&Date.now()-hoverTime>90){hoverTime=Date.now();action({kind:'pointer',phase:'move',buttons:0,...p}).catch(unavailable)}return}
-  if(gesture.id!==e.pointerId)return;e.preventDefault();
-  if(pending<2&&Date.now()-gesture.time>45){gesture.time=Date.now();gesture.last=p;action(gesture.touch?{kind:'touch',phase:'move',...p}:{kind:'pointer',phase:'move',buttons:1,...p}).catch(unavailable)}
- };
- function release(e,cancelled){
-  if(!gesture||gesture.id!==e.pointerId)return;e.preventDefault();const g=gesture;gesture=null;const p=pos(e);
-  action(g.touch?{kind:'touch',phase:cancelled?'cancel':'end',...p}:{kind:'pointer',phase:'up',buttons:0,...p}).catch(unavailable);
- }
- canvas.onpointerup=e=>release(e,false);canvas.onpointercancel=e=>release(e,true);
- canvas.addEventListener('wheel',e=>{e.preventDefault();if(pending<2)action({kind:'scroll',...pos(e),delta:Math.max(-1200,Math.min(1200,e.deltaY))}).catch(unavailable)},{passive:false});
+ const input=ProviderInput.create({canvas,viewport,action,getScreen:()=>screen,connected:()=>Boolean(id&&!closed),message,fit});
  window.addEventListener('resize',fit);window.visualViewport?.addEventListener('resize',fit);
  document.addEventListener('visibilitychange',()=>{if(document.hidden)clearTimeout(timer);else if(id){action({kind:'frame'}).then(()=>{fit();poll()}).catch(unavailable)}});
- window.addEventListener('pagehide',()=>{closed=true;clearTimeout(timer);clearTimeout(resizeTimer);life.abort();ime.value=''});
+ window.addEventListener('pagehide',()=>{closed=true;clearTimeout(timer);clearTimeout(resizeTimer);life.abort();input.destroy()});
  window.addEventListener('pageshow',e=>{if(e.persisted)location.reload()});
  async function init(){
   if(!launch?.provider||!credential){welcome('Open this page from the panel','Choose “Open provider with proxy” from an account or its setup form.');message('Panel sign-in is required.');return}

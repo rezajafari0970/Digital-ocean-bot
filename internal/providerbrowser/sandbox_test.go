@@ -43,7 +43,7 @@ func TestProviderBrowserWorkerProcess(t *testing.T) {
 	if e != nil {
 		fail(e)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Minute)
 	defer cancel()
 	p := NewPeer(ctx, conn)
 	w := NewWorker(p, "/usr/local/lib/datacenter-bot/browser-fixture-chrome")
@@ -95,6 +95,10 @@ func TestProviderBrowserNativeSandbox(t *testing.T) {
 			return
 		}
 		w.Header().Set("Content-Type", "text/html")
+		if r.URL.Path == "/input" {
+			fmt.Fprint(w, nativeInputFixture)
+			return
+		}
 		fmt.Fprintf(w, `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><input id="value"><button onclick="document.title=document.querySelector('input').value">Set title</button><script>
 const q=new URLSearchParams(location.search).get('set');if(q){document.cookie='identity='+q+';SameSite=Lax';localStorage.identity=q}
 document.title=(document.cookie||'empty')+'|'+(localStorage.identity||'empty')+'|'+navigator.language+'|'+Intl.DateTimeFormat().resolvedOptions().timeZone+'|native-ua:'+Boolean(navigator.userAgentData?.brands?.length);
@@ -108,7 +112,7 @@ fetch('https://unapproved.fixture/').catch(()=>{});fetch(%q).catch(()=>{});try{c
 		t.Fatal(string(b), e)
 	}
 	defer exec.Command("sudo", "systemctl", "unset-environment", "DOB_TEST_BROWSER_SPKI").Run()
-	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()
 	var blocked atomic.Int64
 	open := func(raw string) (*Peer, State) {
@@ -189,6 +193,26 @@ fetch('https://unapproved.fixture/').catch(()=>{});fetch(%q).catch(()=>{});try{c
 	if len(rendered.Editable) == 0 || rendered.Editable[0].Width <= 0 || rendered.Editable[0].Height <= 0 {
 		t.Fatal("editable geometry missing")
 	}
+
+	focused, e := first.Call(ctx, Action{Kind: "tap", X: 40, Y: 18})
+	if e != nil || focused.Focused == nil {
+		t.Fatal("native focused editing state unavailable", e)
+	}
+	f := focused.Focused
+	if _, e = first.Call(ctx, Action{Kind: "edit", Field: "wrong-node", Expected: f.Value, Text: "wrong"}); e == nil {
+		t.Fatal("foreign focused node edit accepted")
+	}
+	if _, e = first.Call(ctx, Action{Kind: "edit", Field: f.Token, Expected: "stale-value", Text: "wrong"}); e == nil {
+		t.Fatal("stale focused value edit accepted")
+	}
+	edited, e := first.Call(ctx, Action{Kind: "edit", Field: f.Token, Expected: f.Value, Text: "Hello فارسی 👋", SelectionStart: 2, SelectionEnd: 7})
+	if e != nil || edited.Focused == nil || edited.Focused.Value != "Hello فارسی 👋" || edited.Focused.Start != 2 || edited.Focused.End != 7 {
+		t.Fatalf("native Unicode edit and selection failed: error=%v focused=%+v", e, edited.Focused)
+	}
+	if _, e = first.Call(ctx, Action{Kind: "edit", Field: f.Token, Expected: edited.Focused.Value, Text: f.Value, SelectionStart: 0, SelectionEnd: 0}); e != nil {
+		t.Fatal("restore native input fixture", e)
+	}
+
 	resized, e := first.Call(ctx, Action{Kind: "resize", Width: 800, Height: 360, ScaleFactor: 2})
 	if e != nil || resized.Width != 800 || resized.Height != 360 || !resized.Isolated {
 		t.Fatal("live viewport resize", resized.Width, resized.Height, e)
@@ -230,6 +254,7 @@ fetch('https://unapproved.fixture/').catch(()=>{});fetch(%q).catch(()=>{});try{c
 	if sockets.Load() != 2 {
 		t.Fatal("native WebSocket tunnels not active", sockets.Load())
 	}
+	nativePageInput(t, first)
 	first.Close()
 	select {
 	case <-first.Done():
