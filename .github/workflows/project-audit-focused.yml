@@ -47,6 +47,7 @@ jobs:
                   path.write_bytes(subprocess.check_output(['git','show',baseline+':'+source]))
                   p=subprocess.run(['go','test','-json','-count=1','-timeout','4m','-run','^'+test+'$',package],capture_output=True,text=True)
                   pathlib.Path('/tmp/'+test+'-before.jsonl').write_text(p.stdout+p.stderr)
+                  print(p.stdout+p.stderr,flush=True)
                   events=[json.loads(l) for l in p.stdout.splitlines() if l.startswith('{')]
                   assert p.returncode!=0 and any(e.get('Action')=='fail' and e.get('Test')==test for e in events),'baseline regression not reproduced'
                   assert not any(e.get('Action')=='build-fail' for e in events),'compile failure is not a reproduction'
