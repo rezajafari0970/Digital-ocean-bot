@@ -39,15 +39,29 @@ type Tab struct {
 	Title string `json:"title"`
 	URL   string `json:"url"`
 }
+
+// EditableRect exposes geometry only, never field values or provider document text.
+type EditableRect struct {
+	X      float64 `json:"x"`
+	Y      float64 `json:"y"`
+	Width  float64 `json:"width"`
+	Height float64 `json:"height"`
+}
+
+func ValidViewport(width, height int64) bool {
+	return width >= 320 && width <= 1440 && height >= 240 && height <= 1200
+}
+
 type State struct {
-	Image    []byte `json:"image,omitempty"`
-	URL      string `json:"url"`
-	Title    string `json:"title"`
-	Target   string `json:"target"`
-	Tabs     []Tab  `json:"tabs"`
-	Width    int64  `json:"width"`
-	Height   int64  `json:"height"`
-	Isolated bool   `json:"isolated"`
+	Editable []EditableRect `json:"editable,omitempty"`
+	Image    []byte         `json:"image,omitempty"`
+	URL      string         `json:"url"`
+	Title    string         `json:"title"`
+	Target   string         `json:"target"`
+	Tabs     []Tab          `json:"tabs"`
+	Width    int64          `json:"width"`
+	Height   int64          `json:"height"`
+	Isolated bool           `json:"isolated"`
 }
 type message struct {
 	Kind    string  `json:"kind"`

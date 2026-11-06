@@ -1,0 +1,149 @@
+/* Standalone, same-origin controls for the isolated remote browser. */
+(() => {
+ 'use strict';
+ const q=s=>document.querySelector(s),canvas=q('canvas'),viewport=q('[data-viewport]'),status=q('[data-status]'),setup=q('[data-setup]'),ime=q('[data-ime]');
+ const storage={read:k=>{try{return JSON.parse(sessionStorage.getItem(k)||'null')}catch{return null}},write:(k,v)=>sessionStorage.setItem(k,JSON.stringify(v))};
+ const launch=storage.read('providerBrowser.launch'),credential=sessionStorage.getItem('providerBrowser.token');
+ let generation=0,startAbort=null;
+ let id='',closed=false,busy=false,timer=0,resizeTimer=0,queue=Promise.resolve(),pending=0,screen={width:0,height:0},editable=[],proxies=[],options=[],pollFailures=0,gesture=null,composing=false;
+ const life=new AbortController();
+ window.opener=null;
+ function message(text){status.textContent=text||''}
+ function welcome(title,text){q('[data-welcome]').hidden=false;q('[data-heading]').textContent=title;q('[data-message]').textContent=text;canvas.hidden=true}
+ function saveSession(data){storage.write('providerBrowser.session',data)}
+ function forgetSession(){sessionStorage.removeItem('providerBrowser.session')}
+ async function api(path,opt={}){
+  const abort=new AbortController(),stop=()=>abort.abort();life.signal.addEventListener('abort',stop,{once:true});opt.signal?.addEventListener('abort',stop,{once:true});
+  const timeout=setTimeout(stop,opt.method==='POST'&&path.endsWith('/sessions')?110000:25000);
+  try{
+   const r=await fetch(path,{...opt,headers:{Authorization:'Bearer '+credential,'Content-Type':'application/json'},signal:abort.signal,cache:'no-store'});
+   const data=r.status===204?null:await r.json();
+   if(!r.ok){const error=new Error(data?.detail||data?.error||'The browser request failed.');error.status=r.status;throw error}
+   return data;
+  }catch(e){if(e.name==='AbortError'&&!closed)throw Error('The connection check timed out. Retry or choose another proxy.');throw e}
+  finally{clearTimeout(timeout);life.signal.removeEventListener('abort',stop);opt.signal?.removeEventListener('abort',stop)}
+ }
+ function dimensions(){const r=viewport.getBoundingClientRect();return {width:Math.max(320,Math.min(1440,Math.round(r.width))),height:Math.max(240,Math.min(1200,Math.round(r.height)))}}
+ async function paint(frame){
+  if(closed)return;
+  if(frame.isolated!==true||!frame.width||!frame.height)throw Error('The proxy browser could not verify its isolation.');
+  const image=new Image();image.src='data:image/jpeg;base64,'+frame.image;await image.decode();if(closed)return;
+  screen={width:frame.width,height:frame.height};canvas.width=screen.width;canvas.height=screen.height;canvas.getContext('2d').drawImage(image,0,0);
+  editable=Array.isArray(frame.editable)?frame.editable:[];
+  const address=q('[data-address] input');if(document.activeElement!==address)address.value=frame.url==='about:blank'?'':frame.url;
+  q('[data-tabs]').replaceChildren(...(frame.tabs||[]).map(t=>{const o=new Option(t.title||t.url||'New tab',t.id);o.selected=t.id===frame.target;return o}));
+  q('[data-tabbar]').hidden=(frame.tabs||[]).length<=1;
+  document.title=(frame.title||'Website')+' · Proxy';
+  q('[data-welcome]').hidden=true;canvas.hidden=false;message('');
+ }
+ function unavailable(e){
+  if(closed)return;message(e.message||'The website connection was interrupted.');
+  if([401,403,404,410].includes(e.status)){
+   id='';forgetSession();clearTimeout(timer);setup.hidden=false;
+   welcome('Session ended',e.status===401?'Sign in to the panel and open the website again.':'The isolated session ended. Start again to verify the proxy route.');
+   setup.querySelector('button')?.removeAttribute('disabled');
+  }
+ }
+ function action(payload){
+  if(closed||!id)return Promise.resolve();
+  const session=id;pending++;
+  const next=queue.then(async()=>{if(closed||id!==session)return;const frame=await api('/api/v1/provider-browser/sessions/'+session+'/action',{method:'POST',body:JSON.stringify(payload)});if(closed||id!==session)return;await paint(frame);return frame});
+  queue=next.catch(unavailable).finally(()=>pending--);return next;
+ }
+ function poll(){
+  clearTimeout(timer);if(closed||!id)return;
+  timer=setTimeout(async()=>{if(!pending&&!document.hidden)try{await action({kind:'frame'});pollFailures=0}catch(e){pollFailures++;unavailable(e)}poll()},pollFailures?2500:850);
+ }
+ function fit(){clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{const size=dimensions();if(id&&!closed&&(size.width!==screen.width||size.height!==screen.height))action({kind:'resize',...size}).catch(unavailable)},250)}
+ function route(data){
+  const name=proxies.find(x=>x.id===data.proxy_id)?.name||'Verified proxy';
+  q('[data-route]').textContent=data.country+' · '+name;
+  q('[data-connection]').textContent='Country: '+data.country+' · Proxy: '+name+' · Exit IP: '+data.exit_ip;
+ }
+ async function start(){
+  if(busy||closed||id)return;
+  const attempt=++generation;startAbort=new AbortController();
+  busy=true;q('[data-retry]').hidden=true;const button=setup.querySelector('button');if(button)button.disabled=true;
+  try{
+   const ids=[0,1,2].map(i=>setup.elements['browser_proxy'+i].value),countries=ProxyCountry.read(setup);
+   ProxyCountry.validate(countries,ids[0],ids.slice(1));if(!ids[0])throw Error('Select a proxy to open this website.');
+   launch.proxyIDs=ids;launch.countries=countries;storage.write('providerBrowser.launch',launch);
+   setup.hidden=true;welcome('Opening '+launch.provider,'Verifying the selected proxy and country…');message('Connecting through your proxy…');
+   const data=await api('/api/v1/provider-browser/sessions',{method:'POST',signal:startAbort.signal,body:JSON.stringify({provider:launch.provider,account_id:launch.accountID||'',authorization_id:launch.authorizationID||'',proxy_id:ids[0],proxy_ids:[...new Set(ids.filter(Boolean))],proxy_countries:countries,...dimensions()})});
+   if(closed||attempt!==generation){try{await api('/api/v1/provider-browser/sessions/'+data.id,{method:'DELETE',keepalive:true})}catch{}return}
+   id=data.id;saveSession({id,proxy_id:data.proxy_id,country:data.country,exit_ip:data.exit_ip,expires_at:data.expires_at});route(data);await paint(data.frame);fit();poll();
+  }catch(e){if(!closed&&attempt===generation){welcome('Could not open the website',e.message);setup.hidden=false;message(e.message)}}
+  finally{busy=false;if(button)button.disabled=false}
+ }
+ async function end(){
+  if(closed)return;
+  generation++;startAbort?.abort();
+  const session=id;id='';forgetSession();clearTimeout(timer);
+  if(session)try{await api('/api/v1/provider-browser/sessions/'+session,{method:'DELETE',keepalive:true})}catch(e){message(e.message)}
+  ime.value='';ime.blur();canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);q('[data-options]').hidden=true;
+  welcome('Session closed','Cookies and website data for this session are removed.');setup.hidden=false;q('[data-route]').textContent='Disconnected';
+ }
+ q('[data-close]').onclick=end;
+ q('[data-menu]').onclick=()=>{const open=q('[data-options]').hidden;q('[data-options]').hidden=!open;q('[data-menu]').setAttribute('aria-expanded',String(open))};
+ q('[data-fullscreen]').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();q('[data-options]').hidden=true;fit()}catch{message('Full screen is unavailable in this browser.')}};
+ function keyboard(){if(!id)return;ime.value='\u200b';ime.focus({preventScroll:true});ime.setSelectionRange(ime.value.length,ime.value.length)}
+ q('[data-keyboard]').onclick=keyboard;
+ q('[data-address]').onsubmit=e=>{e.preventDefault();let url=e.target.elements.url.value.trim();if(!/^[a-z][a-z0-9+.-]*:/i.test(url))url='https://'+url;try{const parsed=new URL(url);if(parsed.protocol!=='https:'||parsed.username||parsed.password||(parsed.port&&parsed.port!=='443'))throw Error();action({kind:'navigate',url:parsed.href}).catch(unavailable);e.target.elements.url.blur()}catch{message('Enter a valid HTTPS website address.')}};
+ q('[data-tabs]').onchange=e=>action({kind:'tab',target:e.target.value}).catch(unavailable);
+ document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{q('[data-options]').hidden=true;action({kind:b.dataset.nav}).then(fit).catch(unavailable)});
+ document.querySelectorAll('[data-key]').forEach(b=>b.onclick=()=>action({kind:'key',key:b.dataset.key}).catch(unavailable));
+ q('[data-retry]').onclick=start;
+ const supported=['Enter','Tab','Backspace','Delete','Escape','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End'];
+ function key(e){
+  if(composing||e.isComposing)return;
+  if(supported.includes(e.key)){e.preventDefault();action({kind:'key',key:e.key}).catch(unavailable)}
+  else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='a'){e.preventDefault();action({kind:'key',key:'SelectAll'}).catch(unavailable)}
+  else if(e.target===canvas&&e.key.length===1&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();action({kind:'text',text:e.key}).catch(unavailable)}
+ }
+ canvas.onkeydown=key;ime.onkeydown=key;
+ function flush(e){if(composing||e?.isComposing)return;const text=ime.value.replace(/\u200b/g,'');ime.value='\u200b';if(text)action({kind:'text',text}).catch(unavailable)}
+ ime.oncompositionstart=()=>{composing=true};ime.oncompositionend=e=>{composing=false;flush(e)};
+ ime.oninput=flush;
+ ime.addEventListener('beforeinput',e=>{if(composing||e.isComposing)return;if(e.inputType==='deleteContentBackward'||e.inputType==='deleteContentForward'){e.preventDefault();action({kind:'key',key:e.inputType==='deleteContentBackward'?'Backspace':'Delete'}).catch(unavailable)}else if(e.inputType==='insertLineBreak'){e.preventDefault();action({kind:'key',key:'Enter'}).catch(unavailable)}});
+ const pos=e=>{const r=canvas.getBoundingClientRect(),scale=Math.min(r.width/screen.width,r.height/screen.height);return {x:Math.max(0,Math.min(screen.width-1,(e.clientX-r.left)/scale)),y:Math.max(0,Math.min(screen.height-1,(e.clientY-r.top)/scale))}};
+ canvas.onpointerdown=e=>{
+  if(!id)return;e.preventDefault();const p=pos(e),typing=editable.some(r=>p.x>=r.x&&p.y>=r.y&&p.x<=r.x+r.width&&p.y<=r.y+r.height);
+  if(typing){keyboard();action({kind:'tap',...p}).catch(unavailable)}else{ime.blur();canvas.focus({preventScroll:true})}
+  gesture={id:e.pointerId,start:p,last:p,moved:false,typing,time:0};canvas.setPointerCapture(e.pointerId);
+ };
+ canvas.onpointermove=e=>{
+  if(!gesture||gesture.id!==e.pointerId||gesture.typing)return;e.preventDefault();const p=pos(e),delta=gesture.last.y-p.y;
+  if(Math.abs(gesture.start.y-p.y)>8)gesture.moved=true;
+  if(gesture.moved&&pending<2&&Date.now()-gesture.time>70){gesture.time=Date.now();gesture.last=p;action({kind:'scroll',...p,delta:Math.max(-1200,Math.min(1200,delta))}).catch(unavailable)}
+ };
+ canvas.onpointerup=e=>{
+  if(!gesture||gesture.id!==e.pointerId)return;e.preventDefault();const g=gesture;gesture=null;const p=pos(e);
+  if(!g.typing&&!g.moved)action({kind:'tap',...p}).catch(unavailable);
+  else if(g.moved&&Math.abs(g.last.y-p.y)>2)action({kind:'scroll',...p,delta:Math.max(-1200,Math.min(1200,g.last.y-p.y))}).catch(unavailable);
+ };
+ canvas.onpointercancel=()=>{gesture=null};
+ canvas.addEventListener('wheel',e=>{e.preventDefault();if(pending<2)action({kind:'scroll',...pos(e),delta:Math.max(-1200,Math.min(1200,e.deltaY))}).catch(unavailable)},{passive:false});
+ window.addEventListener('resize',fit);window.visualViewport?.addEventListener('resize',fit);
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)clearTimeout(timer);else if(id){action({kind:'frame'}).then(()=>{fit();poll()}).catch(unavailable)}});
+ window.addEventListener('pagehide',()=>{closed=true;clearTimeout(timer);clearTimeout(resizeTimer);life.abort();ime.value=''});
+ window.addEventListener('pageshow',e=>{if(e.persisted)location.reload()});
+ async function init(){
+  if(!launch?.provider||!credential){welcome('Open this page from the panel','Choose “Open provider with proxy” from an account or its setup form.');message('Panel sign-in is required.');return}
+  try{
+   const [p,c]=await Promise.all([api('/api/v1/proxies'),api('/api/v1/proxy-drivers')]);proxies=p;options=c.country_options||[];
+   for(const code of ProxyCountry.normalize(launch.countries||['AUTO']))if(code!=='AUTO'&&!options.some(x=>x.code===code))options.push({code,label:'Previously selected country'});
+   for(let i=0;i<3;i++){const label=document.createElement('label');label.textContent='Proxy '+(i+1)+(i?' (fallback)':'');const select=document.createElement('select');select.name='browser_proxy'+i;select.append(new Option(i?'None':'Select proxy',''));for(const p of proxies.filter(x=>x.status==='healthy'))select.append(new Option(p.name,p.id));select.value=launch.proxyIDs?.[i]||'';label.append(select);setup.append(label)}
+   const fields=document.createElement('div');fields.innerHTML=ProxyCountry.field(options,launch.countries||['AUTO']);setup.append(fields);
+   if(launch.authorizationID)setup.querySelectorAll('select').forEach(x=>{x.inert=true;x.setAttribute('aria-disabled','true')});
+   const button=document.createElement('button');button.textContent='Open website';setup.append(button);setup.onsubmit=e=>{e.preventDefault();start()};
+   const saved=storage.read('providerBrowser.session');
+   if(saved?.id&&(!saved.expires_at||Date.parse(saved.expires_at)>Date.now())){
+    id=saved.id;route(saved);try{await action({kind:'frame'});fit();poll();return}catch(e){id='';forgetSession();welcome('Session ended','Start again to verify the proxy route.');setup.hidden=false;return}
+   }
+   forgetSession();
+   if(launch.proxyIDs?.[0]&&setup.elements.browser_proxy0.value)await start();
+   else{welcome('Choose a proxy','Select the proxy and country for this website.');setup.hidden=false;message('A proxy is required.')}
+  }catch(e){welcome('Browser unavailable',e.message);message(e.message);q('[data-retry]').textContent='Reload page';q('[data-retry]').onclick=()=>location.reload();q('[data-retry]').hidden=false}
+ }
+ init();
+})();

@@ -85,3 +85,16 @@ func TestBrowserWorkerRejectsHostNetwork(t *testing.T) {
 	}
 	t.Skip("already inside an isolated network namespace")
 }
+
+func TestProviderBrowserViewportBounds(t *testing.T) {
+	for _, v := range [][2]int64{{320, 240}, {390, 700}, {1440, 1200}} {
+		if !ValidViewport(v[0], v[1]) {
+			t.Fatal("valid viewport rejected", v)
+		}
+	}
+	for _, v := range [][2]int64{{319, 800}, {390, 239}, {1441, 800}, {390, 1201}, {0, 0}} {
+		if ValidViewport(v[0], v[1]) {
+			t.Fatal("invalid viewport allowed", v)
+		}
+	}
+}
