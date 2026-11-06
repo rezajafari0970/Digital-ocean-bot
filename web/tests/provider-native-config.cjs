@@ -1,0 +1,18 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+vm.runInThisContext(fs.readFileSync('web/static/provider-native-config.js','utf8'));
+const session={credential:'11111111-2222-4333-8444-555555555555',path:'/api/v1/provider-browser/native-stream/'+'a'.repeat(48),provider:'vultr',country:'AR',expires_at:'2026-11-06T19:00:00Z'};
+const c=ProviderNativeConfig.build(session,'https://203.0.113.8:8443');
+assert.equal(c.outbounds[0].streamSettings.tlsSettings.allowInsecure,undefined);
+assert.equal(c.outbounds[0].streamSettings.network,'ws');
+assert.deepEqual(c.inbounds.map(x=>x.protocol),['socks']);
+assert.equal(c.outbounds[0].settings.vnext[0].users[0].id,session.credential);
+assert.deepEqual(c.routing.rules.filter(x=>x.outboundTag==='panel-only'),[{type:'field',port:'8443',network:'tcp',outboundTag:'panel-only',ip:['203.0.113.8']}]);
+assert.equal(c.routing.rules.at(-1).outboundTag,'blocked');
+assert.equal(c.routing.rules.find(x=>x.network==='udp'&&!x.port).outboundTag,'blocked');
+assert.equal(c.dns.servers[0],'https://1.1.1.1/dns-query');
+assert.equal(c.outbounds[0].mux.enabled,false);
+assert.throws(()=>ProviderNativeConfig.build(session,'http://example.com'));
+assert.throws(()=>ProviderNativeConfig.build({...session,path:'/unrelated'},'https://example.com'));
+assert.throws(()=>ProviderNativeConfig.build({...session,credential:'bad'},'https://example.com'));
+assert.equal(ProviderNativeConfig.build(session,'https://panel.example').routing.rules[0].domain[0],'full:panel.example');
+console.log('NATIVE_BROWSER_CONFIG_TLS_DNS_NO_DIRECT_FALLBACK PASS');

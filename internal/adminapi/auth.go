@@ -47,6 +47,7 @@ func (s *Server) logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.closeProviderBrowsers(p.SessionID)
+	s.closeNativeBrowsers(p.SessionID)
 	_ = s.Auth.Store.DeleteSession(r.Context(), p.SessionID)
 	w.WriteHeader(http.StatusNoContent)
 }

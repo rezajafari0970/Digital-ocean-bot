@@ -1,0 +1,28 @@
+name: Native browser focused UI
+on:
+  pull_request:
+    branches: ['checkpoint/final-e2e-20260929']
+    paths:
+      - 'web/static/provider-native*'
+      - 'web/static/provider-browser.js'
+      - 'web/tests/provider-native*'
+      - '.github/workflows/native-browser-focused.yml'
+permissions:
+  contents: read
+jobs:
+  native-ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Native setup, real clipboard and original website tab
+        env:
+          DOB_TEST_CHROMIUM: /usr/bin/google-chrome
+        run: |
+          node web/tests/provider-native-config.cjs
+          node web/tests/provider-native.cjs

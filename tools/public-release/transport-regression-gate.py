@@ -388,6 +388,9 @@ REQUIRED["internal/app"] += ("TestAccountSSHDeletionRequiresValidAbsenceEvidence
 REQUIRED['internal/adminapi'] += ('TestCleanupAccountsExcludedFromEveryActiveStatistic','TestExplicitLocalPurgeSupportsSettledCleanupWithoutProviderRestriction','TestCleanupBulkJavaScript','TestBulkCleanupBrowser')
 REQUIRED['internal/app'] += ('TestProviderFailureReceiptPreservesSevenProviderContexts','TestProviderFailureHistoryIsAtomicAndDeduplicated')
 
+REQUIRED['internal/nativebrowser'] = ('TestNativeHandshakeBoundaries','TestNativeRelayCancellationAndNoDirectFallback')
+REQUIRED['internal/adminapi'] += ('TestNativeBrowserOwnershipAndCredentials','TestNativeBrowserGatewayHandshakeBoundary')
+
 if __name__ == '__main__':
     try:
         if len(sys.argv) != 2:
