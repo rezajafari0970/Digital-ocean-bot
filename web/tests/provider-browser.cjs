@@ -10,7 +10,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),http
  const entry=app.slice(app.indexOf('function reserveProviderPage()'));
  const draft=app.match(/\$\('#openDraftProviderBrowser'\)\.onclick=(async\(\)=>\{[\s\S]*?\});\$\('#discoverAccount'\)/)[1];
  let fixtureImage='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aN1cAAAAASUVORK5CYII=';
- const frame=(s)=>({isolated:true,format:'png',frame_id:'fixture-'+s.width+'-'+s.height,scale_factor:s.scale_factor||1,width:s.width,height:s.height,image:fixtureImage,url:'https://provider.fixture/login',title:'Provider fixture',target:'tab1',tabs:[{id:'tab1',title:'Provider fixture',url:'https://provider.fixture/login'}],editable:[{x:30,y:120,width:280,height:44}],focused:s.focused?{token:s.field,value:s.value||'',start:s.start||0,end:s.end||0,x:30,y:120,width:280,height:44,style:{fontSize:'16px',paddingLeft:'8px'}}:null});
+ const frame=(s)=>({isolated:true,format:'png',frame_id:'fixture-'+s.width+'-'+s.height,scale_factor:s.scale_factor||1,width:s.width,height:s.height,image:fixtureImage,url:'https://provider.fixture/login',title:'Provider fixture',target:'tab1',tabs:[{id:'tab1',title:'Provider fixture',url:'https://provider.fixture/login'}],editable:[{x:30,y:120,width:280,height:44}],focused:s.focused?{multiline:!!s.multiline,token:s.field,value:s.value||'',start:s.start||0,end:s.end||0,x:30,y:120,width:280,height:44,style:{fontSize:'16px',paddingLeft:'8px'}}:null});
  const server=http.createServer(async(req,res)=>{
   const u=new URL(req.url,'http://localhost');requests.push({path:u.pathname,method:req.method,authorization:req.headers.authorization});
   const json=(x,status=200)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(x))};
@@ -43,7 +43,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),http
   const id=u.pathname.split('/')[5],s=sessions.get(id);
   if(!s){json({error:'browser_session_unavailable'},404);return}
   if(u.pathname.endsWith('/action')){
-   const a=JSON.parse(raw);actions.push({id,...a});if(a.kind==='resize'){s.width=a.width;s.height=a.height}if(a.kind==='tap'){s.focused=a.y>=120&&a.y<=164}if(a.kind==='edit'||a.kind==='select'){assert.equal(a.field,s.field);assert.equal(a.expected,s.value||'');if(a.kind==='edit')s.value=a.text;s.start=a.selection_start;s.end=a.selection_end}json(frame(s));return
+   const a=JSON.parse(raw);actions.push({id,...a});if(a.kind==='resize'){s.width=a.width;s.height=a.height}if(a.kind==='tap'){s.focused=a.y>=120&&a.y<=164}if(a.kind==='key'&&a.key==='Tab'){s.field+='-area';s.multiline=true;s.focused=true;s.value='';s.start=s.end=0}if(a.kind==='edit'||a.kind==='select'){assert.equal(a.field,s.field);assert.equal(a.expected,s.value||'');if(a.kind==='edit')s.value=a.text;s.start=a.selection_start;s.end=a.selection_end}json(frame(s));return
   }
   if(req.method==='DELETE'){closed.push(id);sessions.delete(id);res.writeHead(204).end();return}
   res.writeHead(404).end();
@@ -95,6 +95,10 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),http
   await child.call('Input.dispatchKeyEvent',{type:'keyUp',key:'v',code:'KeyV',windowsVirtualKeyCode:86,modifiers:2});
   await child.wait('document.querySelector("[data-ime]").value==="سلام fixtureسلام fixture"');
   await new Promise(r=>setTimeout(r,200));assert.equal(sessions.get('owned-session-1').value,'سلام fixtureسلام fixture','native clipboard paste did not reach provider');
+  await child.call('Input.dispatchKeyEvent',{type:'keyDown',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});
+  await child.call('Input.dispatchKeyEvent',{type:'keyUp',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});
+  await child.wait('document.activeElement===document.querySelector("[data-ime-multiline]")');
+  assert.equal(await child.evaluate('document.querySelector("[data-ime-multiline]").value'),'','previous field must not copy into next field');
   await child.evaluate('document.querySelector("canvas").dispatchEvent(new WheelEvent("wheel",{clientX:120,clientY:240,deltaY:320,bubbles:true,cancelable:true}))');
   await new Promise(r=>setTimeout(r,100));assert(actions.some(a=>a.kind==='scroll'&&a.delta===320));
   const mobile=(await child.call('Page.captureScreenshot',{format:'png'})).data;fs.writeFileSync(path.join(root,'provider-page-mobile.png'),Buffer.from(mobile,'base64'));
