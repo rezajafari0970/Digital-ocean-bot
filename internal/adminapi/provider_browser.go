@@ -94,6 +94,9 @@ func (s *Server) startProviderBrowser(w http.ResponseWriter, r *http.Request) {
 		ProxyCountries  []string `json:"proxy_countries"`
 		Width           int64    `json:"width"`
 		Height          int64    `json:"height"`
+		ScaleFactor     float64  `json:"scale_factor"`
+		Mobile          bool     `json:"mobile"`
+		Touch           bool     `json:"touch"`
 	}
 	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 8192))
 	dec.DisallowUnknownFields()
@@ -123,7 +126,7 @@ func (s *Server) startProviderBrowser(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 400, map[string]string{"error": "browser_proxy_required", "detail": "Select an eligible proxy and up to three country priorities."})
 		return
 	}
-	if !providerbrowser.ValidViewport(req.Width, req.Height) {
+	if _, err := providerbrowser.DisplayScale(req.Width, req.Height, req.ScaleFactor); err != nil {
 		writeJSON(w, 400, map[string]string{"error": "invalid_browser_viewport"})
 		return
 	}
@@ -201,7 +204,7 @@ func (s *Server) startProviderBrowser(w http.ResponseWriter, r *http.Request) {
 	}
 	b.peer.Start()
 	startCtx, startCancel := context.WithTimeout(ctx, 25*time.Second)
-	frame, e := b.peer.Call(startCtx, providerbrowser.Action{Kind: "start", URL: startURL, Timezone: route.Timezone, Locale: geoctx.LocaleForCountry(route.Country), Width: req.Width, Height: req.Height})
+	frame, e := b.peer.Call(startCtx, providerbrowser.Action{Kind: "start", URL: startURL, Timezone: route.Timezone, Locale: geoctx.LocaleForCountry(route.Country), Width: req.Width, Height: req.Height, ScaleFactor: req.ScaleFactor, Mobile: req.Mobile, Touch: req.Touch})
 	startCancel()
 	if e != nil || !frame.Isolated {
 		writeJSON(w, 503, map[string]string{"error": "browser_start_failed", "detail": "The isolated browser could not start. No direct connection is permitted."})
@@ -306,4 +309,31 @@ func (s *Server) stopProviderBrowser(w http.ResponseWriter, r *http.Request) {
 		b.close()
 	}
 	w.WriteHeader(204)
+}
+
+func (s *Server) listProviderBrowsers(w http.ResponseWriter, r *http.Request) {
+	if !authorizationAdmin(w, r) {
+		return
+	}
+	p, _ := principal(r.Context())
+	rows := []map[string]any{}
+	s.BrowserMu.Lock()
+	for id, b := range s.ProviderBrowsers {
+		if b.owner != p.UserID || b.login != p.SessionID || !b.expires.After(time.Now()) {
+			continue
+		}
+		select {
+		case <-b.peer.Done():
+			continue
+		default:
+		}
+		row := map[string]any{"id": id, "provider": b.provider, "account_id": b.account, "expires_at": b.expires}
+		if b.route != nil {
+			row["country"] = b.route.Country
+			row["proxy_id"] = b.route.ProxyID
+		}
+		rows = append(rows, row)
+	}
+	s.BrowserMu.Unlock()
+	writeJSON(w, 200, rows)
 }

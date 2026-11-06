@@ -2,6 +2,8 @@ package providerbrowser
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"io"
@@ -59,6 +61,8 @@ type Worker struct {
 	profile       string
 	proxy         *http.Server
 	width, height int64
+	scaleFactor   float64
+	mobile, touch bool
 	timezone      string
 	locale        string
 	isolated      bool
@@ -95,6 +99,11 @@ func (w *Worker) start(a Action) error {
 	if !ValidViewport(w.width, w.height) {
 		return errors.New("invalid viewport")
 	}
+	scale, err := DisplayScale(a.Width, a.Height, a.ScaleFactor)
+	if err != nil {
+		return err
+	}
+	w.scaleFactor, w.mobile, w.touch = scale, a.Mobile, a.Touch
 	w.timezone = a.Timezone
 	if a.Locale == "" || len(a.Locale) > 24 || strings.ContainsAny(a.Locale, "\r\n, /\\") {
 		return errors.New("locale unavailable")
@@ -121,6 +130,9 @@ func (w *Worker) start(a Action) error {
 	go w.proxy.Serve(ln)
 	options := append(chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.ExecPath(w.Chrome), chromedp.UserDataDir(filepath.Join(root, "profile")),
+		// Use the full Chrome renderer on an isolated virtual display. Do not spoof
+		// navigator.webdriver, user-agent brands or security-challenge fingerprints.
+		chromedp.Flag("headless", false), chromedp.Flag("hide-scrollbars", false),
 		// The enclosing service supplies the mandatory OS sandbox. Chromium cannot
 		// create additional namespaces under RestrictNamespaces and NoNewPrivileges.
 		chromedp.Flag("no-sandbox", true), chromedp.Flag("disable-dev-shm-usage", true),
@@ -132,6 +144,9 @@ func (w *Worker) start(a Action) error {
 		chromedp.ProxyServer("http://"+ln.Addr().String()), chromedp.WindowSize(int(w.width), int(w.height)),
 		chromedp.Env("HOME="+root, "TZ="+w.timezone),
 	)
+	if os.Getenv("DOB_TEST_BROWSER_WORKER") == "1" {
+		options = append(options, chromedp.CombinedOutput(os.Stderr))
+	}
 	alloc, allocCancel := chromedp.NewExecAllocator(w.Peer.ctx, options...)
 	bctx, browserCancel := chromedp.NewContext(alloc)
 	var once sync.Once
@@ -157,16 +172,15 @@ func (w *Worker) start(a Action) error {
 	return chromedp.Run(bctx, chromedp.ActionFunc(func(ctx context.Context) error { _, _, _, _, e := page.Navigate(a.URL).Do(ctx); return e }))
 }
 func (w *Worker) configure(ctx context.Context) error {
-	return chromedp.Run(ctx, emulation.SetDeviceMetricsOverride(w.width, w.height, 1, false), emulation.SetTimezoneOverride(w.timezone), emulation.SetLocaleOverride().WithLocale(strings.ReplaceAll(w.locale, "-", "_")), chromedp.ActionFunc(func(ctx context.Context) error {
-		// Headless Shell does not consistently consume the profile's language
-		// preferences. Bind both navigator.language and Accept-Language before
-		// navigation, while retaining the installed browser's real user agent.
-		_, _, _, userAgent, _, err := browser.GetVersion().Do(cdp.WithExecutor(ctx, chromedp.FromContext(ctx).Browser))
-		if err != nil {
-			return err
-		}
-		return emulation.SetUserAgentOverride(userAgent).WithAcceptLanguage(w.locale).Do(ctx)
-	}))
+	return chromedp.Run(ctx, emulation.SetDeviceMetricsOverride(w.width, w.height, w.scaleFactor, w.mobile),
+		emulation.SetTouchEmulationEnabled(w.touch || w.mobile).WithMaxTouchPoints(5), emulation.SetTimezoneOverride(w.timezone), emulation.SetLocaleOverride().WithLocale(strings.ReplaceAll(w.locale, "-", "_")), chromedp.ActionFunc(func(ctx context.Context) error {
+			// Bind the chosen route locale while preserving the installed browser's real user agent.
+			_, _, _, userAgent, _, err := browser.GetVersion().Do(cdp.WithExecutor(ctx, chromedp.FromContext(ctx).Browser))
+			if err != nil {
+				return err
+			}
+			return emulation.SetUserAgentOverride(userAgent).WithAcceptLanguage(w.locale).Do(ctx)
+		}))
 }
 func (w *Worker) forward(out http.ResponseWriter, r *http.Request) {
 	address := r.Host
@@ -241,21 +255,53 @@ func (w *Worker) Handle(ctx context.Context, a Action) (State, error) {
 		switch a.Kind {
 		case "frame":
 		case "resize":
-			if !ValidViewport(a.Width, a.Height) {
-				return State{}, errors.New("invalid viewport")
+			scale, err := DisplayScale(a.Width, a.Height, a.ScaleFactor)
+			if err != nil {
+				return State{}, err
 			}
-			// Each open target adopts the same verified session viewport.
-			for _, tab := range w.tabs {
-				child, cancel := context.WithCancel(tab)
-				stop := context.AfterFunc(ctx, cancel)
-				e := chromedp.Run(child, emulation.SetDeviceMetricsOverride(a.Width, a.Height, 1, false))
-				stop()
-				cancel()
-				if e != nil {
-					return State{}, e
-				}
+			if err = w.run(ctx, emulation.SetDeviceMetricsOverride(a.Width, a.Height, scale, a.Mobile), emulation.SetTouchEmulationEnabled(a.Touch || a.Mobile).WithMaxTouchPoints(5)); err != nil {
+				return State{}, err
 			}
-			w.width, w.height = a.Width, a.Height
+			w.width, w.height, w.scaleFactor, w.mobile, w.touch = a.Width, a.Height, scale, a.Mobile, a.Touch
+		case "pointer":
+			if !w.coordinates(a) || (a.Buttons != 0 && a.Buttons != 1) {
+				return State{}, errors.New("invalid pointer")
+			}
+			typ := input.MouseMoved
+			switch a.Phase {
+			case "down":
+				typ = input.MousePressed
+			case "up":
+				typ = input.MouseReleased
+			case "move":
+			default:
+				return State{}, errors.New("invalid pointer phase")
+			}
+			event := input.DispatchMouseEvent(typ, a.X, a.Y).WithButtons(a.Buttons)
+			if a.Phase != "move" {
+				event = event.WithButton(input.Left).WithClickCount(1)
+			}
+			actions = append(actions, event)
+		case "touch":
+			if !w.coordinates(a) || !(w.mobile || w.touch) {
+				return State{}, errors.New("invalid touch")
+			}
+			points := []*input.TouchPoint{{X: a.X, Y: a.Y, ID: 1, RadiusX: 1, RadiusY: 1, Force: 1}}
+			typ := input.TouchStart
+			switch a.Phase {
+			case "start":
+			case "move":
+				typ = input.TouchMove
+			case "end":
+				typ = input.TouchEnd
+				points = nil
+			case "cancel":
+				typ = input.TouchCancel
+				points = nil
+			default:
+				return State{}, errors.New("invalid touch phase")
+			}
+			actions = append(actions, input.DispatchTouchEvent(typ, points))
 		case "navigate":
 			if !ValidURL(a.URL) {
 				return State{}, errors.New("invalid URL")
@@ -324,6 +370,9 @@ func (w *Worker) Handle(ctx context.Context, a Action) (State, error) {
 				}
 				w.tabs[id] = c
 			}
+			if e = w.configure(c); e != nil {
+				return State{}, e
+			}
 			w.current = c
 		case "newtab":
 			list, e := chromedp.Targets(w.base)
@@ -345,7 +394,11 @@ func (w *Worker) Handle(ctx context.Context, a Action) (State, error) {
 			}
 		}
 	}
-	return w.frame(ctx)
+	frame, err := w.frame(ctx)
+	if err == nil && a.Kind == "frame" && a.FrameID != "" && a.FrameID == frame.FrameID {
+		frame.Image = nil
+	}
+	return frame, err
 }
 func (w *Worker) coordinates(a Action) bool {
 	return !math.IsNaN(a.X) && !math.IsNaN(a.Y) && a.X >= 0 && a.Y >= 0 && a.X < float64(w.width) && a.Y < float64(w.height)
@@ -358,10 +411,15 @@ func (w *Worker) run(parent context.Context, actions ...chromedp.Action) error {
 	return chromedp.Run(ctx, actions...)
 }
 func (w *Worker) frame(ctx context.Context) (State, error) {
-	s := State{Width: w.width, Height: w.height, Isolated: w.isolated}
+	s := State{Width: w.width, Height: w.height, Isolated: w.isolated, Format: "png", ScaleFactor: w.scaleFactor, Mobile: w.mobile}
 	e := w.run(ctx, chromedp.Location(&s.URL), chromedp.Title(&s.Title), chromedp.ActionFunc(func(c context.Context) error {
 		var e error
-		s.Image, e = page.CaptureScreenshot().WithFormat(page.CaptureScreenshotFormatJpeg).WithQuality(65).WithCaptureBeyondViewport(false).Do(c)
+		s.Image, e = page.CaptureScreenshot().WithFormat(page.CaptureScreenshotFormatPng).WithCaptureBeyondViewport(false).Do(c)
+		// Keep pathological photo/noise frames bounded; normal text/UI frames are lossless.
+		if e == nil && len(s.Image) > 8<<20 {
+			s.Format = "jpeg"
+			s.Image, e = page.CaptureScreenshot().WithFormat(page.CaptureScreenshotFormatJpeg).WithQuality(95).WithCaptureBeyondViewport(false).Do(c)
+		}
 		return e
 	}))
 	if e != nil {
@@ -385,6 +443,8 @@ func (w *Worker) frame(ctx context.Context) (State, error) {
       }
       scan(document,0,0);return out;
     })()`, &s.Editable))
+	sum := sha256.Sum256(s.Image)
+	s.FrameID = hex.EncodeToString(sum[:])
 	s.Target = string(chromedp.FromContext(w.current).Target.TargetID)
 	ts, e := chromedp.Targets(w.base)
 	if e != nil {
@@ -400,3 +460,17 @@ func (w *Worker) frame(ctx context.Context) (State, error) {
 
 // Kept deliberately narrow; the panel sends pixels/input, never CDP commands,
 // arbitrary scripts, host paths, command lines, credentials or browser profiles.
+
+// DisplayScale bounds physical raster work while preserving high-DPI mobile text.
+func DisplayScale(width, height int64, requested float64) (float64, error) {
+	if !ValidViewport(width, height) || math.IsNaN(requested) || math.IsInf(requested, 0) || requested < 0 || requested > 3 {
+		return 0, errors.New("invalid display")
+	}
+	if requested == 0 {
+		requested = 1
+	}
+	if requested < 1 {
+		return 0, errors.New("invalid display scale")
+	}
+	return math.Min(requested, math.Sqrt(4000000/float64(width*height))), nil
+}

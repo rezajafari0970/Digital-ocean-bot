@@ -2,6 +2,7 @@ package adminapi
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/app"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/auth"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/providerbrowser"
@@ -36,6 +37,26 @@ func TestProviderBrowserOwnershipAndNoDirect(t *testing.T) {
 		s.stopProviderBrowser(w, r)
 		if len(s.ProviderBrowsers) != 1 {
 			t.Fatal("another login closed browser")
+		}
+	}
+	for _, principal := range []auth.Principal{{UserID: "owner", SessionID: "login", Role: auth.Admin}, {UserID: "other", SessionID: "login", Role: auth.Admin}, {UserID: "owner", SessionID: "other-login", Role: auth.Admin}} {
+		req := httptest.NewRequest("GET", "/", nil)
+		req = req.WithContext(context.WithValue(req.Context(), principalKey{}, principal))
+		out := httptest.NewRecorder()
+		s.listProviderBrowsers(out, req)
+		var rows []map[string]any
+		if e := json.Unmarshal(out.Body.Bytes(), &rows); e != nil {
+			t.Fatal(e)
+		}
+		want := 0
+		if principal.UserID == "owner" && principal.SessionID == "login" {
+			want = 1
+		}
+		if len(rows) != want {
+			t.Fatal("session listing crossed owner/login boundary", len(rows), want)
+		}
+		if want == 1 && rows[0]["id"] != "opaque" {
+			t.Fatal("owned session cannot be recovered")
 		}
 	}
 	s.closeProviderBrowsers("login")

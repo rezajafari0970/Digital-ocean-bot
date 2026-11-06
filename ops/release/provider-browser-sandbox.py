@@ -14,7 +14,7 @@ def main():
         sudo('install','-m','0755',str(temp/'worker'),'/opt/digital-ocean-bot/bin/provider-browser-runner')
         source=pathlib.Path(os.environ['DOB_TEST_CHROMIUM']).parent
         sudo('cp','-a',str(source),'/usr/local/lib/datacenter-bot/browser/')
-        wrapper=temp/'chrome';wrapper.write_text('#!/bin/sh\nexec /usr/local/lib/datacenter-bot/browser/chrome-headless-shell-linux64/chrome-headless-shell --ignore-certificate-errors-spki-list="$DOB_TEST_BROWSER_SPKI" "$@"\n')
+        wrapper=temp/'chrome';wrapper.write_text('#!/bin/sh\nexec /usr/local/lib/datacenter-bot/provider-browser-chrome --ignore-certificate-errors-spki-list="$DOB_TEST_BROWSER_SPKI" "$@"\n')
         sudo('install','-m','0755',str(wrapper),'/usr/local/lib/datacenter-bot/browser-fixture-chrome')
         service=(ROOT/'deploy/datacenter-provider-browser@.service').read_text().replace('ExecStart=/opt/digital-ocean-bot/bin/provider-browser-runner','ExecStart=/opt/digital-ocean-bot/bin/provider-browser-runner -test.run=^TestProviderBrowserWorkerProcess$').replace('StandardError=null','StandardError=journal')
         service+='\nEnvironment=DOB_TEST_BROWSER_WORKER=1\nPassEnvironment=DOB_TEST_BROWSER_SPKI\n'
@@ -28,6 +28,7 @@ def main():
             env=os.environ.copy();env['DOB_RUN_PROVIDER_BROWSER_SANDBOX']='1'
             run('go','test','-race','-v','-count=1','-timeout','3m','-run','^TestProviderBrowserNativeSandbox$','./internal/providerbrowser',cwd=ROOT,env=env)
         except BaseException:
+            subprocess.run(['sudo','systemctl','show','datacenter-provider-browser@*','-p','Id,ActiveState,Result,MemoryCurrent,MemoryPeak,CPUUsageNSec,TasksCurrent'])
             subprocess.run(['sudo','journalctl','--no-pager','-n','100','--unit','datacenter-provider-browser@*'])
             raise
         finally:

@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
-	"image/jpeg"
+	"image/png"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -47,7 +47,13 @@ func TestProviderBrowserWorkerProcess(t *testing.T) {
 	defer cancel()
 	p := NewPeer(ctx, conn)
 	w := NewWorker(p, "/usr/local/lib/datacenter-bot/browser-fixture-chrome")
-	p.Handle = w.Handle
+	p.Handle = func(ctx context.Context, a Action) (State, error) {
+		s, e := w.Handle(ctx, a)
+		if e != nil {
+			fmt.Fprintf(os.Stderr, "fixture action %s: %v\n", a.Kind, e)
+		}
+		return s, e
+	}
 	p.Start()
 	<-p.Done()
 	p.Wait()
@@ -85,7 +91,7 @@ func TestProviderBrowserNativeSandbox(t *testing.T) {
 			return
 		}
 		w.Header().Set("Content-Type", "text/html")
-		fmt.Fprintf(w, `<!doctype html><html><body><input id="value"><button onclick="document.title=document.querySelector('input').value">Set title</button><script>
+		fmt.Fprintf(w, `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><input id="value"><button onclick="document.title=document.querySelector('input').value">Set title</button><script>
 const q=new URLSearchParams(location.search).get('set');if(q){document.cookie='identity='+q+';SameSite=Lax';localStorage.identity=q}
 document.title=(document.cookie||'empty')+'|'+(localStorage.identity||'empty')+'|'+navigator.language+'|'+Intl.DateTimeFormat().resolvedOptions().timeZone;
 const socket=new WebSocket('wss://fixture.invalid/ws');socket.onopen=()=>socket.send('ok');socket.onmessage=e=>document.title+='|ws:'+e.data;
@@ -165,21 +171,43 @@ fetch('https://unapproved.fixture/').catch(()=>{});fetch(%q).catch(()=>{});try{c
 	if len(rendered.Editable) == 0 || rendered.Editable[0].Width <= 0 || rendered.Editable[0].Height <= 0 {
 		t.Fatal("editable geometry missing")
 	}
-	resized, e := first.Call(ctx, Action{Kind: "resize", Width: 800, Height: 360})
+	resized, e := first.Call(ctx, Action{Kind: "resize", Width: 800, Height: 360, ScaleFactor: 2})
 	if e != nil || resized.Width != 800 || resized.Height != 360 || !resized.Isolated {
 		t.Fatal("live viewport resize", resized.Width, resized.Height, e)
 	}
-	imageSize, e := jpeg.DecodeConfig(bytes.NewReader(resized.Image))
-	if e != nil || imageSize.Width != 800 || imageSize.Height != 360 {
+	imageSize, e := png.DecodeConfig(bytes.NewReader(resized.Image))
+	if e != nil || imageSize.Width != 1600 || imageSize.Height != 720 || resized.Format != "png" || resized.ScaleFactor != 2 {
 		t.Fatal("resized pixels do not match viewport", imageSize, e)
+	}
+	if _, e = first.Call(ctx, Action{Kind: "pointer", Phase: "down", Buttons: 1, X: 20, Y: 200}); e != nil {
+		t.Fatal(e)
+	}
+	if _, e = first.Call(ctx, Action{Kind: "pointer", Phase: "up", X: 20, Y: 200}); e != nil {
+		t.Fatal(e)
+	}
+	still, e := first.Call(ctx, Action{Kind: "frame"})
+	if e != nil {
+		t.Fatal(e)
+	}
+	unchanged, e := first.Call(ctx, Action{Kind: "frame", FrameID: still.FrameID})
+	if e != nil || len(unchanged.Image) != 0 || unchanged.FrameID != still.FrameID {
+		t.Fatal("unchanged high-resolution screen was retransmitted", e)
 	}
 	if _, e = first.Call(ctx, Action{Kind: "resize", Width: 800, Height: 0}); e == nil {
 		t.Fatal("invalid resize accepted")
 	}
-	if _, e = first.Call(ctx, Action{Kind: "resize", Width: 390, Height: 800}); e != nil {
+	if _, e = first.Call(ctx, Action{Kind: "resize", Width: 390, Height: 800, Mobile: true, Touch: true, ScaleFactor: 3}); e != nil {
 		t.Fatal(e)
 	}
 	frame(first, "typed in isolated browser")
+	for _, phase := range []string{"start", "move", "end"} {
+		if _, e = first.Call(ctx, Action{Kind: "touch", Phase: phase, X: 30, Y: 200}); e != nil {
+			t.Fatal("native touch", e)
+		}
+	}
+	if _, e = first.Call(ctx, Action{Kind: "pointer", Phase: "execute", X: 20, Y: 20}); e == nil {
+		t.Fatal("invalid pointer command accepted")
+	}
 
 	if sockets.Load() != 2 {
 		t.Fatal("native WebSocket tunnels not active", sockets.Load())
