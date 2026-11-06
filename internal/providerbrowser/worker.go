@@ -144,6 +144,9 @@ func (w *Worker) start(a Action) error {
 		chromedp.ProxyServer("http://"+ln.Addr().String()), chromedp.WindowSize(int(w.width), int(w.height)),
 		chromedp.Env("HOME="+root, "TZ="+w.timezone),
 	)
+	if os.Getenv("DOB_TEST_BROWSER_WORKER") == "1" {
+		options = append(options, chromedp.CombinedOutput(os.Stderr))
+	}
 	alloc, allocCancel := chromedp.NewExecAllocator(w.Peer.ctx, options...)
 	bctx, browserCancel := chromedp.NewContext(alloc)
 	var once sync.Once

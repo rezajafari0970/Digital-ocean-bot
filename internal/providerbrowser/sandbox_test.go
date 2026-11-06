@@ -47,7 +47,13 @@ func TestProviderBrowserWorkerProcess(t *testing.T) {
 	defer cancel()
 	p := NewPeer(ctx, conn)
 	w := NewWorker(p, "/usr/local/lib/datacenter-bot/browser-fixture-chrome")
-	p.Handle = w.Handle
+	p.Handle = func(ctx context.Context, a Action) (State, error) {
+		s, e := w.Handle(ctx, a)
+		if e != nil {
+			fmt.Fprintf(os.Stderr, "fixture action %s: %v\n", a.Kind, e)
+		}
+		return s, e
+	}
 	p.Start()
 	<-p.Done()
 	p.Wait()
