@@ -54,6 +54,8 @@ func TestBrowserProxyHealthPinPostgres(t *testing.T) {
 	if err = c.requireAccountNetworkReady(ctx, a); err != nil {
 		t.Fatal("fresh observation not admitted during browser session", err)
 	}
+	// Account Proxy test also publishes observed geo metadata on the shared base row.
+	execBootstrap(t, db, `UPDATE proxies SET country='United States',country_code='us',asn='AS64500 fixture' WHERE id=$1`, ps[0])
 	// The live health change must not release the configuration or secret pin.
 	for _, query := range []string{
 		`UPDATE proxies SET host='changed.invalid' WHERE id=$1`,

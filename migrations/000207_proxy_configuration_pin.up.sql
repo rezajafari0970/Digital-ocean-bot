@@ -3,10 +3,10 @@
 CREATE FUNCTION guard_pinned_proxy_configuration() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
  IF TG_OP='UPDATE' AND
-    (to_jsonb(NEW)-ARRAY['status','exit_ip','failure_count','consecutive_successes',
+    (to_jsonb(NEW)-ARRAY['status','exit_ip','country','country_code','asn','failure_count','consecutive_successes',
       'last_checked_at','last_success_at','latency_ms','health_error','updated_at'])
     IS NOT DISTINCT FROM
-    (to_jsonb(OLD)-ARRAY['status','exit_ip','failure_count','consecutive_successes',
+    (to_jsonb(OLD)-ARRAY['status','exit_ip','country','country_code','asn','failure_count','consecutive_successes',
       'last_checked_at','last_success_at','latency_ms','health_error','updated_at']) THEN
    RETURN NEW;
  END IF;
