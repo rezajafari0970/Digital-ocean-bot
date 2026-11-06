@@ -13,6 +13,7 @@ jobs:
       GOMEMLIMIT: 1536MiB
       GOTOOLCHAIN: local
       DOB_TEST_XRAY: /tmp/dob-xray/xray
+      DOB_TEST_NGINX: /usr/sbin/nginx
       DOB_TEST_CHROMIUM: /tmp/dob-chrome/chrome-headless-shell-linux64/chrome-headless-shell
     steps:
       - uses: actions/checkout@v4
@@ -27,7 +28,7 @@ jobs:
       - name: Prepare isolated dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y postgresql postgresql-contrib libasound2t64 libatk-bridge2.0-0t64 libxdamage1 libnss3 libgbm1 xvfb xauth fonts-noto-core fonts-noto-color-emoji
+          sudo apt-get install -y nginx postgresql postgresql-contrib libasound2t64 libatk-bridge2.0-0t64 libxdamage1 libnss3 libgbm1 xvfb xauth fonts-noto-core fonts-noto-color-emoji
           python3 - <<'PY'
           import hashlib, pathlib, urllib.request, zipfile, io
           payload=urllib.request.urlopen('https://storage.googleapis.com/chrome-for-testing-public/156.0.8078.47/linux64/chrome-headless-shell-linux64.zip',timeout=90).read()

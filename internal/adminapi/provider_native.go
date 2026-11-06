@@ -3,6 +3,7 @@ package adminapi
 import (
 	"context"
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -334,5 +335,23 @@ func (s *Server) nativeBrowserStream(w http.ResponseWriter, r *http.Request) {
 		}
 		_ = nativebrowser.Relay(b.ctx, conn, b.credential, dial, func() { b.mu.Lock(); b.opened++; b.lastUsed = time.Now(); b.mu.Unlock() }, func(n int64) { b.mu.Lock(); b.transferred += n; b.lastUsed = time.Now(); b.mu.Unlock() })
 	}}
-	server.ServeHTTP(w, r)
+	server.ServeHTTP(w, nativeGatewayWebSocketRequest(r))
+}
+
+// The loopback HTTPS gateway can remove hop-by-hop Upgrade headers while keeping
+// the end-to-end Sec-WebSocket handshake. Nginx still tunnels a 101 response when
+// the original client requested Upgrade. Reconstruct only that bounded handshake;
+// the temporary path and VLESS UUID remain required before any upstream egress.
+func nativeGatewayWebSocketRequest(r *http.Request) *http.Request {
+	host, _, err := net.SplitHostPort(r.RemoteAddr)
+	ip := net.ParseIP(host)
+	key, keyErr := base64.StdEncoding.DecodeString(r.Header.Get("Sec-WebSocket-Key"))
+	upgrade := r.Header.Get("Upgrade")
+	if err != nil || ip == nil || !ip.IsLoopback() || r.ProtoMajor != 1 || r.Header.Get("Origin") != "" || r.Header.Get("Sec-WebSocket-Version") != "13" || keyErr != nil || len(key) != 16 || (upgrade != "" && !strings.EqualFold(upgrade, "websocket")) {
+		return r
+	}
+	copy := r.Clone(r.Context())
+	copy.Header.Set("Upgrade", "websocket")
+	copy.Header.Set("Connection", "Upgrade")
+	return copy
 }

@@ -389,7 +389,7 @@ REQUIRED['internal/adminapi'] += ('TestCleanupAccountsExcludedFromEveryActiveSta
 REQUIRED['internal/app'] += ('TestProviderFailureReceiptPreservesSevenProviderContexts','TestProviderFailureHistoryIsAtomicAndDeduplicated')
 
 REQUIRED['internal/nativebrowser'] = ('TestNativeHandshakeBoundaries','TestNativeRelayCancellationAndNoDirectFallback')
-REQUIRED['internal/adminapi'] += ('TestNativeBrowserOwnershipAndCredentials',)
+REQUIRED['internal/adminapi'] += ('TestNativeBrowserOwnershipAndCredentials','TestNativeBrowserGatewayHandshakeBoundary')
 
 if __name__ == '__main__':
     try:

@@ -7,6 +7,7 @@ import (
 	"crypto/x509"
 	"encoding/hex"
 	"encoding/json"
+	"encoding/pem"
 	"io"
 	"net"
 	"net/http"
@@ -134,13 +135,19 @@ func TestNativeBrowserOwnershipAndCredentials(t *testing.T) {
 		}
 	}
 }
-func TestNativeBrowserXrayCompatibility(t *testing.T) {
+func TestNativeBrowserXrayCompatibility(t *testing.T)         { nativeXrayCompatibility(t, false) }
+func TestNativeBrowserNginxGatewayCompatibility(t *testing.T) { nativeXrayCompatibility(t, true) }
+func nativeXrayCompatibility(t *testing.T, gateway bool) {
 	core := os.Getenv("DOB_TEST_XRAY")
 	if core == "" {
 		t.Skip("native Xray fixture requires DOB_TEST_XRAY")
 	}
 	_, b, h, calls, secure := nativeFixture(t)
-	u, _ := url.Parse(h.URL)
+	endpoint := h.URL
+	if gateway {
+		endpoint = nativeNginxGateway(t, h)
+	}
+	u, _ := url.Parse(endpoint)
 	host, portText, _ := net.SplitHostPort(u.Host)
 	var port int
 	json.Unmarshal([]byte(portText), &port)
@@ -232,3 +239,80 @@ func TestNativeBrowserXrayCompatibility(t *testing.T) {
 	t.Log("NATIVE_XRAY_WSS_ORIGINAL_PAYLOAD_AND_REVOCATION PASS")
 }
 func intText(n int) string { b, _ := json.Marshal(n); return string(b) }
+
+func nativeNginxGateway(t *testing.T, backend *httptest.Server) string {
+	t.Helper()
+	binary := os.Getenv("DOB_TEST_NGINX")
+	if binary == "" {
+		t.Skip("native gateway fixture requires DOB_TEST_NGINX")
+	}
+	root := t.TempDir()
+	certificate := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: backend.Certificate().Raw})
+	key, err := x509.MarshalPKCS8PrivateKey(backend.TLS.Certificates[0].PrivateKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	os.WriteFile(filepath.Join(root, "cert.pem"), certificate, 0600)
+	os.WriteFile(filepath.Join(root, "key.pem"), pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: key}), 0600)
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	address := listener.Addr().String()
+	listener.Close()
+	config := "daemon off; master_process off; pid " + root + "/nginx.pid; error_log stderr; events {worker_connections 64;} http {access_log off; client_body_temp_path " + root + "/body; proxy_temp_path " + root + "/proxy; server {listen " + address + " ssl; ssl_certificate " + root + "/cert.pem; ssl_certificate_key " + root + "/key.pem; location / {proxy_pass " + backend.URL + "; proxy_http_version 1.1; proxy_set_header Connection close; proxy_set_header Upgrade \"\"; proxy_set_header X-Forwarded-Proto https;}}}"
+	file := filepath.Join(root, "nginx.conf")
+	os.WriteFile(file, []byte(config), 0600)
+	output, err := os.Create(filepath.Join(root, "nginx.log"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { output.Close() })
+	cmd := exec.Command(binary, "-p", root+"/", "-c", file)
+	cmd.Stdout = output
+	cmd.Stderr = output
+	if err = cmd.Start(); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { cmd.Process.Kill(); cmd.Wait() })
+	for range 40 {
+		conn, err := net.DialTimeout("tcp", address, 100*time.Millisecond)
+		if err == nil {
+			conn.Close()
+			return "https://" + address
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	log, _ := os.ReadFile(output.Name())
+	t.Fatal("disposable nginx failed", string(log))
+	return ""
+}
+func TestNativeBrowserGatewayHandshakeBoundary(t *testing.T) {
+	request := httptest.NewRequest("GET", "/", nil)
+	request.RemoteAddr = "127.0.0.1:2345"
+	request.Header.Set("Sec-WebSocket-Key", "dGhlIHNhbXBsZSBub25jZQ==")
+	request.Header.Set("Sec-WebSocket-Version", "13")
+	request.Header.Set("Connection", "close")
+	restored := nativeGatewayWebSocketRequest(request)
+	if restored.Header.Get("Upgrade") != "websocket" || restored.Header.Get("Connection") != "Upgrade" || request.Header.Get("Upgrade") != "" {
+		t.Fatal("gateway handshake missing or original request mutated")
+	}
+	for _, mode := range []string{"remote", "origin", "key", "version", "protocol"} {
+		candidate := request.Clone(request.Context())
+		switch mode {
+		case "remote":
+			candidate.RemoteAddr = "203.0.113.4:1234"
+		case "origin":
+			candidate.Header.Set("Origin", "https://untrusted.invalid")
+		case "key":
+			candidate.Header.Set("Sec-WebSocket-Key", "bad")
+		case "version":
+			candidate.Header.Set("Sec-WebSocket-Version", "12")
+		case "protocol":
+			candidate.Header.Set("Upgrade", "other")
+		}
+		if nativeGatewayWebSocketRequest(candidate).Header.Get("Upgrade") == "websocket" {
+			t.Fatal("unexpected reconstruction", mode)
+		}
+	}
+}

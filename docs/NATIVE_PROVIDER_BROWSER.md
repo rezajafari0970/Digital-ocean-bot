@@ -18,7 +18,13 @@ active streams. A restart ends all temporary sessions. Import a fresh profile to
 continue. Upstream proxy master credentials never leave the server.
 
 Native clients use authenticated VLESS v0 TCP over WSS on the existing HTTPS panel
-endpoint. The reverse proxy must forward WebSocket Upgrade/Connection headers.
+endpoint. WebSocket Upgrade/Connection headers are normally forwarded by the edge. For
+the existing loopback Nginx gateway that strips those hop-by-hop headers, the
+endpoint can reconstruct a valid version-13 handshake from its preserved
+Sec-WebSocket nonce. Reconstruction is restricted to loopback peers, no Origin,
+and a valid 16-byte nonce; it never grants upstream access without the session
+UUID. A real Nginx fixture intentionally strips these headers and verifies full
+HTTP/HTTPS payloads and revocation through the resulting tunnel.
 The endpoint accepts only temporary session UUIDs and public TCP ports 80/443,
 rejects browser Origin, and reuses strict country/IP-pinned onboarding egress.
 No direct provider fallback exists. DNS runs through in-tunnel DoH; UDP/QUIC and
