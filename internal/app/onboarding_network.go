@@ -66,8 +66,14 @@ func (c Container) onboardingClient(ctx context.Context, proxyID, country string
 	if _, err = tx.ExecContext(ctx, `SET LOCAL lock_timeout='3s'`); err != nil {
 		return nil, nil, "", err
 	}
+	// Canonical UUID spelling shares the same pin as the database writer trigger.
+	// A proxy-row SHARE lock would starve the health monitor for this entire
+	// session, expire its six-minute proof and block unrelated account requests.
+	if _, err = tx.ExecContext(ctx, `SELECT pg_advisory_xact_lock_shared(hashtextextended('proxy-config:'||$1::uuid::text,0))`, proxyID); err != nil {
+		return nil, nil, "", err
+	}
 	var p countryProxy
-	err = tx.QueryRowContext(ctx, `SELECT id::text,type,host,port,COALESCE(username,''),adapter,COALESCE(secret_ref,''),status FROM proxies WHERE id=$1 FOR SHARE`, proxyID).Scan(&p.ID, &p.Type, &p.Host, &p.Port, &p.Username, &p.Adapter, &p.SecretRef, &p.Status)
+	err = tx.QueryRowContext(ctx, `SELECT id::text,type,host,port,COALESCE(username,''),adapter,COALESCE(secret_ref,''),status FROM proxies WHERE id=$1`, proxyID).Scan(&p.ID, &p.Type, &p.Host, &p.Port, &p.Username, &p.Adapter, &p.SecretRef, &p.Status)
 	if err != nil {
 		return nil, nil, "", err
 	}
@@ -126,9 +132,12 @@ func (c Container) onboardingClient(ctx context.Context, proxyID, country string
 		if closed.Load() || ctx.Err() != nil {
 			return ErrStaleAccountNetwork
 		}
-		var alive int
-		if err := tx.QueryRowContext(checkCtx, `SELECT 1`).Scan(&alive); err != nil {
+		var status string
+		if err := tx.QueryRowContext(checkCtx, `SELECT status FROM proxies WHERE id=$1`, p.ID).Scan(&status); err != nil {
 			return ErrStaleAccountNetwork
+		}
+		if status != "healthy" {
+			return networkReadinessError("BASE_PROXY_UNHEALTHY")
 		}
 		if v.Target == "" && !strict {
 			return nil

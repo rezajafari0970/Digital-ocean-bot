@@ -5,6 +5,8 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
+	"errors"
+	"github.com/lib/pq"
 	"io"
 	"net"
 	"net/http"
@@ -242,22 +244,30 @@ func TestCountryCandidateNativeTunnelAndReconnectPostgres(t *testing.T) {
 		t.Fatal("wrong-country onboarding admitted")
 	}
 	wrongCountry.Store(false)
-	// A definition edit waits for the complete preview client lifetime.
-	changed := make(chan error, 1)
-	go func() { _, err := db.Exec(`UPDATE proxies SET username='changed' WHERE id=$1`, p.ID); changed <- err }()
-	select {
-	case err := <-changed:
-		t.Fatal("proxy changed during preview", err)
-	case <-time.After(100 * time.Millisecond):
+	// Health remains writable during the complete preview lifetime. A failure
+	// immediately blocks the next provider dispatch while config stays pinned.
+	health := network.SQLHealthStore{DB: db}
+	if err = health.Save(ctx, p.ID, network.HealthState{Status: network.StatusDown, LastCheckedAt: time.Now().UTC(), LastError: "PROXY_AUTH_FAILED"}); err != nil {
+		t.Fatal("active preview blocked monitor", err)
+	}
+	if response, err = client.Get("https://provider.fixture/account"); err == nil {
+		response.Body.Close()
+		t.Fatal("unhealthy proxy dispatched")
+	}
+	if providerCalls.Load() != 1 {
+		t.Fatal("health rejection leaked a provider request")
+	}
+	if err = health.Save(ctx, p.ID, network.HealthState{Status: network.StatusHealthy, LastCheckedAt: time.Now().UTC(), LastSuccessAt: time.Now().UTC()}); err != nil {
+		t.Fatal(err)
+	}
+	_, err = db.Exec(`UPDATE proxies SET username='changed' WHERE id=$1`, p.ID)
+	var locked *pq.Error
+	if !errors.As(err, &locked) || locked.Code != "55P03" {
+		t.Fatal("proxy edit was not rejected during preview", err)
 	}
 	closeFn()
-	select {
-	case err := <-changed:
-		if err != nil {
-			t.Fatal(err)
-		}
-	case <-time.After(3 * time.Second):
-		t.Fatal("preview lock leaked")
+	if _, err = db.Exec(`UPDATE proxies SET username='changed' WHERE id=$1`, p.ID); err != nil {
+		t.Fatal("preview config pin leaked", err)
 	}
 	if response, err = client.Get("https://provider.fixture/account"); err == nil {
 		response.Body.Close()

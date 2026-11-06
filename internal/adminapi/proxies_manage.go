@@ -109,6 +109,11 @@ func (s *Server) updateProxy(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+	var configFree bool
+	if err = tx.QueryRowContext(r.Context(), `SELECT pg_try_advisory_xact_lock(hashtextextended('proxy-config:'||$1::uuid::text,0))`, id).Scan(&configFree); err != nil || !configFree {
+		writeJSON(w, 409, map[string]string{"error": "proxy_route_busy", "detail": "End the active provider browser or authorization connection before changing proxy settings."})
+		return
+	}
 	var revision int64
 	if err = tx.QueryRowContext(r.Context(), `SELECT settings_revision FROM proxies WHERE id=$1 FOR UPDATE`, id).Scan(&revision); err != nil {
 		writeJSON(w, 409, errorBody())
