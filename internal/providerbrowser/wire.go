@@ -75,15 +75,18 @@ type State struct {
 	Isolated    bool           `json:"isolated"`
 }
 type message struct {
-	Kind    string  `json:"kind"`
-	ID      string  `json:"id"`
-	Address string  `json:"address,omitempty"`
-	Data    []byte  `json:"data,omitempty"`
-	Action  *Action `json:"action,omitempty"`
-	State   *State  `json:"state,omitempty"`
-	Error   string  `json:"error,omitempty"`
+	FlowControl bool    `json:"flow_control,omitempty"`
+	Kind        string  `json:"kind"`
+	ID          string  `json:"id"`
+	Address     string  `json:"address,omitempty"`
+	Data        []byte  `json:"data,omitempty"`
+	Action      *Action `json:"action,omitempty"`
+	State       *State  `json:"state,omitempty"`
+	Error       string  `json:"error,omitempty"`
 }
 type stream struct {
+	flow      atomic.Bool
+	opened    atomic.Bool
 	conn      net.Conn
 	data      chan []byte
 	ready     chan error
@@ -96,8 +99,9 @@ type stream struct {
 
 // Each direction has a bounded receive window. A slow socket consumes its own
 // credits without dropping assets or blocking commands and unrelated tunnels.
-func newStream(conn net.Conn) *stream {
+func newStream(conn net.Conn, flow bool) *stream {
 	s := &stream{conn: conn, data: make(chan []byte, streamWindow+1), ready: make(chan error, 1), credits: make(chan struct{}, streamWindow), done: make(chan struct{})}
+	s.flow.Store(flow)
 	s.allowance.Store(streamWindow)
 	for i := 0; i < streamWindow; i++ {
 		s.credits <- struct{}{}
@@ -202,7 +206,8 @@ func (p *Peer) read() {
 				_ = p.send(message{Kind: "opened", ID: m.ID, Error: "tunnel limit"})
 				continue
 			}
-			s := newStream(nil)
+			s := newStream(nil, m.FlowControl)
+			s.opened.Store(true)
 			p.streams[m.ID] = s
 			p.mu.Unlock()
 			go p.accept(m, s)
@@ -210,7 +215,8 @@ func (p *Peer) read() {
 			p.mu.Lock()
 			s := p.streams[m.ID]
 			p.mu.Unlock()
-			if s != nil {
+			if s != nil && s.opened.CompareAndSwap(false, true) {
+				s.flow.Store(m.FlowControl)
 				var e error
 				if m.Error != "" {
 					e = errors.New("proxy tunnel unavailable")
@@ -228,7 +234,7 @@ func (p *Peer) read() {
 			s := p.streams[m.ID]
 			p.mu.Unlock()
 			if s != nil {
-				if s.readEOF.Load() || s.allowance.Add(-1) < 0 {
+				if s.flow.Load() && (s.readEOF.Load() || s.allowance.Add(-1) < 0) {
 					p.drop(m.ID)
 					continue
 				}
@@ -255,7 +261,7 @@ func (p *Peer) read() {
 			p.mu.Lock()
 			s := p.streams[m.ID]
 			p.mu.Unlock()
-			if s != nil && s.readEOF.CompareAndSwap(false, true) {
+			if s != nil && s.flow.Load() && s.readEOF.CompareAndSwap(false, true) {
 				// One extra queue slot reserves ordered EOF independently of
 				// the byte window; all preceding bytes are written first.
 				select {
@@ -309,7 +315,7 @@ func (p *Peer) accept(m message, s *stream) {
 		p.drop(m.ID)
 		return
 	}
-	if p.send(message{Kind: "opened", ID: m.ID}) != nil {
+	if p.send(message{Kind: "opened", ID: m.ID, FlowControl: s.flow.Load()}) != nil {
 		p.drop(m.ID)
 		return
 	}
@@ -342,9 +348,11 @@ func (p *Peer) pump(id string, s *stream) {
 				if _, e := s.conn.Write(b); e != nil {
 					return
 				}
-				s.allowance.Add(1)
-				if p.send(message{Kind: "credit", ID: id}) != nil {
-					return
+				if s.flow.Load() {
+					s.allowance.Add(1)
+					if p.send(message{Kind: "credit", ID: id}) != nil {
+						return
+					}
 				}
 			case <-s.done:
 				return
@@ -355,12 +363,14 @@ func (p *Peer) pump(id string, s *stream) {
 	}()
 	b := make([]byte, 32768)
 	for {
-		select {
-		case <-s.credits:
-		case <-s.done:
-			return
-		case <-p.ctx.Done():
-			return
+		if s.flow.Load() {
+			select {
+			case <-s.credits:
+			case <-s.done:
+				return
+			case <-p.ctx.Done():
+				return
+			}
 		}
 		n, e := s.conn.Read(b)
 		if n > 0 && p.send(message{Kind: "data", ID: id, Data: b[:n]}) != nil {
@@ -368,7 +378,7 @@ func (p *Peer) pump(id string, s *stream) {
 			return
 		}
 		if e != nil {
-			if errors.Is(e, io.EOF) {
+			if errors.Is(e, io.EOF) && s.flow.Load() {
 				// Closing a socket immediately here discards queued bytes at the peer.
 				// Ordered EOF lets its writer drain, then acknowledge the full close.
 				if p.send(message{Kind: "eof", ID: id}) != nil {
@@ -385,7 +395,7 @@ func (p *Peer) pump(id string, s *stream) {
 func (p *Peer) Open(ctx context.Context, address string) (net.Conn, error) {
 	id := fmt.Sprintf("t%d", p.serial.Add(1))
 	client, pipe := net.Pipe()
-	s := newStream(pipe)
+	s := newStream(pipe, false)
 	p.mu.Lock()
 	if len(p.streams) >= maxStreams {
 		p.mu.Unlock()
@@ -395,7 +405,7 @@ func (p *Peer) Open(ctx context.Context, address string) (net.Conn, error) {
 	}
 	p.streams[id] = s
 	p.mu.Unlock()
-	if e := p.send(message{Kind: "dial", ID: id, Address: address}); e != nil {
+	if e := p.send(message{Kind: "dial", ID: id, Address: address, FlowControl: true}); e != nil {
 		client.Close()
 		p.drop(id)
 		return nil, e
