@@ -65,10 +65,14 @@ func TestProviderBrowserNativeSandbox(t *testing.T) {
 		t.Skip("disposable systemd sandbox opt-in")
 	}
 	var direct, requests, sockets atomic.Int64
+	var missingBrowserMetadata atomic.Int64
 	trap := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { direct.Add(1); w.WriteHeader(200) }))
 	defer trap.Close()
 	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requests.Add(1)
+		if r.URL.Path == "/" && (r.Header.Get("Sec-CH-UA") == "" || !strings.HasPrefix(r.Header.Get("Accept-Language"), "de-DE")) {
+			missingBrowserMetadata.Add(1)
+		}
 		if r.URL.Path == "/ws" {
 			conn, _, _, err := ws.UpgradeHTTP(r, w)
 			if err != nil {
@@ -93,7 +97,7 @@ func TestProviderBrowserNativeSandbox(t *testing.T) {
 		w.Header().Set("Content-Type", "text/html")
 		fmt.Fprintf(w, `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><input id="value"><button onclick="document.title=document.querySelector('input').value">Set title</button><script>
 const q=new URLSearchParams(location.search).get('set');if(q){document.cookie='identity='+q+';SameSite=Lax';localStorage.identity=q}
-document.title=(document.cookie||'empty')+'|'+(localStorage.identity||'empty')+'|'+navigator.language+'|'+Intl.DateTimeFormat().resolvedOptions().timeZone;
+document.title=(document.cookie||'empty')+'|'+(localStorage.identity||'empty')+'|'+navigator.language+'|'+Intl.DateTimeFormat().resolvedOptions().timeZone+'|native-ua:'+Boolean(navigator.userAgentData?.brands?.length);
 const socket=new WebSocket('wss://fixture.invalid/ws');socket.onopen=()=>socket.send('ok');socket.onmessage=e=>document.title+='|ws:'+e.data;
 fetch('https://unapproved.fixture/').catch(()=>{});fetch(%q).catch(()=>{});try{const p=new RTCPeerConnection({iceServers:[{urls:'stun:1.1.1.1:3478'}]});p.createDataChannel('x');p.createOffer().then(x=>p.setLocalDescription(x));setTimeout(()=>p.close(),1000)}catch{}
 </script></body></html>`, trap.URL)
@@ -151,10 +155,13 @@ fetch('https://unapproved.fixture/').catch(()=>{});fetch(%q).catch(()=>{});try{c
 		t.Fatalf("fixture did not render: want=%q actual=%q url=%q requests=%d sockets=%d blocked=%d", want, last.Title, last.URL, requests.Load(), sockets.Load(), blocked.Load())
 		return State{}
 	}
-	frame(first, "identity=first|first|de-DE|Europe/Berlin|ws:ok")
-	frame(second, "empty|empty|de-DE|Europe/Berlin|ws:ok")
+	frame(first, "identity=first|first|de-DE|Europe/Berlin|native-ua:true|ws:ok")
+	frame(second, "empty|empty|de-DE|Europe/Berlin|native-ua:true|ws:ok")
 	if blocked.Load() < 2 {
 		t.Fatal("unapproved destinations did not reach the guarded bridge", blocked.Load())
+	}
+	if missingBrowserMetadata.Load() != 0 {
+		t.Fatal("native Chrome Client Hints or configured language missing", missingBrowserMetadata.Load())
 	}
 	if requests.Load() < 2 {
 		t.Fatal("browser did not reach fixture through bridge")
@@ -221,7 +228,7 @@ fetch('https://unapproved.fixture/').catch(()=>{});fetch(%q).catch(()=>{});try{c
 	if _, e := first.Call(ctx, Action{Kind: "frame"}); e == nil {
 		t.Fatal("closed session served pixels")
 	}
-	frame(second, "empty|empty|de-DE|Europe/Berlin|ws:ok")
+	frame(second, "empty|empty|de-DE|Europe/Berlin|native-ua:true|ws:ok")
 	deadline := time.Now().Add(3 * time.Second)
 	for sockets.Load() != 1 && time.Now().Before(deadline) {
 		time.Sleep(20 * time.Millisecond)
@@ -236,7 +243,7 @@ fetch('https://unapproved.fixture/').catch(()=>{});fetch(%q).catch(()=>{});try{c
 	if _, e := second.Call(ctx, Action{Kind: "navigate", URL: "file:///etc/passwd"}); e == nil {
 		t.Fatal("local file navigation accepted")
 	}
-	if strings.Contains(frame(second, "empty|empty|de-DE|Europe/Berlin|ws:ok").URL, "first") {
+	if strings.Contains(frame(second, "empty|empty|de-DE|Europe/Berlin|native-ua:true|ws:ok").URL, "first") {
 		t.Fatal("cross-session navigation")
 	}
 	t.Logf("native isolated browsers: requests=%d, direct=%d, rejected destinations=%d; cookies/storage separate", requests.Load(), direct.Load(), blocked.Load())

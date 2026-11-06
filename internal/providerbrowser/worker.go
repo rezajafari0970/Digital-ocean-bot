@@ -172,16 +172,14 @@ func (w *Worker) start(a Action) error {
 	return chromedp.Run(bctx, chromedp.ActionFunc(func(ctx context.Context) error { _, _, _, _, e := page.Navigate(a.URL).Do(ctx); return e }))
 }
 func (w *Worker) configure(ctx context.Context) error {
+	// Language is set in the real Chrome profile and command line. Leave the
+	// native user agent and Client Hints intact; overriding only the UA string
+	// suppresses Chrome's structured Client Hint headers.
 	return chromedp.Run(ctx, emulation.SetDeviceMetricsOverride(w.width, w.height, w.scaleFactor, w.mobile),
-		emulation.SetTouchEmulationEnabled(w.touch || w.mobile).WithMaxTouchPoints(5), emulation.SetTimezoneOverride(w.timezone), emulation.SetLocaleOverride().WithLocale(strings.ReplaceAll(w.locale, "-", "_")), chromedp.ActionFunc(func(ctx context.Context) error {
-			// Bind the chosen route locale while preserving the installed browser's real user agent.
-			_, _, _, userAgent, _, err := browser.GetVersion().Do(cdp.WithExecutor(ctx, chromedp.FromContext(ctx).Browser))
-			if err != nil {
-				return err
-			}
-			return emulation.SetUserAgentOverride(userAgent).WithAcceptLanguage(w.locale).Do(ctx)
-		}))
+		emulation.SetTouchEmulationEnabled(w.touch || w.mobile).WithMaxTouchPoints(5),
+		emulation.SetTimezoneOverride(w.timezone), emulation.SetLocaleOverride().WithLocale(strings.ReplaceAll(w.locale, "-", "_")))
 }
+
 func (w *Worker) forward(out http.ResponseWriter, r *http.Request) {
 	address := r.Host
 	if r.Method != http.MethodConnect {
