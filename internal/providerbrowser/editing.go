@@ -147,7 +147,7 @@ func (w *Worker) editingState(ctx context.Context, s *State) {
 // Modifier keys must accompany the key event, not be typed as sequential keys.
 func selectAllInput() chromedp.Action {
 	return chromedp.Tasks{
-		input.DispatchKeyEvent(input.RawKeyDown).WithKey("a").WithCode("KeyA").WithWindowsVirtualKeyCode(65).WithModifiers(input.ModifierCtrl),
+		input.DispatchKeyEvent(input.KeyDown).WithKey("a").WithCode("KeyA").WithWindowsVirtualKeyCode(65).WithModifiers(input.ModifierCtrl),
 		input.DispatchKeyEvent(input.KeyUp).WithKey("a").WithCode("KeyA").WithWindowsVirtualKeyCode(65).WithModifiers(input.ModifierCtrl),
 	}
 }
