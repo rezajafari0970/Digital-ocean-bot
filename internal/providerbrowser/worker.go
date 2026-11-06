@@ -350,12 +350,18 @@ func (w *Worker) Handle(ctx context.Context, a Action) (State, error) {
 			}
 			actions = append(actions, input.InsertText(a.Text))
 		case "key":
-			keys := map[string]string{"Enter": kb.Enter, "Tab": kb.Tab, "ShiftTab": kb.Shift + kb.Tab, "Backspace": kb.Backspace, "Delete": kb.Delete, "Escape": kb.Escape, "ArrowUp": kb.ArrowUp, "ArrowDown": kb.ArrowDown, "ArrowLeft": kb.ArrowLeft, "ArrowRight": kb.ArrowRight, "Home": kb.Home, "End": kb.End, "SelectAll": kb.Control + "a"}
+			keys := map[string]string{"Enter": kb.Enter, "Tab": kb.Tab, "ShiftTab": kb.Tab, "Backspace": kb.Backspace, "Delete": kb.Delete, "Escape": kb.Escape, "ArrowUp": kb.ArrowUp, "ArrowDown": kb.ArrowDown, "ArrowLeft": kb.ArrowLeft, "ArrowRight": kb.ArrowRight, "Home": kb.Home, "End": kb.End, "SelectAll": "a"}
 			key, ok := keys[a.Key]
 			if !ok {
 				return State{}, errors.New("unsupported key")
 			}
-			actions = append(actions, chromedp.KeyEvent(key))
+			if a.Key == "SelectAll" {
+				actions = append(actions, selectAllInput())
+			} else if a.Key == "ShiftTab" {
+				actions = append(actions, chromedp.KeyEvent(key, chromedp.KeyModifiers(input.ModifierShift)))
+			} else {
+				actions = append(actions, chromedp.KeyEvent(key))
+			}
 		case "tab":
 			list, e := chromedp.Targets(w.base)
 			if e != nil {

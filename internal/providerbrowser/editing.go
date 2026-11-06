@@ -99,7 +99,7 @@ func (w *Worker) edit(ctx context.Context, a Action) error {
 			return errors.New("focused input changed")
 		}
 		if a.Kind == "edit" && f.Value != a.Text {
-			if err := chromedp.KeyEvent(kb.Control + "a").Do(c); err != nil {
+			if err := selectAllInput().Do(c); err != nil {
 				return err
 			}
 			if a.Text == "" {
@@ -142,4 +142,12 @@ func (w *Worker) editingState(ctx context.Context, s *State) {
 		s.Selection = ""
 	}
 	s.Selection = strings.ReplaceAll(s.Selection, "\x00", "")
+}
+
+// Modifier keys must accompany the key event, not be typed as sequential keys.
+func selectAllInput() chromedp.Action {
+	return chromedp.Tasks{
+		input.DispatchKeyEvent(input.RawKeyDown).WithKey("a").WithCode("KeyA").WithWindowsVirtualKeyCode(65).WithModifiers(input.ModifierCtrl),
+		input.DispatchKeyEvent(input.KeyUp).WithKey("a").WithCode("KeyA").WithWindowsVirtualKeyCode(65).WithModifiers(input.ModifierCtrl),
+	}
 }

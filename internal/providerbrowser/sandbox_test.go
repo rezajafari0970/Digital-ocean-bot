@@ -207,7 +207,7 @@ fetch('https://unapproved.fixture/').catch(()=>{});fetch(%q).catch(()=>{});try{c
 	}
 	edited, e := first.Call(ctx, Action{Kind: "edit", Field: f.Token, Expected: f.Value, Text: "Hello فارسی 👋", SelectionStart: 2, SelectionEnd: 7})
 	if e != nil || edited.Focused == nil || edited.Focused.Value != "Hello فارسی 👋" || edited.Focused.Start != 2 || edited.Focused.End != 7 {
-		t.Fatal("native Unicode edit and selection failed", e)
+		t.Fatalf("native Unicode edit and selection failed: error=%v focused=%+v", e, edited.Focused)
 	}
 	if _, e = first.Call(ctx, Action{Kind: "edit", Field: f.Token, Expected: edited.Focused.Value, Text: f.Value, SelectionStart: 0, SelectionEnd: 0}); e != nil {
 		t.Fatal("restore native input fixture", e)
