@@ -135,6 +135,17 @@ fetch('https://unapproved.fixture/').catch(()=>{});fetch(%q).catch(()=>{});try{c
 	}
 	first, _ := open("https://fixture.invalid/?set=first")
 	second, _ := open("https://fixture.invalid/")
+	// The two browser services share the original total hard budget even though
+	// a single heavy provider may borrow more of that budget.
+	group, err := exec.Command("systemctl", "show", "datacenter-provider-browser.slice", "-p", "ControlGroup", "--value").Output()
+	if err != nil {
+		t.Fatal("browser resource slice unavailable", err)
+	}
+	capBytes, err := os.ReadFile("/sys/fs/cgroup" + strings.TrimSpace(string(group)) + "/memory.max")
+	if err != nil || strings.TrimSpace(string(capBytes)) != "1342177280" {
+		t.Fatal("combined browser memory budget missing", string(capBytes), err)
+	}
+
 	frame := func(p *Peer, want string) State {
 		deadline := time.Now().Add(15 * time.Second)
 		var last State

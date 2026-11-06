@@ -1,0 +1,9 @@
+[Unit]
+Description=Combined isolated provider browser resource budget
+
+[Slice]
+MemoryAccounting=yes
+MemoryHigh=1152M
+MemoryMax=1280M
+TasksMax=512
+CPUQuota=150%
