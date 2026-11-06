@@ -274,6 +274,8 @@ REQUIRED['internal/adminapi'] += ('TestStrictCountryOnboardingAtomicAndBindingPo
 REQUIRED['internal/adminapi'] += ('TestBuildActivitySummaryGlobalTerminalAndSecretSafety', 'TestBuildActivityDiagnosticsBoundedToVisiblePage')
 REQUIRED['internal/panels/export'] = REQUIRED.get('internal/panels/export', ()) + ('TestNativeDriverPublicationContract', 'TestTrojanHTTPPublicationRejectsInvalidTransport')
 
+REQUIRED['internal/app'] += ('TestBrowserProxyHealthPinPostgres', 'TestPrimaryIdentityRecoversWithoutRotationPostgres', 'TestNetworkReadinessDiagnosticsForEveryProvider')
+
 def main(repo):
     if os.geteuid() == 0:
         raise RuntimeError("gate must run as the unprivileged release builder")

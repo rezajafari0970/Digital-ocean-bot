@@ -331,7 +331,9 @@ func (c Container) maintainOrderedCountryWithProbe(ctx context.Context, account 
 	defer cancel()
 	var incumbent *countryCandidate
 	var incumbentUnknown bool
-	if s.Health && s.IP != "" && s.Applied == s.Config.Revision {
+	// Failed observation does not erase the committed route. Recheck that exact
+	// session/IP before allocating a replacement on the following keeper cycle.
+	if s.IP != "" && s.Applied == s.Config.Revision && s.Stage != "" {
 		if p, ok := s.proxy(s.Active); ok {
 			port := p.Port
 			if ProxyAdapterCapabilities(p.Adapter).DedicatedPort {
@@ -343,6 +345,16 @@ func (c Container) maintainOrderedCountryWithProbe(ctx context.Context, account 
 			} else {
 				incumbentUnknown = e.Health == proxyselection.Unknown
 			}
+		}
+	}
+	if len(s.Config.Countries) > 0 && s.Stage == s.Config.Countries[0] {
+		if incumbent != nil {
+			// Negative evidence from an earlier sweep cannot evict a now-proven
+			// primary. Keep its exact session, port and address without churn.
+			return c.finishCountryWork(ctx, s, incumbent, nil, "ready", "Primary country and existing isolated proxy identity verified", true)
+		}
+		if incumbentUnknown {
+			return c.finishCountryWork(ctx, s, nil, nil, "searching", "Rechecking the existing primary identity; unavailable observation does not authorize a fallback", false)
 		}
 	}
 	providers := make([]proxyselection.Provider, 0, len(s.Config.Pool))

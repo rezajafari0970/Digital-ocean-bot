@@ -129,6 +129,13 @@ func providerFailureReceipt(provider string, cause error, state, detail string) 
 	} else if provider == "vultr" && state == "TOKEN_INVALID" {
 		d.Guidance = "Vultr rejected authentication. Check the API key, API access and source-IP allowlist against the selected proxy exit; HTTP 401 alone does not distinguish them."
 	}
+	var readiness networkReadinessError
+	if errors.As(cause, &readiness) {
+		d.Code = string(readiness)
+		d.Class = "network_readiness"
+		d.Operation = "network"
+		d.Guidance = readiness.guidance() + ". Requests remain blocked until verification succeeds; no direct fallback is authorized."
+	}
 	raw, _ := json.Marshal(struct {
 		State      string                  `json:"provider_state"`
 		Message    string                  `json:"provider_error"`

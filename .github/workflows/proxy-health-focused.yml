@@ -1,0 +1,46 @@
+name: Proxy health and primary identity
+on:
+  pull_request:
+    branches: ['checkpoint/final-e2e-20260929']
+    paths:
+      - 'internal/app/**'
+      - 'internal/network/**'
+      - 'migrations/000207*'
+      - '.github/workflows/proxy-health-focused.yml'
+permissions:
+  contents: read
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: fixture
+          POSTGRES_DB: bulk_test
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      BULK_TEST_DATABASE_URL: postgres://postgres:fixture@localhost:5432/bulk_test?sslmode=disable
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+      - name: Prepare disposable migration roles
+        env:
+          PGPASSWORD: fixture
+        run: psql -h localhost -U postgres -d bulk_test -v ON_ERROR_STOP=1 -c 'CREATE ROLE digitaloceanbot; CREATE ROLE digitaloceanbot_readonly;'
+      - name: Verify pinned configuration, live health and primary recovery
+        run: |
+          set -o pipefail
+          go test -json -race -count=1 -timeout 5m -run '^(TestBrowserProxyHealthPinPostgres|TestPrimaryIdentityRecoversWithoutRotationPostgres|TestNetworkReadinessDiagnosticsForEveryProvider|TestCountryCandidateNativeTunnelAndReconnectPostgres|TestCountryRuntimePriorityStabilityAndNoChurnPostgres)$' ./internal/app | tee /tmp/proxy-health-events.jsonl
+          python3 - <<'PY'
+          import runpy,pathlib
+          gate=runpy.run_path('tools/public-release/transport-regression-gate.py')
+          gate['verify_events'](pathlib.Path('/tmp/proxy-health-events.jsonl').read_text().splitlines(),{'internal/app':('TestBrowserProxyHealthPinPostgres','TestPrimaryIdentityRecoversWithoutRotationPostgres','TestNetworkReadinessDiagnosticsForEveryProvider','TestCountryCandidateNativeTunnelAndReconnectPostgres','TestCountryRuntimePriorityStabilityAndNoChurnPostgres')})
+          PY
