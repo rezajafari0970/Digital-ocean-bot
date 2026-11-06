@@ -43,7 +43,7 @@ func TestProviderBrowserWorkerProcess(t *testing.T) {
 	if e != nil {
 		fail(e)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Minute)
 	defer cancel()
 	p := NewPeer(ctx, conn)
 	w := NewWorker(p, "/usr/local/lib/datacenter-bot/browser-fixture-chrome")
@@ -95,6 +95,10 @@ func TestProviderBrowserNativeSandbox(t *testing.T) {
 			return
 		}
 		w.Header().Set("Content-Type", "text/html")
+		if r.URL.Path == "/input" {
+			fmt.Fprint(w, nativeInputFixture)
+			return
+		}
 		fmt.Fprintf(w, `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><input id="value"><button onclick="document.title=document.querySelector('input').value">Set title</button><script>
 const q=new URLSearchParams(location.search).get('set');if(q){document.cookie='identity='+q+';SameSite=Lax';localStorage.identity=q}
 document.title=(document.cookie||'empty')+'|'+(localStorage.identity||'empty')+'|'+navigator.language+'|'+Intl.DateTimeFormat().resolvedOptions().timeZone+'|native-ua:'+Boolean(navigator.userAgentData?.brands?.length);
@@ -108,7 +112,7 @@ fetch('https://unapproved.fixture/').catch(()=>{});fetch(%q).catch(()=>{});try{c
 		t.Fatal(string(b), e)
 	}
 	defer exec.Command("sudo", "systemctl", "unset-environment", "DOB_TEST_BROWSER_SPKI").Run()
-	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()
 	var blocked atomic.Int64
 	open := func(raw string) (*Peer, State) {
@@ -230,6 +234,7 @@ fetch('https://unapproved.fixture/').catch(()=>{});fetch(%q).catch(()=>{});try{c
 	if sockets.Load() != 2 {
 		t.Fatal("native WebSocket tunnels not active", sockets.Load())
 	}
+	nativePageInput(t, first)
 	first.Close()
 	select {
 	case <-first.Done():

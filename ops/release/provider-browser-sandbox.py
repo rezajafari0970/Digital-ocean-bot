@@ -32,7 +32,7 @@ def main():
         sudo('systemctl','daemon-reload');sudo('systemctl','start','datacenter-provider-browser.socket')
         try:
             env=os.environ.copy();env['DOB_RUN_PROVIDER_BROWSER_SANDBOX']='1'
-            run('go','test','-race','-v','-count=1','-timeout','3m','-run','^TestProviderBrowserNativeSandbox$','./internal/providerbrowser',cwd=ROOT,env=env)
+            run('go','test','-race','-v','-count=1','-timeout','5m','-run','^TestProviderBrowserNativeSandbox$','./internal/providerbrowser',cwd=ROOT,env=env)
         except BaseException:
             subprocess.run(['sudo','systemctl','show','datacenter-provider-browser@*','-p','Id,ActiveState,Result,MemoryCurrent,MemoryPeak,CPUUsageNSec,TasksCurrent'])
             subprocess.run(['sudo','journalctl','--no-pager','-n','100','--unit','datacenter-provider-browser@*'])

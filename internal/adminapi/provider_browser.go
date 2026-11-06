@@ -76,6 +76,7 @@ func (s *Server) browserSession(w http.ResponseWriter, r *http.Request) *provide
 	return b
 }
 func (s *Server) startProviderBrowser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "no-store")
 	if !authorizationAdmin(w, r) {
 		return
 	}
@@ -272,12 +273,13 @@ func (s *Server) watchProviderBrowser(ctx context.Context, id string, b *provide
 	}
 }
 func (s *Server) providerBrowserAction(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "no-store")
 	b := s.browserSession(w, r)
 	if b == nil {
 		return
 	}
 	var a providerbrowser.Action
-	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 16384))
+	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 131072))
 	dec.DisallowUnknownFields()
 	if dec.Decode(&a) != nil || dec.Decode(new(any)) != io.EOF || a.Kind == "start" || a.Timezone != "" || a.Locale != "" {
 		writeJSON(w, 400, errorBody())
