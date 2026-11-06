@@ -14,14 +14,10 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),asse
   const {targetId}=await send('Target.createTarget',{url:'about:blank'}),{sessionId}=await send('Target.attachToTarget',{targetId,flatten:true}),call=(m,p)=>send(m,p,sessionId);
   await call('Page.enable');await call('Network.enable');
   const ev=async expression=>{const r=await call('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true,userGesture:true});if(r.exceptionDetails)throw Error(r.exceptionDetails.exception?.description||r.exceptionDetails.text);return r.result.value};
-  async function wait(expression){const end=Date.now()+18000;while(Date.now()<end){if(await ev(expression))return;await delay(100)}throw Error('Native input timeout: '+expression+'; state='+JSON.stringify(await ev('({title:document.title,status:document.querySelector("[data-status]")?.textContent,active:document.activeElement?.outerHTML.slice(0,300),singleHidden:document.querySelector("[data-ime]")?.hidden,multiHidden:document.querySelector("[data-ime-multiline]")?.hidden,trace:window.__inputTrace})')))}
+  async function wait(expression){const end=Date.now()+18000;while(Date.now()<end){if(await ev(expression))return;await delay(100)}throw Error('Native input timeout: '+expression+'; state='+JSON.stringify(await ev('({title:document.title,status:document.querySelector("[data-status]")?.textContent,active:document.activeElement?.outerHTML.slice(0,300),singleHidden:document.querySelector("[data-ime]")?.hidden,multiHidden:document.querySelector("[data-ime-multiline]")?.hidden})')))}
   await call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
   await call('Emulation.setTouchEmulationEnabled',{enabled:true,maxTouchPoints:5});
   await call('Page.addScriptToEvaluateOnNewDocument',{source:'sessionStorage.setItem("providerBrowser.token","input-fixture");sessionStorage.setItem("providerBrowser.launch",JSON.stringify({provider:"vultr",proxyIDs:["fixture"],countries:["DE"]}));'});
-  await call('Page.addScriptToEvaluateOnNewDocument',{source:`
-   window.__inputTrace=[];const trace=x=>{window.__inputTrace.push(x);if(window.__inputTrace.length>200)window.__inputTrace.shift()};
-   let value;Object.defineProperty(window,'ProviderInput',{get:()=>value,set:v=>{value=v;const create=v.create;v.create=function(o){const api=create(o),update=api.update;api.update=function(f,s){trace({kind:s?.kind,key:s?.key,token:f.focused?.token,multi:f.focused?.multiline,before:document.activeElement?.tagName});try{return update(f,s)}catch(e){trace({error:e.message});throw e}finally{trace({after:document.activeElement?.tagName,single:document.querySelector('[data-ime]').hidden,multi:document.querySelector('[data-ime-multiline]').hidden})}};return api}}});
-  `});
   await call('Page.navigate',{url:base+'/static/provider-browser.html'});await wait('document.querySelector("canvas")&&!document.querySelector("canvas").hidden&&document.title.includes("Native input fixture")');
   assert.match(await ev('document.querySelector("meta[name=viewport]").content'),/interactive-widget=resizes-content/);
   async function tap(x,y){
@@ -60,9 +56,17 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),asse
   await wait('document.title.includes("password-edited")');
   assert.equal(await ev('document.querySelector("[data-ime]").value'),'fixture-only-password');
   await key('Tab','Tab',9);
+  await call('Input.insertText',{text:'line one'}); // Buffer typing while the native focus response is in flight.
   await wait('document.activeElement===document.querySelector("[data-ime-multiline]")');
-  await call('Input.insertText',{text:'line one\nخط دوم'});
+  await call('Input.insertText',{text:'\nخط دوم'});
   await wait('document.title.includes("multiline:line one")&&document.title.includes("خط دوم")');
+  await key('Tab','Tab',9,8);
+  await wait('document.activeElement===document.querySelector("[data-ime]")&&document.querySelector("[data-ime]").type==="password"');
+  assert.equal(await ev('document.querySelector("[data-ime]").value'),'fixture-only-password','reverse Tab must retain only the target field value');
+  await ev('document.querySelector("[data-desktop]").click()');
+  await wait('Number(document.querySelector("canvas").dataset.viewportWidth)===1280');
+  await tap(190,310);
+  await wait('document.title.includes("commit:Hello fixtureسلام fixture!?")');
   await ev('document.querySelector("[data-close]").click()');await wait('document.querySelector("[data-heading]").textContent==="Session closed"');
   assert.equal(await ev('document.querySelector("[data-ime]").value+document.querySelector("[data-ime-multiline]").value'),'');
   assert.equal(await ev('JSON.stringify(sessionStorage).includes("fixture-only-password")'),false);

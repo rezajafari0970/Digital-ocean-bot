@@ -43,7 +43,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),http
   const id=u.pathname.split('/')[5],s=sessions.get(id);
   if(!s){json({error:'browser_session_unavailable'},404);return}
   if(u.pathname.endsWith('/action')){
-   const a=JSON.parse(raw);actions.push({id,...a});if(a.kind==='resize'){s.width=a.width;s.height=a.height}if(a.kind==='tap'){s.focused=a.y>=120&&a.y<=164}if(a.kind==='key'&&a.key==='Tab'){s.field+='-area';s.multiline=true;s.focused=true;s.value='';s.start=s.end=0}if(a.kind==='edit'||a.kind==='select'){assert.equal(a.field,s.field);assert.equal(a.expected,s.value||'');if(a.kind==='edit')s.value=a.text;s.start=a.selection_start;s.end=a.selection_end}json(frame(s));return
+   const a=JSON.parse(raw);actions.push({id,...a});if(a.kind==='resize'){s.width=a.width;s.height=a.height}if(a.kind==='tap'){s.focused=a.y>=120&&a.y<=164}if(a.kind==='key'&&a.key==='Tab'){s.field+='-area';s.multiline=true;s.focused=true;s.value='';s.start=s.end=0}if(a.kind==='edit'||a.kind==='select'){assert.equal(a.field,s.field);assert.equal(a.expected,s.value||'');if(a.kind==='edit')s.value=a.text;s.start=a.selection_start;s.end=a.selection_end}await new Promise(r=>setTimeout(r,120));json(frame(s));return
   }
   if(req.method==='DELETE'){closed.push(id);sessions.delete(id);res.writeHead(204).end();return}
   res.writeHead(404).end();
@@ -95,6 +95,8 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),http
   await child.call('Input.dispatchKeyEvent',{type:'keyUp',key:'v',code:'KeyV',windowsVirtualKeyCode:86,modifiers:2});
   await child.wait('document.querySelector("[data-ime]").value==="سلام fixtureسلام fixture"');
   await new Promise(r=>setTimeout(r,200));assert.equal(sessions.get('owned-session-1').value,'سلام fixtureسلام fixture','native clipboard paste did not reach provider');
+  await child.call('Input.insertText',{text:'!'});
+  await new Promise(r=>setTimeout(r,250));
   await child.call('Input.dispatchKeyEvent',{type:'keyDown',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});
   await child.call('Input.dispatchKeyEvent',{type:'keyUp',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});
   await child.wait('document.activeElement===document.querySelector("[data-ime-multiline]")');

@@ -83,6 +83,11 @@
     }).then(()=>{if(focus?.token===field)ack=version});
    }
    const next=action(payload);
+   if(editorOpen&&payload.kind==='key'&&['Tab','ShiftTab'].includes(payload.key)){
+    // Buffer input for the next field. Key-up/selection from the old field must
+    // not queue a stale edit after the remote focus has already moved.
+    editor.value='';focus=null;revision=ack=0;startupDeletes=0;waiting=true;
+   }
    return Promise.all([edited,next]).then(([,frame])=>frame);
   }
   function key(e){
@@ -195,8 +200,8 @@
     if(remoteTarget&&frame.target!==remoteTarget)clear();
     remoteTarget=frame.target;regions=Array.isArray(frame.editable)?frame.editable:[];selection=frame.selection||'';
     const next=frame.focused||null;remoteFocus=next;
-    if(waiting&&source?.kind!=='tap')return;
-    if(editorOpen&&next&&focus?.token!==next.token&&source?.kind==='key'&&['Tab','ShiftTab'].includes(source.key)){editor.value='';revision=ack=0;startupDeletes=0;waiting=true;seed(next);return}
+    const focusAction=source?.kind==='tap'||(source?.kind==='key'&&['Tab','ShiftTab'].includes(source.key));
+    if(waiting&&!focusAction)return;
     if(editorOpen)sync(next);else focus=next;
    },
    isGesturing:()=>Boolean(gesture),
