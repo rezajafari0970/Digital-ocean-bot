@@ -44,7 +44,8 @@ func TestAuditOutputKeepsPluginOwnershipAndTypedClientsPostgres(t *testing.T) {
 				}
 			}))
 			defer remote.Close()
-			_, _, panel := seedPanel(t, db, remote.URL)
+			_, droplet, panel := seedPanel(t, db, remote.URL)
+			sqlMust(t, db, "UPDATE deployments SET host='192.0.2.10' WHERE droplet_id=$1", droplet)
 			sqlMust(t, db, "INSERT INTO inbound_export_metadata(panel_id,remote_id,public_key) VALUES($1,1,'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')", panel)
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()

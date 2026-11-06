@@ -132,7 +132,10 @@ func (m *Modules) Run(ctx context.Context, role Role) error {
 		wg.Add(1)
 		go func(v invocation) {
 			defer wg.Done()
-			err := resilience.Guard(v.ctx, func(ctx context.Context) error { v.mod.Run(ctx); return nil })
+			// Every registered module must enter its lifecycle, even if a sibling
+			// fails before this goroutine is scheduled. It receives the cancelled
+			// module context so its owned cleanup still runs; Guard only contains panics here.
+			err := resilience.Guard(context.Background(), func(context.Context) error { v.mod.Run(v.ctx); return nil })
 			if runCtx.Err() == nil {
 				cause := fmt.Errorf("worker module %s stopped unexpectedly", v.mod.Name)
 				if err != nil {
