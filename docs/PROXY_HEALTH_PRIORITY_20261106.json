@@ -1,0 +1,234 @@
+{
+  "accepted_at_utc": "2026-11-06T20:42:55.430921+00:00",
+  "source_and_gates": {
+    "source": "cae452cec2d6e5a2c711365b1724d82cd118c73b",
+    "merge": "86a8f3fa819556543ba4dedee8d754fb1a5ec89d",
+    "pr": 48,
+    "sourceRun": 42286251434,
+    "sourceRequiredPassed": 380,
+    "sourceSkipped": 0,
+    "restoreMigrations": 207,
+    "focusedRun": 42286251553,
+    "public": "73fa40ce8d4d6ec6f7eb947d0ac0d8fb2ab70aed",
+    "publicRun": 42286574249,
+    "promotionCommit": "8407a0d6124f7c89a31ed4a575a2ac4815db5181",
+    "promotionRun": 42287956673
+  },
+  "runtime": "73fa40ce8d4d6ec6f7eb947d0ac0d8fb2ab70aed",
+  "schema": "000207_proxy_configuration_pin",
+  "instances": {
+    "default": {
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness_checks": 5,
+      "preservation_checks": 21,
+      "preservation": {
+        "profile_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        },
+        "trojan_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        }
+      },
+      "assets": {
+        "at": "2026-11-06T20:27:56.237844+00:00",
+        "instance": "default",
+        "commit": "73fa40ce8d4d6ec6f7eb947d0ac0d8fb2ab70aed",
+        "assets": 32,
+        "panel": true,
+        "provider_browser_module": true,
+        "country_priorities_module": true
+      }
+    },
+    "production": {
+      "services": [
+        {
+          "unit": "dob-production-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "dob-production-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "dob-production-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness_checks": 5,
+      "preservation_checks": 21,
+      "preservation": {
+        "profile_ownership": {
+          "common": 1621,
+          "unchanged": 1621,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        },
+        "trojan_ownership": {
+          "common": 9,
+          "unchanged": 9,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        }
+      },
+      "assets": {
+        "at": "2026-11-06T20:32:21.279687+00:00",
+        "instance": "production",
+        "commit": "73fa40ce8d4d6ec6f7eb947d0ac0d8fb2ab70aed",
+        "assets": 32,
+        "panel": true,
+        "provider_browser_module": true,
+        "country_priorities_module": true,
+        "public_gateway_tls_verified": true,
+        "public_gateway_assets": 32
+      }
+    }
+  },
+  "live_checks": {
+    "public_https_api_and_strict_AR_session": true,
+    "public_gateway_websocket_upgrade": true,
+    "exported_full_profile_core_validation": true,
+    "public_WSS_original_TLS_and_pinned_exit": true,
+    "native_UDP_DNS_redirected_to_tunnel_DoH": true,
+    "all_active_accounts_verified_through_assigned_proxy": true,
+    "monitor_published_during_390_second_native_session": true,
+    "account_primary_country_and_IP_retained_across_samples": true,
+    "native_exit_still_pinned_after_hold": true,
+    "server_received_real_client_response": true,
+    "revoked_session_has_no_direct_fallback": true
+  },
+  "monitor_samples": 14,
+  "primary_country_samples": 14,
+  "base_age_max_seconds": 296.099612,
+  "monitor_publications": 3,
+  "account_probe_results": [
+    {
+      "provider": "linode",
+      "phase": "before_hold",
+      "status": "healthy",
+      "provider_usable": true,
+      "ip_matches": true,
+      "country_matches": true,
+      "primary_matches": null
+    },
+    {
+      "provider": "linode",
+      "phase": "before_hold",
+      "status": "healthy",
+      "provider_usable": true,
+      "ip_matches": true,
+      "country_matches": true,
+      "primary_matches": null
+    },
+    {
+      "provider": "vultr",
+      "phase": "before_hold",
+      "status": "healthy",
+      "provider_usable": true,
+      "ip_matches": true,
+      "country_matches": true,
+      "primary_matches": true
+    },
+    {
+      "provider": "linode",
+      "phase": "after_hold",
+      "status": "healthy",
+      "provider_usable": true,
+      "ip_matches": true,
+      "country_matches": true,
+      "primary_matches": null
+    },
+    {
+      "provider": "linode",
+      "phase": "after_hold",
+      "status": "healthy",
+      "provider_usable": true,
+      "ip_matches": true,
+      "country_matches": true,
+      "primary_matches": null
+    },
+    {
+      "provider": "vultr",
+      "phase": "after_hold",
+      "status": "healthy",
+      "provider_usable": true,
+      "ip_matches": true,
+      "country_matches": true,
+      "primary_matches": true
+    }
+  ],
+  "active_accounts": 3,
+  "unresolved_provider_errors": 0,
+  "native_390_second_hold": true,
+  "native_exit_and_account_ipv4_unchanged": true,
+  "temporary_operator_removed": true,
+  "cloud_mutations_by_acceptance": 0,
+  "physical_android_tested": false,
+  "provider_login_submitted": false,
+  "browser_runner_hash_match": true,
+  "combined_browser_memory_bytes": 1342177280,
+  "evidence_directory": "/root/dob-proxy-health-20261106",
+  "limitations": [
+    "Short live sample is not a 99% long-term SLA.",
+    "Residential upstream can retire an IP or end a sticky session; unverified identity fails closed.",
+    "Explicit TT/US/TV priority order and legacy AUTO policies were preserved.",
+    "Live account checks covered one Vultr and two Linode accounts, not seven live providers.",
+    "No CAPTCHA bypass, provider login, physical Android interaction or cloud create/delete was tested.",
+    "Original primary cluster and duplicate workers stay quarantined; unknown Kamatera creates must not be replayed."
+  ],
+  "earlier_live_attempt": {
+    "passed": false,
+    "failure": "Native temporary session lost route verification after the first health sample; exact first closure cause was not captured. Three account probes, HTTPS and tunnel DNS had passed. Temporary operator was removed; original receipt retained in live-attempt-1."
+  },
+  "earlier_ci_failure": {
+    "source": "441d1439c084371c9a957776707fc4d3fa98b68d",
+    "run": 42285855811,
+    "reason": "Existing browser scroll fixture delta assertion; retained. Final source full gate passed with unchanged frontend."
+  }
+}

@@ -1,3 +1,7 @@
+## Latest verified continuation — proxy health and primary identity, 2026-11-06
+
+Read [the proxy health release](PROXY_HEALTH_PRIORITY_20261106.md) first. Both installations and public main/stable are 73fa40ce8d4d6ec6f7eb947d0ac0d8fb2ab70aed, schema 207. All 380 required roots passed with zero skips; focused pin/identity tests, restore and independent install/reinstall passed. Both bounded updates preserved 21 settings/identity groups each. A 390-second live native session allowed monitor publications without expiry; three existing account routes passed provider checks before/after, and the explicit primary country held in 14 samples. No unresolved error remains on the three active production accounts at acceptance. No long-term 99% guarantee or seven-provider live claim. Preserve existing policy priorities, fail-closed routes, original-cluster quarantine and unknown-create receipts. Earlier entries are historical.
+
 ## Current native provider browser release — 2026-11-06
 
 Read [the native browser release](NATIVE_BROWSER_RELEASE_20261106.md) and HANDOFF.md first. Native Chrome was explicitly selected by the user. Runtime identities, original-video defects, real gateway compatibility, all accepted gates and remaining phone/login limitations are recorded there. Earlier remote-renderer acceptance does not prove native Android parity.
