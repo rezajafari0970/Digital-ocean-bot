@@ -1,0 +1,179 @@
+{
+  "date": "2026-11-06T23:18:36.819293+00:00",
+  "source": "84c3609b94fb22a3d984b03dedd393bc5cdd483d",
+  "merge": "90db255745f306ea5c496de0d344dc0bee64e2d4",
+  "pr": 49,
+  "runtime": "019def54477ceaae3e29bc7c7b7403db5258e1c9",
+  "schema": 207,
+  "gates": {
+    "source": "84c3609b94fb22a3d984b03dedd393bc5cdd483d",
+    "merge": "90db255745f306ea5c496de0d344dc0bee64e2d4",
+    "pr": 49,
+    "sourceRun": 42308530050,
+    "sourceRequiredPassed": 395,
+    "sourceSkipped": 0,
+    "restoreMigrations": 207,
+    "focusedRun": 42308529863,
+    "primaryRun": 42308529960,
+    "public": "019def54477ceaae3e29bc7c7b7403db5258e1c9",
+    "publicRun": 42309212345,
+    "promotionCommit": "f4ec035b477bd0737b8b01bdc73216858a13fdf9",
+    "promotionRun": 42310098727
+  },
+  "instances": {
+    "default": {
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness_checks": 5,
+      "preservation_checks": 21,
+      "preservation": {
+        "profile_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        },
+        "trojan_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        }
+      },
+      "assets": {
+        "at": "2026-11-06T23:13:42.974637+00:00",
+        "instance": "default",
+        "commit": "019def54477ceaae3e29bc7c7b7403db5258e1c9",
+        "assets": 32,
+        "panel": true,
+        "provider_browser_module": true,
+        "country_priorities_module": true
+      }
+    },
+    "production": {
+      "services": [
+        {
+          "unit": "dob-production-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "dob-production-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "dob-production-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "readiness_checks": 5,
+      "preservation_checks": 21,
+      "preservation": {
+        "profile_ownership": {
+          "common": 1627,
+          "unchanged": 1626,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 1,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        },
+        "trojan_ownership": {
+          "common": 9,
+          "unchanged": 9,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        }
+      },
+      "assets": {
+        "at": "2026-11-06T23:15:47.855476+00:00",
+        "instance": "production",
+        "commit": "019def54477ceaae3e29bc7c7b7403db5258e1c9",
+        "assets": 32,
+        "panel": true,
+        "provider_browser_module": true,
+        "country_priorities_module": true,
+        "public_gateway_tls_verified": true,
+        "public_gateway_assets": 32
+      }
+    }
+  },
+  "live": {
+    "active_accounts": 3,
+    "unresolved_errors": 0,
+    "providers": [
+      "linode",
+      "vultr"
+    ],
+    "checks": {
+      "active_account_routes": true,
+      "no_malformed_legacy_output": true,
+      "output_not_empty": true,
+      "no_runtime_panic": true,
+      "no_contained_task_panic": true
+    },
+    "output": {
+      "rows": 48,
+      "malformed_legacy_vless": 0,
+      "panels": 24
+    },
+    "log_counts": {
+      "contained_task_panics": 0,
+      "runtime_panics": 0,
+      "output_missing_legacy_key": 0
+    }
+  },
+  "audit_scope": {
+    "structural_modules": 38,
+    "production_go_files": 659,
+    "test_go_files": 632,
+    "manual_line_by_line_complete": false,
+    "changed_files": 34,
+    "new_mandatory_roots": 15,
+    "pure_module_lifecycle_repeats": 20
+  },
+  "paid_openai_calls": 0,
+  "private_evidence": "/root/dob-project-audit-20261107",
+  "prior_openai_unknown_receipt": "unchanged; no duplicate request or replacement ledger",
+  "limits": [
+    "No guarantee of zero future bugs, no measured 99-percent primary-IP SLA.",
+    "Live acceptance covers only configured active Vultr and Linode accounts. Other provider behavior is verified in isolated fixtures.",
+    "Original offline corrupted cluster remains quarantined; physical root cause and unknown provider-create receipts are not resolved by this release."
+  ]
+}
