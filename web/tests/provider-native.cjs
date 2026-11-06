@@ -10,6 +10,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),http
    if(u.pathname==='/'){res.setHeader('Content-Type','text/html');res.end('<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><button id="open">Open provider</button><script src="/static/provider-browser.js"></script><script>document.querySelector("#open").onclick=()=>ProviderBrowser.open({provider:"vultr",accountID:"saved-account",proxyIDs:["one","two"],countries:["AR","US"],authToken:"fixture-token"})</script>');return}
    if(u.pathname==='/original-site'){res.setHeader('Content-Type','text/html');res.end('<!doctype html><title>Original website</title><h1>Original website</h1><input name="email"><textarea></textarea>');return}
    if(u.pathname.startsWith('/static/')){const name=path.basename(u.pathname);res.setHeader('Content-Type',name.endsWith('.js')?'text/javascript':name.endsWith('.html')?'text/html':'text/css');res.end(fs.readFileSync('web/static/'+name));return}
+   if(!u.pathname.startsWith('/api/')){res.writeHead(404);res.end();return}
    assert.equal(req.headers.authorization,'Bearer fixture-token');
    if(u.pathname==='/api/v1/proxies'){json([{id:'one',name:'First proxy',status:'healthy'},{id:'two',name:'Second proxy',status:'healthy'}]);return}
    if(u.pathname==='/api/v1/proxy-drivers'){json({country_options:[{code:'AR',label:'Argentina'},{code:'US',label:'United States'}]});return}
