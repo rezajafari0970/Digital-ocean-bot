@@ -194,6 +194,8 @@ REQUIRED['internal/app'] += ('TestLifecycleDeleteConfirmationInterruptedReadRoll
 
 REQUIRED['internal/adminapi'] += ('TestAdminListsRejectPartialDatabaseResults',)
 
+REQUIRED['internal/network'] = REQUIRED.get('internal/network', ()) + ('TestHealthStoreConfigurationLockDoesNotBlockPostgres', 'TestHealthDiagnosticsPersistencePostgres')
+
 def verify_events(lines, required=REQUIRED):
     expected = {(package, test) for package, tests in required.items() for test in tests}
     passed = set()
