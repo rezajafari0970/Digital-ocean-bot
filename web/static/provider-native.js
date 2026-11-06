@@ -1,7 +1,7 @@
 (() => {
  'use strict';
  const q=s=>document.querySelector(s),form=q('[data-setup]'),token=sessionStorage.getItem('providerBrowser.token');
- let launch,session=null,config='',timer=0,busy=false,proxies=[];
+ let launch,session=null,config='',timer=0,busy=false,statusError=false,proxies=[];
  try{launch=JSON.parse(sessionStorage.getItem('providerBrowser.launch')||'null')}catch{}
  window.opener=null;
  function message(s){q('[data-status]').textContent=s||''}
@@ -10,7 +10,7 @@
   const abort=new AbortController(),t=setTimeout(()=>abort.abort(),options.method==='POST'?110000:20000);
   try{const r=await fetch('/api/v1/provider-browser/native-sessions'+path,{...options,headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},cache:'no-store',signal:abort.signal});const value=r.status===204?null:await r.json();if(!r.ok)throw Error(value?.detail||value?.error||'Connection unavailable.');return value}finally{clearTimeout(t)}
  }
- function forget(){sessionStorage.removeItem('providerBrowser.native');session=null;config='';clearTimeout(timer);q('[data-session]').hidden=true;form.hidden=false}
+ function forget(){sessionStorage.removeItem('providerBrowser.native');session=null;config='';statusError=false;clearTimeout(timer);q('[data-session]').hidden=true;form.hidden=false}
  function show(data){
   session=data;config=JSON.stringify(ProviderNativeConfig.build(session,location.origin),null,2);
   q('[data-session]').hidden=false;form.hidden=true;
@@ -19,15 +19,15 @@
   q('[data-expiry]').textContent='Expires '+new Date(session.expires_at).toLocaleTimeString();
   const ready=Number(session.successful_connections)>0;
   q('[data-open]').disabled=q('[data-site-copy]').disabled=!ready;
-  q('[data-client]').textContent=ready?'Client traffic verified through this proxy.':'Waiting for V2RayNG: connect and run its real connection test.';
+  q('[data-client]').textContent=ready?'A client response was received. Keep V2RayNG active; this page cannot check Android’s VPN switch.':'Waiting for V2RayNG: connect and run its real connection test.';
  }
  async function poll(){
-  clearTimeout(timer);if(!session)return;
+  clearTimeout(timer);if(!session)return;const current=session;
   try{
-   const status=await api('/'+session.id);
+   const status=await api('/'+current.id);if(session!==current)return;
    if(status.state!=='active'){const reason=reasons[status.reason]||'The connection has ended.';forget();message(reason);return}
-   show({...session,...status});message('');
-  }catch(e){q('[data-open]').disabled=q('[data-site-copy]').disabled=true;message('Could not verify the connection: '+e.message)}
+   show({...session,...status});if(statusError){message('');statusError=false}
+  }catch(e){if(session!==current)return;statusError=true;q('[data-open]').disabled=q('[data-site-copy]').disabled=true;message('Could not verify the connection: '+e.message)}
   if(session)timer=setTimeout(poll,2500);
  }
  async function start(){
@@ -40,7 +40,7 @@
   }catch(e){message(e.message)}finally{busy=false;form.querySelector('button').disabled=false}
  }
  async function copy(text){
-  if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(text);return}
+  if(navigator.clipboard?.writeText){try{await navigator.clipboard.writeText(text);return}catch{}}
   const t=document.createElement('textarea');t.value=text;t.style.cssText='position:fixed;top:0;left:0';document.body.append(t);t.select();const copied=document.execCommand('copy');t.remove();if(!copied)throw Error('Clipboard unavailable. Use Download JSON.');
  }
  q('[data-copy]').onclick=()=>{if(config)copy(config).then(()=>message('Copied. Import as a custom config in V2RayNG.')).catch(e=>message(e.message))};
@@ -55,7 +55,7 @@
   if(location.protocol!=='https:'){message('Open the panel over HTTPS to use this encrypted connection.');return}
   if(launch.returnPath?.startsWith('/')&&!launch.returnPath.startsWith('//'))q('[data-return]').href=launch.returnPath;
   try{
-   const headers={Authorization:'Bearer '+token};const values=await Promise.all(['/api/v1/proxies','/api/v1/proxy-drivers'].map(async path=>{const r=await fetch(path,{headers,cache:'no-store'});if(!r.ok)throw Error('Sign in to the panel again.');return r.json()}));proxies=values[0];const options=values[1].country_options||[];
+   const headers={Authorization:'Bearer '+token};const values=await Promise.all(['/api/v1/proxies','/api/v1/proxy-drivers'].map(async path=>{const r=await fetch(path,{headers,cache:'no-store'});if(!r.ok)throw Error('Sign in to the panel again.');return r.json()}));proxies=values[0]||[];const options=values[1].country_options||[];
    for(const code of ProxyCountry.normalize(launch.countries||['AUTO']))if(code!=='AUTO'&&!options.some(x=>x.code===code))options.push({code,label:'Previously selected country'});
    for(let i=0;i<3;i++){const label=document.createElement('label');label.textContent='Proxy '+(i+1)+(i?' (fallback)':'');const select=document.createElement('select');select.name='browser_proxy'+i;select.append(new Option(i?'None':'Select proxy',''));for(const p of proxies.filter(x=>x.status==='healthy'))select.append(new Option(p.name,p.id));select.value=launch.proxyIDs?.[i]||'';label.append(select);form.append(label)}
    const fields=document.createElement('div');fields.innerHTML=ProxyCountry.field(options,launch.countries||['AUTO']);form.append(fields);
