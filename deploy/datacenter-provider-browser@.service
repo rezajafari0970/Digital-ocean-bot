@@ -35,6 +35,7 @@ TimeoutStopSec=5s
 KillMode=control-group
 MemoryHigh=384M
 MemoryMax=512M
-TasksMax=128
+# Full Chrome plus the isolated display requires more threads than headless-shell.
+TasksMax=256
 CPUQuota=75%
 OOMPolicy=kill

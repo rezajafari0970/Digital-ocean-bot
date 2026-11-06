@@ -38,6 +38,9 @@ FULL_SHA256='e6c94490f0b6b337225aeb2d2a5034858516b7017356980ba94f5176d8774a50'
 FULL_ROOT=ROOT.parent/'chrome'/VERSION
 def install_full():
     if os.uname().machine!='x86_64':return
+    # Installer umask may be077; DynamicUser must traverse the immutable runtime.
+    FULL_ROOT.parent.mkdir(parents=True,exist_ok=True)
+    FULL_ROOT.parent.chmod(0o755)
     manifest=FULL_ROOT/'runtime.json'
     if FULL_ROOT.exists():
         data=__import__('json').loads(manifest.read_text())
