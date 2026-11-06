@@ -84,4 +84,19 @@ type Factory interface {
 	Open(context.Context, OpenRequest) (Driver, error)
 }
 
+// RuntimeRequirements describes dependencies needed for a persisted account.
+// Onboarding has no saved external identity yet. The driver owns this contract;
+// the application supplies the requested account-scoped stores.
+type RuntimeRequirements struct {
+	ExternalIdentity bool
+	Resources        bool
+	Absence          bool
+	Plans            bool
+	Cleanup          bool
+}
+
+type RuntimeRequirementProvider interface {
+	RuntimeRequirements() RuntimeRequirements
+}
+
 func CanCreateCapacity(c Capacity) bool { return !c.LimitKnown || c.ComputeLimit > c.ComputeInUse }

@@ -8,10 +8,10 @@ import (
 	"testing"
 )
 
-type testDriver struct{}
+type testDriver struct{ name string }
 
-func (testDriver) Name() string                 { return "test" }
-func (testDriver) Capabilities() Capabilities   { return Capabilities{Account: true, Compute: true} }
+func (d testDriver) Name() string               { return d.name }
+func (testDriver) Capabilities() Capabilities   { return Capabilities{} }
 func (testDriver) Health(context.Context) error { return nil }
 
 type testFactory struct {
@@ -28,7 +28,7 @@ func (f *testFactory) Open(context.Context, OpenRequest) (Driver, error) {
 	f.mu.Lock()
 	f.opens++
 	f.mu.Unlock()
-	return testDriver{}, nil
+	return testDriver{name: normalizeName(f.name)}, nil
 }
 
 func TestRegistryNormalizesAndOpens(t *testing.T) {
@@ -44,7 +44,7 @@ func TestRegistryNormalizesAndOpens(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if d.Name() != "test" {
+	if d.Name() != "digitalocean" {
 		t.Fatalf("driver=%s", d.Name())
 	}
 	if f.opens != 1 {

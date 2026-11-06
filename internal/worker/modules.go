@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/resilience"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/supervision"
 	"sort"
 	"sync"
@@ -126,15 +127,19 @@ func (m *Modules) Run(ctx context.Context, role Role) error {
 		selected = append(selected, invocation{mod, c})
 	}
 	var wg sync.WaitGroup
-	stopped := make(chan string, 1)
+	stopped := make(chan error, 1)
 	for _, v := range selected {
 		wg.Add(1)
 		go func(v invocation) {
 			defer wg.Done()
-			v.mod.Run(v.ctx)
+			err := resilience.Guard(v.ctx, func(ctx context.Context) error { v.mod.Run(ctx); return nil })
 			if runCtx.Err() == nil {
+				cause := fmt.Errorf("worker module %s stopped unexpectedly", v.mod.Name)
+				if err != nil {
+					cause = fmt.Errorf("worker module %s stopped unexpectedly: %w", v.mod.Name, err)
+				}
 				select {
-				case stopped <- v.mod.Name:
+				case stopped <- cause:
 				default:
 				}
 			}
@@ -146,16 +151,16 @@ func (m *Modules) Run(ctx context.Context, role Role) error {
 		cancel()
 		if m.Supervisor != nil {
 			m.Supervisor.Cancel()
-			grace := m.Grace
-			if grace <= 0 {
-				grace = 15 * time.Second
-			}
-			timer := time.NewTimer(grace)
-			defer timer.Stop()
-			select {
-			case <-joined:
-			case <-timer.C:
-			}
+		}
+		grace := m.Grace
+		if grace <= 0 {
+			grace = 15 * time.Second
+		}
+		timer := time.NewTimer(grace)
+		defer timer.Stop()
+		select {
+		case <-joined:
+		case <-timer.C:
 		}
 		return err
 	}
@@ -182,8 +187,8 @@ func (m *Modules) Run(ctx context.Context, role Role) error {
 				err = fmt.Errorf("worker ownership monitor stopped")
 			}
 			return fail(err)
-		case name := <-stopped:
-			return fail(fmt.Errorf("worker module %s stopped unexpectedly", name))
+		case err := <-stopped:
+			return fail(err)
 		case <-ticks:
 			if err := m.Supervisor.Check(); err != nil {
 				return fail(err)
@@ -191,8 +196,8 @@ func (m *Modules) Run(ctx context.Context, role Role) error {
 			snapshot := m.Supervisor.Snapshot()
 			if !ready && snapshot.Healthy {
 				select {
-				case name := <-stopped:
-					return fail(fmt.Errorf("worker module %s stopped during startup", name))
+				case err := <-stopped:
+					return fail(err)
 				default:
 				}
 				select {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/configdriver"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/export"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/readyworker"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
@@ -11,6 +12,7 @@ import (
 	"log"
 	"net/http"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -202,6 +204,11 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 			invalidJSON++
 			continue
 		}
+		// The plugin collector above owns these listeners and its publication
+		// fences. Legacy metadata must not resurrect a removed/disabled profile.
+		if strings.HasPrefix(in.Remark, configdriver.ManagedPrefix) {
+			continue
+		}
 		if !in.Enable {
 			disabled++
 			continue
@@ -286,15 +293,16 @@ func (s *Server) collectRuntimeOutput(ctx context.Context, p readyworker.Panel, 
 			if json.Unmarshal(b, &cl) != nil {
 				continue
 			}
-			id := fmt.Sprint(cl["id"])
-			if id == "" {
+			id, validID := cl["id"].(string)
+			if !validID || strings.TrimSpace(id) == "" {
+				exportErrors++
 				continue
 			}
 			if enabled, ok := cl["enable"].(bool); ok && !enabled {
 				continue
 			}
 			remark := in.Remark
-			if email := fmt.Sprint(cl["email"]); email != "" {
+			if email, ok := cl["email"].(string); ok && email != "" {
 				remark += "-" + email
 			}
 			flow, _ := cl["flow"].(string)

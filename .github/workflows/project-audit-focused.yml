@@ -1,0 +1,68 @@
+name: Project audit isolation and driver contracts
+on:
+  pull_request:
+    branches: ['checkpoint/final-e2e-20260929']
+permissions:
+  contents: read
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: fixture
+          POSTGRES_DB: bulk_test
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      BULK_TEST_DATABASE_URL: postgres://postgres:fixture@localhost:5432/bulk_test?sslmode=disable
+      GOMAXPROCS: '2'
+      GOMEMLIMIT: 1536MiB
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+      - name: Prepare disposable migration roles
+        env:
+          PGPASSWORD: fixture
+        run: psql -h localhost -U postgres -d bulk_test -v ON_ERROR_STOP=1 -c 'CREATE ROLE digitaloceanbot; CREATE ROLE digitaloceanbot_readonly;'
+      - name: Prove baseline recovery and publication defects
+        run: |
+          python3 - <<'PY'
+          import pathlib,subprocess,json
+          baseline='b84869a94f1ffd407591c3132b893342a7221b3b'
+          cases=[
+            ('internal/worker/recovery_checkpoint.go','./internal/worker','TestAuditRecoveryPanicPersistsBackoffWithoutReplayPostgres',['native panic escaped']),
+            ('internal/adminapi/output.go','./internal/adminapi','TestAuditOutputKeepsPluginOwnershipAndTypedClientsPostgres',['malformed clients exported','legacy metadata bypassed']),
+          ]
+          for source,package,test,proof in cases:
+              path=pathlib.Path(source);candidate=path.read_bytes()
+              try:
+                  path.write_bytes(subprocess.check_output(['git','show',baseline+':'+source]))
+                  p=subprocess.run(['go','test','-json','-count=1','-timeout','4m','-run','^'+test+'$',package],capture_output=True,text=True)
+                  pathlib.Path('/tmp/'+test+'-before.jsonl').write_text(p.stdout+p.stderr)
+                  events=[json.loads(l) for l in p.stdout.splitlines() if l.startswith('{')]
+                  assert p.returncode!=0 and any(e.get('Action')=='fail' and e.get('Test')==test for e in events),'baseline regression not reproduced'
+                  assert not any(e.get('Action')=='build-fail' for e in events),'compile failure is not a reproduction'
+                  assert all(s in p.stdout for s in proof),'fixture failed before the intended behavioral boundary'
+                  print(json.dumps({'baseline':baseline,'regression':test,'reproduced':True}))
+              finally:
+                  path.write_bytes(candidate)
+          PY
+      - name: Verify independent contracts and durable failure handling
+        run: |
+          set -o pipefail
+          go test -json -race -count=1 -timeout 6m -run '^TestAudit' ./internal/network ./internal/providers ./internal/providers/builtin ./internal/resilience ./internal/supervision ./internal/worker ./internal/app ./internal/adminapi | tee /tmp/project-audit-events.jsonl
+          python3 - <<'PY'
+          import runpy,pathlib
+          gate=runpy.run_path('tools/public-release/transport-regression-gate.py')
+          required={p:tuple(t for t in names if t.startswith('TestAudit')) for p,names in gate['REQUIRED'].items()}
+          required={p:names for p,names in required.items() if names}
+          gate['verify_events'](pathlib.Path('/tmp/project-audit-events.jsonl').read_text().splitlines(),required)
+          PY

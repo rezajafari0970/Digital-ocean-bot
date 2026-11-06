@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -29,6 +30,10 @@ type ipPayload struct {
 func CheckProxy(ctx context.Context, g *Gateway, endpoint, expectedExitIP, serverPublicIP string) HealthResult {
 	started := time.Now()
 	result := HealthResult{Status: StatusDown, CheckedAt: started}
+	if err := ctx.Err(); err != nil {
+		result.Error = activeProbeDiagnostic(err)
+		return result
+	}
 	if g == nil || g.Client == nil {
 		result.Error = activeProbeDiagnostic(ErrProxyConfigInvalid)
 		return result
@@ -50,7 +55,11 @@ func CheckProxy(ctx context.Context, g *Gateway, endpoint, expectedExitIP, serve
 		return result
 	}
 	var payload ipPayload
-	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil || strings.TrimSpace(payload.IP) == "" {
+	// Read through EOF within a small bound: a valid prefix is not proof that
+	// a second JSON value, trailing garbage or an oversized response is valid.
+	const maxHealthResponseBytes = 16 << 10
+	body, readErr := io.ReadAll(io.LimitReader(resp.Body, maxHealthResponseBytes+1))
+	if readErr != nil || len(body) > maxHealthResponseBytes || json.Unmarshal(body, &payload) != nil || strings.TrimSpace(payload.IP) == "" {
 		result.Error = activeProbeDiagnostic(ErrHealthPayload)
 		return result
 	}

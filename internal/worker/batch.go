@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"errors"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/resilience"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/supervision"
 	"sync"
 )
@@ -49,7 +50,9 @@ func RunBoundedBatch(ctx context.Context, count, concurrency int, admit func(con
 				if !ok {
 					return
 				}
-				run := func(c context.Context) error { return fn(c, index) }
+				run := func(c context.Context) error {
+					return resilience.Guard(c, func(c context.Context) error { return fn(c, index) })
+				}
 				if admit != nil {
 					add(admit(ctx, run))
 				} else {
