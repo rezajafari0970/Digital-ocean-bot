@@ -1,7 +1,7 @@
-/* Opens the isolated website in its own tab; never navigates locally to the provider. */
+/* Opens native-client setup in its own tab; remote rendering remains explicit. */
 (() => {
  'use strict';
- function open({target,provider,accountID='',authorizationID='',proxyIDs=[],countries=['AUTO'],authToken='',returnPath='/'}){
+ function open({target,provider,mode='native',accountID='',authorizationID='',proxyIDs=[],countries=['AUTO'],authToken='',returnPath='/'}){
   const tab=target||window.open('about:blank','_blank');
   if(!tab||tab.closed)throw Error('Allow a new tab for this panel, then try again.');
   try{
@@ -12,8 +12,9 @@
    tab.sessionStorage.setItem('providerBrowser.token',credential);
    tab.sessionStorage.setItem('providerBrowser.launch',JSON.stringify(launch));
    tab.sessionStorage.removeItem('providerBrowser.session');
+   tab.sessionStorage.removeItem('providerBrowser.native');
    tab.opener=null;
-   tab.location.replace('/static/provider-browser.html');
+   tab.location.replace(mode==='remote'?'/static/provider-browser.html':'/static/provider-native.html');
    return tab;
   }catch(e){try{tab.close()}catch{}throw e}
  }

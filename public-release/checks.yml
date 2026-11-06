@@ -8,11 +8,24 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-24.04
+    env:
+      DOB_TEST_XRAY: /tmp/dob-xray/xray
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version: '1.27.1'
+      - name: Prepare pinned native client compatibility fixture
+        run: |
+          python3 - <<'PYXRAY'
+          import hashlib, pathlib, urllib.request, zipfile, io
+          payload=urllib.request.urlopen('https://github.com/XTLS/Xray-core/releases/download/v26.9.9/Xray-linux-64.zip',timeout=90).read()
+          assert hashlib.sha256(payload).hexdigest()=='1eb9175d0f0a8f8149c9230a7fc5ae66ce332ed20a53155ce61fe62e3f58b7df'
+          out=pathlib.Path('/tmp/dob-xray');out.mkdir()
+          with zipfile.ZipFile(io.BytesIO(payload)) as archive:
+              (out/'xray').write_bytes(archive.read('xray'))
+          (out/'xray').chmod(0o755)
+          PYXRAY
       - name: Regression and static checks
         env:
           GOMAXPROCS: '2'
@@ -32,6 +45,7 @@ jobs:
           node web/tests/preview-stream.cjs
           node web/tests/aws-catalog.cjs
           node web/tests/account-catalog.cjs
+          node web/tests/provider-native-config.cjs
       - name: Verify exported file manifest
         run: python3 release/check-source.py
   install:

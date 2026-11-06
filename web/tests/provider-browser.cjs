@@ -25,7 +25,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),http
    if(!fs.existsSync(file)){res.writeHead(404).end();return}
    res.setHeader('Content-Type',name.endsWith('.js')?'text/javascript':name.endsWith('.html')?'text/html; charset=utf-8':'text/css');
    if(name==='provider-browser.html')res.setHeader('Content-Security-Policy',"default-src 'none'; script-src 'self'; style-src 'self'; img-src data:; connect-src 'self'; form-action 'self'; base-uri 'none'");
-   res.end(fs.readFileSync(file));return
+   res.end(name==='provider-browser.js'?fs.readFileSync(file,'utf8').replace("mode='native'","mode='remote'"):fs.readFileSync(file));return
   }
   if(u.pathname==='/api/v1/accounts'){json([{id:'account-one',provider:'vultr',proxy_ids:['one','two']}]);return}
   if(u.pathname.endsWith('/proxy-country-policy')){json({policy:{countries:['US','DE','FR']},country_options:countryOptions});return}

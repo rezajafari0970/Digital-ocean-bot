@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="referrer" content="no-referrer"><title>Open in your browser</title>
+<link rel="stylesheet" href="/static/provider-native.css">
+<script defer src="/static/proxy-country.js"></script>
+<script defer src="/static/provider-native-config.js"></script>
+<script defer src="/static/provider-native.js"></script>
+</head><body>
+<main>
+ <a data-return href="/admin">← Accounts</a>
+ <h1>Open in your real browser</h1>
+ <p class="intro">Use Chrome's own display, keyboard, touch and clipboard. The website opens at its original address through your selected proxy.</p>
+ <p data-status role="status" aria-live="polite">Loading your proxy choices…</p>
+ <form data-setup hidden></form>
+ <section data-session hidden>
+  <div class="connection"><strong data-route></strong><span data-expiry></span></div>
+  <ol>
+   <li><h2>Import this connection</h2><p>In V2RayNG, choose <b>＋ → Custom config → Import from clipboard or file</b>.</p><div class="actions"><button data-copy>Copy configuration</button><button data-download>Download JSON</button></div></li>
+   <li><h2>Connect V2RayNG</h2><p>Select the new <b>Browser</b> profile, connect, then run its real connection test. To proxy only Chrome, use V2RayNG's per-app mode and select Chrome.</p><p data-client class="waiting">Waiting for the client to connect…</p><details><summary>Keep the browser on this connection</summary><p>For protection when the VPN stops, enable Android's <b>Always-on VPN</b> and <b>Block connections without VPN</b> for V2RayNG. These are device settings; this page cannot turn them on. This profile carries web traffic; other apps may need your normal VPN profile.</p></details></li>
+   <li><h2>Open the original website</h2><p>For separate account cookies, open a fresh Chrome Incognito session. Close <b>all</b> existing Incognito tabs before switching accounts; Incognito tabs share their session.</p><div class="actions"><button data-open disabled>Open here (current cookies)</button><button data-site-copy disabled>Copy website address</button></div><p class="hint">The connection test confirms client traffic reached this proxy. Keep the VPN active in Chrome. For desktop layout, use Chrome's menu → Desktop site. Security checks are handled by the website; CAPTCHA-free access is not guaranteed.</p></li>
+  </ol>
+  <button data-end class="danger">End proxy connection</button><p class="hint">Ending or expiring the connection stops its tunnels. Website cookies stay in Chrome until you close its private session or clear them.</p>
+ </section>
+</main></body></html>

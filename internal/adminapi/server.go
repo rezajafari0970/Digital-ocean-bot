@@ -35,6 +35,10 @@ type Server struct {
 	BrowserTickets     map[string]time.Time
 	ProviderBrowsers   map[string]*providerBrowserSession
 	BrowserStarting    int
+	NativeMu           sync.Mutex
+	NativeBrowsers     map[string]*nativeBrowserSession
+	NativeStarting     int
+	NativeConnections  int
 }
 
 func New(db *sql.DB, c app.Container) *Server {
@@ -74,6 +78,10 @@ func (s *Server) Routes() *http.ServeMux {
 	m.HandleFunc("GET /api/v1/auth/me", s.require(s.authMe, false))
 	m.HandleFunc("POST /api/v1/auth/password", s.require(s.changePassword, false))
 	m.HandleFunc("POST /api/v1/auth/logout", s.require(s.logout, false))
+	m.HandleFunc("POST /api/v1/provider-browser/native-sessions", s.require(s.startNativeBrowser, true))
+	m.HandleFunc("GET /api/v1/provider-browser/native-sessions/{id}", s.require(s.nativeBrowserStatus, true))
+	m.HandleFunc("DELETE /api/v1/provider-browser/native-sessions/{id}", s.require(s.stopNativeBrowser, true))
+	m.HandleFunc("GET /api/v1/provider-browser/native-stream/{id}", s.nativeBrowserStream)
 	m.HandleFunc("GET /api/v1/provider-browser/sessions", s.require(s.listProviderBrowsers, true))
 	m.HandleFunc("POST /api/v1/provider-browser/sessions", s.require(s.startProviderBrowser, true))
 	m.HandleFunc("POST /api/v1/provider-browser/sessions/{id}/action", s.require(s.providerBrowserAction, true))

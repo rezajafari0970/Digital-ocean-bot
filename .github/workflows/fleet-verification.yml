@@ -12,6 +12,7 @@ jobs:
       GOMAXPROCS: '2'
       GOMEMLIMIT: 1536MiB
       GOTOOLCHAIN: local
+      DOB_TEST_XRAY: /tmp/dob-xray/xray
       DOB_TEST_CHROMIUM: /tmp/dob-chrome/chrome-headless-shell-linux64/chrome-headless-shell
     steps:
       - uses: actions/checkout@v4
@@ -36,6 +37,12 @@ jobs:
               assert all(not pathlib.Path(x.filename).is_absolute() and '..' not in pathlib.Path(x.filename).parts for x in archive.infolist())
               archive.extractall(out)
           (out/'chrome-headless-shell-linux64/chrome-headless-shell').chmod(0o755)
+          payload=urllib.request.urlopen('https://github.com/XTLS/Xray-core/releases/download/v26.9.9/Xray-linux-64.zip',timeout=90).read()
+          assert hashlib.sha256(payload).hexdigest()=='1eb9175d0f0a8f8149c9230a7fc5ae66ce332ed20a53155ce61fe62e3f58b7df'
+          out=pathlib.Path('/tmp/dob-xray');out.mkdir()
+          with zipfile.ZipFile(io.BytesIO(payload)) as archive:
+              (out/'xray').write_bytes(archive.read('xray'))
+          (out/'xray').chmod(0o755)
           PY
           sudo python3 deploy/provider-browser-runtime.py
       - name: Native isolated provider browser and cookie separation
@@ -54,6 +61,9 @@ jobs:
           python3 tools/public-release/transport-regression-gate_test.py
           node web/tests/config-transport.cjs
           node web/tests/config-delete.cjs
+          node web/tests/provider-native-config.cjs
+          node web/tests/provider-native.cjs
+          go test -race -v -count=1 -timeout 3m ./internal/nativebrowser ./internal/adminapi -run "TestNative(Browser|Handshake|Relay)"
           DOB_RUN_BROWSER_TEST=0 go test ./...
           go vet ./...
           node --check web/static/app.js
