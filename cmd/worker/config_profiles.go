@@ -7,6 +7,7 @@ import (
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/configplane"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/panels/sanaei"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/provisioning"
+	"github.com/rezajafari0970/Digital-ocean-bot/internal/resource"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/supervision"
 	"github.com/rezajafari0970/Digital-ocean-bot/internal/worker"
 	"log"
@@ -49,6 +50,10 @@ func addConfigProfileModules(modules *worker.Modules, a *app.Application, rt *sa
 	// Independent panels can drain a fleet deletion without raising the shared
 	// SQL/SSH ceiling or allowing concurrent writers on a single panel.
 	remove := worker.NewWorkClass(budget, min(8, limit))
+	// Keep recovery and routine proof discovery independent to preserve fairness.
+	discovery := map[string]*resource.Discovery{
+		"create": {}, "delete": {}, "verify": {}, "recovery": {},
+	}
 	for _, name := range []string{"profiles-create-0", "profiles-create-1", "profiles-create-2", "profiles-create-3", "profiles-create-4", "profiles-create-5", "profiles-create-6", "profiles-create-7", "profiles-delete-0", "profiles-delete-1", "profiles-delete-2", "profiles-delete-3", "profiles-delete-4", "profiles-delete-5", "profiles-delete-6", "profiles-delete-7", "profiles-verify-0", "profiles-verify-1", "profiles-verify-2", "profiles-verify-3", "profiles-verify-4", "profiles-verify-5", "profiles-verify-6", "profiles-verify-7"} {
 		modules.Add(worker.RolePanels, name, func(ctx context.Context) {
 			service := configplane.Service{DB: a.DB, Secrets: a.Container.Secrets, Runtimes: rt, SSH: provisioning.SSHClient{OutputLimit: 16384, Timeout: 420 * time.Second, HostKeys: provisioning.SQLHostKeyPins{DB: a.DB}}}
@@ -66,23 +71,31 @@ func addConfigProfileModules(modules *worker.Modules, a *app.Application, rt *sa
 				if e != nil {
 					continue
 				}
-				duration := 2 * time.Minute
-				if strings.Contains(name, "verify") {
-					duration = 2 * time.Minute
+				class := "create"
+				admit := create.Do
+				if strings.Contains(name, "delete") {
+					class, admit = "delete", remove.Do
 				}
 				if strings.Contains(name, "verify") {
-					run := service.RunVerifyOne
-					// Two of eight consumers recover failed classes promptly. Six retain
-					// deadline order so a failing provider cannot starve healthy refreshes.
-					if name == "profiles-verify-0" || name == "profiles-verify-1" {
-						run = service.RunVerifyRecoveryOne
+					class, admit = "verify", verify.Do
+				}
+				if name == "profiles-verify-0" || name == "profiles-verify-1" {
+					class = "recovery"
+				}
+				e = discovery[class].Do(work, time.Now(), time.Second, func(probe context.Context, found func()) error {
+					current := service
+					current.Claimed = found
+					run := current.RunOne
+					switch class {
+					case "delete":
+						run = current.RunDeleteOne
+					case "verify":
+						run = current.RunVerifyOne
+					case "recovery":
+						run = current.RunVerifyRecoveryOne
 					}
-					e = runConfigProfileWork(work, verify.Do, duration, run)
-				} else if strings.Contains(name, "delete") {
-					e = runConfigProfileWork(work, remove.Do, duration, service.RunDeleteOne)
-				} else {
-					e = runConfigProfileWork(work, create.Do, duration, service.RunOne)
-				}
+					return runConfigProfileWork(probe, admit, 2*time.Minute, run)
+				})
 				finish()
 				if e != nil && ctx.Err() == nil {
 					log.Printf("config profile reconcile: %v", e)

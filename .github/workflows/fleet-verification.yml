@@ -55,6 +55,7 @@ jobs:
         run: |
           test "$(git rev-parse HEAD)" = '${{ github.event.pull_request.head.sha }}'
           python3 tools/bounded_openai_review_test.py
+          python3 deploy/rollback_archive_test.py
           python3 deploy/bootstrap_test.py
           python3 deploy/project_update_test.py
           sudo useradd --system digitaloceanbot
