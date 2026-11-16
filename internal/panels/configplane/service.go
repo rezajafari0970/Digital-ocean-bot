@@ -21,6 +21,9 @@ import (
 )
 
 type Service struct {
+	// Claimed observes a committed SQL claim before remote execution.
+	// It is a scheduling hint only; all ownership checks remain mandatory.
+	Claimed  func()
 	DB       *sql.DB
 	Secrets  trojantcp.Secrets
 	Runtimes *sanaei.RuntimeManager
@@ -136,6 +139,9 @@ func (s Service) runPrioritized(ctx context.Context, verify, deleting, recovery 
 		defer cancel()
 		_, _ = s.DB.ExecContext(c, "UPDATE config_driver_listeners SET lease_until=NULL,claim_token=NULL WHERE profile_id=$1 AND panel_id=$2 AND claim_token=$3", id, panel, claim)
 	}()
+	if s.Claimed != nil {
+		s.Claimed()
+	}
 	if verify && s.Verify == nil {
 		err := s.VerifyPanel(ctx, panel, id)
 		if err != nil {

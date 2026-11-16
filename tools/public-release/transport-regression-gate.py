@@ -91,6 +91,9 @@ REQUIRED = {
     ),
 }
 
+REQUIRED['internal/resource'] = ('TestDiscoveryCoalescesIdleAndReopensAtCadence','TestDiscoveryClaimOpensCapacityBeforeCompletion','TestDiscoveryStaleEmptyCannotOverrideNewClaim','TestDiscoveryCancellationFailurePanicAndClassIsolation','TestDiscoveryLateClaimDoesNotReopenFinishedProbe')
+REQUIRED['internal/panels/configplane'] += ('TestProfileDiscoveryReportsCommittedClaimAndReleasesOnPanic',)
+
 REQUIRED['internal/workflow'] = REQUIRED.get('internal/workflow', ()) + ('TestSQLPendingCreateWaitsWithoutRetryExhaustionE2E', 'TestSQLPendingCreateEvidenceFencingE2E', 'TestWorkflowPendingCreateKeepsReservationAndEventuallyResumesE2E', 'TestWorkflowPendingEvidenceReadFailureDoesNotFinalize')
 REQUIRED['internal/droplets'] = REQUIRED.get('internal/droplets', ()) + ('TestAcceptedAsyncCreateDoesNotMarkAccountTransportError',)
 
