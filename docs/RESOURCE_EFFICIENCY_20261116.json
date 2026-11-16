@@ -1,0 +1,536 @@
+{
+  "at": "2026-11-16T01:26:07.313125+00:00",
+  "status": "resource change deployed and baseline nonregression accepted; pre-existing Vultr provider failure remains",
+  "verification": {
+    "source_sha": "a0c81e89a9ecdba87c23d42aef15c1e0214cb640",
+    "source_merge": "b8110c157f6150e125e3cbda3eae531adbae6c60",
+    "source_pr": 50,
+    "source_ci": {
+      "run": 43784122244,
+      "status": "success",
+      "required_passed": 401,
+      "skipped": 0,
+      "job": 133027813417
+    },
+    "contract_ci": {
+      "run": 43784122344,
+      "status": "success"
+    },
+    "public_sha": "4c4be6978301f6e7d1c263250f7d58e59828b8c0",
+    "public_ci": {
+      "run": 43784452875,
+      "test": "success",
+      "install": "success"
+    },
+    "promotion_ci": {
+      "run": 43785402676,
+      "status": "success",
+      "atomic_main_stable": true
+    },
+    "focused_race_tests": "passed",
+    "archive_python_tests": 5
+  },
+  "resource_comparison": {
+    "at": "2026-11-16T01:26:07.186739+00:00",
+    "samples_per_phase": 3,
+    "window_seconds": {
+      "before": 61.31491598417051,
+      "after": 60.73087284201756
+    },
+    "units": {
+      "digital-ocean-bot-api": {
+        "cpu_percent": {
+          "before": 0.068,
+          "after": 0.057,
+          "reduction_percent": 16.18
+        },
+        "memory_MiB": {
+          "before": 13.21,
+          "after": 17.953,
+          "reduction_percent": -35.9
+        },
+        "same_process_across_phases": false
+      },
+      "digital-ocean-bot-worker": {
+        "cpu_percent": {
+          "before": 0.178,
+          "after": 0.192,
+          "reduction_percent": -7.87
+        },
+        "memory_MiB": {
+          "before": 8.653,
+          "after": 7.61,
+          "reduction_percent": 12.05
+        },
+        "same_process_across_phases": false
+      },
+      "digital-ocean-bot-worker-panels": {
+        "cpu_percent": {
+          "before": 2.59,
+          "after": 1.709,
+          "reduction_percent": 34.02
+        },
+        "memory_MiB": {
+          "before": 21.18,
+          "after": 14.847,
+          "reduction_percent": 29.9
+        },
+        "same_process_across_phases": false
+      },
+      "dob-production-api": {
+        "cpu_percent": {
+          "before": 7.435,
+          "after": 7.77,
+          "reduction_percent": -4.51
+        },
+        "memory_MiB": {
+          "before": 21.127,
+          "after": 23.63,
+          "reduction_percent": -11.85
+        },
+        "same_process_across_phases": false
+      },
+      "dob-production-worker": {
+        "cpu_percent": {
+          "before": 0.605,
+          "after": 0.605,
+          "reduction_percent": 0.0
+        },
+        "memory_MiB": {
+          "before": 22.037,
+          "after": 9.863,
+          "reduction_percent": 55.24
+        },
+        "same_process_across_phases": false
+      },
+      "dob-production-worker-panels": {
+        "cpu_percent": {
+          "before": 6.144,
+          "after": 5.296,
+          "reduction_percent": 13.8
+        },
+        "memory_MiB": {
+          "before": 15.027,
+          "after": 26.123,
+          "reduction_percent": -73.84
+        },
+        "same_process_across_phases": false
+      },
+      "postgresql@18-main": {
+        "cpu_percent": {
+          "before": 17.795,
+          "after": 9.262,
+          "reduction_percent": 47.95
+        },
+        "memory_MiB": {
+          "before": 145.573,
+          "after": 151.483,
+          "reduction_percent": -4.06
+        },
+        "same_process_across_phases": true
+      },
+      "postgresql@18-production": {
+        "cpu_percent": {
+          "before": 58.942,
+          "after": 39.88,
+          "reduction_percent": 32.34
+        },
+        "memory_MiB": {
+          "before": 505.75,
+          "after": 973.223,
+          "reduction_percent": -92.43
+        },
+        "same_process_across_phases": true
+      }
+    },
+    "database": {
+      "digital-ocean-bot": {
+        "sessions_per_second": {
+          "before": 3.539,
+          "after": 2.618,
+          "reduction_percent": 26.02
+        },
+        "commits_per_second": {
+          "before": 185.201,
+          "after": 91.799,
+          "reduction_percent": 50.43
+        },
+        "rollbacks_per_second": {
+          "before": 0.211,
+          "after": 0.198,
+          "reduction_percent": 6.16
+        },
+        "temp_bytes_per_second": {
+          "before": 0.0,
+          "after": 0.0,
+          "reduction_percent": null
+        }
+      },
+      "dob-production": {
+        "sessions_per_second": {
+          "before": 12.8,
+          "after": 11.065,
+          "reduction_percent": 13.55
+        },
+        "commits_per_second": {
+          "before": 924.397,
+          "after": 844.119,
+          "reduction_percent": 8.68
+        },
+        "rollbacks_per_second": {
+          "before": 0.195,
+          "after": 0.214,
+          "reduction_percent": -9.74
+        },
+        "temp_bytes_per_second": {
+          "before": 0.0,
+          "after": 0.0,
+          "reduction_percent": null
+        }
+      }
+    },
+    "scope": "Six Digital-ocean-bot services plus the two PostgreSQL clusters dedicated to its default and production instances. CPU percent of one core; host has two cores. cgroup memory includes cache. Short live samples, not peak guarantees.",
+    "total": {
+      "cpu_percent": {
+        "before": 93.757,
+        "after": 64.771,
+        "reduction_percent": 30.92
+      },
+      "memory_MiB": {
+        "before": 752.557,
+        "after": 1224.733,
+        "reduction_percent": -62.74
+      }
+    },
+    "output_counts": {
+      "before": [
+        {
+          "rows": 40,
+          "panels": 20
+        },
+        {
+          "rows": 40,
+          "panels": 20
+        },
+        {
+          "rows": 40,
+          "panels": 20
+        }
+      ],
+      "after": [
+        {
+          "rows": 40,
+          "panels": 20
+        },
+        {
+          "rows": 40,
+          "panels": 20
+        },
+        {
+          "rows": 40,
+          "panels": 20
+        }
+      ]
+    },
+    "storage": {
+      "archived_versions": 15,
+      "archive_logical_saving_bytes": 560464916,
+      "unused_cache_reclaimed_bytes": 369528832,
+      "attributable_savings_bytes": 929993748,
+      "filesystem_free_bytes_now": 22043140096,
+      "note": "Attributable archive/cache savings; not a net filesystem before/after claim. Builds, verified backups and ongoing work also write files."
+    },
+    "other_project_service_state_unchanged": {
+      "tg-go-collector": true,
+      "tg-go-probe": true,
+      "supervisor": true,
+      "nonecdn-fetcher": true,
+      "config-renamer": true,
+      "x-ui": true
+    }
+  },
+  "memory_breakdown": {
+    "at": "2026-11-16T01:24:06.127542+00:00",
+    "units": {
+      "digital-ocean-bot-api": {
+        "total_bytes": 18771968,
+        "anonymous_bytes": 6479872,
+        "shared_memory_bytes": 0,
+        "file_cache_excluding_shmem_bytes": 11878400,
+        "inactive_file_bytes": 9863168,
+        "kernel_bytes": 413696,
+        "limits": {
+          "memory.high": "max",
+          "memory.max": "max",
+          "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0",
+          "memory.pressure": "some avg10=0.00 avg60=0.00 avg300=0.00 total=0\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0"
+        }
+      },
+      "digital-ocean-bot-worker": {
+        "total_bytes": 8486912,
+        "anonymous_bytes": 7757824,
+        "shared_memory_bytes": 0,
+        "file_cache_excluding_shmem_bytes": 4096,
+        "inactive_file_bytes": 4096,
+        "kernel_bytes": 462848,
+        "limits": {
+          "memory.high": "268435456",
+          "memory.max": "536870912",
+          "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0",
+          "memory.pressure": "some avg10=0.00 avg60=0.00 avg300=0.00 total=0\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0"
+        }
+      },
+      "digital-ocean-bot-worker-panels": {
+        "total_bytes": 15446016,
+        "anonymous_bytes": 8470528,
+        "shared_memory_bytes": 0,
+        "file_cache_excluding_shmem_bytes": 6475776,
+        "inactive_file_bytes": 6361088,
+        "kernel_bytes": 499712,
+        "limits": {
+          "memory.high": "268435456",
+          "memory.max": "536870912",
+          "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0",
+          "memory.pressure": "some avg10=0.00 avg60=0.00 avg300=0.00 total=0\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0"
+        }
+      },
+      "dob-production-api": {
+        "total_bytes": 25358336,
+        "anonymous_bytes": 10436608,
+        "shared_memory_bytes": 0,
+        "file_cache_excluding_shmem_bytes": 13705216,
+        "inactive_file_bytes": 13705216,
+        "kernel_bytes": 679936,
+        "limits": {
+          "memory.high": "max",
+          "memory.max": "max",
+          "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0",
+          "memory.pressure": "some avg10=0.00 avg60=0.00 avg300=0.00 total=0\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0"
+        }
+      },
+      "dob-production-worker": {
+        "total_bytes": 10313728,
+        "anonymous_bytes": 9682944,
+        "shared_memory_bytes": 0,
+        "file_cache_excluding_shmem_bytes": 147456,
+        "inactive_file_bytes": 147456,
+        "kernel_bytes": 483328,
+        "limits": {
+          "memory.high": "268435456",
+          "memory.max": "536870912",
+          "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0",
+          "memory.pressure": "some avg10=0.00 avg60=0.00 avg300=0.00 total=0\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0"
+        }
+      },
+      "dob-production-worker-panels": {
+        "total_bytes": 26865664,
+        "anonymous_bytes": 12013568,
+        "shared_memory_bytes": 0,
+        "file_cache_excluding_shmem_bytes": 14155776,
+        "inactive_file_bytes": 13910016,
+        "kernel_bytes": 679936,
+        "limits": {
+          "memory.high": "268435456",
+          "memory.max": "536870912",
+          "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0",
+          "memory.pressure": "some avg10=0.00 avg60=0.00 avg300=0.00 total=0\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0"
+        }
+      },
+      "postgresql@18-main": {
+        "total_bytes": 158773248,
+        "anonymous_bytes": 97357824,
+        "shared_memory_bytes": 37916672,
+        "file_cache_excluding_shmem_bytes": 13815808,
+        "inactive_file_bytes": 8192000,
+        "kernel_bytes": 9420800,
+        "limits": {
+          "memory.high": "max",
+          "memory.max": "max",
+          "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0",
+          "memory.pressure": "some avg10=0.00 avg60=0.00 avg300=0.00 total=221073\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=20568"
+        }
+      },
+      "postgresql@18-production": {
+        "total_bytes": 1046388736,
+        "anonymous_bytes": 130867200,
+        "shared_memory_bytes": 152100864,
+        "file_cache_excluding_shmem_bytes": 721719296,
+        "inactive_file_bytes": 700370944,
+        "kernel_bytes": 41488384,
+        "limits": {
+          "memory.high": "max",
+          "memory.max": "max",
+          "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0",
+          "memory.pressure": "some avg10=0.00 avg60=0.00 avg300=0.00 total=14720567\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=2779899"
+        }
+      }
+    },
+    "host": {
+      "MemTotal": "4004544 kB",
+      "MemFree": "453664 kB",
+      "MemAvailable": "2310460 kB",
+      "Cached": "1817856 kB",
+      "SwapTotal": "0 kB",
+      "SReclaimable": "296264 kB"
+    },
+    "host_pressure": "some avg10=0.00 avg60=0.08 avg300=0.33 total=8255892889\nfull avg10=0.00 avg60=0.04 avg300=0.15 total=2163552137\n"
+  },
+  "maintenance": {
+    "timer_enabled": "enabled",
+    "timer": "ActiveState=active\nTimersMonotonic={ OnUnitActiveUSec=1h ; next_elapse=3w 2d 12h 44min 47.009181s }\nTimersMonotonic={ OnBootUSec=15min ; next_elapse=15min }\nNextElapseUSecMonotonic=3w 2d 12h 49min 23.174075s\n",
+    "service": "Result=success\nCPUWeight=10\nCPUQuotaPerSecUSec=250ms\nIOWeight=[not set]\nMemoryMax=134217728\nNice=19\n"
+  },
+  "instances": {
+    "default": {
+      "readiness_checks": 5,
+      "preservation_checks": 21,
+      "preservation": {
+        "profile_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        },
+        "trojan_ownership": {
+          "common": 0,
+          "unchanged": 0,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        }
+      },
+      "services": [
+        {
+          "unit": "digital-ocean-bot-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "digital-ocean-bot-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "assets": 32
+    },
+    "production": {
+      "readiness_checks": 5,
+      "preservation_checks": 21,
+      "preservation": {
+        "profile_ownership": {
+          "common": 1903,
+          "unchanged": 1903,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        },
+        "trojan_ownership": {
+          "common": 9,
+          "unchanged": 9,
+          "unexpected_changes": 0,
+          "confirmed_expired_retirements": 0,
+          "confirmed_initial_activations": 0,
+          "confirmed_preupdate_initial_activations": 0,
+          "retired_since_backup": 0,
+          "new_since_backup": 0
+        }
+      },
+      "services": [
+        {
+          "unit": "dob-production-api",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "dob-production-worker",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        },
+        {
+          "unit": "dob-production-worker-panels",
+          "active": true,
+          "hash_match": true,
+          "restarts": 0
+        }
+      ],
+      "assets": 32
+    }
+  },
+  "live": {
+    "checks": {
+      "account_routes_and_baseline_nonregression": true,
+      "no_malformed_legacy_output": true,
+      "output_not_empty": true,
+      "no_runtime_panic": true,
+      "no_contained_task_panic": true
+    },
+    "output": {
+      "rows": 40,
+      "malformed_legacy_vless": 0,
+      "panels": 20
+    },
+    "log_counts": {
+      "contained_task_panics": 0,
+      "runtime_panics": 0,
+      "output_missing_legacy_key": 0
+    },
+    "provider_states": [
+      {
+        "provider": "linode",
+        "error": null,
+        "proxy_required": true,
+        "health": true,
+        "explicit_primary_matches": true
+      },
+      {
+        "provider": "linode",
+        "error": null,
+        "proxy_required": true,
+        "health": true,
+        "explicit_primary_matches": true
+      },
+      {
+        "provider": "vultr",
+        "error": "PROXY_ERROR",
+        "proxy_required": true,
+        "health": true,
+        "explicit_primary_matches": true
+      }
+    ],
+    "limits": [
+      "Pre-existing provider failure is not counted as healthy: require unchanged error or fresh successful recovery, fresh attempt and fail-closed route.",
+      "Read-only live checks cover configured active Vultr and Linode accounts only.",
+      "No new cloud create/delete, CAPTCHA bypass or 99-percent primary-IP availability claim.",
+      "Other providers and native browser behavior are covered by isolated CI, not universal live acceptance."
+    ]
+  },
+  "openai": {
+    "review_returned": false,
+    "failure": "credit_balance_exhausted",
+    "generation_requests": 1,
+    "retry_generations": 0,
+    "reservation_micro_usd": 236559,
+    "reservation_is_charge": false,
+    "usage_receipt": null
+  }
+}
